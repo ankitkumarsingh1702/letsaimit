@@ -1,0 +1,41 @@
+.co-page{background:#fff;color:#143e35}
+.co-hero{display:grid;grid-template-columns:.78fr 1.22fr;gap:clamp(32px,5.5vw,84px);align-items:center;padding-block:48px 58px}
+.co-title{}
+.co-title>span{color:#80b938}
+.co-intro{margin-top:26px}
+.co-description{color:#60736c;margin-block:16px 28px}
+.co-hero-copy>.btn{max-width:100%}
+.co-hero-photo{margin:0;min-width:0}
+.co-hero-photo>img{width:100%;height:560px;object-fit:cover;object-position:55% 55%;border-radius:20px 20px 70px 20px}
+.co-hero-photo>figcaption{color:#60736c;margin-top:13px}
+.co-experience{padding-block:65px;background:#143e35;color:#fff}
+.co-experience-inner{display:grid;grid-template-columns:1.55fr .8fr;gap:60px;align-items:center}
+.co-experience h2{}
+.co-experience h2>span{color:#c5f66b}
+.co-experience p{color:#dce8e1;max-width:33ch}
+.co-credentials{display:grid;grid-template-columns:.85fr 1.15fr;align-items:start;gap:76px}
+.co-credential-intro>h2{}
+.co-credential-intro>p{color:#60736c;margin-top:23px}
+.co-credential-list{border-top:1px solid #dce4de}
+.co-credential{display:flex;align-items:center;gap:22px;width:100%;padding:23px 0;background:#fff;border:0;border-bottom:1px solid #dce4de;text-align:left;color:#143e35;transition:background .2s}
+.co-credential:hover{background:#f7faf5}
+.co-credential-thumb{width:96px;height:75px;flex:0 0 96px;border:1px solid #e1e7e1;border-radius:4px;overflow:hidden;background:#fff}
+.co-credential-thumb>img{width:100%;height:100%;object-fit:contain}
+.co-credential-copy{display:block;min-width:0;flex:1}
+.co-credential-copy>strong{display:block;}
+.co-credential-copy>span{display:block;color:#60736c;margin-top:6px}
+.co-credential>.arrow-icon{width:23px;height:23px;flex:0 0 23px;transition:transform .2s}
+.co-credential:hover>.arrow-icon{transform:translate(2px,-2px)}
+.co-teaching-photo{margin:0}
+.co-teaching-photo>img{width:100%;height:460px;object-fit:cover;object-position:50% 58%;border-radius:16px}
+.co-teaching-photo>figcaption{color:#60736c;margin-top:12px}
+.co-principles{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin-top:35px}
+.co-principles>h3{padding-top:17px;position:relative}
+.co-principles>h3::before{content:'';position:absolute;top:0;left:0;width:32px;height:3px;background:#a8d75b}
+.co-closing{display:flex;align-items:center;justify-content:space-between;gap:35px;border-top:1px solid #dce4de;margin-top:65px;padding-block:48px 60px}
+.co-closing>h2{}
+.co-closing>.btn{flex-shrink:0}
+@media(max-width:1050px){.co-hero{gap:35px}.co-title{}.co-hero-photo>img{height:520px}.co-intro{}.co-experience-inner{gap:40px;grid-template-columns:1.4fr .85fr}.co-experience h2{}.co-credentials{gap:38px;grid-template-columns:.8fr 1.2fr}.co-credential{gap:16px}.co-credential-thumb{width:76px;height:59px;flex-basis:76px}.co-credential-copy>strong{}.co-credential-copy>span{}.co-teaching-photo>img{height:390px}}
+@media(max-width:800px){.co-hero{grid-template-columns:.85fr 1.15fr;gap:25px;padding-block:38px 44px}.co-title{}.co-hero-photo>img{height:470px;border-bottom-right-radius:48px}.co-intro{}.co-description{}.co-description br{display:none}.co-hero-copy>.btn{padding-inline:18px;gap:12px}.co-experience{padding-block:46px}.co-experience-inner{grid-template-columns:1fr;gap:25px}.co-experience h2{}.co-experience p{max-width:50ch}.co-experience p br+br{display:none}.co-credentials{grid-template-columns:1fr;gap:30px}.co-credential-intro{display:flex;align-items:flex-end;justify-content:space-between;gap:30px}.co-credential-intro>h2{}.co-credential-intro>p{margin:0}.co-credential-copy>strong{}.co-credential-copy>span{}.co-credential-thumb{width:90px;height:70px;flex-basis:90px}.co-teaching-photo>img{height:330px}.co-principles{gap:23px}.co-principles>h3{}.co-closing{padding-block:40px 48px;margin-top:50px}.co-closing>h2{}}
+@media(max-width:650px){.co-hero{display:flex;flex-direction:column;align-items:stretch;gap:28px;padding-block:32px 38px}.co-title{}.co-title br:first-child{display:none}.co-intro{margin-top:22px}.co-description{margin-block:14px 23px;max-width:30ch}.co-hero-copy>.btn{padding-inline:22px;gap:19px}.co-hero-photo>img{height:370px;object-position:55% 55%;border-radius:14px 14px 50px 14px}.co-hero-photo>figcaption{margin-top:11px}.co-experience{padding-block:42px}.co-experience-inner{gap:22px}.co-experience h2{}.co-experience p{}.co-credentials{gap:27px}.co-credential-intro{display:block}.co-credential-intro>h2{}.co-credential-intro>p{margin-top:17px}.co-credential-intro>p>br{display:none}.co-credential{gap:15px;padding-block:19px}.co-credential-thumb{width:67px;height:53px;flex-basis:67px}.co-credential-copy>strong{}.co-credential-copy>span{margin-top:4px;max-width:18ch}.co-credential>.arrow-icon{width:20px;height:20px;flex-basis:20px}.co-teaching-photo>img{height:280px;object-position:48% 60%;border-radius:12px}.co-teaching-photo>figcaption{}.co-principles{grid-template-columns:1fr;gap:22px;margin-top:30px}.co-principles>h3{padding-top:13px}.co-principles>h3::before{height:2px;width:25px}.co-closing{align-items:flex-start;flex-direction:column;gap:23px;margin-top:38px;padding-block:35px 45px}.co-closing>h2{}}
+@media(prefers-reduced-motion:reduce){.co-credential,.co-credential>.arrow-icon{transition:none}.co-credential:hover>.arrow-icon{transform:none}}

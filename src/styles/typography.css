@@ -1,0 +1,292 @@
+/* One type scale for every page. Keep component styles focused on layout. */
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  src: url('/assets/fonts/plus-jakarta-sans-variable.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+}
+
+:root {
+  --font-body: 'Plus Jakarta Sans', Arial, sans-serif;
+  --font-display: var(--font-body);
+  --type-h1: 88px;
+  --line-h1: 92px;
+  --type-h2: 56px;
+  --line-h2: 62px;
+  --type-h3: 20px;
+  --line-h3: 28px;
+  --type-body: 16px;
+  --line-body: 26px;
+  --type-intro: 18px;
+  --line-intro: 28px;
+  --type-action: 16px;
+  --line-action: 24px;
+  --type-nav: 14px;
+  --line-nav: 21px;
+  --type-label: 14px;
+  --line-label: 20px;
+  --type-caption: 14px;
+  --line-caption: 21px;
+  --type-legal: 12px;
+  --line-legal: 18px;
+  --type-metric: 72px;
+  --line-metric: 76px;
+  --type-quote: 48px;
+  --line-quote: 56px;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--type-body);
+  font-weight: 400;
+  line-height: var(--line-body);
+  letter-spacing: 0;
+}
+
+button, input, select, textarea {
+  font-family: var(--font-body);
+  font-size: var(--type-body);
+  font-weight: 400;
+  line-height: var(--line-action);
+  letter-spacing: 0;
+}
+
+strong, b { font-weight: 600; }
+button { font-weight: 600; }
+
+h1, h2, .display, .fm-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: -.035em;
+}
+
+h1, .home-title, .pg-hero h1, .co-title, .so-title {
+  font-size: var(--type-h1);
+  font-weight: 800;
+  line-height: var(--line-h1);
+}
+
+h2, .display, .home-coach-copy h2, .home-society h2,
+.pg-session-head h2, .pg-faq-intro h2, .co-experience h2,
+.co-credential-intro > h2, .co-closing > h2, .so-role-grid > h2,
+.so-community-top h2, .so-process > h2, .so-enquire-inner h2, .fm-title {
+  font-size: var(--type-h2);
+  line-height: var(--line-h2);
+}
+
+/* Page titles also carry .display; keep their role above section headings. */
+h1.display, .home-title, .pg-hero h1, .co-title, .so-title {
+  font-size: var(--type-h1);
+  font-weight: 800;
+  line-height: var(--line-h1);
+}
+
+h3, .co-principles > h3, .co-credential-copy > strong,
+.pg-session-steps h3, .so-role h3, .so-steps h3, .fm-main-heading {
+  font-family: var(--font-body);
+  font-size: var(--type-h3);
+  font-weight: 600;
+  line-height: var(--line-h3);
+  letter-spacing: -.02em;
+  text-transform: none;
+}
+
+.home-intro p, .pg-hero-copy > p, .co-intro, .so-hero-copy > p,
+.home-coach-copy p {
+  font-size: var(--type-intro);
+  font-weight: 400;
+  line-height: var(--line-intro);
+  letter-spacing: 0;
+}
+
+.section-aside p, .co-description, .co-experience p,
+.co-credential-intro > p, .pg-session-head > p, .pg-session-steps p,
+.pg-fee-panel ul, .pg-fee-location, .pg-questions details p,
+.so-role p, .so-community-info p, .so-steps p,
+.fm-aside-copy, .fm-intro {
+  font-size: var(--type-body);
+  font-weight: 400;
+  line-height: var(--line-body);
+  letter-spacing: 0;
+}
+
+/* Navigation has one size across header, menu and footer. */
+.desktop-nav a, .mobile-nav a, .footer-col a, .footer-col h2 {
+  font-family: var(--font-body);
+  font-size: var(--type-nav);
+  font-weight: 600;
+  line-height: var(--line-nav);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* All text actions share the same size, including quiet actions and forms. */
+.btn, .header-trial, .home-intro .btn, .co-hero-copy > .btn,
+.text-link, .pg-enroll, .pg-faq-intro .text-link,
+.fm-primary, .fm-back, .fm-text-button, .fm-alternative,
+.fm-handoff-result > a, .film-toggle, .back-top, .footer-phone,
+.footer-col button, .footer-col a[href^='https://wa.me'] {
+  font-family: var(--font-body);
+  font-size: var(--type-action);
+  font-weight: 600;
+  line-height: var(--line-action);
+  letter-spacing: -.01em;
+  text-transform: none;
+}
+
+/* Image descriptions stay 14/21 on desktop, tablet and mobile. */
+figcaption, .photo figcaption, .home-photo-pair figcaption,
+.pg-hero-photo figcaption, .pg-film figcaption,
+.co-hero-photo > figcaption, .co-teaching-photo > figcaption,
+.so-hero-media figcaption, .media-context, .media-caption, .caption-index {
+  font-family: var(--font-body);
+  font-size: var(--type-caption);
+  font-weight: 400;
+  line-height: var(--line-caption);
+  letter-spacing: 0;
+}
+
+/* Metrics share a number treatment; units retain readable UI typography. */
+.fact-value, .metric-value, .home-facts dd, .pg-facts dd,
+.pg-price, .fm-enroll-price > strong {
+  font-family: var(--font-display);
+  font-size: var(--type-metric);
+  font-weight: 600;
+  font-variant-numeric: lining-nums tabular-nums;
+  line-height: var(--line-metric);
+  letter-spacing: -.045em;
+  text-transform: none;
+}
+
+.fact-label, .metric-label, .fact-unit, .home-facts dt,
+.home-facts dd span, .pg-facts dt, .pg-facts dd span,
+.pg-price span, .fm-enroll-price > span {
+  font-family: var(--font-body);
+  font-size: var(--type-body);
+  font-weight: 500;
+  line-height: var(--line-action);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.fact-location, .home-facts dd.fact-location {
+  font-family: var(--font-body);
+  font-size: var(--type-h3);
+  font-weight: 600;
+  line-height: var(--line-h3);
+  letter-spacing: -.02em;
+}
+
+.pg-step-no, .so-step-number {
+  font-family: var(--font-body);
+  font-size: var(--type-h3);
+  font-weight: 600;
+  line-height: var(--line-h3);
+  letter-spacing: 0;
+}
+
+.pg-fee-panel h2, .fm-field label, .fm-aside-label, .fm-mobile-step {
+  font-family: var(--font-body);
+  font-size: var(--type-label);
+  font-weight: 600;
+  line-height: var(--line-label);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.fm-field input, .fm-field select, .fm-field textarea {
+  font-family: var(--font-body);
+  font-size: var(--type-body);
+  font-weight: 400;
+  line-height: var(--line-action);
+  letter-spacing: 0;
+}
+
+.co-credential-copy > span, .pg-payment, .pg-video-error,
+.fm-error, .fm-hint, .fm-handoff-note, .fm-handoff-result,
+.fm-aside-footer, .fm-step-list li, .fm-step-list li > span,
+.fm-enroll-facts > p, .fm-enroll-note, .footer-col p,
+.quote-eyebrow, .quote-card {
+  font-family: var(--font-body);
+  font-size: var(--type-caption);
+  font-weight: 400;
+  line-height: var(--line-caption);
+  letter-spacing: 0;
+}
+
+.fm-optional { font-weight: 400; }
+.fm-enroll-facts strong { font-weight: 600; }
+
+.pg-questions summary {
+  font-family: var(--font-body);
+  font-size: var(--type-body);
+  font-weight: 600;
+  line-height: var(--line-action);
+  letter-spacing: 0;
+}
+
+.fm-privacy, .footer-bottom, .footer-bottom > span:nth-child(2) {
+  font-family: var(--font-body);
+  font-size: var(--type-legal);
+  font-weight: 400;
+  line-height: var(--line-legal);
+  letter-spacing: 0;
+}
+
+.footer-tagline {
+  font-family: var(--font-display);
+  font-size: var(--type-h3);
+  font-weight: 600;
+  line-height: var(--line-h3);
+  letter-spacing: -.02em;
+}
+
+.home-quote blockquote {
+  font-family: var(--font-body);
+  font-size: var(--type-quote);
+  font-weight: 600;
+  line-height: var(--line-quote);
+  letter-spacing: -.04em;
+}
+
+/* Decorative type is separate from readable content roles. */
+.footer-wordmark {
+  font-family: var(--font-display);
+  font-size: clamp(64px, 16.7vw, 240px);
+  font-weight: 600;
+  line-height: .95;
+  letter-spacing: -.06em;
+}
+
+@media (max-width: 1023px) {
+  :root {
+    --type-h1: 72px;
+    --line-h1: 76px;
+    --type-h2: 44px;
+    --line-h2: 50px;
+    --type-metric: 60px;
+    --line-metric: 64px;
+  }
+}
+
+@media (max-width: 700px) {
+  :root {
+    --type-h1: 48px;
+    --line-h1: 52px;
+    --type-h2: 36px;
+    --line-h2: 42px;
+    --type-metric: 44px;
+    --line-metric: 48px;
+    --type-quote: 28px;
+    --line-quote: 38px;
+  }
+}
+
+@media (max-width: 380px) {
+  :root {
+    --type-h1: 44px;
+    --line-h1: 48px;
+  }
+}

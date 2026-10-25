@@ -1,0 +1,296 @@
+.so-page {
+  color: #143e35;
+  background: #fff;
+}
+
+.so-hero {
+  display: grid;
+  grid-template-columns: .9fr 1.2fr;
+  align-items: center;
+  gap: clamp(32px, 4.5vw, 72px);
+  padding-block: 52px 64px;
+}
+
+.so-title {
+  margin: 0;
+  
+  
+  
+}
+
+.so-dot { color: #86a94c; }
+
+.so-hero-copy > p {
+  margin: 26px 0;
+  max-width: 32ch;
+  
+  
+}
+
+.so-hero-copy .btn { max-width: 100%; }
+
+.so-hero-media {
+  position: relative;
+  align-self: stretch;
+  min-width: 0;
+  min-height: 540px;
+  margin: 0;
+}
+
+.so-hero-media img {
+  display: block;
+  width: 100%;
+  height: calc(100% - 32px);
+  min-height: 510px;
+  object-fit: cover;
+  object-position: 56% 56%;
+  border-radius: 4px 4px 4px 64px;
+}
+
+.so-hero-media figcaption {
+  padding-top: 12px;
+  color: #586d63;
+  
+  
+}
+
+.so-responsibilities {
+  background: #143e35;
+  color: #fff;
+  padding-block: 66px;
+}
+
+.so-role-grid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr;
+  gap: 40px;
+  align-items: center;
+}
+
+.so-role-grid > h2 {
+  margin: 0;
+  
+  
+  
+}
+
+.so-role-grid > h2 span { color: #c5f66b; }
+
+.so-role {
+  border-left: 1px solid rgb(255 255 255 / .24);
+  padding-left: 38px;
+}
+
+.so-role-icon {
+  display: block;
+  width: 43px;
+  height: 38px;
+  margin-bottom: 18px;
+  color: #c5f66b;
+}
+
+.so-role-icon svg {
+  width: 100%;
+  height: 100%;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.so-role h3 {
+  margin: 0 0 6px;
+  
+  
+  
+  
+}
+
+.so-role p {
+  margin: 0;
+  color: #dce8e1;
+  
+  
+}
+
+.so-community-top {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  margin-bottom: 36px;
+}
+
+.so-community-top h2 {
+  margin: 0;
+  
+  
+}
+
+.so-community-info { padding-bottom: 4px; }
+
+.so-community-info p {
+  margin: 0 0 16px;
+  
+  
+}
+
+.so-community-images {
+  display: grid;
+  grid-template-columns: .7fr 1.3fr;
+  gap: 24px;
+  height: clamp(300px, 34vw, 450px);
+}
+
+.so-community-images figure {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+.so-community-images img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.so-building img { object-position: 50% 55%; }
+.so-training img { object-position: 51% 66%; }
+
+.so-process { padding-block: 0 96px; }
+
+.so-process > h2 {
+  margin: 0 0 38px;
+  
+  
+}
+
+.so-mobile-break { display: none; }
+
+.so-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.so-steps li {
+  min-width: 0;
+  border-top: 1px solid #c8d5cd;
+  padding-top: 22px;
+}
+
+.so-step-number {
+  display: block;
+  width: fit-content;
+  margin-bottom: 22px;
+  padding-bottom: 5px;
+  border-bottom: 4px solid #c5f66b;
+  
+  
+  
+  
+}
+
+.so-steps h3 {
+  margin: 0 0 12px;
+  
+  
+  
+  
+  
+}
+
+.so-steps p {
+  margin: 0;
+  color: #586d63;
+  
+  
+}
+
+.so-enquire {
+  padding-block: 58px;
+  background: #c5f66b;
+}
+
+.so-enquire-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 36px;
+}
+
+.so-enquire-inner h2 {
+  margin: 0;
+  
+  
+}
+
+@media (max-width: 1000px) {
+  .so-hero { gap: 32px; }
+  .so-title {  }
+  .so-hero-media { min-height: 470px; }
+  .so-hero-media img { min-height: 440px; }
+  .so-role-grid { gap: 28px; grid-template-columns: 1.4fr 1fr 1fr; }
+  .so-role { padding-left: 26px; }
+  .so-role-grid > h2 {  }
+  .so-steps { gap: 28px; }
+}
+
+@media (max-width: 700px) {
+  .so-hero {
+    grid-template-columns: 1fr;
+    gap: 30px;
+    padding-block: 38px 40px;
+  }
+  .so-title {   }
+  .so-hero-copy > p { margin-block: 20px;  }
+  .so-hero-media { min-height: 0; }
+  .so-hero-media img {
+    height: auto;
+    min-height: 0;
+    aspect-ratio: 1.18;
+    object-position: 55% 58%;
+    border-bottom-left-radius: 38px;
+  }
+  .so-hero-media figcaption {  padding-top: 10px; }
+  .so-responsibilities { padding-block: 42px; }
+  .so-role-grid { grid-template-columns: repeat(2, 1fr); gap: 30px 20px; }
+  .so-role-grid > h2 { grid-column: 1 / -1;  }
+  .so-role { padding-left: 0; border-left: 0; }
+  .so-role + .so-role { border-left: 1px solid rgb(255 255 255 / .24); padding-left: 20px; }
+  .so-role-icon { width: 38px; height: 34px; margin-bottom: 14px; }
+  .so-role h3, .so-role p {  }
+  .so-community-top { flex-direction: column; align-items: flex-start; gap: 22px; margin-bottom: 26px; }
+  .so-community-top h2 {  }
+  .so-community-info { padding-bottom: 0; }
+  .so-community-info p { margin-bottom: 10px;  }
+  .so-community-images { grid-template-columns: 1fr; height: auto; gap: 16px; }
+  .so-building { display: none; }
+  .so-training { aspect-ratio: 1.2; }
+  .so-training img { object-position: 54% 70%; }
+  .so-process { padding-block: 0 60px; }
+  .so-process > h2 {  margin-bottom: 28px; }
+  .so-mobile-break { display: inline; }
+  .so-steps { grid-template-columns: 1fr; gap: 25px; }
+  .so-steps li { display: grid; grid-template-columns: 48px 1fr; gap: 4px 20px; padding-top: 20px; }
+  .so-step-number { grid-row: span 2; margin-bottom: 0; align-self: start;  }
+  .so-steps h3 { margin: 0;   }
+  .so-steps h3 br { display: none; }
+  .so-steps p { grid-column: 2;  }
+  .so-enquire { padding-block: 40px; }
+  .so-enquire-inner { flex-direction: column; align-items: flex-start; gap: 28px; }
+  .so-enquire-inner h2 {  }
+  .so-enquire-inner .btn { max-width: 100%; }
+}
+
+@media (max-width: 360px) {
+  .so-desktop-break { display: none; }
+  .so-role-grid { gap: 24px 14px; }
+  .so-role + .so-role { padding-left: 14px; }
+  .so-role p {  }
+}
