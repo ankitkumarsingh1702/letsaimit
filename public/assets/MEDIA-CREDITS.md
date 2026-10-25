@@ -32,3 +32,17 @@ The following public assets were downloaded from https://letsaimit.com/assets/ f
 - `safe-soccer-cert.webp`
 
 The existing website supplies these assets as coaching evidence. Preserve their original context; coaching photographs from the United States should not be relabelled as the Bengaluru programme. Certificates are displayed documents from the original site, not independent verification by the redesign team.
+
+## Complete original photo gallery
+
+All 23 gallery images and all 29 unique image assets from the original homepage are included locally. See `GALLERY-SOURCES.json` for exact filenames, source URLs, dimensions and hashes. The homepage features six football/community photos and its full viewer includes the complete original gallery.
+
+`p1.jpg` and `p2.jpg` show the coach’s personal Club Pilates milestone, not football coaching qualifications. `image1.jpeg` shows the Nambiar Ellegenza clubhouse. Known locations are retained; other photographs use descriptive captions without assigning an unverified location.
+
+
+## Coach feature and football footer — 25 October 2026
+
+- `coach-and-player-cutout.png` is a transparent background-removal derivative of the original `Coach_Goalie_conversation_before_the_game.jpg`, prepared with the built-in image generation tool for the layered coach section. The original source photo remains unmodified in the gallery. The first extraction was rejected for visual drift; the selected second extraction was compared with the original at the intended display size. It should not be represented as a pixel-identical archival photograph.
+- `football-footer-scene.png` is an original generated decorative illustration, not documentary photography of the LetsAimIt venue or participants. It is presented with empty alternative text because the footer's real heading and actions are HTML.
+- Visible footer media credits were removed at the user's request. This source notice, original provenance and licenses are retained.
+- See `ARTWORK-NOTES.md` for the artwork prompts and integration notes.

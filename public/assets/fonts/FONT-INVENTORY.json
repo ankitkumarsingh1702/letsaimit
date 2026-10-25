@@ -1,0 +1,50 @@
+[
+  {
+    "filename": "archivo-variable.woff2",
+    "source_url": "https://fonts.gstatic.com/s/archivo/v25/k3kPo8UDI-1M0wlSV9XAw6lQkqWY8Q82sLydOxI.woff2",
+    "bytes": 34928,
+    "sha256": "8f704806dbedeaaeca334b11ec348bc3ac3a439d6431544b3afb54f534ee4967"
+  },
+  {
+    "filename": "archivo-variable-latin-ext.woff2",
+    "source_url": "https://fonts.gstatic.com/s/archivo/v25/k3kPo8UDI-1M0wlSV9XAw6lQkqWY8Q82sLyTOxK-vA.woff2",
+    "bytes": 32608,
+    "sha256": "ff4f17d21930e36d6d93baba663e624cb767afc3feebf7adaebd82242638de05"
+  },
+  {
+    "filename": "abril-fatface.woff2",
+    "source_url": "https://fonts.gstatic.com/s/abrilfatface/v25/zOL64pLDlL1D99S8g8PtiKchq-dmjQ.woff2",
+    "bytes": 13156,
+    "sha256": "edf7a1f3bc22e815ea426b102fa0493d20af482b242066e689a1263ebb2eeb68"
+  },
+  {
+    "filename": "abril-fatface-latin-ext.woff2",
+    "source_url": "https://fonts.gstatic.com/s/abrilfatface/v25/zOL64pLDlL1D99S8g8PtiKchq-lmjdLh.woff2",
+    "bytes": 7716,
+    "sha256": "c7cc6ab22643e87e9693f54ad411dde5012b5d4f96f53408f52c541144be9b6a"
+  },
+  {
+    "filename": "Archivo-OFL.txt",
+    "source_url": "https://raw.githubusercontent.com/google/fonts/main/ofl/archivo/OFL.txt",
+    "bytes": 4388,
+    "sha256": "108b4e57c9c796d3d38d0428ca7ee39de47ad93187302718d9b2d8864b9b716b"
+  },
+  {
+    "filename": "Abril-Fatface-OFL.txt",
+    "source_url": "https://raw.githubusercontent.com/google/fonts/main/ofl/abrilfatface/OFL.txt",
+    "bytes": 4415,
+    "sha256": "aba8997e16b1e3888c6e855ba883c70d96bd4375bff8cb9c7ce0f097200f74b8"
+  },
+  {
+    "filename": "Archivo-METADATA.pb",
+    "source_url": "https://raw.githubusercontent.com/google/fonts/main/ofl/archivo/METADATA.pb",
+    "bytes": 1339,
+    "sha256": "a2e8f63ffa4f9dfe43a65c349b4742e9cd85298802aed890a6315152f2ae231d"
+  },
+  {
+    "filename": "Abril-Fatface-METADATA.pb",
+    "source_url": "https://raw.githubusercontent.com/google/fonts/main/ofl/abrilfatface/METADATA.pb",
+    "bytes": 682,
+    "sha256": "fb7807509c5cdceaa33c8748b4e387b14d37a70a24cdc7511101a6208fc86c19"
+  }
+]

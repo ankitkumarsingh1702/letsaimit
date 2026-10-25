@@ -1,0 +1,159 @@
+/* Coach story: shared type tokens are defined in typography.css. */
+.home-coach.coach-feature {
+  position: relative;
+  overflow: hidden;
+  padding-block: 56px;
+  background: #edf3e2;
+  color: var(--green);
+}
+
+.coach-feature .home-coach-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr);
+  gap: clamp(40px, 6vw, 88px);
+  align-items: center;
+  max-width: 1080px;
+}
+
+.coach-feature-art {
+  position: relative;
+  isolation: isolate;
+  height: 370px;
+  min-width: 0;
+}
+
+.coach-feature-art::before {
+  content: '';
+  position: absolute;
+  z-index: -2;
+  top: -56px;
+  bottom: -56px;
+  left: 42%;
+  width: 64px;
+  background: #dce9d1;
+}
+
+.coach-feature-plate {
+  position: absolute;
+  z-index: -1;
+  inset: 44px 24px 28px 56px;
+  border-radius: 36px 36px 76px 24px;
+  background: var(--green);
+}
+
+.coach-feature-photo {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  height: calc(100% - 30px);
+  width: auto;
+  aspect-ratio: 466 / 780;
+  transform: translateX(-50%);
+  overflow: hidden;
+  margin: 0;
+}
+
+/* Crop only transparent canvas: source 1448 × 1086, window (522, 306, 466, 780). */
+.coach-feature-photo img {
+  position: absolute;
+  left: -112.017167%;
+  top: -39.230769%;
+  display: block;
+  width: 310.729614%;
+  height: 139.230769%;
+  max-width: none;
+  object-fit: fill;
+}
+
+.coach-feature-badges { display: contents; }
+
+.coach-feature-chip {
+  position: absolute;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  max-width: 100%;
+  min-height: 42px;
+  padding: 10px 15px;
+  border-radius: 999px;
+  background: var(--lime);
+  color: var(--green);
+  font-family: var(--font-body);
+  font-size: var(--type-caption);
+  font-weight: 600;
+  line-height: var(--line-caption);
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.coach-feature-chip svg {
+  flex: 0 0 22px;
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.coach-feature-chip-training { left: 0; top: 35px; }
+.coach-feature-chip-personal { right: 0; bottom: 0; }
+
+.coach-feature .home-coach-copy { max-width: 340px; }
+.coach-feature .home-coach-copy h2 { text-wrap: balance; }
+.coach-feature .home-coach-copy h2 span { color: #527146; }
+.coach-feature .home-coach-copy p {
+  max-width: 32ch;
+  margin-block: 16px 22px;
+  color: var(--green);
+  font-size: var(--type-intro);
+  line-height: var(--line-intro);
+}
+.coach-feature .home-coach-copy .text-link { color: var(--green); }
+
+@media (max-width: 900px) {
+  .coach-feature .home-coach-inner { gap: 32px; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); }
+  .coach-feature-art { height: 340px; }
+  .coach-feature-plate { inset: 40px 12px 28px 24px; }
+  .coach-feature-chip { padding-inline: 12px; gap: 7px; }
+  .coach-feature-chip-training { top: -24px; }
+}
+
+@media (max-width: 700px) {
+  .home-coach.coach-feature { padding-block: 40px; }
+  .coach-feature .home-coach-inner { grid-template-columns: 1fr; gap: 32px; }
+  .coach-feature .home-coach-copy { order: -1; max-width: 100%; }
+  .coach-feature .home-coach-copy p { margin-block: 14px 18px; }
+  .coach-feature-art {
+    display: grid;
+    grid-template-rows: 290px auto;
+    gap: 24px;
+    height: auto;
+    min-height: 366px;
+    width: min(420px, 100%);
+    margin-inline: auto;
+  }
+  .coach-feature-art::before { top: -16px; bottom: -40px; width: 52px; }
+  .coach-feature-plate { inset: 36px 14px auto 26px; height: 254px; border-radius: 28px 28px 62px 20px; }
+  .coach-feature-photo { height: 290px; }
+  .coach-feature-badges {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-self: start;
+    gap: 8px;
+    grid-row: 2;
+    min-width: 0;
+  }
+  .coach-feature-badges .coach-feature-chip { position: static; padding: 8px 10px; min-height: 38px; }
+  .coach-feature-badges .coach-feature-chip svg { display: none; }
+}
+
+@media (max-width: 380px) {
+  .coach-feature-art { grid-template-rows: 270px auto; min-height: 346px; }
+  .coach-feature-photo { height: 270px; }
+  .coach-feature-plate { height: 234px; }
+  .coach-feature-chip { gap: 6px; padding: 8px 10px; min-height: 38px; }
+  .coach-feature-chip svg { width: 20px; height: 20px; flex-basis: 20px; }
+}

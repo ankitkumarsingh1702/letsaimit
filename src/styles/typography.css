@@ -83,7 +83,7 @@ h1.display, .home-title, .pg-hero h1, .co-title, .so-title {
   line-height: var(--line-h1);
 }
 
-h3, .co-principles > h3, .co-credential-copy > strong,
+h3, .photo-gallery-title, .co-principles > h3, .co-credential-copy > strong,
 .pg-session-steps h3, .so-role h3, .so-steps h3, .fm-main-heading {
   font-family: var(--font-body);
   font-size: var(--type-h3);
@@ -137,7 +137,7 @@ h3, .co-principles > h3, .co-credential-copy > strong,
 }
 
 /* Image descriptions stay 14/21 on desktop, tablet and mobile. */
-figcaption, .photo figcaption, .home-photo-pair figcaption,
+.photo-gallery-count, .photo-gallery-location, figcaption, .photo figcaption, .home-photo-pair figcaption,
 .pg-hero-photo figcaption, .pg-film figcaption,
 .co-hero-photo > figcaption, .co-teaching-photo > figcaption,
 .so-hero-media figcaption, .media-context, .media-caption, .caption-index {
@@ -290,3 +290,6 @@ figcaption, .photo figcaption, .home-photo-pair figcaption,
     --line-h1: 48px;
   }
 }
+
+/* Featured photo chips use the same caption role and a slightly stronger weight. */
+.moment-chip figcaption > span { font-weight: 600; }

@@ -1,6 +1,7 @@
 import { TrialButton, ArrowLink } from '../components/ui.jsx';
 import HomeFilm from '../components/HomeFilm.jsx';
-import { asset } from '../lib/assets.js';
+import HomeGallery from '../components/HomeGallery.jsx';
+import HomeCoach from '../components/HomeCoach.jsx';
 
 export default function Home() {
   return (
@@ -70,37 +71,9 @@ export default function Home() {
         </dl>
       </section>
 
-      <section className="home-play wrap section" aria-labelledby="home-play-title">
-        <div className="section-head">
-          <h2 className="display" id="home-play-title">Learn. Play.<br /> Make friends.</h2>
-          <div className="section-aside">
-            <p>First touches. New skills.<br /> A team to belong to.</p>
-            <ArrowLink href="#/programme">Explore the programme</ArrowLink>
-          </div>
-        </div>
-        <div className="home-photo-pair">
-          <figure>
-            <div className="photo-window"><img src={asset('Initial_days_of_kids_training.jpg')} width="1600" height="1200" alt="Children practising together in Coach Dhiraj’s Texas programme" loading="lazy" decoding="async" /></div>
-            <figcaption><span>Find your feet.</span><span className="caption-index">01</span></figcaption>
-          </figure>
-          <figure>
-            <div className="photo-window"><img src={asset('Parents_Players_Coach_pic_post_Game.jpg')} width="1600" height="1200" alt="Young players, families and Coach Dhiraj after a game in Texas" loading="lazy" decoding="async" /></div>
-            <figcaption><span>Find your team.</span><span className="caption-index">02</span></figcaption>
-          </figure>
-        </div>
-        <p className="media-context">From Coach Dhiraj’s sessions in Frisco, Texas.</p>
-      </section>
+      <HomeGallery />
 
-      <section className="home-coach green-band" aria-labelledby="home-coach-title">
-        <div className="wrap home-coach-inner">
-          <figure className="home-coach-photo"><img src={asset('Coach_Goalie_conversation_before_the_game.jpg')} width="1600" height="1200" alt="Coach Dhiraj speaking to a young goalkeeper in Texas" loading="lazy" decoding="async" /></figure>
-          <div className="home-coach-copy">
-            <h2 className="display" id="home-coach-title">A coach.<br /> <span>A mentor.</span></h2>
-            <p>Meet Dhiraj. A youth football coach<br /> and a father of two.</p>
-            <ArrowLink href="#/coach">Meet your coach</ArrowLink>
-          </div>
-        </div>
-      </section>
+      <HomeCoach />
 
       <section className="home-quote" aria-label="A parent’s experience">
         <div className="quote-stage wrap">

@@ -1,6 +1,6 @@
 # LetsAimIt — React codebase
 
-A complete React + Vite export of the approved four-page LetsAimIt website. The pages, forms, navigation and media controls are implemented as React components. The approved layout, colours, wording, responsive styles and locally hosted **Plus Jakarta Sans** font are preserved.
+A complete React + Vite codebase for the four-page LetsAimIt website, including the expanded Home gallery, redesigned coach feature and football landscape footer. The pages, forms, navigation, gallery and media controls are implemented as React components. The current design restores locally hosted **Plus Jakarta Sans throughout** and the earlier typography scale, with the established green, lime and sage palette.
 
 The ZIP includes the editable source, a dependency lockfile, local image/video/font assets and a prebuilt `dist/` folder. `node_modules/` is intentionally excluded; install dependencies with `npm ci`.
 
@@ -17,7 +17,7 @@ npm run dev
 
 Open the local URL printed by Vite, normally `http://localhost:5173`.
 
-**No `.env` file, API key, database or backend service is needed.** The first dependency installation requires an internet connection. The website's images, video and font are bundled locally; WhatsApp and Google Forms open their own external websites when a visitor chooses those actions.
+**No `.env` file, API key, database or backend service is needed.** The first dependency installation requires an internet connection. The website's images, video and fonts are bundled locally; WhatsApp and Google Forms open their own external websites when a visitor chooses those actions.
 
 ## Available commands
 
@@ -62,25 +62,53 @@ For example, the local programme page is `http://localhost:5173/#/programme`. An
 | `src/components/ContactDialog.jsx` | Trial, society enquiry and enrollment panel markup and behaviour. |
 | `src/components/HomeFilm.jsx`, `ProgrammeFilm.jsx` | Local video presentation and playback controls. |
 | `src/components/MediaDialog.jsx` | Coaching certificate viewer. |
+| `src/components/HomeGallery.jsx` | The six featured Home photographs and the action that opens the full gallery. |
+| `src/components/HomeCoach.jsx` | The coach feature with its cutout photograph, rounded backing, small labels and coach-page link. |
+| `src/components/PhotoGalleryDialog.jsx` | Full photo viewer with previous/next controls, keyboard navigation, thumbnails and close/focus behaviour. |
 | `src/components/ui.jsx` | Shared visual primitives such as icons and buttons. |
+| `src/data/gallery.js` | Original gallery image filenames, alternative text, captions, locations and featured-photo selection. |
 | `src/context/SiteActions.jsx` | Shared actions for opening forms and certificates. |
 | `src/hooks/useHashRoute.js`, `src/lib/routes.js` | Hash navigation, route lookup and page title labels. |
 | `src/lib/formLogic.js` | Official form destinations, validation rules and WhatsApp message text. |
 | `src/lib/assets.js` | Asset URL helper, used for root and subdirectory deployments. |
 | `src/styles/styles.css` | Shared layout, colours and Home styling. |
+| `src/styles/gallery.css` | Featured-photo composition and full-gallery viewer layout, including responsive rules. |
+| `src/styles/home-coach.css` | Coach feature composition, image framing and responsive stacking. |
+| `src/styles/football-footer.css` | Football landscape, readable footer content and responsive footer layout; markup is in `src/components/Footer.jsx`. |
 | `src/styles/programme.css`, `coach.css`, `societies.css`, `forms.css` | Page and dialog layout styles. |
 | `src/styles/typography.css` | Font registration and the shared font-size, line-height and weight system. |
 | `public/assets/` | Local photographs, video, posters, certificates, font files and credit notices. |
 | `tests/formLogic.test.js` | Tests for required fields, phone/age rules and WhatsApp draft generation. |
+| `docs/DESIGN-SYSTEM.md` | Current typography, spacing, responsive rules and protection of the approved gallery. |
 | `dist/` | Production output. Regenerate it after source edits; edit the source files above. |
 
 ### Keep typography consistent
 
-The entire site uses the bundled Plus Jakarta Sans variable font. Update the shared tokens in `src/styles/typography.css` when changing the type scale, including `--type-action` for CTA labels and `--type-caption` for image descriptions. This keeps matching roles at matching sizes across all four pages and dialogs.
+**Plus Jakarta Sans** handles every text role, including the Home hero's final word, “together.” The hero uses **88/92px on desktop, 72/76px on tablet and 48/52px on mobile**, with 44/48px at widths of 380px and below. Section headings use **56/62px on desktop, 44/50px on tablet and 36/42px on mobile**. These values are font size / line height. All CTA labels remain **16/24px**, and image captions remain **14/21px**.
+
+Use the shared tokens in `src/styles/typography.css`, including `--type-action` for CTA labels and `--type-caption` for image descriptions. The locally hosted variable font supports weights 200–800; hero text uses 800, section headings 700, and actions and card headings 600. Keep `font-synthesis: none`. The footer scene headline and small brand text use the 20/28px subheading role, and the coach introduction uses 18/28px. The full role and spacing reference is [docs/DESIGN-SYSTEM.md](docs/DESIGN-SYSTEM.md).
 
 To replace an image or video, place the new file in `public/assets/` and update its reference in the relevant page or media component. Keep the supplied asset URL helper when adding references. Check alternative text, captions and credits when replacing a file.
 
 Fees and programme details are visible in page content and the enrollment panel. Update all displayed instances together when changing those business details.
+
+## Home photo gallery
+
+The “Learn. Play. Make friends.” section features **six original LetsAimIt photographs**. Visitors can open the full viewer to browse **all 23 images from the original website gallery**, using the previous/next buttons, Left/Right arrow keys or thumbnails. Escape or the close button returns them to the page.
+
+All **29 source image assets** from the original website are bundled locally, including the gallery photographs and other website images. The gallery keeps the photos' captions and location context; business images, certificates and milestone pictures retain their original meaning.
+
+Edit gallery entries and featured-photo selection in `src/data/gallery.js`, the section in `src/components/HomeGallery.jsx`, and its layout in `src/styles/gallery.css`. The full viewer uses `src/components/PhotoGalleryDialog.jsx`. Keep caption and CTA styling tied to the shared typography tokens: **14px captions and 16px text actions**.
+
+The gallery composition, image selection and full-viewer behaviour are retained through the coach and footer update and the restoration of the previous typography. The verification history and recorded checks are in [docs/VERIFICATION.md](docs/VERIFICATION.md).
+
+## Coach feature and football footer
+
+`src/components/HomeCoach.jsx` presents the coach and young goalkeeper over a rounded dark-green backing, with two small lime labels. On mobile, the labels flow in a wrapping row below the photograph, and the copy appears first. Its `coach-and-player-cutout.png` asset is a background-removed derivative of the existing `Coach_Goalie_conversation_before_the_game.jpg` photograph. The original photo remains bundled. The copy and “Meet your coach” destination remain part of the existing four-page journey.
+
+`src/components/Footer.jsx` and `src/styles/football-footer.css` place the generated `football-footer-scene.png` landscape above the footer links. This is decorative football artwork, not a photograph of the actual venue. The footer retains the free-trial action, page navigation, contact links, policy links and Back to top control.
+
+The visible “Photos: LetsAimIt · Stock film: Marsel Sharipov” footer line and oversized footer wordmark remain removed. The footer uses a small brand label. Media provenance and font licenses remain included in the source package.
 
 ## Forms and external handoffs
 
@@ -126,4 +154,4 @@ Keep the supplied notices with the assets:
 - [Plus Jakarta Sans SIL Open Font License](public/assets/fonts/Plus-Jakarta-Sans-OFL.txt)
 - [Original font history](public/assets/fonts/Plus-Jakarta-Sans-FONTLOG.txt)
 
-The media notice identifies the stock football footage and the original LetsAimIt business assets. Preserve its attribution and context when reusing or replacing media. LetsAimIt branding, business photographs and certificates retain their original ownership and usage rights; their inclusion in this export does not place them under an open-source license. The font's included license applies to the font, not to the site's business assets.
+The media notice identifies the stock football footage and the original LetsAimIt business assets. Preserve its attribution and context when reusing or replacing media. LetsAimIt branding, business photographs and certificates retain their original ownership and usage rights; their inclusion in this export does not place them under an open-source license. The included font licenses apply to the fonts, not to the site's business assets.

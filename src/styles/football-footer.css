@@ -1,0 +1,151 @@
+/* The football landscape flows into the solid, readable footer below it. */
+.site-footer.football-footer {
+  padding-top: 0;
+  background: var(--green);
+  color: #fff;
+}
+
+.footer-scene {
+  position: relative;
+  isolation: isolate;
+  height: 350px;
+  overflow: hidden;
+  background: #35664e;
+}
+
+.footer-scene-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 50%;
+  z-index: -3;
+  pointer-events: none;
+}
+
+.footer-scene::before,
+.footer-scene::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.footer-scene::before {
+  z-index: -2;
+  background: linear-gradient(180deg, #143e35c7 0%, #143e358f 24%, #143e3500 56%);
+}
+
+.footer-scene::after {
+  z-index: -1;
+  background: linear-gradient(180deg, #143e3500 76%, #143e35 100%);
+}
+
+.footer-scene-inner {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 32px;
+  padding-top: 42px;
+}
+
+.football-footer .footer-scene-heading {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--type-h3, 20px);
+  font-weight: 600;
+  line-height: var(--line-h3, 28px);
+  letter-spacing: -.02em;
+  max-width: 25ch;
+  color: #fff;
+}
+
+.footer-trial {
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.football-footer .footer-top {
+  grid-template-columns: 1.1fr .8fr 1.2fr .8fr;
+  gap: 34px;
+  padding-top: 24px;
+  padding-bottom: 32px;
+}
+
+.football-footer .footer-intro {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.footer-brand {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  font-family: var(--font-display);
+  font-size: var(--type-h3, 20px);
+  font-weight: 600;
+  line-height: var(--line-h3, 28px);
+  letter-spacing: -.02em;
+  color: #fff;
+}
+
+.football-footer .footer-phone {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  white-space: nowrap;
+}
+
+.football-footer .footer-col h2 {
+  margin-bottom: 12px;
+}
+
+.football-footer .footer-col a,
+.football-footer .footer-col button {
+  display: flex;
+  align-items: center;
+  min-height: 36px;
+  margin-bottom: 2px;
+}
+
+.football-footer .footer-col p {
+  margin-top: 12px;
+}
+
+.football-footer .footer-bottom {
+  padding-block: 18px;
+}
+
+.football-footer a:focus-visible,
+.football-footer button:focus-visible {
+  outline-color: var(--lime);
+}
+
+@media (max-width: 900px) {
+  .footer-scene { height: 330px; }
+  .footer-scene-inner { padding-top: 36px; gap: 24px; }
+  .football-footer .footer-top { grid-template-columns: 1fr 1fr; gap: 28px 36px; }
+}
+
+@media (max-width: 700px) {
+  .footer-scene { height: 330px; }
+  .footer-scene-image { object-position: 50% 50%; }
+  .footer-scene-inner { flex-direction: column; gap: 18px; padding-top: 26px; }
+  .footer-trial { margin-top: 0; }
+  .footer-scene::before {
+    background: linear-gradient(180deg, #143e35e0 0%, #143e3599 32%, #143e3500 64%);
+  }
+  .football-footer .footer-top { grid-template-columns: 1fr 1fr; padding-top: 16px; padding-bottom: 24px; gap: 24px; }
+  .football-footer .footer-intro { grid-column: 1 / -1; flex-direction: row; justify-content: space-between; align-items: center; gap: 12px; }
+  .football-footer .footer-col a,
+  .football-footer .footer-col button { min-height: 40px; }
+  .football-footer .footer-bottom { align-items: center; padding-block: 14px; gap: 12px; }
+}
+
+@media (max-width: 380px) {
+  .football-footer .footer-intro { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .football-footer .footer-top { gap: 22px 18px; }
+}
