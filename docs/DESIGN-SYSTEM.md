@@ -4,7 +4,7 @@ Current design reference for the four-page React website, updated 25 October 202
 
 ## Design direction
 
-Keep copy short and easy to understand. Use the existing photographs to show the programme and community. The visual language combines green, lime and sage, rounded image frames and one consistent sans-serif family. The earlier typography scale is restored across all four pages, including large section headings, metrics and the parent quote. The redesigned coach section, football footer and accepted gallery composition remain in place.
+Keep copy short and easy to understand. Use the existing photographs to show the programme and community. The visual language combines green, lime and sage, rounded image frames and one consistent sans-serif family. The earlier typography scale is restored across all four pages, including large section headings, metrics and the parent quote. The redesigned coach section and accepted gallery composition remain in place. The footer uses the same layout with artwork for football, basketball and fitness.
 
 ## Font family and delivery
 
@@ -54,7 +54,7 @@ Shared tracking is `-.035em` for hero and section headings, `-.02em` for subhead
 | Hairline | `#dce4de` | Dividers and light borders |
 | Coach surface | `#edf3e2` | Pale coach-section background |
 
-The football artwork blends into the solid green footer. Its top and bottom overlays keep the headline and transition readable. Keep functional controls visually distinct from decorative lime caption pills.
+The sports artwork blends into the solid green footer. Its top and bottom overlays keep the headline and transition readable. Keep functional controls visually distinct from decorative lime caption pills.
 
 ## Spacing and layout roles
 
@@ -99,7 +99,7 @@ Edit gallery content only in `src/data/gallery.js`; use `HomeGallery.jsx`, `Phot
 
 `HomeCoach.jsx` and `home-coach.css` compose the background-removed `coach-and-player-cutout.png` over a rounded green backing. The source is the existing coach-and-goalkeeper photograph, which remains in the package. At ≤700px, the copy comes first and the two lime labels flow in a separate wrapping row below the image. Keep this image's meaning, the mobile label flow and the established coach-page route. The coach paragraph uses the shared 18/28px introduction role.
 
-`Footer.jsx` and `football-footer.css` use `football-footer-scene.png` as decorative, generated football artwork. It has empty alternative text because the heading, actions and navigation carry the useful content. Do not describe this artwork as a photograph of the actual LetsAimIt venue.
+`Footer.jsx` and `football-footer.css` use `multisport-footer-scene.svg` as decorative artwork for football, basketball and fitness. Keep the three symbols within the central crop so they remain visible on narrow screens. The image has empty alternative text because the heading, actions and navigation carry the useful content. It does not depict the actual LetsAimIt venue.
 
 The visible footer photo/film credit line and oversized wordmark remain removed. The replacement headline and small brand use the shared 20/28px subheading size at weight 600. Footer routes, contact links, the free-trial action and the Back to top control remain. Source records and licenses stay in the package; removing a visible credit does not change the provenance or ownership of an asset.
 

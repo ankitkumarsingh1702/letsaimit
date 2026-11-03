@@ -14,7 +14,7 @@ export default function Footer() {
   return (
     <footer className="site-footer football-footer">
       <div className="footer-scene">
-        <img className="footer-scene-image" src={asset('football-footer-scene.png')} width="2172" height="724" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+        <img className="footer-scene-image" src={asset('multisport-footer-scene.svg')} width="1440" height="480" alt="" aria-hidden="true" loading="lazy" decoding="async" />
         <div className="wrap footer-scene-inner">
           <p className="footer-tagline footer-scene-heading">A little football.<br /> A lot to look forward to.</p>
           <button className="btn btn-lime footer-trial" data-action="trial" type="button" onClick={(event) => openForm('trial', event.currentTarget)}>

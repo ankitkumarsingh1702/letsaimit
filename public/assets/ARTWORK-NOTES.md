@@ -1,4 +1,10 @@
-# Football footer artwork
+# Multisport footer artwork
+
+- Current asset: `multisport-footer-scene.svg`, an original vector illustration of football, basketball and fitness.
+- The central icons fit the narrow footer crop; the distant trees and court markings carry the landscape across wide screens. The footer heading, action and links remain separate HTML.
+- This illustration is decorative and does not depict the actual venue.
+
+# Original football footer artwork
 
 - Final asset: `football-footer-scene.png`
 - Dimensions: 2172 × 724, RGB PNG (3:1).

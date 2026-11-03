@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="480" viewBox="0 0 1440 480" fill="none">
+  <defs>
+    <linearGradient id="sky" x1="720" y1="0" x2="720" y2="338" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#214d3e"/>
+      <stop offset="1" stop-color="#92ad78"/>
+    </linearGradient>
+    <radialGradient id="light" cx="0" cy="0" r="1" gradientTransform="translate(720 228) scale(698 210)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#e5ecd9" stop-opacity=".36"/>
+      <stop offset="1" stop-color="#e5ecd9" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="field" x1="720" y1="260" x2="720" y2="465" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4e7857"/>
+      <stop offset="1" stop-color="#143e35"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-25%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="9" stdDeviation="8" flood-color="#143e35" flood-opacity=".35"/>
+    </filter>
+    <g id="tree">
+      <path d="M0 62V29M0 49l-12-13M0 44l11-12" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+      <path d="M-24 39c-8-4-5-18 2-20-4-9 6-17 14-15C-4-8 11-7 15 4c12-3 20 6 17 16 7 7 3 16-3 20-8 4-15 1-19-3-7 6-20 7-27 0-2 2-5 3-7 2Z" fill="currentColor"/>
+    </g>
+  </defs>
+
+  <path fill="url(#sky)" d="M0 0h1440v480H0z"/>
+  <path fill="url(#light)" d="M0 0h1440v480H0z"/>
+  <path d="M0 230c125-46 211-41 328-15 102 24 204 24 323 4 150-25 239-23 362 6 138 32 260 19 427-22v143H0Z" fill="#6a8e67"/>
+  <path d="M0 265c126-53 199-38 301-22 146 22 266 18 403-5 132-23 221 4 340 18 124 15 246 8 396-26v126H0Z" fill="#537b58"/>
+
+  <g color="#3f684c" opacity=".7">
+    <use href="#tree" transform="translate(101 216) scale(.9)"/><use href="#tree" transform="translate(160 230) scale(.59)"/>
+    <use href="#tree" transform="translate(212 215) scale(.82)"/><use href="#tree" transform="translate(257 228) scale(.58)"/>
+    <use href="#tree" transform="translate(368 228) scale(.6)"/><use href="#tree" transform="translate(424 234) scale(.47)"/>
+    <use href="#tree" transform="translate(981 222) scale(.7)"/><use href="#tree" transform="translate(1035 224) scale(.66)"/>
+    <use href="#tree" transform="translate(1160 224) scale(.76)"/><use href="#tree" transform="translate(1229 219) scale(.82)"/>
+    <use href="#tree" transform="translate(1282 218) scale(.78)"/><use href="#tree" transform="translate(1354 194) scale(1.12)"/>
+  </g>
+
+  <path d="M0 285c308-33 480-27 720-21 276 7 481 0 720-4v220H0Z" fill="url(#field)"/>
+  <path d="M0 349c377-52 809-41 1440 4M0 393c381-67 1029-44 1440 11" stroke="#9db884" stroke-opacity=".26" stroke-width="2"/>
+  <g stroke="#cfdfb5" stroke-width="2" stroke-linejoin="round" opacity=".38">
+    <path d="M252 301v-35h96v34m-96-34-15 15v20h111m0-35-13 15v20m-98-20h98m-66-15v35m16-35v35m17-35v35m17-35v35"/>
+    <path d="M162 326h250l-28-23H199l-37 23Zm139 0 3-23"/>
+    <path d="M1129 295v-63h-34v22h34m-28 1h-15m4 0 4 13h9l4-13m22 32 10 8m-104 18c37-10 105-10 141 1m-116 18 31-29m48 0 31 28"/>
+    <path d="M1168 314h88m-42-11v22"/>
+  </g>
+
+  <g opacity=".38" fill="#e5ecd9">
+    <rect x="486" y="194" width="33" height="33" rx="9"/>
+    <rect x="512" y="334" width="23" height="23" rx="7"/>
+    <rect x="913" y="187" width="26" height="26" rx="8"/>
+    <rect x="939" y="309" width="33" height="33" rx="9"/>
+  </g>
+
+  <g transform="translate(591 258) rotate(-9)">
+    <rect x="-52" y="-52" width="104" height="104" rx="24" fill="#174638" stroke="#8caf74" stroke-opacity=".55" filter="url(#shadow)"/>
+    <circle r="32" fill="#e5ecd9"/>
+    <path d="m0-11 11 8-4 13H-7l-4-13 11-8Zm-8-20 8 6 8-6a32 32 0 0 0-16 0Zm38 21-9 4 3 10 8 2a32 32 0 0 0-2-16Zm-10 35-4-9-11 3-1 12a32 32 0 0 0 16-6Zm-40 0 4-9 11 3 1 12a32 32 0 0 1-16-6Zm-10-35 9 4-3 10-8 2a32 32 0 0 1 2-16Z" fill="#143e35"/>
+    <path d="M0-25v14m21 5-10 3M16 16 7 10m-23 6 9-6M-21-6l10 3" stroke="#143e35" stroke-width="2.5"/>
+  </g>
+  <g transform="translate(720 280) rotate(6)">
+    <rect x="-53" y="-53" width="106" height="106" rx="24" fill="#c5f66b" stroke="#e5ecd9" stroke-opacity=".65" filter="url(#shadow)"/>
+    <circle r="32" stroke="#143e35" stroke-width="3.5"/>
+    <path d="M-32 0h64M0-32v64M-23-22c14 12 14 32 0 44M23-22C9-10 9 10 23 22" stroke="#143e35" stroke-width="3.5" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(849 255) rotate(-7)">
+    <rect x="-52" y="-52" width="104" height="104" rx="24" fill="#e5ecd9" stroke="#fff" stroke-opacity=".6" filter="url(#shadow)"/>
+    <path d="M-22 0h44M-37 0h8M29 0h8" stroke="#143e35" stroke-width="7" stroke-linecap="round"/>
+    <rect x="-32" y="-15" width="11" height="30" rx="4" fill="#143e35"/>
+    <rect x="-21" y="-22" width="11" height="44" rx="4" fill="#143e35"/>
+    <rect x="10" y="-22" width="11" height="44" rx="4" fill="#143e35"/>
+    <rect x="21" y="-15" width="11" height="30" rx="4" fill="#143e35"/>
+  </g>
+
+  <g color="#214b39" opacity=".9">
+    <use href="#tree" transform="translate(23 228) scale(1.7)"/><use href="#tree" transform="translate(64 276) scale(.82)"/>
+    <use href="#tree" transform="translate(1418 214) scale(2)"/><use href="#tree" transform="translate(1380 268) scale(1)"/>
+  </g>
+  <path d="M0 424c210-23 344 5 522 13 195 9 386-25 569-27 146-1 261 13 349 16v54H0Z" fill="#143e35"/>
+</svg>

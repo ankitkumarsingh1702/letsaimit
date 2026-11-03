@@ -1,0 +1,136 @@
+.programme-facts {
+  margin-top: clamp(48px, 6vw, 88px);
+  padding-block: clamp(48px, 7vw, 96px);
+  background: #faf8f3;
+}
+
+.programme-facts-inner { position: relative; }
+
+.programme-facts-content {
+  width: min(100%, 1010px);
+  margin-inline: auto;
+}
+
+.programme-facts-content h2,
+.programme-facts-intro { text-align: center; text-wrap: balance; }
+
+.programme-facts-intro {
+  max-width: 72ch;
+  margin: 18px auto 0;
+  color: var(--muted);
+  font-size: var(--type-intro);
+  line-height: var(--line-intro);
+}
+
+.programme-facts-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: clamp(28px, 4vw, 56px);
+}
+
+.programme-facts-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  grid-column: span 2;
+  min-height: clamp(140px, 15vw, 218px);
+  gap: 8px;
+  padding: 20px 14px;
+  border-radius: var(--radius);
+  background: var(--sage);
+  text-align: center;
+}
+
+.programme-facts-card > .fact-value { order: -1; }
+
+.programme-facts-card--dark { background: var(--green); color: var(--lime); }
+.programme-facts-card--dark .fact-label { color: var(--white); }
+
+.programme-facts-card--fee,
+.programme-facts-card--location {
+  grid-column: span 3;
+  min-height: clamp(116px, 11vw, 160px);
+}
+
+.programme-facts-card--fee { flex-direction: row; flex-wrap: wrap; column-gap: 20px; }
+
+.programme-facts-card--location {
+  --pin-space: 52px;
+  position: relative;
+  align-items: flex-start;
+  gap: 2px;
+  padding-inline-start: calc(var(--pin-space) + 24px);
+  text-align: start;
+}
+
+.programme-facts-card--location svg {
+  position: absolute;
+  inset-inline-start: 23px;
+  top: 50%;
+  width: 38px;
+  color: #6f8e61;
+  transform: translateY(-50%);
+}
+
+.programme-facts-card--location dd > span { display: block; }
+
+.programme-facts-decor {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: clamp(10px, 2vw, 20px);
+  margin-bottom: clamp(20px, 3vw, 36px);
+  pointer-events: none;
+}
+
+.programme-facts-tile {
+  display: grid;
+  place-items: center;
+  width: clamp(43px, 7vw, 78px);
+  aspect-ratio: 1;
+  border-radius: clamp(12px, 2vw, 23px);
+  background: var(--sage);
+  color: var(--green);
+  box-shadow: 0 10px 20px #143e3512;
+}
+
+.programme-facts-tile svg { width: 65%; height: 65%; }
+.programme-facts-tile--football { background: var(--green); color: var(--white); }
+.programme-facts-tile--basketball, .programme-facts-tile--stopwatch { background: var(--white); }
+.programme-facts-tile--dumbbell { background: var(--lime); }
+
+@media (min-width: 1160px) {
+  .programme-facts-content { width: min(calc(100% - 210px), 1010px); }
+  .programme-facts-decor { position: absolute; inset: 0; margin: 0; }
+  .programme-facts-tile { position: absolute; }
+  .programme-facts-tile::before {
+    content: '';
+    position: absolute;
+    inset: auto auto 82% 80%;
+    width: 44%;
+    aspect-ratio: 1;
+    border-radius: 9px;
+    background: var(--sage);
+    opacity: .75;
+  }
+  .programme-facts-tile:nth-child(even)::before { inset: 80% 75% auto auto; }
+  .programme-facts-tile--football { left: 19px; top: 4%; }
+  .programme-facts-tile--pitch { left: 0; top: 43%; }
+  .programme-facts-tile--dumbbell { left: 18px; bottom: 7%; }
+  .programme-facts-tile--basketball { right: 16px; top: 5%; }
+  .programme-facts-tile--hoop { right: 0; top: 45%; }
+  .programme-facts-tile--stopwatch { right: 21px; bottom: 6%; }
+}
+
+@media (max-width: 580px) {
+  .programme-facts-decor { gap: 8px; }
+  .programme-facts-tile { width: clamp(30px, 10.5vw, 46px); }
+  .programme-facts-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .programme-facts-card { grid-column: span 1; padding: 14px 9px; min-height: 112px; }
+  .programme-facts-card--dark,
+  .programme-facts-card--location { grid-column: 1 / -1; }
+  .programme-facts-card--location { padding-inline-start: calc(var(--pin-space) + 18px); }
+  .programme-facts-card--location svg { inset-inline-start: 19px; }
+}
