@@ -2,6 +2,7 @@ import { TrialButton, ArrowLink } from '../components/ui.jsx';
 import HomeFilm from '../components/HomeFilm.jsx';
 import HomeGallery from '../components/HomeGallery.jsx';
 import HomeCoach from '../components/HomeCoach.jsx';
+import HomeFacts from '../components/HomeFacts.jsx';
 
 export default function Home() {
   return (
@@ -56,20 +57,7 @@ export default function Home() {
         <HomeFilm />
       </section>
 
-      <section className="home-facts-section wrap" aria-labelledby="home-facts-title">
-        <h2 className="display" id="home-facts-title">The programme, at a glance.</h2>
-        <dl className="facts-grid">
-          <div className="fact-card fact-age"><dt className="fact-label">Years old</dt><dd className="fact-value">5–13</dd></div>
-          <div className="fact-card fact-frequency"><dt className="fact-label">Sessions each week</dt><dd className="fact-value">2</dd></div>
-          <div className="fact-card fact-duration"><dt className="fact-label">Minutes per session</dt><dd className="fact-value">45–60</dd></div>
-          <div className="fact-card fact-fee"><dt className="fact-label">Per month</dt><dd className="fact-value">₹5,000</dd></div>
-          <div className="fact-card fact-place">
-            <dt className="fact-label">Find us at</dt>
-            <dd><span className="fact-location">Nambiar<br /> Ellegenza</span><span className="fact-city fact-label">Bengaluru</span></dd>
-            <svg viewBox="0 0 40 48" aria-hidden="true"><path d="M20 43S5 28 5 18a15 15 0 0 1 30 0c0 10-15 25-15 25Z" /><circle cx="20" cy="18" r="5" /></svg>
-          </div>
-        </dl>
-      </section>
+      <HomeFacts />
 
       <HomeGallery />
 

@@ -67,8 +67,30 @@ export default function Programme() {
 
       <section className="section wrap pg-faq" id="programme-faq" aria-labelledby="faq-heading">
         <div className="pg-faq-intro">
-          <h2 className="display" id="faq-heading">Good to <br /> know<span className="pg-dot">.</span></h2>
+          <h2 className="display" id="faq-heading">Good to know<span className="pg-dot">.</span></h2>
           <a className="text-link" href="https://letsaimit.com/refund-policy" target="_blank" rel="noopener noreferrer">Fees &amp; cancellations <Arrow /></a>
+          <div className="pg-faq-sports" aria-hidden="true">
+            <span className="pg-faq-sport pg-faq-sport-football">
+              <svg viewBox="0 0 48 48">
+                <circle cx="24" cy="24" r="19" />
+                <path d="m24 17 7 5-3 8h-8l-3-8 7-5Z" fill="currentColor" stroke="none" />
+                <path d="M24 5v12M42 18l-11 4M35 39l-7-9M13 39l7-9M6 18l11 4" />
+              </svg>
+            </span>
+            <span className="pg-faq-sport pg-faq-sport-basketball">
+              <svg viewBox="0 0 48 48">
+                <circle cx="24" cy="24" r="19" />
+                <path d="m10 11 28 26M11 38l26-28M5 25a18 18 0 0 0 20-20m18 18a18 18 0 0 0-20 20" />
+              </svg>
+            </span>
+            <span className="pg-faq-sport pg-faq-sport-fitness">
+              <svg viewBox="0 0 48 48">
+                <rect x="9" y="13" width="8" height="22" rx="2" />
+                <rect x="31" y="13" width="8" height="22" rx="2" />
+                <path d="M17 24h14M5 20v8m38-8v8" />
+              </svg>
+            </span>
+          </div>
         </div>
         <div className="pg-questions">
           {questions.map(([question, answer]) => (

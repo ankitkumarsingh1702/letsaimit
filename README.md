@@ -1,6 +1,6 @@
 # LetsAimIt — React codebase
 
-A complete React + Vite codebase for the four-page LetsAimIt website, including the expanded Home gallery, redesigned coach feature and football landscape footer. The pages, forms, navigation, gallery and media controls are implemented as React components. The current design restores locally hosted **Plus Jakarta Sans throughout** and the earlier typography scale, with the established green, lime and sage palette.
+A complete React + Vite codebase for the four-page LetsAimIt website, including the expanded Home gallery, redesigned coach feature and multisport landscape footer. The pages, forms, navigation, gallery and media controls are implemented as React components. The current design restores locally hosted **Plus Jakarta Sans throughout** and the earlier typography scale, with the established green, lime and sage palette.
 
 The ZIP includes the editable source, a dependency lockfile, local image/video/font assets and a prebuilt `dist/` folder. `node_modules/` is intentionally excluded; install dependencies with `npm ci`.
 
@@ -102,11 +102,11 @@ Edit gallery entries and featured-photo selection in `src/data/gallery.js`, the 
 
 The gallery composition, image selection and full-viewer behaviour are retained through the coach and footer update and the restoration of the previous typography. The verification history and recorded checks are in [docs/VERIFICATION.md](docs/VERIFICATION.md).
 
-## Coach feature and football footer
+## Coach feature and multisport footer
 
 `src/components/HomeCoach.jsx` presents the coach and young goalkeeper over a rounded dark-green backing, with two small lime labels. On mobile, the labels flow in a wrapping row below the photograph, and the copy appears first. Its `coach-and-player-cutout.png` asset is a background-removed derivative of the existing `Coach_Goalie_conversation_before_the_game.jpg` photograph. The original photo remains bundled. The copy and “Meet your coach” destination remain part of the existing four-page journey.
 
-`src/components/Footer.jsx` and `src/styles/football-footer.css` place the generated `football-footer-scene.png` landscape above the footer links. This is decorative football artwork, not a photograph of the actual venue. The footer retains the free-trial action, page navigation, contact links, policy links and Back to top control.
+`src/components/Footer.jsx` and `src/styles/football-footer.css` place `multisport-footer-scene.svg` above the footer links. This decorative landscape uses icons for football, basketball and fitness and does not depict the actual venue. The footer retains the free-trial action, page navigation, contact links, policy links and Back to top control.
 
 The visible “Photos: LetsAimIt · Stock film: Marsel Sharipov” footer line and oversized footer wordmark remain removed. The footer uses a small brand label. Media provenance and font licenses remain included in the source package.
 
