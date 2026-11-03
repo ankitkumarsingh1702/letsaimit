@@ -63,7 +63,7 @@ export function validateForm(mode, draft, societyStep = 1) {
 export function prepareMessage(mode, value) {
   if (mode === 'trial') {
     return [
-      'Hi Coach Dhiraj, I’d like to ask about a free football trial.',
+      'Hi Coach Dhiraj, I’d like to ask about a free trial with LetsAimIt.',
       `Parent/guardian: ${value.parentName.trim()}`,
       `Phone: ${value.phone.trim()}`,
       `Child’s age: ${value.age === 'other' ? 'Under 5 or over 13 — please advise on a suitable group' : `${value.age} years`}`,
@@ -72,7 +72,7 @@ export function prepareMessage(mode, value) {
     ].join('\n');
   }
   return [
-    'Hi Coach Dhiraj, I’d like to discuss football coaching in our society.',
+    'Hi Coach Dhiraj, I’d like to discuss football, basketball and physical fitness sessions in our society.',
     `Society: ${value.societyName.trim()}`,
     `Location: ${value.locality.trim()}`,
     `Contact: ${value.contactName.trim()}`,

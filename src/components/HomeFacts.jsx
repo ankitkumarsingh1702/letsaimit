@@ -52,7 +52,7 @@ export default function HomeFacts() {
         <FactDecoration />
         <div className="programme-facts-content">
           <h2 className="display" id="home-facts-title">The programme, at a glance.</h2>
-          <p className="programme-facts-intro">Football, basketball and fitness sessions that help kids move, learn and play together.</p>
+          <p className="programme-facts-intro">Football, basketball and physical fitness sessions that help kids move, learn and play together.</p>
           <dl className="programme-facts-grid">
             <div className="programme-facts-card"><dt className="fact-label">Years old</dt><dd className="fact-value">5–13</dd></div>
             <div className="programme-facts-card"><dt className="fact-label">Sessions each week</dt><dd className="fact-value">2</dd></div>
