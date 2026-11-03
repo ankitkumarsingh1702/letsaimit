@@ -16,7 +16,7 @@ export default function Footer() {
       <div className="footer-scene">
         <img className="footer-scene-image" src={asset('multisport-footer-scene.svg')} width="1440" height="480" alt="" aria-hidden="true" loading="lazy" decoding="async" />
         <div className="wrap footer-scene-inner">
-          <p className="footer-tagline footer-scene-heading">A little football.<br /> A lot to look forward to.</p>
+          <p className="footer-tagline footer-scene-heading">More ways to play.<br /> A lot to look forward to.</p>
           <button className="btn btn-lime footer-trial" data-action="trial" type="button" onClick={(event) => openForm('trial', event.currentTarget)}>
             Request a free trial<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" /></svg>
           </button>

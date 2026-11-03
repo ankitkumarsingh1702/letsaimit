@@ -30,11 +30,11 @@ export default function Home() {
                 <span className="hero-pitch" aria-hidden="true">
                   <svg viewBox="0 0 220 92" fill="none">
                     <rect x="23" y="14" width="174" height="64" rx="2" />
-                    <path d="M110 14v64 M23 32h20v28H23 M197 32h-20v28h20" />
-                    <circle cx="110" cy="46" r="18" />
-                    <circle className="pitch-dot" cx="110" cy="46" r="3" />
-                    <circle className="pitch-player" cx="72" cy="31" r="5" />
-                    <circle className="pitch-player" cx="150" cy="61" r="5" />
+                    <path d="M110 14v18m0 28v18M23 36h29v20H23m174-20h-29v20h29M41 18a29 29 0 0 1 0 56m138-56a29 29 0 0 0 0 56M31 41v10m158-10v10" />
+                    <circle cx="37" cy="46" r="3" />
+                    <circle cx="183" cy="46" r="3" />
+                    <circle cx="110" cy="46" r="14" />
+                    <path d="m100 36 20 20m-20 0 20-20m-24 10c8 0 14-6 14-14m0 28c0-8 6-14 14-14" />
                   </svg>
                 </span>
               </span>{' '}
@@ -42,7 +42,7 @@ export default function Home() {
                 <span className="hero-players" aria-hidden="true">
                   <span className="hero-player"><svg viewBox="0 0 32 36"><circle cx="16" cy="10" r="6" /><path d="M5 32v-5a11 11 0 0 1 22 0v5Z" /></svg></span>
                   <span className="hero-player"><svg viewBox="0 0 32 36"><circle cx="16" cy="10" r="6" /><path d="M5 32v-5a11 11 0 0 1 22 0v5Z" /></svg></span>
-                  <span className="hero-player"><svg viewBox="0 0 32 36"><circle cx="16" cy="10" r="6" /><path d="M5 32v-5a11 11 0 0 1 22 0v5Z" /></svg></span>
+                  <span className="hero-player"><svg viewBox="0 0 32 36"><rect x="1" y="14" width="4" height="8" rx="2" /><rect x="5" y="10" width="6" height="16" rx="2" /><rect x="10" y="16" width="12" height="4" rx="2" /><rect x="21" y="10" width="6" height="16" rx="2" /><rect x="27" y="14" width="4" height="8" rx="2" /></svg></span>
                 </span>
                 <span>play</span>
               </span>{' '}
@@ -50,7 +50,7 @@ export default function Home() {
             </h1>
           </div>
           <div className="home-intro">
-            <p>Football coaching for kids, inside your community.</p>
+            <p>Football, basketball and physical fitness for kids, right in your community.</p>
             <TrialButton />
           </div>
         </div>

@@ -18,8 +18,8 @@ export default function Societies() {
     <div className="so-page">
       <section className="wrap so-hero" aria-labelledby="society-heading">
         <div className="so-hero-copy">
-          <h1 className="display so-title" id="society-heading" tabIndex={-1}>Bring<br /> football<br /> home<span className="so-dot">.</span></h1>
-          <p>Football coaching for children,<br className="so-desktop-break" /> inside your society.</p>
+          <h1 className="display so-title" id="society-heading" tabIndex={-1}>Bring<br /> play<br /> home<span className="so-dot">.</span></h1>
+          <p>Football, basketball and physical fitness for children, right in your society.</p>
           <button className="btn btn-lime" type="button" data-action="society" onClick={enquire}>Enquire for your society <Arrow /></button>
         </div>
         <figure className="so-hero-media">

@@ -54,7 +54,7 @@ function Sidebar({ mode, societyStep }) {
   const content = {
     trial: {
       title: <>Let’s get<br /> playing.</>,
-      copy: <>A little football.<br /> A lot to look forward to.</>,
+      copy: <>More ways to play.<br /> A lot to look forward to.</>,
       label: 'Your free trial',
       footer: <>Nambiar Ellegenza<br /> Bengaluru</>,
     },

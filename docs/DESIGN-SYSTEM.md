@@ -4,7 +4,7 @@ Current design reference for the four-page React website, updated 25 October 202
 
 ## Design direction
 
-Keep copy short and easy to understand. Use the existing photographs to show the programme and community. The visual language combines green, lime and sage, rounded image frames and one consistent sans-serif family. The earlier typography scale is restored across all four pages, including large section headings, metrics and the parent quote. The redesigned coach section and accepted gallery composition remain in place. The footer uses the same layout with artwork for football, basketball and fitness.
+Give football, basketball and physical fitness equal weight in programme copy. Keep copy short and easy to understand, and label sport-specific photos, testimonials and qualifications accurately. Use the existing photographs to show the programme and community. The visual language combines green, lime and sage, rounded image frames and one consistent sans-serif family. The earlier typography scale is restored across all four pages, including large section headings, metrics and the parent quote. The redesigned coach section and accepted gallery composition remain in place. The footer uses the same layout with artwork for football, basketball and fitness.
 
 ## Font family and delivery
 

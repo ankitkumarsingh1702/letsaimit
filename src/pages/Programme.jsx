@@ -17,8 +17,8 @@ export default function Programme() {
     <div className="pg-page">
       <section className="pg-hero wrap" aria-labelledby="programme-heading">
         <div className="pg-hero-copy">
-          <h1 className="display" id="programme-heading">Football<br /> starts with<br /> play<span className="pg-dot">.</span></h1>
-          <p>Learn new skills. Make new friends.<br /> Enjoy the game.</p>
+          <h1 className="display" id="programme-heading">Move.<br /> Learn.<br /> Play<span className="pg-dot">.</span></h1>
+          <p>Football, basketball and physical fitness for kids. Learn new skills and make friends.</p>
           <TrialButton />
         </div>
         <figure className="pg-hero-photo">
@@ -44,7 +44,7 @@ export default function Programme() {
         <ol className="pg-session-steps">
           <li><span className="pg-step-no">01</span><h3>Warm up</h3><p>Get moving. Have fun.</p></li>
           <li><span className="pg-step-no">02</span><h3>Learn a skill</h3><p>A little better, every time.</p></li>
-          <li><span className="pg-step-no">03</span><h3>Play together</h3><p>One ball. One team.</p></li>
+          <li><span className="pg-step-no">03</span><h3>Play together</h3><p>Put new skills into play.</p></li>
         </ol>
       </section>
 
