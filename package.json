@@ -3,11 +3,12 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "The approved four-page LetsAimIt website, implemented in React.",
+  "description": "Complete current LetsAimIt React website, including all six pages, shared header/footer and local media.",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0",
+    "verify:assets": "node scripts/verify-assets.mjs",
     "test": "node --test"
   },
   "engines": {

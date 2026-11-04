@@ -48,15 +48,15 @@ test('society validates only the current step and permits an empty optional mess
   });
 });
 
-test('trial WhatsApp draft keeps original copy, trims fields and encodes punctuation safely', () => {
+test('trial WhatsApp draft includes all three activities, trims fields and encodes punctuation safely', () => {
   const draft = { parentName: '  Asha & Dev  ', phone: '  +91 98765 43210  ', age: '8', community: '  Elm / West  ' };
   const message = [
-    'Hi Coach Dhiraj, I’d like to ask about a free trial with LetsAimIt.',
+    'Hi Coach Dhiraj, I’d like to ask about a free LetsAimIt trial.',
     'Parent/guardian: Asha & Dev',
     'Phone: +91 98765 43210',
     'Child’s age: 8 years',
     'Community: Elm / West',
-    'Please let me know the current availability and timing.',
+    'Please tell me which football, basketball or fitness session is suitable, and the current timing.',
   ].join('\n');
   assert.equal(prepareMessage('trial', draft), message);
   const url = new URL(createWhatsAppUrl('trial', draft));
@@ -71,7 +71,7 @@ test('society message includes the first-step draft and only a nonblank optional
     phone: ' +91 98765 43210 ', message: '   ',
   };
   const expected = [
-    'Hi Coach Dhiraj, I’d like to discuss football, basketball and physical fitness sessions in our society.',
+    'Hi Coach Dhiraj, I’d like to discuss football, basketball and fitness sessions in our society.',
     'Society: Elm', 'Location: Bengaluru', 'Contact: Asha', 'Phone: +91 98765 43210',
   ].join('\n');
   assert.equal(prepareMessage('society', draft), expected);

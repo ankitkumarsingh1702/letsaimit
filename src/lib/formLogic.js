@@ -1,86 +1,109 @@
-/** Official destinations preserved from the approved LetsAimIt website. */
-export const FORM_LINKS = Object.freeze({
-  whatsapp: 'https://wa.me/918868886074',
-  registration: 'https://forms.gle/zNEWMbwzLcEiA3Ym8',
-  societyEnquiry: 'https://forms.gle/H6CmdvR8qxJ4UpVM9',
-  privacy: 'https://letsaimit.com/privacy-policy',
+var FORM_LINKS = Object.freeze({
+  whatsapp: "https://wa.me/918868886074",
+  registration: "https://forms.gle/zNEWMbwzLcEiA3Ym8",
+  societyEnquiry: "https://forms.gle/H6CmdvR8qxJ4UpVM9",
+  privacy: "https://letsaimit.com/privacy-policy",
 });
-
-export const TRIAL_AGES = Object.freeze(
-  Array.from({ length: 9 }, (_, index) => String(index + 5)),
+var TRIAL_AGES = Object.freeze(
+  Array.from(
+    {
+      length: 9,
+    },
+    (unused, index) => String(index + 5),
+  ),
 );
-
-export function createInitialDrafts() {
+function createInitialDrafts() {
   return {
-    trial: { parentName: '', phone: '', age: '', community: '' },
-    society: { societyName: '', locality: '', contactName: '', phone: '', message: '' },
+    trial: {
+      parentName: "",
+      phone: "",
+      age: "",
+      community: "",
+    },
+    society: {
+      societyName: "",
+      locality: "",
+      contactName: "",
+      phone: "",
+      message: "",
+    },
   };
 }
-
-/** Uses the same validation and copy as the original vanilla forms. */
-export function fieldError(name, rawValue, required = true) {
-  const value = rawValue.trim();
-  if (required && !value) {
-    if (name === 'age') return 'Choose your child’s age.';
-    if (name === 'phone') return 'Enter a phone number.';
-    if (name === 'community') return 'Enter your society or locality.';
-    if (name === 'societyName') return 'Enter your society’s name.';
-    if (name === 'locality') return 'Enter the locality and city.';
-    return 'Enter your name.';
+function fieldError(name, value, required = true) {
+  let trimmedValue = value.trim();
+  if (required && !trimmedValue)
+    return name === "age"
+      ? "Choose your child’s age."
+      : name === "phone"
+        ? "Enter a phone number."
+        : name === "community"
+          ? "Enter your society or locality."
+          : name === "societyName"
+            ? "Enter your society’s name."
+            : name === "locality"
+              ? "Enter the locality and city."
+              : "Enter your name.";
+  if (name === "phone" && trimmedValue) {
+    let digits = trimmedValue.replace(/\D/g, "");
+    if (
+      !/^\+?[\d\s()\-]+$/.test(trimmedValue) ||
+      digits.length < 8 ||
+      digits.length > 15
+    )
+      return "Enter a valid phone number, with country code if needed.";
   }
-  if (name === 'phone' && value) {
-    const digits = value.replace(/\D/g, '');
-    if (!/^\+?[\d\s()\-]+$/.test(value) || digits.length < 8 || digits.length > 15) {
-      return 'Enter a valid phone number, with country code if needed.';
-    }
-  }
-  if (name === 'age' && value && ![...TRIAL_AGES, 'other'].includes(value)) {
-    return 'Choose your child’s age.';
-  }
-  return '';
+  return name === "age" &&
+    trimmedValue &&
+    ![...TRIAL_AGES, "other"].includes(trimmedValue)
+    ? "Choose your child’s age."
+    : "";
 }
-
-export function visibleFieldNames(mode, societyStep = 1) {
-  if (mode === 'trial') return ['parentName', 'phone', 'age', 'community'];
-  if (mode === 'society') {
-    return societyStep === 1
-      ? ['societyName', 'locality']
-      : ['contactName', 'phone', 'message'];
-  }
-  return [];
+function visibleFieldNames(mode, societyStep = 1) {
+  return mode === "trial"
+    ? ["parentName", "phone", "age", "community"]
+    : mode === "society"
+      ? societyStep === 1
+        ? ["societyName", "locality"]
+        : ["contactName", "phone", "message"]
+      : [];
 }
-
-/** Object order matches the visible fields, so the first error can receive focus. */
-export function validateForm(mode, draft, societyStep = 1) {
+function validateForm(mode, draft, societyStep = 1) {
   return Object.fromEntries(
     visibleFieldNames(mode, societyStep).map((name) => [
       name,
-      fieldError(name, draft[name], name !== 'message'),
+      fieldError(name, draft[name], name !== "message"),
     ]),
   );
 }
-
-export function prepareMessage(mode, value) {
-  if (mode === 'trial') {
-    return [
-      'Hi Coach Dhiraj, I’d like to ask about a free trial with LetsAimIt.',
-      `Parent/guardian: ${value.parentName.trim()}`,
-      `Phone: ${value.phone.trim()}`,
-      `Child’s age: ${value.age === 'other' ? 'Under 5 or over 13 — please advise on a suitable group' : `${value.age} years`}`,
-      `Community: ${value.community.trim()}`,
-      'Please let me know the current availability and timing.',
-    ].join('\n');
-  }
-  return [
-    'Hi Coach Dhiraj, I’d like to discuss football, basketball and physical fitness sessions in our society.',
-    `Society: ${value.societyName.trim()}`,
-    `Location: ${value.locality.trim()}`,
-    `Contact: ${value.contactName.trim()}`,
-    `Phone: ${value.phone.trim()}`,
-    ...(value.message.trim() ? [`Message: ${value.message.trim()}`] : []),
-  ].join('\n');
+function prepareMessage(mode, draft) {
+  return mode === "trial"
+    ? [
+        "Hi Coach Dhiraj, I’d like to ask about a free LetsAimIt trial.",
+        `Parent/guardian: ${draft.parentName.trim()}`,
+        `Phone: ${draft.phone.trim()}`,
+        `Child’s age: ${draft.age === "other" ? "Under 5 or over 13 — please advise on a suitable group" : `${draft.age} years`}`,
+        `Community: ${draft.community.trim()}`,
+        "Please tell me which football, basketball or fitness session is suitable, and the current timing.",
+      ].join("\n")
+    : [
+        "Hi Coach Dhiraj, I’d like to discuss football, basketball and fitness sessions in our society.",
+        `Society: ${draft.societyName.trim()}`,
+        `Location: ${draft.locality.trim()}`,
+        `Contact: ${draft.contactName.trim()}`,
+        `Phone: ${draft.phone.trim()}`,
+        ...(draft.message.trim() ? [`Message: ${draft.message.trim()}`] : []),
+      ].join("\n");
 }
-
-export function createWhatsAppUrl(mode, value) {
-  return `${FORM_LINKS.whatsapp}?text=${encodeURIComponent(prepareMessage(mode, value))}`;
+function createWhatsAppUrl(mode, draft) {
+  return `${FORM_LINKS.whatsapp}?text=${encodeURIComponent(prepareMessage(mode, draft))}`;
 }
+export {
+  FORM_LINKS,
+  TRIAL_AGES,
+  createInitialDrafts,
+  fieldError,
+  visibleFieldNames,
+  validateForm,
+  prepareMessage,
+  createWhatsAppUrl,
+};

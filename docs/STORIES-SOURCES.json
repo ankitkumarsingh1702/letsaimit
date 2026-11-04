@@ -1,0 +1,77 @@
+{
+  "source": "LetsAimIt_Parent_Testimonials_Final.docx(1).pdf",
+  "source_sha256": "93216a3336f289dbcaaaf32e3ff372dd9f716d82fc39a501150cb7e3f208f508",
+  "source_pages": 3,
+  "context": "Frisco, Texas, USA",
+  "policy": "Approved words and names retained. Short verbatim excerpts open to complete quotes. Supporting images are coaching context, not parent portraits.",
+  "testimonials": [
+    {
+      "id": "anand-sachiv",
+      "author": "Anand",
+      "relationship": "Sachiv\u2019s father",
+      "source_page": 1,
+      "full_quote_sha256": "ded9711582b92a2df1ede54bd801d85df010d50cb4f3554d64930464a1f2048c"
+    },
+    {
+      "id": "eric-elliott",
+      "author": "Eric",
+      "relationship": "Elliott\u2019s father",
+      "source_page": 1,
+      "full_quote_sha256": "bd018660b52e4f71c8234253ef7cb9377355ea635637d4ca0d86779599a20c6a"
+    },
+    {
+      "id": "deepak-shaurya",
+      "author": "Deepak",
+      "relationship": "Shaurya\u2019s father",
+      "source_page": 2,
+      "full_quote_sha256": "67aaf7b2944a4d18d18c696e549482cf1729719c9f20977ef8735a1a913a3d87"
+    },
+    {
+      "id": "hayder-ali",
+      "author": "Hayder",
+      "relationship": "Ali\u2019s father",
+      "source_page": 2,
+      "full_quote_sha256": "d83859e7ba9e79ad0461c909fb14373079337f09838990d7d940bf4a6e70b9a3"
+    },
+    {
+      "id": "shama-mustafa",
+      "author": "Shama",
+      "relationship": "Mustafa\u2019s mother",
+      "source_page": 2,
+      "full_quote_sha256": "828bcde9948d2be8679ae7a51fe06706f6a1eca918c8bb03cd49c430aa81d3e2"
+    },
+    {
+      "id": "dinesh-tathya",
+      "author": "Dinesh",
+      "relationship": "Tathya\u2019s father",
+      "source_page": 2,
+      "full_quote_sha256": "91ffe6083cb1d9f9361f8c03766427233941da0c3d4dd90bcc334e61de2807e5"
+    },
+    {
+      "id": "meenakshi-kiaan",
+      "author": "Meenakshi",
+      "relationship": "Kiaan\u2019s mother",
+      "source_page": 2,
+      "full_quote_sha256": "cdbbea54d390685ead70b2a0b6a6cee4bff43511fdd0003215557cc4baf37817"
+    },
+    {
+      "id": "muhammad-arfaraaz",
+      "author": "Muhammad",
+      "relationship": "Arfaraaz\u2019s father",
+      "source_page": 2,
+      "full_quote_sha256": "298b41ecfb81e170e40e9f5db6cdb118fe0cba6afac58c42f0d76da2fa715a53"
+    }
+  ],
+  "context_photo": {
+    "asset": "Initial_days_of_kids_training.jpg",
+    "caption": "Coaching in Frisco, Texas.",
+    "portrait": false
+  },
+  "credential": {
+    "asset": "safe-soccer-cert.webp",
+    "name": "Safe Soccer Cleared",
+    "issued": "2026-05-06",
+    "valid_through": "2027-05-01",
+    "source": "Owner-supplied certificate, read visually; no independent verification asserted."
+  }
+}

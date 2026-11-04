@@ -1,101 +1,193 @@
-import { Arrow, TrialButton } from '../components/ui.jsx';
-import ProgrammeFilm from '../components/ProgrammeFilm.jsx';
-import { asset } from '../lib/assets.js';
-import { useSiteActions } from '../context/SiteActions.jsx';
-
-const questions = [
-  ['Is this suitable for a beginner?', 'Tell the coach your child’s age and experience. They’ll help you find a suitable group.'],
-  ['When are the sessions?', 'The coach will confirm the current days and times before you join.'],
-  ['What should my child bring?', 'Ask the coach for the kit list before your first session.'],
-  ['How does the free trial work?', 'Send a trial enquiry. The coach will help you agree a suitable time.'],
+import { useSiteActions } from "../context/SiteActions.jsx";
+import { TrialButton } from "../components/ui.jsx";
+import { asset } from "../lib/assets.js";
+import { ProgrammeFilm } from "../components/ProgrammeFilm.jsx";
+import { Arrow } from "../components/ui.jsx";
+var questions = [
+  [
+    "Is this suitable for a beginner?",
+    "Tell the coach your child’s age and experience. They’ll help you find a suitable group.",
+  ],
+  [
+    "When are the sessions?",
+    "The coach will confirm the current days and times before you join.",
+  ],
+  [
+    "What should my child bring?",
+    "Ask the coach for the kit list before your first session.",
+  ],
+  [
+    "How does the free trial work?",
+    "Send a trial enquiry. The coach will help you agree a suitable time.",
+  ],
 ];
-
-export default function Programme() {
-  const { openForm } = useSiteActions();
-
+function Programme() {
+  let { openForm } = useSiteActions();
   return (
     <div className="pg-page">
       <section className="pg-hero wrap" aria-labelledby="programme-heading">
         <div className="pg-hero-copy">
-          <h1 className="display" id="programme-heading">Move.<br /> Learn.<br /> Play<span className="pg-dot">.</span></h1>
-          <p>Football, basketball and physical fitness for kids. Learn new skills and make friends.</p>
+          <h1 className="display" id="programme-heading">
+            Move.
+            <br />
+            {" Learn."}
+            <br />
+            {" Play"}
+            <span className="pg-dot">.</span>
+          </h1>
+          <p>
+            Football, basketball and fitness.
+            <br />
+            {" New skills. New friends."}
+          </p>
           <TrialButton />
         </div>
         <figure className="pg-hero-photo">
-          <img src={asset('Initial_days_of_kids_training.jpg')} alt="Children running together during Coach Dhiraj’s football training" width="1600" height="1200" fetchPriority="high" />
+          <img
+            src={asset("Initial_days_of_kids_training.jpg")}
+            alt="Children running together during Coach Dhiraj’s football training"
+            width="1600"
+            height="1200"
+            fetchPriority="high"
+          />
           <figcaption>From Coach Dhiraj’s sessions in Texas.</figcaption>
         </figure>
       </section>
-
       <section className="pg-facts" aria-label="Programme at a glance">
         <dl className="wrap pg-facts-inner">
-          <div><dt>Ages</dt><dd>5–13</dd></div>
-          <div><dt>Each week</dt><dd>2 <span>sessions</span></dd></div>
-          <div><dt>Each session</dt><dd>45–60 <span>min</span></dd></div>
+          <div>
+            <dt>Ages</dt>
+            <dd>5–13</dd>
+          </div>
+          <div>
+            <dt>Each week</dt>
+            <dd>
+              {"2 "}
+              <span>sessions</span>
+            </dd>
+          </div>
+          <div>
+            <dt>Each session</dt>
+            <dd>
+              {"45–60 "}
+              <span>min</span>
+            </dd>
+          </div>
         </dl>
       </section>
-
-      <section className="section wrap pg-session" aria-labelledby="session-heading">
+      <section
+        className="section wrap pg-session"
+        aria-labelledby="session-heading"
+      >
         <div className="pg-session-head">
-          <h2 className="display" id="session-heading">A little practice.<br /> <span>A lot of play.</span></h2>
-          <p>Time to move, learn and<br /> play as a team.</p>
+          <h2 className="display" id="session-heading">
+            A little practice.
+            <br /> <span>A lot of play.</span>
+          </h2>
+          <p>
+            Every session helps children
+            <br />
+            {" move, learn and play together."}
+          </p>
         </div>
         <ProgrammeFilm />
         <ol className="pg-session-steps">
-          <li><span className="pg-step-no">01</span><h3>Warm up</h3><p>Get moving. Have fun.</p></li>
-          <li><span className="pg-step-no">02</span><h3>Learn a skill</h3><p>A little better, every time.</p></li>
-          <li><span className="pg-step-no">03</span><h3>Play together</h3><p>Put new skills into play.</p></li>
+          <li>
+            <span className="pg-step-no">01</span>
+            <h3>Warm up</h3>
+            <p>Get moving. Have fun.</p>
+          </li>
+          <li>
+            <span className="pg-step-no">02</span>
+            <h3>Learn a skill</h3>
+            <p>A little better, every time.</p>
+          </li>
+          <li>
+            <span className="pg-step-no">03</span>
+            <h3>Play together</h3>
+            <p>One ball. One team.</p>
+          </li>
         </ol>
       </section>
-
-      <section className="wrap pg-fees" id="fees" aria-labelledby="fees-heading">
+      <section
+        className="wrap pg-fees"
+        id="communities"
+        aria-labelledby="communities-heading"
+      >
         <div className="pg-fee-panel">
-          <h2 id="fees-heading">The programme</h2>
-          <p className="pg-price">₹5,000<span>/ month</span></p>
-          <p className="pg-fee-location">Nambiar Ellegenza, Bengaluru</p>
-          <ul><li>Two sessions a week.</li><li>Coach confirms your batch and timing.</li></ul>
+          <h2 id="communities-heading">Our communities</h2>
+          <h3 className="pg-community-heading">2 active communities</h3>
+          <p className="pg-fee-location">Bengaluru</p>
+          <ul
+            className="pg-community-list"
+            role="list"
+            aria-label="Active communities"
+          >
+            <li>Nambiar Ellegenza</li>
+            <li>Nambiar Bellezea</li>
+          </ul>
+          <p className="pg-community-note">
+            Ask about sessions in your community.
+          </p>
           <TrialButton className="btn-dark">Request a free trial</TrialButton>
-          <button className="pg-enroll text-link" type="button" data-action="enroll" onClick={(event) => openForm('enroll', event.currentTarget)}>
-            Ready to join? Enroll your child <Arrow />
+          <button
+            className="pg-enroll text-link"
+            type="button"
+            data-action="enroll"
+            onClick={(event) => openForm("enroll", event.currentTarget)}
+          >
+            {"Ready to join? Enroll your child "}
+            <Arrow />
           </button>
-          <p className="pg-payment">UPI · Cash · Bank transfer</p>
         </div>
         <figure className="pg-fee-photo">
-          <img src={asset('Game_in_action.jpg')} alt="Young football players enjoying a match on a grass field" width="1024" height="768" loading="lazy" />
+          <img
+            src={asset("Game_in_action.jpg")}
+            alt="Young football players enjoying a match on a grass field"
+            width="1024"
+            height="768"
+            loading="lazy"
+          />
         </figure>
       </section>
-
-      <section className="section wrap pg-faq" id="programme-faq" aria-labelledby="faq-heading">
+      <section
+        className="section wrap pg-faq"
+        id="programme-faq"
+        aria-labelledby="faq-heading"
+      >
         <div className="pg-faq-intro">
-          <h2 className="display" id="faq-heading">Good to know<span className="pg-dot">.</span></h2>
-          <a className="text-link" href="https://letsaimit.com/refund-policy" target="_blank" rel="noopener noreferrer">Fees &amp; cancellations <Arrow /></a>
-          <div className="pg-faq-sports" aria-hidden="true">
-            <span className="pg-faq-sport pg-faq-sport-football">
-              <svg viewBox="0 0 48 48">
-                <circle cx="24" cy="24" r="19" />
-                <path d="m24 17 7 5-3 8h-8l-3-8 7-5Z" fill="currentColor" stroke="none" />
-                <path d="M24 5v12M42 18l-11 4M35 39l-7-9M13 39l7-9M6 18l11 4" />
-              </svg>
-            </span>
-            <span className="pg-faq-sport pg-faq-sport-basketball">
-              <svg viewBox="0 0 48 48">
-                <circle cx="24" cy="24" r="19" />
-                <path d="m10 11 28 26M11 38l26-28M5 25a18 18 0 0 0 20-20m18 18a18 18 0 0 0-20 20" />
-              </svg>
-            </span>
-            <span className="pg-faq-sport pg-faq-sport-fitness">
-              <svg viewBox="0 0 48 48">
-                <rect x="9" y="13" width="8" height="22" rx="2" />
-                <rect x="31" y="13" width="8" height="22" rx="2" />
-                <path d="M17 24h14M5 20v8m38-8v8" />
-              </svg>
-            </span>
-          </div>
+          <h2 className="display" id="faq-heading">
+            {"Good to "}
+            <br />
+            {" know"}
+            <span className="pg-dot">.</span>
+          </h2>
+          <a
+            className="text-link"
+            href="https://letsaimit.com/refund-policy"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {"Cancellations "}
+            <Arrow />
+          </a>
         </div>
         <div className="pg-questions">
           {questions.map(([question, answer]) => (
             <details key={question}>
-              <summary>{question}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg></summary>
+              <summary>
+                {question}
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="m6 9 6 6 6-6"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </summary>
               <p>{answer}</p>
             </details>
           ))}
@@ -104,3 +196,5 @@ export default function Programme() {
     </div>
   );
 }
+export { questions, Programme };
+export default Programme;

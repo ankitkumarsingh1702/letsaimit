@@ -1,0 +1,50 @@
+/* The coach story uses the site's existing heading and body roles. */
+.co-page .co-founder {
+  margin-block: 72px 0;
+}
+.co-page .co-founder-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 64px;
+  padding: 48px;
+  border-radius: 28px;
+  background: var(--sage, #e5ecd9);
+}
+.co-page .co-founder h2 {
+  max-width: 14ch;
+}
+.co-page .co-founder-copy {
+  max-width: 40ch;
+}
+.co-page .co-founder-copy p {
+  font-size: var(--type-intro, 18px);
+  line-height: var(--line-intro, 28px);
+}
+.co-page .co-founder-copy p + p {
+  margin-top: 16px;
+}
+@media (max-width: 900px) {
+  .co-page .co-founder-inner {
+    gap: 32px;
+    padding: 36px;
+  }
+}
+@media (max-width: 700px) {
+  .co-page .co-founder {
+    margin-top: 48px;
+  }
+  .co-page .co-founder-inner {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding: 28px 24px;
+    border-radius: 24px;
+  }
+  .co-page .co-founder h2 {
+    max-width: 16ch;
+  }
+  .co-page .co-founder-copy p {
+    font-size: 16px;
+    line-height: 26px;
+  }
+}

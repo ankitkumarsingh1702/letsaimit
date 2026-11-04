@@ -1,99 +1,116 @@
-import { useEffect, useRef, useState } from 'react';
-import { asset } from '../lib/assets.js';
-
-export default function HomeFilm() {
-  const videoRef = useRef(null);
-  const lifecycleRef = useRef(0);
-  const [playing, setPlaying] = useState(false);
-  const [failed, setFailed] = useState(false);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    const lifecycle = ++lifecycleRef.current;
-    const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const pauseWhenHidden = () => {
-      if (document.hidden) video.pause();
-    };
-    const pauseForMotion = () => {
-      if (motion.matches) video.pause();
-    };
-    const observer = typeof IntersectionObserver === 'undefined' ? null : new IntersectionObserver((entries) => {
-      if (!entries[0]?.isIntersecting) video.pause();
-    }, { threshold: 0.05 });
-
+import * as React from "react";
+import { asset } from "../lib/assets.js";
+function HomeFilm() {
+  let videoRef = React.useRef(null),
+    playbackGenerationRef = React.useRef(0),
+    [isPlaying, setIsPlaying] = React.useState(false),
+    [hasError, setHasError] = React.useState(false);
+  React.useEffect(() => {
+    let video = videoRef.current,
+      generation = ++playbackGenerationRef.current,
+      motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)"),
+      pauseWhenHidden = () => {
+        document.hidden && video.pause();
+      },
+      pauseForReducedMotion = () => {
+        motionPreference.matches && video.pause();
+      },
+      visibilityObserver =
+        typeof IntersectionObserver > "u"
+          ? null
+          : new IntersectionObserver(
+              (entries) => {
+                entries[0]?.isIntersecting || video.pause();
+              },
+              {
+                threshold: 0.05,
+              },
+            );
     video.muted = true;
-    observer?.observe(video);
-    document.addEventListener('visibilitychange', pauseWhenHidden);
-    motion.addEventListener('change', pauseForMotion);
-
-    if (!motion.matches && !document.hidden) {
-      // A rejected autoplay attempt keeps the original manual play control.
+    visibilityObserver?.observe(video);
+    document.addEventListener("visibilitychange", pauseWhenHidden);
+    motionPreference.addEventListener("change", pauseForReducedMotion);
+    !motionPreference.matches &&
+      !document.hidden &&
       video.play().catch(() => {
-        if (lifecycleRef.current === lifecycle) setPlaying(!video.paused);
+        playbackGenerationRef.current === generation &&
+          setIsPlaying(!video.paused);
       });
-    }
-
     return () => {
-      // Invalidate outstanding play promises before StrictMode re-runs the effect.
-      lifecycleRef.current += 1;
-      observer?.disconnect();
-      document.removeEventListener('visibilitychange', pauseWhenHidden);
-      motion.removeEventListener('change', pauseForMotion);
+      playbackGenerationRef.current += 1;
+      visibilityObserver?.disconnect();
+      document.removeEventListener("visibilitychange", pauseWhenHidden);
+      motionPreference.removeEventListener("change", pauseForReducedMotion);
       video.pause();
     };
   }, []);
-
-  async function toggleFilm() {
-    const video = videoRef.current;
+  async function togglePlayback() {
+    let video = videoRef.current;
     if (!video) return;
     if (!video.paused) {
       video.pause();
       return;
     }
-
-    const lifecycle = lifecycleRef.current;
-    setFailed(false);
+    let generation = playbackGenerationRef.current;
+    setHasError(false);
     try {
-      if (video.error) video.load();
+      video.error && video.load();
       await video.play();
     } catch {
-      if (lifecycleRef.current !== lifecycle) return;
-      setPlaying(!video.paused);
-      setFailed(Boolean(video.error));
+      if (playbackGenerationRef.current !== generation) return;
+      setIsPlaying(!video.paused);
+      setHasError(!!video.error);
     }
   }
-
-  function syncFilm(event) {
-    setPlaying(!event.currentTarget.paused);
+  function syncPlaybackState(event) {
+    setIsPlaying(!event.currentTarget.paused);
   }
-
   return (
     <div className="home-film">
       <video
         ref={videoRef}
         id="home-video"
-        muted
-        loop
-        playsInline
+        muted={true}
+        loop={true}
+        playsInline={true}
         preload="metadata"
-        poster={asset('football-film-poster.jpg')}
+        poster={asset("football-film-poster.jpg")}
         aria-label="Stock film of children practising football"
-        onPlay={syncFilm}
-        onPause={syncFilm}
-        onError={() => { setFailed(true); setPlaying(false); }}
+        onPlay={syncPlaybackState}
+        onPause={syncPlaybackState}
+        onError={() => {
+          setHasError(true);
+          setIsPlaying(false);
+        }}
       >
-        <source src={asset('football-film.mp4')} type="video/mp4" />
+        <source src={asset("football-film.mp4")} type="video/mp4" />
       </video>
       <button
         type="button"
         className="film-toggle"
         data-action="toggle-home-film"
-        aria-label={failed ? 'Retry football film' : playing ? 'Pause football film' : 'Play football film'}
-        onClick={toggleFilm}
+        aria-label={
+          hasError
+            ? "Retry football film"
+            : isPlaying
+              ? "Pause football film"
+              : "Play football film"
+        }
+        onClick={togglePlayback}
       >
-        {!failed && <svg viewBox="0 0 24 24" aria-hidden="true"><path d={playing ? 'M7 5h4v14H7zM15 5h4v14h-4z' : 'm9 5 11 7-11 7Z'} /></svg>}
-        <span>{failed ? 'Retry film' : playing ? 'Pause film' : 'Play film'}</span>
+        {!hasError && (
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d={isPlaying ? "M7 5h4v14H7zM15 5h4v14h-4z" : "m9 5 11 7-11 7Z"}
+            />
+          </svg>
+        )}
+        <span>
+          {hasError ? "Retry film" : isPlaying ? "Pause film" : "Play film"}
+        </span>
       </button>
     </div>
   );
 }
+export { HomeFilm };
+export default HomeFilm;

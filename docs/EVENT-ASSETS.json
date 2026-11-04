@@ -1,0 +1,47 @@
+{
+  "source": "User-provided Nambiar Ellegenza Tournament Aug 22nd 2026 archive",
+  "past_event": "Ellegenza Match Day",
+  "date_policy": "Past event undated; archive date is not used as event copy.",
+  "assets": [
+    {
+      "asset": "ellegenza-match-action.jpg",
+      "source_member": "Nambiar Ellegenza Tournament Aug 22nd 2026/f066e086-3581-4428-964d-403ffe06f028.jpg",
+      "sha256": "b719bac272073bd45d4e6511120bdcef08cc05f7c7a4bb13f8c1e4765358ef27",
+      "width": 1600,
+      "height": 1070,
+      "original_bytes_preserved": true
+    },
+    {
+      "asset": "ellegenza-team-lineup.jpg",
+      "source_member": "Nambiar Ellegenza Tournament Aug 22nd 2026/255d745e-8b31-44b3-9f30-5e4cee874371(1).jpg",
+      "sha256": "50fd0e6e96f385bb9738b0d827d586d87e90fcad06d25d5c3c0cc689ab277309",
+      "width": 1600,
+      "height": 1070,
+      "original_bytes_preserved": true
+    },
+    {
+      "asset": "ellegenza-trophy-moment.jpg",
+      "source_member": "Nambiar Ellegenza Tournament Aug 22nd 2026/9c10c49c-0a9a-4352-a253-70ae8bb68d34.jpg",
+      "sha256": "8b8e9867bca12303033e486407868b22153ac548002b0ede4456cb12b3b35bf9",
+      "width": 1600,
+      "height": 1070,
+      "original_bytes_preserved": true
+    },
+    {
+      "asset": "ellegenza-young-players.jpg",
+      "source_member": "Nambiar Ellegenza Tournament Aug 22nd 2026/e8a8381a-e65d-48be-bf03-6e1fd04659d1.jpg",
+      "sha256": "763827f7e40285a087bf51720d6f353c79863e3bde45e38f2ae3d22fb604a77a",
+      "width": 1600,
+      "height": 1070,
+      "original_bytes_preserved": true
+    },
+    {
+      "asset": "ellegenza-coach-huddle.jpg",
+      "source_member": "Nambiar Ellegenza Tournament Aug 22nd 2026/46990ca2-67ad-4728-bfd0-09d2309cec17.jpg",
+      "sha256": "834fa31310ebe98cbcd288e273468f5327eead652d804fddce615aa22e39e1ba",
+      "width": 4032,
+      "height": 3024,
+      "original_bytes_preserved": true
+    }
+  ]
+}

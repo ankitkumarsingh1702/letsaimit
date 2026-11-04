@@ -1,0 +1,9 @@
+/* Use the established menu before the additional destinations crowd the header. */
+@media (min-width: 701px) and (max-width: 1120px) {
+  .site-header .desktop-nav {
+    display: none;
+  }
+  .site-header .menu-toggle {
+    display: block;
+  }
+}

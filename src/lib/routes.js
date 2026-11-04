@@ -1,12 +1,13 @@
-export const PAGE_TITLES = {
-  home: 'Sports and fitness, close to home',
-  programme: 'Programme & fees',
-  coach: 'Meet Coach Dhiraj',
-  societies: 'Sports and fitness for your society',
+var PAGE_TITLES = {
+  home: "Sport, close to home",
+  programme: "Programme",
+  coach: "Meet Coach Dhiraj",
+  societies: "Sports for your society",
+  schools: "School fitness consultancy",
+  events: "Events and match days",
 };
-
-/** Keep the original site's hash URLs, including its home fallback. */
-export function pageFromHash(hash) {
-  const route = hash.replace(/^#\/?/, '').split('?')[0];
-  return Object.hasOwn(PAGE_TITLES, route) ? route : 'home';
+function pageFromHash(hash) {
+  let page = hash.replace(/^#\/?/, "").split("?")[0];
+  return Object.hasOwn(PAGE_TITLES, page) ? page : "home";
 }
+export { PAGE_TITLES, pageFromHash };
