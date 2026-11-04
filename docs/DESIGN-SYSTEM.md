@@ -1,10 +1,12 @@
+> Export reference note — 4 November 2026: This document preserves the project’s design history, including earlier four-page layouts and source paths. The exported application contains six pages. For current component paths and commands, use the export README; the exported CSS and components define the shipped appearance. The current multisport footer is documented in `FOOTER-ART-DIRECTION-2026-11-04.md`. The parent-stories revision at the end of this document describes the current compact card design.
+
 # LetsAimIt design system
 
 Current design reference for the four-page React website, updated 25 October 2026. This document describes the implemented type roles, spacing and responsive rules. `src/styles/typography.css` is the source of truth for font values; component styles control layout. Import typography last, as in `src/main.jsx`.
 
 ## Design direction
 
-Give football, basketball and physical fitness equal weight in programme copy. Keep copy short and easy to understand, and label sport-specific photos, testimonials and qualifications accurately. Use the existing photographs to show the programme and community. The visual language combines green, lime and sage, rounded image frames and one consistent sans-serif family. The earlier typography scale is restored across all four pages, including large section headings, metrics and the parent quote. The redesigned coach section and accepted gallery composition remain in place. The footer uses the same layout with artwork for football, basketball and fitness.
+Keep copy short and easy to understand. Use the existing photographs to show the programme and community. The visual language combines green, lime and sage, rounded image frames and one consistent sans-serif family. The earlier typography scale is restored across all four pages, including large section headings, metrics and the parent quote. The redesigned coach section, football footer and accepted gallery composition remain in place.
 
 ## Font family and delivery
 
@@ -31,14 +33,14 @@ All roles use **Plus Jakarta Sans**. Values below are **font size / line height 
 | Navigation | 600 | 14 / 21 | 14 / 21 | 14 / 21 | `--type-nav`, `--line-nav` |
 | Form/short label | 600 | 14 / 20 | 14 / 20 | 14 / 20 | `--type-label`, `--line-label` |
 | Image caption/context | 400 | **14 / 21** | **14 / 21** | **14 / 21** | `--type-caption`, `--line-caption` |
-| Metric/price | 600 | 72 / 76 | 60 / 64 | 44 / 48 | `--type-metric`, `--line-metric` |
+| Metric | 600 | 72 / 76 | 60 / 64 | 44 / 48 | `--type-metric`, `--line-metric` |
 | Parent quote | 600 | 48 / 56 | 48 / 56 | 28 / 38 | `--type-quote`, `--line-quote` |
 | Footer scene headline / small brand | 600 | 20 / 28 | 20 / 28 | 20 / 28 | `.footer-scene-heading`, `.footer-brand` |
 | Legal/small footer copy | 400 | 12 / 18 | 12 / 18 | 12 / 18 | `--type-legal`, `--line-legal` |
 
 At widths of 380px and below, heroes use **44 / 48**. Responsive heading and metric sizes do not change the CTA or caption roles.
 
-Semantic tags do not override their content role: footer column headings and fee-panel labels remain compact navigation/label text. Dialog titles use the section-heading or card-heading role already assigned in `typography.css`. Gallery caption pills and coach chips use the 14px caption size with weight 600 for emphasis.
+Semantic tags do not override their content role: footer column headings and programme-panel labels remain compact navigation/label text. Dialog titles use the section-heading or card-heading role already assigned in `typography.css`. Gallery caption pills and coach chips use the 14px caption size with weight 600 for emphasis.
 
 Shared tracking is `-.035em` for hero and section headings, `-.02em` for subheadings, `-.01em` for actions, `-.045em` for metrics and `-.04em` for the parent quote. Body, captions and navigation use zero tracking. Preserve these roles instead of adding individual font-size overrides. The footer scene headline follows the former 20/28px footer tagline role rather than the larger section-heading role.
 
@@ -54,7 +56,7 @@ Shared tracking is `-.035em` for hero and section headings, `-.02em` for subhead
 | Hairline | `#dce4de` | Dividers and light borders |
 | Coach surface | `#edf3e2` | Pale coach-section background |
 
-The sports artwork blends into the solid green footer. Its top and bottom overlays keep the headline and transition readable. Keep functional controls visually distinct from decorative lime caption pills.
+The football artwork blends into the solid green footer. Its top and bottom overlays keep the headline and transition readable. Keep functional controls visually distinct from decorative lime caption pills.
 
 ## Spacing and layout roles
 
@@ -69,7 +71,7 @@ Use the existing responsive container and section rules. Avoid adding new offset
 | Text action | Minimum 44px height with a clear focus outline. |
 | Coach section | 56px vertical padding on desktop, 40px on mobile. Two columns become a single column at ≤700px, with copy first. |
 | Coach body spacing | 16px above and 22px below the paragraph on desktop; 14px and 18px on mobile. |
-| Facts grid | 540px desktop height and 32px card padding; automatic rows of 230px at ≤900px and 190px at ≤700px. At ≤350px, cards form one column with 180px rows. |
+| Facts section | Centred programme summary with four metrics and subtle activity tiles. Four columns on desktop, two columns at tablet/mobile and one column below 350px. |
 | Quote section | 660px minimum desktop height and 172px vertical padding. At ≤700px, the layout uses content-driven height, a 40px gap and 48px vertical padding. |
 | Footer scene | 350px tall on wide desktop, 330px at ≤900px. Headline and CTA stack at ≤700px. |
 | Footer navigation | Four columns on wide desktop, two at ≤900px, with the brand/contact group spanning both columns on mobile. |
@@ -99,7 +101,7 @@ Edit gallery content only in `src/data/gallery.js`; use `HomeGallery.jsx`, `Phot
 
 `HomeCoach.jsx` and `home-coach.css` compose the background-removed `coach-and-player-cutout.png` over a rounded green backing. The source is the existing coach-and-goalkeeper photograph, which remains in the package. At ≤700px, the copy comes first and the two lime labels flow in a separate wrapping row below the image. Keep this image's meaning, the mobile label flow and the established coach-page route. The coach paragraph uses the shared 18/28px introduction role.
 
-`Footer.jsx` and `football-footer.css` use `multisport-footer-scene.svg` as decorative artwork for football, basketball and fitness. Keep the three symbols within the central crop so they remain visible on narrow screens. The image has empty alternative text because the heading, actions and navigation carry the useful content. It does not depict the actual LetsAimIt venue.
+`Footer.jsx` and `football-footer.css` use `football-footer-scene.png` as decorative, generated football artwork. It has empty alternative text because the heading, actions and navigation carry the useful content. Do not describe this artwork as a photograph of the actual LetsAimIt venue.
 
 The visible footer photo/film credit line and oversized wordmark remain removed. The replacement headline and small brand use the shared 20/28px subheading size at weight 600. Footer routes, contact links, the free-trial action and the Back to top control remain. Source records and licenses stay in the package; removing a visible credit does not change the provenance or ownership of an asset.
 
@@ -108,3 +110,15 @@ The visible footer photo/film credit line and oversized wordmark remain removed.
 Update the shared token before changing individual components. Verify the role across all four routes and the dialogs. Preserve the Home gallery and existing form destinations. Check the hero, section headings, facts and quote at desktop, tablet and narrow mobile widths. Keep captions and actions consistent, and retain the new coach and footer layouts when adjusting type.
 
 Use [VERIFICATION.md](VERIFICATION.md) for recorded checks and their limits. This design document specifies the intended current system; it does not claim that an unrecorded browser or device test has passed.
+
+## LetsAimIt logo
+
+Original A-shaped player plus football mark. Header lettering uses the existing Plus Jakarta Sans at weight 800, 20px on desktop, 18px on tablet/mobile and 17px at 380px and below. This is a logo role only; page type tokens remain unchanged. Full wordmark is omitted only at 350px and below. Header heights remain 88/80/76px; CTA and menu sizes remain intact. White footer symbol uses a CSS filter; footer lettering remains 20px. `brand.css` is intentionally scoped to logo elements.
+
+## Home parent stories — reference revision, 4 November 2026
+
+The supplied second Pinterest reference replaces the earlier oversized single-quote presentation. The Home section now uses a white rounded panel, split header, two staggered compact card rows, soft sage/neutral fills, closing quotation marks and white name cutouts. A small contextual coaching photograph sits in the header; parent portraits are not available.
+
+Use existing type roles: section heading 56/62, 44/50 or 36/42; compact card excerpts use the 16/26 body role; parent names use 16/24 at weight 600; short headings and relationships use 14px label/caption roles. Full quotes open in a separate native dialog using the 18/28 introduction role. The former large parent-quote role is not used by these compact cards. Shared typography tokens and other page roles remain unchanged.
+
+All eight source quotes and attributions remain intact. Desktop uses two horizontally scrollable staggered rows; phones use one row in source order with native swiping. Cards open full stories without changing the card geometry. Respect reduced motion and keep vertical page scrolling available.

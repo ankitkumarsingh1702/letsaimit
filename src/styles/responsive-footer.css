@@ -1,0 +1,124 @@
+/* Phone and tablet refinements. The supplied desktop design stays the baseline. */
+
+/* Separate artwork keeps all three activities visible at narrow widths. */
+.football-footer .footer-scene {
+  height: clamp(340px, 33.333vw, 560px);
+  background: var(--green);
+}
+.footer-scene-picture {
+  position: absolute;
+  inset: 0;
+  z-index: -3;
+  display: block;
+  pointer-events: none;
+}
+.footer-scene-picture .footer-scene-image {
+  z-index: auto;
+  object-position: center bottom;
+}
+.footer-scene-inner {
+  position: relative;
+  z-index: 1;
+}
+.footer-trial {
+  max-width: 100%;
+}
+
+/* Keep menus and native dialogs usable on short phone viewports. */
+.mobile-nav {
+  max-height: calc(100vh - var(--header));
+  max-height: calc(100dvh - var(--header));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.contact-dialog,
+.photo-gallery-dialog,
+.media-dialog {
+  overscroll-behavior: contain;
+}
+
+@media (min-width: 701px) and (max-width: 900px) {
+  .fact-card .fact-value {
+    font-size: clamp(48px, 6.5vw, 60px);
+    line-height: 1.08;
+  }
+}
+
+@media (max-width: 740px) {
+  .fm-close {
+    width: 44px;
+    height: 44px;
+    top: 10px;
+    right: 10px;
+  }
+  .fm-text-button,
+  .fm-alternative,
+  .fm-privacy,
+  .fm-handoff-result > a,
+  .pg-enroll,
+  .gallery-all {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+  .fm-text-button,
+  .fm-alternative {
+    display: flex;
+  }
+}
+
+@media (max-width: 700px) {
+  .football-footer .footer-scene {
+    height: clamp(360px, 100vw, 480px);
+  }
+  .football-footer .footer-col a,
+  .football-footer .footer-col button {
+    min-height: 44px;
+  }
+  .facts-grid {
+    grid-template-rows: minmax(176px, auto) minmax(176px, auto) minmax(
+        150px,
+        auto
+      ) minmax(150px, auto);
+  }
+}
+
+@media (max-width: 440px) {
+  .footer-scene-picture .footer-scene-image {
+    object-fit: contain;
+  }
+  .fm-aside-label {
+    padding-right: 48px;
+  }
+  .facts-grid {
+    grid-template-rows: minmax(158px, auto) minmax(158px, auto) minmax(
+        142px,
+        auto
+      ) minmax(142px, auto);
+  }
+}
+
+@media (max-width: 380px) {
+  .facts-mobile-activities {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
+  .facts-mobile-activities span {
+    flex: 0 1 auto;
+    gap: 6px;
+    padding-inline: 10px;
+  }
+  .facts-mobile-activities span::before {
+    flex: 0 0 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+@media (max-width: 350px) {
+  .facts-grid {
+    grid-template-rows: repeat(5, minmax(150px, auto));
+  }
+}

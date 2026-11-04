@@ -1,0 +1,1061 @@
+/* For schools: a scoped extension of the existing LetsAimIt visual system. */
+.sk-page {
+  --sk-forest: var(--green, #143e35);
+  --sk-lime: var(--lime, #c5f66b);
+  --sk-sage: var(--sage, #e5ecd9);
+  color: var(--sk-forest);
+  font-family: var(--font-body, "Plus Jakarta Sans", Arial, sans-serif);
+  padding-top: 24px;
+  display: flow-root;
+}
+
+.sk-page .sk-shell {
+  width: min(1320px, calc(100% - 64px));
+  margin-inline: auto;
+}
+
+.sk-page .sk-section {
+  margin-block: 96px;
+}
+.sk-page section[id] {
+  scroll-margin-top: calc(var(--header, 88px) + 24px);
+}
+
+.sk-page .sk-eyebrow,
+.sk-page .sk-overline {
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 600;
+  letter-spacing: 0.035em;
+}
+
+.sk-page .sk-overline {
+  color: var(--muted, #60736c);
+  margin-bottom: 14px;
+}
+
+.sk-page .sk-section-title,
+.sk-page .sk-approach-head h2,
+.sk-page .sk-coach-copy h2,
+.sk-page .sk-enquiry-copy h2 {
+  font-family: var(--font-display, var(--font-body));
+  font-size: clamp(36px, 4.2vw, 56px);
+  line-height: 1.08;
+  font-weight: 700;
+  letter-spacing: -0.045em;
+  text-wrap: balance;
+}
+
+.sk-page .sk-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  min-height: 54px;
+  max-width: 100%;
+  padding: 15px 25px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.sk-page .sk-button svg,
+.sk-page .sk-text-link svg,
+.sk-page .sk-jump svg {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+}
+
+.sk-page .sk-button-lime {
+  color: var(--sk-forest);
+  background: var(--sk-lime);
+}
+.sk-page .sk-button-white {
+  color: var(--sk-forest);
+  background: #fff;
+}
+.sk-page .sk-button-lime:hover {
+  background: #b7ec5e;
+}
+.sk-page .sk-button-white:hover {
+  background: var(--sk-sage);
+}
+.sk-page .sk-button:hover {
+  transform: translateY(-2px);
+}
+.sk-page .sk-button:focus-visible,
+.sk-page .sk-text-link:focus-visible,
+.sk-page .sk-jump:focus-visible {
+  outline: 3px solid #4b8e18;
+  outline-offset: 5px;
+}
+
+/* The photographs remain documentary; the left overlay provides text contrast. */
+.sk-page .sk-hero {
+  position: relative;
+  isolation: isolate;
+  min-height: 660px;
+  overflow: hidden;
+  border-radius: 32px;
+  background: var(--sk-forest);
+  color: #fff;
+}
+
+.sk-page .sk-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(9, 38, 31, 0.92) 0%,
+      rgba(9, 38, 31, 0.83) 31%,
+      rgba(9, 38, 31, 0.35) 61%,
+      rgba(9, 38, 31, 0.1) 100%
+    ),
+    linear-gradient(0deg, rgba(9, 38, 31, 0.5), transparent 45%);
+}
+
+.sk-page .sk-hero-image {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 60% 50%;
+}
+
+.sk-page .sk-hero-content {
+  min-height: 660px;
+  display: flex;
+  align-items: center;
+  padding: 80px 64px 178px;
+}
+
+.sk-page .sk-hero-copy {
+  width: 100%;
+  max-width: 690px;
+}
+.sk-page .sk-hero .sk-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 5px 13px;
+  margin-bottom: 25px;
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  border-radius: 999px;
+  color: #fff;
+}
+
+.sk-page .sk-hero-title {
+  max-width: 12ch;
+  color: #fff;
+  font-family: var(--font-display, var(--font-body));
+  font-size: clamp(56px, 6.2vw, 84px);
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: -0.05em;
+  text-wrap: balance;
+}
+
+.sk-page .sk-hero-intro {
+  max-width: 31ch;
+  margin-top: 23px;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 18px;
+  line-height: 28px;
+}
+
+.sk-page .sk-hero-copy > .sk-button {
+  margin-top: 28px;
+}
+.sk-page .sk-hero :is(a, button):focus-visible {
+  outline-color: #fff;
+}
+
+.sk-page .sk-hero-links {
+  position: absolute;
+  z-index: 2;
+  left: 40px;
+  right: 40px;
+  bottom: 32px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.sk-page .sk-jump {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 58px;
+  padding: 16px 22px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.88);
+  color: var(--sk-forest);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 21px;
+  text-decoration: none;
+  transition: background-color 0.18s ease;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.sk-page .sk-jump:hover {
+  background: #fff;
+}
+.sk-page .sk-hero-caption {
+  position: absolute;
+  right: 43px;
+  bottom: 109px;
+  max-width: calc(100% - 86px);
+  color: rgba(255, 255, 255, 0.94);
+  font-size: 12px;
+  line-height: 18px;
+  text-align: right;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.65);
+}
+
+/* Four services, deliberately readable without opening or hovering. */
+.sk-page .sk-section-head {
+  max-width: 720px;
+  margin: 0 auto 40px;
+  text-align: center;
+}
+.sk-page .sk-section-head > p:not(.sk-overline) {
+  margin-top: 18px;
+  color: var(--muted, #60736c);
+  font-size: 18px;
+  line-height: 28px;
+}
+.sk-page .sk-service-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+.sk-page .sk-service-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  min-height: 336px;
+  padding: 28px;
+  border: 1px solid rgba(20, 62, 53, 0.045);
+  border-radius: 24px;
+  background: #f4f6ef;
+  color: var(--sk-forest);
+}
+
+.sk-page .sk-service-card--sage {
+  background: var(--sk-sage);
+}
+.sk-page .sk-service-card--lime {
+  background: var(--sk-lime);
+}
+.sk-page .sk-service-card--dark {
+  background: var(--sk-forest);
+  color: #fff;
+}
+.sk-page .sk-service-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--sk-forest);
+}
+
+.sk-page .sk-service-icon svg {
+  width: 24px;
+  height: 24px;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+.sk-page .sk-service-card--lime .sk-service-icon {
+  background: var(--sk-forest);
+  color: var(--sk-lime);
+}
+.sk-page .sk-service-card--dark .sk-service-icon {
+  background: var(--sk-lime);
+}
+.sk-page .sk-service-number {
+  position: absolute;
+  right: 28px;
+  top: 39px;
+  opacity: 0.6;
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 500;
+}
+.sk-page .sk-service-title {
+  max-width: 13ch;
+  margin: 38px 0 13px;
+  font-family: var(--font-display, var(--font-body));
+  font-size: 25px;
+  line-height: 31px;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+.sk-page .sk-service-copy {
+  max-width: 26ch;
+  font-size: 16px;
+  line-height: 26px;
+}
+.sk-page .sk-service-card--dark .sk-service-copy {
+  color: #dce8e0;
+}
+.sk-page .sk-service-rule {
+  width: 34px;
+  height: 2px;
+  margin-top: auto;
+  padding-top: 0;
+  border: 0;
+  background: currentColor;
+  opacity: 0.35;
+}
+.sk-page .sk-service-copy + .sk-service-rule {
+  margin-top: 25px;
+}
+.sk-page .sk-service-note {
+  margin-top: auto;
+  padding-top: 24px;
+  font-size: 12px;
+  line-height: 18px;
+  opacity: 0.75;
+}
+.sk-page .sk-service-media {
+  width: 100%;
+  margin-top: 24px;
+  border-radius: 15px;
+  overflow: hidden;
+}
+.sk-page .sk-service-media img {
+  width: 100%;
+  height: 155px;
+  object-fit: cover;
+}
+
+/* A quieter, shared approach follows the service overview. */
+.sk-page .sk-approach {
+  padding: 58px 64px 56px;
+  border-radius: 32px;
+  background: var(--sk-forest);
+  color: #fff;
+}
+.sk-page .sk-approach .sk-overline {
+  color: var(--sk-lime);
+}
+.sk-page .sk-approach-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 48px;
+}
+.sk-page .sk-approach-head h2 {
+  max-width: 14ch;
+  color: #fff;
+}
+.sk-page .sk-approach-head > p {
+  max-width: 29ch;
+  color: #dce8e0;
+  font-size: 17px;
+  line-height: 28px;
+}
+.sk-page .sk-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 42px;
+  margin: 48px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.sk-page .sk-steps > li {
+  min-width: 0;
+  padding-top: 26px;
+  border-top: 1px solid rgba(255, 255, 255, 0.22);
+}
+.sk-page .sk-step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(197, 246, 107, 0.3);
+  border-radius: 50%;
+  color: var(--sk-lime);
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 500;
+}
+.sk-page .sk-steps h3 {
+  margin: 22px 0 10px;
+  color: #fff;
+  font-family: var(--font-display, var(--font-body));
+  font-size: 27px;
+  font-weight: 600;
+  line-height: 34px;
+  letter-spacing: -0.035em;
+}
+.sk-page .sk-steps p {
+  max-width: 28ch;
+  color: #dce8e0;
+  font-size: 16px;
+  line-height: 26px;
+}
+
+/* Documentary coach imagery stays separate from school-service claims. */
+.sk-page .sk-coach {
+  display: grid;
+  grid-template-columns: minmax(0, 1.06fr) minmax(0, 0.94fr);
+  align-items: center;
+  gap: 72px;
+}
+.sk-page .sk-coach-photo {
+  min-width: 0;
+}
+.sk-page .sk-coach-photo img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  max-height: 460px;
+  object-fit: cover;
+  object-position: 50% 48%;
+  border-radius: 28px;
+}
+.sk-page .sk-coach-photo figcaption {
+  margin-top: 12px;
+  color: var(--muted, #60736c);
+  font-size: 13px;
+  line-height: 21px;
+}
+.sk-page .sk-coach-copy {
+  max-width: 500px;
+  padding-right: 20px;
+}
+.sk-page .sk-coach-copy .sk-eyebrow {
+  display: block;
+  margin-bottom: 18px;
+  color: var(--muted, #60736c);
+}
+.sk-page .sk-coach-intro {
+  max-width: 30ch;
+  margin-top: 22px;
+  font-size: 21px;
+  line-height: 32px;
+  letter-spacing: -0.015em;
+}
+.sk-page .sk-coach-details {
+  max-width: 34ch;
+  margin-top: 17px;
+  color: var(--muted, #60736c);
+  font-size: 16px;
+  line-height: 26px;
+}
+.sk-page .sk-text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 20px;
+  min-height: 44px;
+  margin-top: 25px;
+  padding-block: 7px;
+  border-bottom: 1px solid currentColor;
+  color: var(--sk-forest);
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.sk-page .sk-text-link:hover svg {
+  transform: translateX(3px);
+}
+
+/* The form prepares a WhatsApp message, with visible labels and errors. */
+.sk-page .sk-enquiry {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  align-items: start;
+  gap: 64px;
+  padding: 58px 64px;
+  border-radius: 32px;
+  background: #f4f6ed;
+}
+.sk-page .sk-enquiry-copy {
+  min-width: 0;
+}
+.sk-page .sk-enquiry-copy > p:not(.sk-overline) {
+  max-width: 27ch;
+  margin-top: 18px;
+  color: var(--muted, #60736c);
+  font-size: 18px;
+  line-height: 28px;
+}
+.sk-page .sk-contact-links {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 32px;
+}
+.sk-page .sk-contact-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  max-width: 100%;
+  gap: 12px;
+  color: var(--sk-forest);
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+.sk-page .sk-contact-links a:hover {
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+.sk-page .sk-contact-links svg {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
+.sk-page .sk-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px 18px;
+  min-width: 0;
+}
+.sk-page .sk-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.sk-page .sk-field-wide {
+  grid-column: 1 / -1;
+}
+.sk-page .sk-field label {
+  color: var(--sk-forest);
+  font-size: 14px;
+  line-height: 21px;
+  font-weight: 600;
+}
+.sk-page .sk-optional {
+  color: var(--muted, #60736c);
+  font-weight: 400;
+}
+.sk-page .sk-field input,
+.sk-page .sk-field textarea {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 53px;
+  margin: 0;
+  padding: 13px 15px;
+  border: 1px solid #c4d0c5;
+  border-radius: 12px;
+  background: #fff;
+  color: var(--sk-forest);
+  font: inherit;
+  font-size: 16px;
+  line-height: 25px;
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease;
+}
+.sk-page .sk-field textarea {
+  min-height: 118px;
+  resize: vertical;
+}
+.sk-page .sk-field input:hover,
+.sk-page .sk-field textarea:hover {
+  border-color: #8da393;
+}
+.sk-page .sk-field input:focus,
+.sk-page .sk-field textarea:focus {
+  outline: 2px solid var(--sk-forest);
+  outline-offset: 2px;
+  border-color: var(--sk-forest);
+}
+.sk-page .sk-field [aria-invalid="true"] {
+  border-color: #a03529;
+}
+.sk-page .sk-error {
+  color: #9b2d22;
+  font-size: 13px;
+  line-height: 20px;
+}
+.sk-page .sk-form-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 11px;
+  padding-top: 1px;
+}
+.sk-page .sk-form-note {
+  margin: 0;
+  color: var(--muted, #60736c);
+  font-size: 13px;
+  line-height: 21px;
+}
+.sk-page .sk-privacy {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: -4px;
+  color: var(--sk-forest);
+  font-size: 13px;
+  line-height: 20px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.sk-page .sk-handoff {
+  padding: 18px 20px;
+  border: 1px solid #b9cbb1;
+  border-radius: 14px;
+  background: #e8efdf;
+}
+.sk-page .sk-handoff p {
+  font-size: 14px;
+  line-height: 22px;
+}
+.sk-page .sk-handoff .sk-handoff-link {
+  min-height: 44px;
+  margin-top: 8px;
+  font-size: 14px;
+  line-height: 22px;
+  font-weight: 600;
+}
+
+/* The extra navigation destination uses the existing mobile header earlier. */
+@media (min-width: 701px) and (max-width: 1040px) {
+  .site-header .desktop-nav {
+    display: none;
+  }
+  .site-header .menu-toggle {
+    display: block;
+  }
+}
+
+@media (max-width: 1040px) {
+  .sk-page .sk-shell {
+    width: calc(100% - 48px);
+  }
+  .sk-page .sk-section {
+    margin-block: 76px;
+  }
+  .sk-page .sk-hero-content {
+    padding: 72px 44px 168px;
+  }
+  .sk-page .sk-hero-title {
+    font-size: clamp(56px, 7.5vw, 76px);
+  }
+  .sk-page .sk-hero-links {
+    left: 28px;
+    right: 28px;
+    bottom: 27px;
+    gap: 12px;
+  }
+  .sk-page .sk-hero-caption {
+    right: 30px;
+    bottom: 103px;
+    max-width: calc(100% - 60px);
+  }
+  .sk-page .sk-service-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+  .sk-page .sk-service-card {
+    min-height: 310px;
+    padding: 30px;
+  }
+  .sk-page .sk-service-title {
+    max-width: none;
+    margin-top: 34px;
+  }
+  .sk-page .sk-service-number {
+    top: 41px;
+    right: 30px;
+  }
+  .sk-page .sk-service-copy {
+    max-width: 31ch;
+  }
+  .sk-page .sk-approach {
+    padding: 44px;
+  }
+  .sk-page .sk-approach-head {
+    gap: 32px;
+  }
+  .sk-page .sk-approach-head > p {
+    max-width: 24ch;
+    font-size: 16px;
+    line-height: 26px;
+  }
+  .sk-page .sk-steps {
+    gap: 25px;
+    margin-top: 38px;
+  }
+  .sk-page .sk-coach {
+    gap: 40px;
+  }
+  .sk-page .sk-coach-copy {
+    padding-right: 0;
+  }
+  .sk-page .sk-coach-intro {
+    font-size: 19px;
+    line-height: 30px;
+  }
+  .sk-page .sk-enquiry {
+    gap: 38px;
+    padding: 44px;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  }
+}
+
+@media (max-width: 760px) {
+  .sk-page {
+    padding-top: 16px;
+  }
+  .sk-page .sk-shell {
+    width: calc(100% - 32px);
+  }
+  .sk-page .sk-section {
+    margin-block: 60px;
+  }
+  .sk-page .sk-section-head {
+    margin-bottom: 28px;
+  }
+  .sk-page .sk-section-title,
+  .sk-page .sk-approach-head h2,
+  .sk-page .sk-coach-copy h2,
+  .sk-page .sk-enquiry-copy h2 {
+    font-size: 38px;
+    line-height: 43px;
+    letter-spacing: -0.04em;
+  }
+  .sk-page .sk-hero {
+    min-height: 650px;
+    border-radius: 24px;
+  }
+  .sk-page .sk-hero-content {
+    min-height: 650px;
+    align-items: flex-start;
+    padding: 35px 28px 270px;
+  }
+  .sk-page .sk-hero-copy {
+    max-width: 440px;
+  }
+  .sk-page .sk-hero .sk-eyebrow {
+    margin-bottom: 20px;
+  }
+  .sk-page .sk-hero-title {
+    max-width: 12ch;
+    font-size: clamp(42px, 8.7vw, 56px);
+    line-height: 1.03;
+  }
+  .sk-page .sk-hero-intro {
+    max-width: 25ch;
+    margin-top: 18px;
+    font-size: 17px;
+    line-height: 26px;
+  }
+  .sk-page .sk-hero-copy > .sk-button {
+    margin-top: 22px;
+  }
+  .sk-page .sk-hero-image {
+    object-position: 66% 53%;
+  }
+  .sk-page .sk-hero::after {
+    background: linear-gradient(
+      180deg,
+      rgba(9, 38, 31, 0.95) 0%,
+      rgba(9, 38, 31, 0.88) 36%,
+      rgba(9, 38, 31, 0.28) 69%,
+      rgba(9, 38, 31, 0.52) 100%
+    );
+  }
+  .sk-page .sk-hero-links {
+    left: 20px;
+    right: 20px;
+    bottom: 20px;
+    gap: 8px;
+  }
+  .sk-page .sk-jump {
+    justify-content: center;
+    gap: 8px;
+    min-height: 60px;
+    padding: 12px 10px;
+    border-radius: 12px;
+    font-size: 13px;
+    line-height: 18px;
+  }
+  .sk-page .sk-jump svg {
+    width: 16px;
+    height: 16px;
+    flex-basis: 16px;
+  }
+  .sk-page .sk-hero-caption {
+    right: 22px;
+    bottom: 94px;
+    max-width: calc(100% - 44px);
+    font-size: 11px;
+    line-height: 17px;
+  }
+  .sk-page .sk-service-card {
+    padding: 25px;
+    min-height: 316px;
+    border-radius: 22px;
+  }
+  .sk-page .sk-service-number {
+    top: 36px;
+    right: 25px;
+  }
+  .sk-page .sk-service-title {
+    font-size: 24px;
+    line-height: 29px;
+  }
+  .sk-page .sk-service-copy {
+    font-size: 16px;
+    line-height: 25px;
+  }
+  .sk-page .sk-approach {
+    padding: 34px 28px;
+    border-radius: 24px;
+  }
+  .sk-page .sk-approach-head {
+    display: block;
+  }
+  .sk-page .sk-approach-head > p {
+    max-width: 31ch;
+    margin-top: 20px;
+  }
+  .sk-page .sk-steps {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    margin-top: 32px;
+  }
+  .sk-page .sk-steps > li {
+    padding-top: 24px;
+  }
+  .sk-page .sk-steps h3 {
+    display: inline-block;
+    margin: 0 0 0 15px;
+    font-size: 26px;
+    line-height: 36px;
+    vertical-align: middle;
+  }
+  .sk-page .sk-step-number {
+    vertical-align: middle;
+  }
+  .sk-page .sk-steps p {
+    max-width: 35ch;
+    margin-top: 14px;
+  }
+  .sk-page .sk-coach {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  .sk-page .sk-coach-photo img {
+    aspect-ratio: 4 / 3;
+    max-height: 430px;
+    border-radius: 24px;
+  }
+  .sk-page .sk-coach-photo figcaption {
+    margin-top: 10px;
+  }
+  .sk-page .sk-coach-copy {
+    max-width: 100%;
+    padding-inline: 8px;
+  }
+  .sk-page .sk-coach-copy .sk-eyebrow {
+    margin-bottom: 14px;
+  }
+  .sk-page .sk-coach-intro {
+    margin-top: 18px;
+    font-size: 19px;
+    line-height: 29px;
+  }
+  .sk-page .sk-coach-details {
+    max-width: 38ch;
+    margin-top: 14px;
+  }
+  .sk-page .sk-text-link {
+    margin-top: 18px;
+  }
+  .sk-page .sk-enquiry {
+    grid-template-columns: 1fr;
+    gap: 30px;
+    padding: 34px 28px;
+    border-radius: 24px;
+  }
+  .sk-page .sk-contact-links {
+    margin-top: 20px;
+    gap: 4px;
+  }
+  .sk-page .sk-form {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .sk-page .sk-form-actions {
+    gap: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sk-page .sk-section {
+    margin-block: 52px;
+  }
+  .sk-page .sk-hero-content {
+    padding: 30px 23px 270px;
+  }
+  .sk-page .sk-hero-title {
+    font-size: 43px;
+  }
+  .sk-page .sk-hero-intro {
+    font-size: 16px;
+    line-height: 25px;
+  }
+  .sk-page .sk-hero .sk-eyebrow {
+    min-height: 30px;
+    margin-bottom: 18px;
+    padding: 4px 11px;
+  }
+  .sk-page .sk-hero-copy > .sk-button {
+    min-height: 51px;
+    padding: 13px 20px;
+  }
+  .sk-page .sk-hero-links {
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    gap: 7px;
+  }
+  .sk-page .sk-jump {
+    flex-direction: column;
+    gap: 5px;
+    padding: 10px 5px;
+    font-size: 12px;
+    line-height: 17px;
+  }
+  .sk-page .sk-hero-caption {
+    right: 18px;
+    bottom: 98px;
+    max-width: calc(100% - 36px);
+  }
+  .sk-page .sk-service-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .sk-page .sk-service-card {
+    min-height: 270px;
+    padding: 25px 27px;
+  }
+  .sk-page .sk-service-title {
+    max-width: 100%;
+    margin-top: 27px;
+  }
+  .sk-page .sk-service-copy {
+    max-width: 30ch;
+  }
+  .sk-page .sk-service-number {
+    right: 27px;
+  }
+  .sk-page .sk-service-copy + .sk-service-rule {
+    margin-top: 22px;
+  }
+  .sk-page .sk-approach,
+  .sk-page .sk-enquiry {
+    padding: 30px 23px;
+  }
+  .sk-page .sk-coach-copy {
+    padding-inline: 4px;
+  }
+  .sk-page .sk-coach-photo img {
+    border-radius: 22px;
+  }
+  .sk-page .sk-contact-links a {
+    font-size: 15px;
+    line-height: 24px;
+  }
+  .sk-page .sk-submit {
+    width: 100%;
+    gap: 14px;
+    padding-inline: 16px;
+  }
+  .sk-page .sk-handoff {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 360px) {
+  .sk-page .sk-hero-content {
+    padding-inline: 19px;
+  }
+  .sk-page .sk-hero-title {
+    font-size: 39px;
+    letter-spacing: -0.055em;
+  }
+  .sk-page .sk-hero-links {
+    left: 12px;
+    right: 12px;
+    gap: 6px;
+  }
+  .sk-page .sk-jump {
+    font-size: 11px;
+    line-height: 17px;
+  }
+  .sk-page .sk-section-title,
+  .sk-page .sk-approach-head h2,
+  .sk-page .sk-coach-copy h2,
+  .sk-page .sk-enquiry-copy h2 {
+    font-size: 34px;
+    line-height: 39px;
+  }
+  .sk-page .sk-enquiry,
+  .sk-page .sk-approach {
+    padding-inline: 19px;
+  }
+  .sk-page .sk-button {
+    gap: 14px;
+    padding-inline: 17px;
+    font-size: 15px;
+  }
+  .sk-page .sk-service-card {
+    padding-inline: 23px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sk-page .sk-button,
+  .sk-page .sk-jump,
+  .sk-page .sk-text-link svg,
+  .sk-page .sk-field input,
+  .sk-page .sk-field textarea {
+    transition: none;
+  }
+  .sk-page .sk-button:hover,
+  .sk-page .sk-text-link:hover svg {
+    transform: none;
+  }
+}

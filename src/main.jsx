@@ -1,18 +1,16 @@
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
-import App from './App.jsx';
-import './styles/styles.css';
-import './styles/programme.css';
-import './styles/coach.css';
-import './styles/societies.css';
-import './styles/forms.css';
-import './styles/gallery.css';
-import './styles/home-coach.css';
-import './styles/football-footer.css';
-import './styles/typography.css';
+import * as React from "react";
+import * as ReactDOM from "react-dom/client";
+import App from "./App.jsx";
+import "./styles/site.css";
+import "./styles/responsive-footer.css";
+import "./features/schools/schools.css";
+import "./features/events/events.css";
+import "./styles/navigation.css";
+import "./features/stories/parent-stories.css";
+import "./features/stories/coach-story.css";
 
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <React.StrictMode>
     <App />
-  </StrictMode>,
+  </React.StrictMode>,
 );
