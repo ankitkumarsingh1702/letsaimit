@@ -3,5 +3,7 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
-  base: "./",
+  base: "/",
+  server: { allowedHosts: ["terminal.local"] },
+  preview: { allowedHosts: ["terminal.local"] },
 });

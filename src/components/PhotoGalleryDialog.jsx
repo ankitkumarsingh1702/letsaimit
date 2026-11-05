@@ -1,5 +1,5 @@
 import * as React from "react";
-import { asset } from "../lib/assets.js";
+import { mediaProps, thumbnailSource } from "../lib/media.js";
 function safeIndex(index, photoCount) {
   return Number.isInteger(index) && index >= 0 && index < photoCount
     ? index
@@ -177,7 +177,7 @@ function PhotoGalleryDialog({
             </svg>
           </button>
         </div>
-        {currentPhoto && (
+        {isOpen && currentPhoto && (
           <>
             <div className="photo-gallery-stage">
               <button
@@ -193,7 +193,7 @@ function PhotoGalleryDialog({
                 {isOpen && (
                   <img
                     className="photo-gallery-image"
-                    src={asset(currentPhoto.src)}
+                    {...mediaProps(currentPhoto.src, "(max-width: 700px) calc(100vw - 52px), (max-width: 1440px) calc(100vw - 180px), 1260px")}
                     alt={currentPhoto.alt}
                     decoding="async"
                     key={currentPhoto.src}
@@ -232,15 +232,17 @@ function PhotoGalleryDialog({
                     }}
                     type="button"
                     className="photo-gallery-thumb"
-                    aria-label={`View photo ${index + 1}: ${photo.caption || photo.alt}`}
+                    aria-label={`View photo ${index + 1}: ${photo.alt}`}
                     aria-current={index === currentIndex ? "true" : void 0}
                     tabIndex={index === currentIndex ? 0 : -1}
                     onClick={() => setSelectedIndex(index)}
                     key={photo.src}
                   >
                     <img
-                      src={asset(photo.src)}
-                      alt=""
+                      src={thumbnailSource(photo.src)}
+                      alt={photo.alt}
+                      width={photo.width}
+                      height={photo.height}
                       loading="lazy"
                       decoding="async"
                     />

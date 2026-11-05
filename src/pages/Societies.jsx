@@ -1,6 +1,6 @@
 import { useSiteActions } from "../context/SiteActions.jsx";
 import { Arrow } from "../components/ui.jsx";
-import { asset } from "../lib/assets.js";
+import { mediaProps } from "../lib/media.js";
 function PitchIcon() {
   return (
     <svg viewBox="0 0 48 36" fill="none" aria-hidden="true">
@@ -35,9 +35,9 @@ function Societies() {
             <span className="so-dot">.</span>
           </h1>
           <p>
-            Football, basketball and fitness
+            Football and basketball.
             <br className="so-desktop-break" />
-            {" for children in your society."}
+            {" Fitness through play, close to home."}
           </p>
           <button
             className="btn btn-lime"
@@ -51,7 +51,7 @@ function Societies() {
         </div>
         <figure className="so-hero-media">
           <img
-            src={asset("image2.jpeg")}
+            {...mediaProps("image2.jpeg", "(max-width: 700px) calc(100vw - 40px), (max-width: 1400px) 48vw, 640px")}
             alt="Children practising football at the Nambiar Ellegenza community ground"
             width="2048"
             height="1536"
@@ -104,7 +104,7 @@ function Societies() {
           </h2>
           <div className="so-community-info">
             <p className="so-community-count">
-              2 active communities in Bengaluru.
+              Football and basketball in Bengaluru.
             </p>
             <ul
               className="so-community-list"
@@ -114,7 +114,7 @@ function Societies() {
               <li>Nambiar Ellegenza</li>
               <li>Nambiar Bellezea</li>
             </ul>
-            <a className="text-link" href="#/programme">
+            <a className="text-link" href="/programme/">
               {"Explore the programme "}
               <Arrow />
             </a>
@@ -123,7 +123,7 @@ function Societies() {
         <div className="so-community-images">
           <figure className="so-building">
             <img
-              src={asset("image1.jpeg")}
+              {...mediaProps("image1.jpeg", "(max-width: 700px) calc(100vw - 40px), (max-width: 1400px) 34vw, 440px")}
               alt="Nambiar Ellegenza community clubhouse"
               width="640"
               height="640"
@@ -133,7 +133,7 @@ function Societies() {
           </figure>
           <figure className="so-training">
             <img
-              src={asset("image3.jpeg")}
+              {...mediaProps("image3.jpeg", "(max-width: 700px) calc(100vw - 40px), (max-width: 1400px) 62vw, 820px")}
               alt="Coach and children training together on the Nambiar Ellegenza football court"
               width="2048"
               height="1536"

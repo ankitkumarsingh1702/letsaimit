@@ -1,8 +1,9 @@
 import * as React from "react";
-import { asset } from "../lib/assets.js";
+import { imageSource, videoSource } from "../lib/media.js";
 function ProgrammeFilm() {
   let videoRef = React.useRef(null),
     playbackGenerationRef = React.useRef(0),
+    [hasStarted, setHasStarted] = React.useState(false),
     [isPlaying, setIsPlaying] = React.useState(false),
     [errorMessage, setErrorMessage] = React.useState("");
   React.useEffect(() => {
@@ -36,7 +37,13 @@ function ProgrammeFilm() {
     let generation = playbackGenerationRef.current;
     setErrorMessage("");
     try {
-      video.error && video.load();
+      if (!video.getAttribute("src")) {
+        video.src = videoSource("football-film.mp4");
+        video.load();
+        setHasStarted(true);
+      } else if (video.error) {
+        video.load();
+      }
       await video.play();
     } catch {
       if (playbackGenerationRef.current !== generation) return;
@@ -56,21 +63,20 @@ function ProgrammeFilm() {
           ref={videoRef}
           id="programme-film"
           data-ready="true"
-          controls={true}
+          controls={hasStarted}
           playsInline={true}
           muted={true}
           loop={true}
-          preload="metadata"
-          poster={asset("football-film-poster.jpg")}
+          preload="none"
+          poster={imageSource("football-film-poster.jpg")}
           aria-label="Children practising football; silent stock footage"
           onPlay={syncPlaybackState}
           onPause={syncPlaybackState}
           onEnded={syncPlaybackState}
           onError={handleVideoError}
         >
-          <source src={asset("football-film.mp4")} type="video/mp4" />
           {"Your browser does not support this film. "}
-          <a href={asset("football-film.mp4")}>Open the football film</a>.
+          <a href={videoSource("football-film.mp4")}>Open the football film</a>.
         </video>
         <button
           className="pg-video-play"

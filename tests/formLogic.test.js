@@ -14,7 +14,8 @@ test('empty trial fields keep the source error copy and first-invalid order', ()
     parentName: 'Enter your name.',
     phone: 'Enter a phone number.',
     age: 'Choose your child’s age.',
-    community: 'Enter your society or locality.',
+    community: 'Choose your community.',
+    sport: 'Choose a sport.',
   });
 });
 
@@ -23,16 +24,16 @@ test('phone validation preserves international formatting and rejects wrong leng
     assert.equal(fieldError('phone', phone), '', phone);
   }
   for (const phone of ['1234567', '+1234567890123456', 'call 9876543210', '91+9876543210', '+91.9876543210']) {
-    assert.equal(fieldError('phone', phone), 'Enter a valid phone number, with country code if needed.', phone);
+    assert.equal(fieldError('phone', phone), 'Enter a valid phone number.', phone);
   }
   assert.equal(fieldError('phone', '  '), 'Enter a phone number.');
 });
 
-test('age choice is restricted to 5–13 or the coach guidance option', () => {
-  for (const age of ['5', '6', '7', '8', '9', '10', '11', '12', '13', 'other']) {
+test('age choice is restricted to 5–14 or the trial guidance option', () => {
+  for (const age of ['5', '6', '7', '8', '9', '10', '11', '12', '13', '14', 'other']) {
     assert.equal(fieldError('age', age), '');
   }
-  for (const age of ['', '4', '14', 'banana']) {
+  for (const age of ['', '4', '15', 'banana']) {
     assert.equal(fieldError('age', age), 'Choose your child’s age.');
   }
 });
@@ -42,40 +43,47 @@ test('society validates only the current step and permits an empty optional mess
   assert.deepEqual(validateForm('society', society, 1), {
     societyName: 'Enter your society’s name.',
     locality: 'Enter the locality and city.',
+    childrenCount: 'Enter an estimate, or Not sure.',
+    space: 'Tell us about the available space.',
   });
-  assert.deepEqual(validateForm('society', { ...society, contactName: '  Asha  ', phone: '+91 98765 43210' }, 2), {
-    contactName: '', phone: '', message: '',
+  assert.deepEqual(validateForm('society', { ...society, contactName: '  Asha  ', phone: '+91 98765 43210', role: 'Resident' }, 2), {
+    contactName: '', phone: '', role: '', message: '',
   });
 });
 
-test('trial WhatsApp draft includes all three activities, trims fields and encodes punctuation safely', () => {
-  const draft = { parentName: '  Asha & Dev  ', phone: '  +91 98765 43210  ', age: '8', community: '  Elm / West  ' };
+test('trial WhatsApp draft keeps the chosen sport and consent and encodes punctuation safely', () => {
+  const draft = { parentName: '  Asha & Dev  ', phone: '  +91 98765 43210  ', age: '8', community: '  Elm / West  ', sport: 'Basketball' };
   const message = [
-    'Hi Coach Dhiraj, I’d like to ask about a free LetsAimIt trial.',
+    'Hi Coach Dhiraj, I’d like to book a first free session with LetsAimIt.',
     'Parent/guardian: Asha & Dev',
     'Phone: +91 98765 43210',
     'Child’s age: 8 years',
     'Community: Elm / West',
-    'Please tell me which football, basketball or fitness session is suitable, and the current timing.',
+    'Sport: Basketball',
+    'Please confirm a suitable group and session time.',
+    'Parent/guardian and contact consent: agreed. Privacy version: 2026-11-05.',
   ].join('\n');
   assert.equal(prepareMessage('trial', draft), message);
   const url = new URL(createWhatsAppUrl('trial', draft));
   assert.equal(`${url.origin}${url.pathname}`, FORM_LINKS.whatsapp);
   assert.equal(url.searchParams.get('text'), message);
-  assert.match(prepareMessage('trial', { ...draft, age: 'other' }), /Child’s age: Under 5 or over 13 — please advise on a suitable group/);
+  assert.match(prepareMessage('trial', { ...draft, age: 'other' }), /Child’s age: Under 5 or over 14 — please advise/);
 });
 
 test('society message includes the first-step draft and only a nonblank optional message', () => {
   const draft = {
     societyName: ' Elm ', locality: ' Bengaluru ', contactName: ' Asha ',
-    phone: ' +91 98765 43210 ', message: '   ',
+    phone: ' +91 98765 43210 ', role: ' Resident ', childrenCount: '12',
+    space: ' Covered court ', message: '   ',
   };
   const expected = [
-    'Hi Coach Dhiraj, I’d like to discuss football, basketball and fitness sessions in our society.',
-    'Society: Elm', 'Location: Bengaluru', 'Contact: Asha', 'Phone: +91 98765 43210',
+    'Hi Coach Dhiraj, I’d like to discuss sport for our society.',
+    'Society: Elm', 'Location: Bengaluru', 'Contact: Asha', 'Role: Resident', 'Phone: +91 98765 43210',
+    'Interested children (estimate): 12', 'Available space: Covered court',
+    'Contact consent: agreed. Privacy version: 2026-11-05.',
   ].join('\n');
   assert.equal(prepareMessage('society', draft), expected);
-  assert.equal(prepareMessage('society', { ...draft, message: '  We have a playing space.  ' }), `${expected}\nMessage: We have a playing space.`);
+  assert.equal(prepareMessage('society', { ...draft, message: '  We have a playing space.  ' }), expected.replace('Contact consent:', 'Message: We have a playing space.\nContact consent:'));
 });
 
 test('draft initializer returns independent memory-only objects', () => {

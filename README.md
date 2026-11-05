@@ -1,86 +1,126 @@
-# LetsAimIt — complete React website
+# LetsAimIt — React website
 
-The current six-page website as an editable React project. Includes the shared header and footer, responsive styles, eight parent stories, events, school consultancy, enquiries, gallery and all local media.
+The updated website, with all editable React source, shared header/footer, approved content and local assets.
+
+**Public review site:** https://letsaimit-review.one92843.chatgpt.site/
 
 ## Run locally
 
-Use Node.js **22.12 or later** and npm.
+Use Node.js 22.12 or newer.
 
-```bash
+```sh
 npm ci
 npm run dev
 ```
 
-Open the local URL printed by Vite. The project uses React 19.3.1 and Vite 8.3.5, with pinned dependencies in `package-lock.json`.
+Create and inspect the production build:
 
-## Build and preview
-
-```bash
+```sh
 npm run build
 npm run preview
 ```
 
-`dist/` is the production website. A tested build is already included. Upload the contents of that folder to a static web host, or run the preview command after installing dependencies. Use a web server rather than opening `index.html` with a `file://` URL.
+Deploy the contents of `dist/` at your domain root. The production build contains real HTML for each page and hydrates it with React. It does not require a React server at runtime. Keep directory-index routing and configure unknown URLs to serve `404.html` with HTTP 404 where supported by the host.
 
-The site uses hash routes, so a static host does not need route-rewrite rules. Relative build paths support hosting at a domain root or a subdirectory.
+## Included
 
-## Where to edit
+- Home, Programme, Coach, Societies, Schools and Events.
+- Internal Privacy, Terms, and Fees & refunds pages.
+- A page-not-found view; old `/#/…` links remain compatible.
+- Shared responsive header, mobile menu and multisport footer.
+- A floating Socials disclosure with LinkedIn, Instagram, WhatsApp and Call links.
+- Eight approved Frisco parent stories with card browsing, native touch scrolling, keyboard controls and full-story dialogs. No parent portraits are invented.
+- Twenty-three gallery photos, four coaching credentials and all original bundled media.
+- Responsive WebP photographs, small gallery thumbnails and a 1.61 MB video that loads only after Play.
+- Page-specific Open Graph/Twitter metadata, canonical URLs and a 1200×630 share image.
+- SVG, 32px and 180px favicon assets.
+- Trial, enrolment, society and school enquiry UI with consent and clear delivery states.
+- A free Google Apps Script integration, plus optional native Google Forms setup linked to a private workbook.
 
-| Area | Source |
+## Floating socials
+
+The **Socials** pill appears after the first screen of scrolling and stays at the upper right, below the sticky header. Tap or click to open the four labelled links. Escape, an outside tap or moving keyboard focus away closes the panel. It hides while the mobile navigation is open, and native enquiry/photo dialogs take priority. Reduced-motion settings remove the new animation.
+
+Edit the destinations in `SOCIAL_LINKS` in `src/components/SocialDock.jsx`; styling is in `src/styles/social-dock.css`. These are ordinary profile/contact links, with no new API, server or animation dependency. Backend implementation remains with the site owner; this update changes only the front end.
+
+## Confirmed content
+
+Basketball is available at **Nambiar Ellegenza** and **Nambiar Bellezea**, Bengaluru. The site retains the established football programme and describes fitness as part of the activities. Ages are 5–14. The first session is free. Public prices are omitted.
+
+Paid enrolment is non-refundable for voluntary withdrawal or missed sessions, including leaving after one, two or three sessions. Provider cancellations, verified payment errors and legally required remedies are covered separately in the internal policies. Have the operational policy reviewed before relying on it for paid enrolments.
+
+School services remain consultancy for the school's existing PE team. Salesforce experience appears on the Schools page. The coaching story consistently uses Frisco, Texas.
+
+## What is connected now
+
+**Direct Google Sheet capture is prepared, not activated.** The connected account did not have edit access to the existing LetsAimIt forms or response Sheet, and the browser was signed out of Google. There is no deployed Apps Script endpoint in this package.
+
+Without that endpoint:
+
+- Trial, society and school forms clearly prepare a WhatsApp message. The visitor must send it.
+- Enrolment opens the existing public Google registration form after the guardian and terms checks. Google stores a response when the visitor submits it; this package does not verify whether that older form is linked to a Sheet.
+- No client-side message falsely claims that an enquiry has been saved.
+- No response data is stored in browser local storage.
+
+To activate direct capture, follow [integrations/google-sheets/README.md](integrations/google-sheets/README.md). Deploy `Code.gs` in the intended owner account, set `VITE_LEAD_ENDPOINT` to the returned `/exec` URL, verify a synthetic save from the published origin, then rebuild and publish. The UI switches to Save → confirmation → optional WhatsApp only after configuration. It checks a matching Google acknowledgement before showing success. Retries reuse a submission ID; editing details creates a new one.
+
+The optional `setupRegistrationForms()` function creates four consent-equipped Google Forms connected to the same private workbook. It does not alter the older public forms or import their responses. No notification email API is needed. Response Sheets must remain Restricted.
+
+## Configuration
+
+Copy `.env.example` to `.env.local` if changing configuration. These are public build-time settings, not secrets.
+
+| Variable | Purpose |
 | --- | --- |
-| App, page routing and shared dialogs | `src/App.jsx` |
-| Shared header and menu | `src/components/Header.jsx` |
-| Shared footer and multisport artwork | `src/components/Footer.jsx` |
-| Home | `src/pages/Home.jsx` |
-| Programme | `src/pages/Programme.jsx` |
-| Meet the coach | `src/pages/Coach.jsx` |
-| For societies | `src/pages/Societies.jsx` |
-| For schools and school enquiry | `src/features/schools/` |
-| Events | `src/features/events/EventsPage.js` |
-| Parent story cards and swipe controls | `src/features/stories/ParentStories.js` |
-| All eight approved testimonials | `src/features/stories/testimonials.js` |
-| Founder and adviser story | `src/features/stories/CoachStory.js` |
-| Trial, society and enrollment dialogs | `src/components/ContactDialog.jsx` |
-| Form validation and external form links | `src/lib/formLogic.js` |
-| Photo gallery data | `src/data/gallery.js` |
-| Main styles and responsive overrides | `src/styles/` |
-| All images, video, fonts and credits | `public/assets/` |
+| `VITE_SITE_ORIGIN` | Canonical HTTPS origin. Defaults to the current ChatGPT.site URL. Use `https://letsaimit.com` when deploying there. |
+| `VITE_LEAD_ENDPOINT` | Owner-deployed Google Apps Script `/exec` URL. Blank until connected. |
+| `VITE_GA4_ID` | Optional GA4 measurement ID. Blank; analytics are not active. |
+| `VITE_GA4_MANUAL_EVENTS_ONLY_CONFIRMED` | Set `true` only after disabling automatic Enhanced Measurement and user-provided data collection in the GA4 stream. |
 
-The newer feature modules use React's `createElement` syntax and export standard React components. The other pages use JSX. Both are editable source and are built together by Vite; no retained minified application bundle is needed to rebuild the site.
+Before enabling GA4, disable automatic outbound-link and form events. Those automatic events can otherwise include a pre-filled WhatsApp URL. The manual events contain only the page and form category; never names, phone numbers, children’s details, messages or full WhatsApp URLs. Analytics loads only after explicit visitor consent; the site and forms work when it is declined.
 
-## Pages
+Prepared events: `free_trial_click`, `enrol_click`, `whatsapp_click`, `call_click`, `society_enquiry_click`, `school_enquiry_click`, and `lead_saved`. Only a newly acknowledged, saved row fires `lead_saved`; a WhatsApp click is not a saved lead or a sent message.
 
-- Home: `#/`
-- Programme: `#/programme`
-- Meet the coach: `#/coach`
-- For societies: `#/societies`
-- For schools: `#/schools`
-- Events: `#/events`
+## Content still awaiting owner details
 
-## Assets
+- Exact days and start times by community and age group.
+- The August/October match dates, attendance figures, age groups and highlights. Supplied photos remain in the undated Ellegenza Match Day recap.
+- Venue, time and age brackets for the planned **3 December 2026** match day.
+- GA4 measurement ID, if tracking should be enabled.
 
-All 54 original bundled asset files are included: 39 images, one MP4, five font files, and nine credit, source and license files. This includes the original logo, 23 gallery photos, five event photos, four certificates, desktop and phone footer artwork, and the self-hosted Plus Jakarta Sans font.
+The website does not invent those details. The December event remains marked Planned.
 
-The site renders without an external image, video, font or icon service. WhatsApp, Google Forms, Instagram and policy links keep their existing external destinations. No backend, database or API key is required. Enquiry handoffs work as in the published website and do not silently send messages.
+## Source map
 
-Check asset integrity with:
-
-```bash
-npm run verify:assets
+```text
+src/
+  App.jsx                  Shared shell and page registry
+  components/              Header, footer, dialogs, gallery and film players
+  pages/                   Home, programme, coach, societies, policies and 404
+  features/schools/        Consultancy page and school enquiry
+  features/events/         Planned and past match content
+  features/stories/        Approved parent stories and founder profile
+  lib/                     Routes, media, lead delivery and analytics
+  data/                    Gallery and generated media manifest
+  styles/                  Established design and responsive refinements
+public/assets/             Originals, optimised media, fonts and licenses
+integrations/google-sheets/Code.gs
+scripts/                   Build, prerendering, media and asset verification
 ```
 
-`docs/ASSET-MANIFEST.json` records the original file hashes. Font licenses and media credits are included with the assets. Additional image and testimonial provenance is in `docs/`.
+`public/assets/` retains all source originals. The final build removes superseded original images/video from `dist/` after checking the rendered HTML and CSS use their optimised replacements. Certificates, footer art, fonts and source/license records are retained.
 
-## Export notes
+Run `npm run verify:assets` to check the 54 original assets against the prior approved snapshot. `src/data/media-manifest.json` records the generated derivatives and their hashes. Python and ffmpeg are needed only to regenerate media; they are not needed for the normal React build.
 
-This source was reconciled with the approved published version 8 on 4 November 2026. It preserves the current design, wording, navigation, responsive layout and interactions, including removal of public pricing, both active communities, the school and event pages, the testimonial card wall and multisport footer.
+## Supporting notes
 
-The older supplied React source had diverged from the approved site. This package restores the current application into named source modules and includes the current feature modules and exact media. It does not depend on that older source or on the original bundle-patching scripts.
+- [Sharing and deployment](docs/SHARING-DEPLOYMENT.md)
+- [Google registration setup](integrations/google-sheets/README.md)
+- [Policy sources and assumptions](docs/POLICY-SOURCES.md)
+- [Update verification and remaining dependencies](docs/UPDATE-VERIFICATION.md)
 
-`node_modules` and machine-specific hosting/authentication files are intentionally excluded. Run `npm ci` to install dependencies. See `docs/EXPORT-VERIFICATION.md` for the checks completed on this package.
+The ZIP contains no credentials, private form responses, customer CSV files, Git metadata or hosting account identity. Source and build are included together for handoff.
 
 ## UAT deployment
 
-Merge changes into the `uat` branch to deploy automatically to [uat.letsaimit.com](https://uat.letsaimit.com). Vercel builds with `npm ci` and `npm run build`, serving `dist/` as configured in `vercel.json`.
-
-Run `npm test`, `npm run verify:assets`, and `npm run build` before merging. The local `git deploy-uat` alias can retrigger the Preview deployment from a clean, up-to-date `uat` checkout. Production uses a separate release path.
+Push a verified merge to `uat` to trigger a Vercel Preview deployment at [uat.letsaimit.com](https://uat.letsaimit.com). The Vercel build uses the UAT origin for canonical and share URLs on this branch. Run `npm test`, `npm run verify:assets`, and `npm run build` before merging. Production uses a separate release path.
