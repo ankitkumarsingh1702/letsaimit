@@ -1,5 +1,5 @@
 import * as React from "react";
-import { asset } from "../lib/assets.js";
+import { imageSource, videoSource } from "../lib/media.js";
 function HomeFilm() {
   let videoRef = React.useRef(null),
     playbackGenerationRef = React.useRef(0),
@@ -7,7 +7,6 @@ function HomeFilm() {
     [hasError, setHasError] = React.useState(false);
   React.useEffect(() => {
     let video = videoRef.current,
-      generation = ++playbackGenerationRef.current,
       motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)"),
       pauseWhenHidden = () => {
         document.hidden && video.pause();
@@ -26,16 +25,11 @@ function HomeFilm() {
                 threshold: 0.05,
               },
             );
+    playbackGenerationRef.current += 1;
     video.muted = true;
     visibilityObserver?.observe(video);
     document.addEventListener("visibilitychange", pauseWhenHidden);
     motionPreference.addEventListener("change", pauseForReducedMotion);
-    !motionPreference.matches &&
-      !document.hidden &&
-      video.play().catch(() => {
-        playbackGenerationRef.current === generation &&
-          setIsPlaying(!video.paused);
-      });
     return () => {
       playbackGenerationRef.current += 1;
       visibilityObserver?.disconnect();
@@ -54,7 +48,12 @@ function HomeFilm() {
     let generation = playbackGenerationRef.current;
     setHasError(false);
     try {
-      video.error && video.load();
+      if (!video.getAttribute("src")) {
+        video.src = videoSource("football-film.mp4");
+        video.load();
+      } else if (video.error) {
+        video.load();
+      }
       await video.play();
     } catch {
       if (playbackGenerationRef.current !== generation) return;
@@ -73,8 +72,8 @@ function HomeFilm() {
         muted={true}
         loop={true}
         playsInline={true}
-        preload="metadata"
-        poster={asset("football-film-poster.jpg")}
+        preload="none"
+        poster={imageSource("football-film-poster.jpg")}
         aria-label="Stock film of children practising football"
         onPlay={syncPlaybackState}
         onPause={syncPlaybackState}
@@ -82,9 +81,7 @@ function HomeFilm() {
           setHasError(true);
           setIsPlaying(false);
         }}
-      >
-        <source src={asset("football-film.mp4")} type="video/mp4" />
-      </video>
+      />
       <button
         type="button"
         className="film-toggle"

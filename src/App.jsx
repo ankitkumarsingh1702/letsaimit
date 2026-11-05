@@ -6,7 +6,10 @@ import { Societies } from "./pages/Societies.jsx";
 import SchoolsPage from "./features/schools/SchoolsPage.js";
 import EventsPage from "./features/events/EventsPage.js";
 import { useHashRoute } from "./hooks/useHashRoute.js";
-import { PAGE_TITLES } from "./lib/routes.js";
+import { syncPageMeta } from "./lib/routes.js";
+import { Privacy, Terms, Refunds } from "./pages/Legal.jsx";
+import NotFound from "./pages/NotFound.jsx";
+import AnalyticsConsent from "./components/AnalyticsConsent.jsx";
 import { SiteActionsProvider } from "./context/SiteActions.jsx";
 import { Header } from "./components/Header.jsx";
 import { Footer } from "./components/Footer.jsx";
@@ -19,10 +22,14 @@ var pages = {
   societies: Societies,
   schools: SchoolsPage,
   events: EventsPage,
+  privacy: Privacy,
+  terms: Terms,
+  refunds: Refunds,
+  notfound: NotFound,
 };
 var formKinds = new Set(["trial", "society", "enroll"]);
-function App() {
-  let page = useHashRoute();
+function App({ initialPage = "home" } = {}) {
+  let page = useHashRoute(initialPage);
   let Page = pages[page];
   let mainRef = React.useRef(null);
   let formOpenerRef = React.useRef(null);
@@ -65,7 +72,7 @@ function App() {
     mediaOpenerRef.current = null;
     setFormKind(null);
     setCertificate(null);
-    document.title = `${PAGE_TITLES[page]} — LetsAimIt`;
+    syncPageMeta(page);
     document.body.dataset.page = page;
     window.scrollTo({
       top: 0,
@@ -132,6 +139,7 @@ function App() {
         onSwitchKind={switchFormKind}
       />
       <MediaDialog certificate={certificate} onClose={closeCertificate} />
+      <AnalyticsConsent />
     </SiteActionsProvider>
   );
 }

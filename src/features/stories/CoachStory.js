@@ -14,7 +14,7 @@ export function createCoachStory(React) {
         h(
           "h2",
           { className: "display", id: "coach-founder-title" },
-          "Coach. Founder. Adviser.",
+          "Coach. Founder. Father.",
         ),
         h(
           "div",
@@ -27,7 +27,7 @@ export function createCoachStory(React) {
           h(
             "p",
             null,
-            "He runs LetsAimIt and advises businesses on Salesforce.",
+            "He founded LetsAimIt to bring sport closer to home.",
           ),
         ),
       ),

@@ -1,33 +1,35 @@
+import { mediaProps } from "../lib/media.js";
 import * as React from "react";
 import { useSiteActions } from "../context/SiteActions.jsx";
 import { scrollToNextEvent } from "../features/events/EventsPage.js";
 import { scrollToSchoolEnquiry } from "../features/schools/SchoolsPage.js";
 import { asset } from "../lib/assets.js";
 import { Arrow } from "./ui.jsx";
+import SocialDock from "./SocialDock.jsx";
 var navigation = [
   {
     page: "programme",
-    href: "#/programme",
+    href: "/programme/",
     label: "Programme",
   },
   {
     page: "coach",
-    href: "#/coach",
+    href: "/coach/",
     label: "Meet the coach",
   },
   {
     page: "societies",
-    href: "#/societies",
+    href: "/societies/",
     label: "For societies",
   },
   {
     page: "schools",
-    href: "#/schools",
+    href: "/schools/",
     label: "For schools",
   },
   {
     page: "events",
-    href: "#/events",
+    href: "/events/",
     label: "Events",
   },
 ];
@@ -111,13 +113,13 @@ function Header({ page, onSkipToContent }) {
         <div className="header-inner wrap">
           <a
             className="brand"
-            href="#/"
+            href="/"
             aria-label="LetsAimIt home"
             onClick={closeMenu}
           >
             <img
               className="brand-logo"
-              src={asset("logo.png")}
+              {...mediaProps("logo.png", "160px")}
               width="538"
               height="393"
               alt="LetsAimIt"
@@ -162,7 +164,7 @@ function Header({ page, onSkipToContent }) {
           hidden={!menuOpen}
         >
           <a
-            href="#/"
+            href="/"
             aria-current={page === "home" ? "page" : void 0}
             onClick={closeMenu}
           >
@@ -171,6 +173,7 @@ function Header({ page, onSkipToContent }) {
           {navigation.map(renderNavLink)}
         </nav>
       </header>
+      <SocialDock page={page} suspended={menuOpen} />
     </>
   );
 }

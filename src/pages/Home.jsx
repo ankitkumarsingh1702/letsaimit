@@ -140,7 +140,7 @@ function Home() {
           </div>
           <dl className="facts-grid">
             <div className="fact-card fact-age">
-              <dd className="fact-value">5–13</dd>
+              <dd className="fact-value">5–14</dd>
               <dt className="fact-label">Years old</dt>
             </div>
             <div className="fact-card fact-frequency">
@@ -151,9 +151,9 @@ function Home() {
               <dd className="fact-value">45–60</dd>
               <dt className="fact-label">Minutes per session</dt>
             </div>
-            <div className="fact-card fact-communities">
-              <dd className="fact-value">2</dd>
-              <dt className="fact-label">Active communities</dt>
+            <div className="fact-card fact-trial">
+              <dd className="fact-value">Free</dd>
+              <dt className="fact-label">First session</dt>
             </div>
             <div className="fact-card fact-place">
               <svg viewBox="0 0 40 48" aria-hidden="true">
@@ -175,7 +175,7 @@ function Home() {
       <section className="home-society lime-band">
         <div className="wrap">
           <h2 className="display">Bring sport home.</h2>
-          <ArrowLink href="#/societies">For your society</ArrowLink>
+          <ArrowLink href="/societies/">For your society</ArrowLink>
         </div>
       </section>
     </>

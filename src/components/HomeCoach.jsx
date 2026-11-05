@@ -1,4 +1,4 @@
-import { asset } from "../lib/assets.js";
+import { mediaProps } from "../lib/media.js";
 import { ArrowLink } from "./ui.jsx";
 function HomeCoach() {
   return (
@@ -11,7 +11,7 @@ function HomeCoach() {
           <div className="coach-feature-plate" aria-hidden="true" />
           <figure className="coach-feature-photo">
             <img
-              src={asset("coach-and-player-cutout.png")}
+              {...mediaProps("coach-and-player-cutout.png", "(max-width: 700px) calc(100vw - 40px), (max-width: 1440px) 50vw, 680px")}
               width="1448"
               height="1086"
               alt="Coach Dhiraj speaking with a young goalkeeper"
@@ -46,7 +46,7 @@ function HomeCoach() {
             <br />
             {" and a father of two."}
           </p>
-          <ArrowLink href="#/coach">Meet your coach</ArrowLink>
+          <ArrowLink href="/coach/">Meet your coach</ArrowLink>
         </div>
       </div>
     </section>

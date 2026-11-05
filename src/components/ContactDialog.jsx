@@ -1,3 +1,6 @@
+import LeadConsent from "./LeadConsent.jsx";
+import { leadCaptureConfigured, saveLead, newSubmissionId } from "../lib/leadCapture.js";
+import { trackEvent } from "../lib/analytics.js";
 import * as React from "react";
 import { createInitialDrafts } from "../lib/formLogic.js";
 import { fieldError } from "../lib/formLogic.js";
@@ -190,425 +193,180 @@ function HandoffResult({ url }) {
   );
 }
 function ContactDialog({ kind, onClose, onSwitchKind }) {
-  let dialogRef = React.useRef(null),
-    headingRef = React.useRef(null),
-    fieldRefs = React.useRef({}),
-    [drafts, setDrafts] = React.useState(createInitialDrafts),
-    [societyStep, setSocietyStep] = React.useState(1),
-    [errors, setErrors] = React.useState({}),
-    [handoffUrl, setHandoffUrl] = React.useState(""),
-    mode = kind || "trial";
+  const dialogRef = React.useRef(null);
+  const headingRef = React.useRef(null);
+  const fieldRefs = React.useRef({});
+  const submissionIds = React.useRef({});
+  const requestGeneration = React.useRef(0);
+  const [drafts, setDrafts] = React.useState(createInitialDrafts);
+  const [consents, setConsents] = React.useState({ trial: false, enroll: false, society: false });
+  const [terms, setTerms] = React.useState(false);
+  const [societyStep, setSocietyStep] = React.useState(1);
+  const [errors, setErrors] = React.useState({});
+  const [handoffUrl, setHandoffUrl] = React.useState("");
+  const [status, setStatus] = React.useState("idle");
+  const [saveError, setSaveError] = React.useState("");
+  const mode = kind || "trial";
+  const finalStep = mode !== "society" || societyStep === 2;
+  const isParent = mode !== "society";
+
   React.useLayoutEffect(() => {
-    let dialog = dialogRef.current;
+    requestGeneration.current += 1;
+    const dialog = dialogRef.current;
     if (!kind) {
-      dialog.open && dialog.close();
+      if (dialog.open) dialog.close();
       document.body.classList.remove("form-open");
       return;
     }
-    setErrors({});
-    setHandoffUrl("");
+    setErrors({}); setSaveError(""); setHandoffUrl(""); setStatus("idle");
     document.body.classList.add("form-open");
-    dialog.open || dialog.showModal();
+    if (!dialog.open) dialog.showModal();
     dialog.scrollTop = 0;
-    let focusFrame = requestAnimationFrame(() => {
-      dialog.open &&
-        headingRef.current?.focus({
-          preventScroll: true,
-        });
-    });
-    return () => cancelAnimationFrame(focusFrame);
-  }, [kind, societyStep]);
-  React.useLayoutEffect(
-    () => () => {
-      document.body.classList.remove("form-open");
-    },
-    [],
-  );
+    const frame = requestAnimationFrame(() => headingRef.current?.focus({ preventScroll: true }));
+    return () => { cancelAnimationFrame(frame); requestGeneration.current += 1; };
+  }, [kind]);
+  React.useEffect(() => {
+    if (dialogRef.current?.open) dialogRef.current.scrollTop = 0;
+    headingRef.current?.focus({ preventScroll: true });
+  }, [societyStep]);
+  React.useEffect(() => () => document.body.classList.remove("form-open"), []);
+
   function handleChange(name, value) {
-    setDrafts((previousDrafts) => ({
-      ...previousDrafts,
-      [mode]: {
-        ...previousDrafts[mode],
-        [name]: value,
-      },
-    }));
-    setErrors((previousErrors) =>
-      previousErrors[name]
-        ? {
-            ...previousErrors,
-            [name]: fieldError(name, value, name !== "message"),
-          }
-        : previousErrors,
-    );
-    setHandoffUrl("");
+    setDrafts(previous => ({ ...previous, [mode]: { ...previous[mode], [name]: value } }));
+    setErrors(previous => ({ ...previous, [name]: "" }));
+    setSaveError(""); setHandoffUrl(""); setStatus("idle");
+    delete submissionIds.current[mode];
   }
-  function handleSubmit(event) {
+  function changeConsent(value) {
+    setConsents(previous => ({ ...previous, [mode]: value }));
+    setErrors(previous => ({ ...previous, consent: "" }));
+    setStatus("idle"); setHandoffUrl(""); setSaveError(""); delete submissionIds.current[mode];
+  }
+  function checkConsent(nextErrors) {
+    if (!consents[mode]) nextErrors.consent = isParent ? "Please confirm that you are the parent or guardian and agree." : "Please agree before continuing.";
+    if (mode === "enroll" && !terms) nextErrors.terms = "Please read and accept the programme terms.";
+  }
+  function focusError(nextErrors) {
+    const field = Object.keys(nextErrors).find(name => nextErrors[name]);
+    if (field) fieldRefs.current[field]?.focus();
+    return Boolean(field);
+  }
+  async function handleSubmit(event) {
     event.preventDefault();
-    let nextErrors = validateForm(mode, drafts[mode], societyStep);
+    if (status === "saving") return;
+    const nextErrors = validateForm(mode, drafts[mode], societyStep);
+    if (finalStep) checkConsent(nextErrors);
     setErrors(nextErrors);
-    let firstInvalidField = Object.keys(nextErrors).find(
-      (name) => nextErrors[name],
-    );
-    if (firstInvalidField) {
-      fieldRefs.current[firstInvalidField]?.focus();
+    if (focusError(nextErrors)) return;
+    if (!finalStep) { setSocietyStep(2); return; }
+    const url = createWhatsAppUrl(mode, drafts[mode]);
+    setHandoffUrl(url); setSaveError("");
+    if (!leadCaptureConfigured) {
+      trackEvent("whatsapp_click");
+      window.open(url, "_blank", "noopener,noreferrer");
       return;
     }
-    if (mode === "society" && societyStep === 1) {
-      setSocietyStep(2);
-      return;
-    }
-    let url = createWhatsAppUrl(mode, drafts[mode]);
-    setHandoffUrl(url);
-    window.open(url, "_blank", "noopener,noreferrer");
+    setStatus("saving");
+    const id = submissionIds.current[mode] ||= newSubmissionId();
+    const generation = requestGeneration.current;
+    try {
+      await saveLead(mode === "enroll" ? "enrol" : mode, drafts[mode], {
+        agreed: true, guardian: isParent, terms: mode === "enroll" && terms,
+      }, id);
+      if (requestGeneration.current === generation) setStatus("saved");
+    } catch (error) { if (requestGeneration.current === generation) { setSaveError(error.message); setStatus("error"); } }
   }
-  function handleBackdropClick(event) {
-    if (event.target !== event.currentTarget) return;
-    let bounds = event.currentTarget.getBoundingClientRect();
-    (event.clientX < bounds.left ||
-      event.clientX > bounds.right ||
-      event.clientY < bounds.top ||
-      event.clientY > bounds.bottom) &&
-      onClose();
+  function openRegistration() {
+    const nextErrors = {}; checkConsent(nextErrors); setErrors(nextErrors);
+    if (!focusError(nextErrors)) window.open(FORM_LINKS.registration, "_blank", "noopener,noreferrer");
   }
   function fieldProps(name) {
-    return {
-      mode,
-      name,
-      value: drafts[mode][name],
-      onChange: handleChange,
-      error: errors[name],
-      inputRef: (element) => {
-        fieldRefs.current[name] = element;
-      },
-    };
+    return { mode, name, value: drafts[mode][name], onChange: handleChange, error: errors[name], inputRef: element => { fieldRefs.current[name] = element; } };
   }
-  return (
-    <dialog
-      ref={dialogRef}
-      id="contact-dialog"
-      className="contact-dialog"
-      aria-labelledby="fm-dialog-title"
-      data-mode={mode}
-      onCancel={(event) => {
-        event.preventDefault();
-        onClose();
-      }}
-      onClose={() => {
-        dialogRef.current?.open ||
-          (document.body.classList.remove("form-open"), kind && onClose());
-      }}
-      onClick={handleBackdropClick}
-    >
-      <div className="fm-shell">
-        <button
-          className="fm-close"
-          type="button"
-          data-form-action="close"
-          aria-label="Close enquiry panel"
-          onClick={onClose}
-        >
-          <CloseIcon />
-        </button>
-        <FormSidebar mode={mode} societyStep={societyStep} />
-        {mode === "trial" && (
-          <div className="fm-content">
-            <div className="fm-content-top">
-              <h3 ref={headingRef} className="fm-main-heading" tabIndex={-1}>
-                Your details
-              </h3>
-              <p className="fm-intro">The coach will help you find a time.</p>
+  function selectField(name, label, options) {
+    const id = `fm-${mode}-${name}`;
+    return <div className="fm-field"><label htmlFor={id}>{label}</label><div className="fm-select-wrap">
+      <select id={id} name={name} value={drafts[mode][name]} onChange={event => handleChange(name, event.target.value)} required aria-invalid={errors[name] ? true : undefined} aria-describedby={`${id}-error`} ref={element => { fieldRefs.current[name] = element; }}>
+        <option value="">Choose {name === "age" ? "age" : name}</option>
+        {options.map(option => <option value={option.value ?? option} key={option.value ?? option}>{option.label ?? option}</option>)}
+      </select><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m7 10 5 5 5-5" stroke="currentColor" strokeWidth="1.6" /></svg>
+    </div><span id={`${id}-error`} className="fm-error">{errors[name] || ""}</span></div>;
+  }
+  function consentControls() {
+    return <>
+      <LeadConsent id={`fm-${mode}-consent`} checked={consents[mode]} onChange={changeConsent} guardian={isParent} error={errors.consent} inputRef={element => { fieldRefs.current.consent = element; }} />
+      {mode === "enroll" && <div>
+        <label className="fm-consent"><input type="checkbox" checked={terms} onChange={event => { setTerms(event.target.checked); setErrors(previous => ({ ...previous, terms: "" })); setStatus("idle"); setHandoffUrl(""); setSaveError(""); delete submissionIds.current.enroll; }} ref={element => { fieldRefs.current.terms = element; }} aria-describedby={errors.terms ? "fm-terms-error" : undefined} aria-invalid={errors.terms ? true : undefined} />
+          <span>I accept the <a href="/terms/" target="_blank" rel="noopener noreferrer">programme terms</a> and <a href="/refunds/" target="_blank" rel="noopener noreferrer">cancellation policy</a>. Paid enrolment is non-refundable for personal absence or withdrawal.</span></label>
+        {errors.terms && <p id="fm-terms-error" className="fm-consent-error">{errors.terms}</p>}
+      </div>}
+    </>;
+  }
+  function result() {
+    if (status === "saved") return <div className="fm-success" role="status"><h4>Thank you. Details saved.</h4><p>We’ll be in touch to confirm the next step.</p><a href={handoffUrl} target="_blank" rel="noopener noreferrer">Continue in WhatsApp</a><p className="fm-handoff-note">Opens WhatsApp with a pre-filled message.</p></div>;
+    if (saveError) return <div className="fm-save-error" role="alert"><p>{saveError}</p><a href={handoffUrl} target="_blank" rel="noopener noreferrer">Contact us in WhatsApp</a><p>Send the message to share your details.</p></div>;
+    if (!leadCaptureConfigured) return <HandoffResult url={handoffUrl} />;
+    return null;
+  }
+  const externalEnrol = mode === "enroll" && !leadCaptureConfigured;
+  return <dialog ref={dialogRef} id="contact-dialog" className="contact-dialog" aria-labelledby="fm-dialog-title" data-mode={mode}
+    onCancel={event => { event.preventDefault(); onClose(); }}
+    onClose={() => { document.body.classList.remove("form-open"); if (kind && !dialogRef.current?.open) onClose(); }}
+    onClick={event => { if (event.target !== event.currentTarget) return; const r = event.currentTarget.getBoundingClientRect(); if (event.clientX < r.left || event.clientX > r.right || event.clientY < r.top || event.clientY > r.bottom) onClose(); }}>
+    <div className="fm-shell">
+      <button className="fm-close" type="button" aria-label="Close enquiry panel" onClick={onClose}><CloseIcon /></button>
+      <FormSidebar mode={mode} societyStep={societyStep} />
+      <div className={`fm-content${externalEnrol ? " fm-enrollment" : ""}`}>
+        <div className="fm-content-top">
+          {mode === "society" && <p className="fm-mobile-step">Step {societyStep} of 2</p>}
+          <h3 ref={headingRef} className="fm-main-heading" tabIndex={-1}>{mode === "society" ? societyStep === 1 ? "Your society" : "Your contact details" : mode === "enroll" ? "Join the programme." : "Your first session. Free."}</h3>
+          <p className="fm-intro">{mode === "society" ? "Make room for play." : mode === "enroll" ? "Register with a parent or guardian." : "Choose a sport. We’ll confirm a time."}</p>
+        </div>
+        {externalEnrol ? <>
+          <div className="fm-enroll-facts"><p><span>Ages</span><strong>5–14</strong></p><p><span>Sessions</span><strong>2 each week · 45–60 min</strong></p><p><span>Communities</span><strong>Nambiar Ellegenza<br />Nambiar Bellezea</strong></p></div>
+          {consentControls()}
+          <button className="fm-primary" type="button" onClick={openRegistration}>Open registration form <FormArrow /></button>
+          <p className="fm-handoff-note">Opens Google Forms. Submit there to register.</p>
+          <button className="fm-text-button" type="button" onClick={() => onSwitchKind("trial")}>Try a session first <FormArrow /></button>
+        </> : <form className="fm-form" data-form-mode={mode} noValidate onSubmit={handleSubmit}>
+          <fieldset className="fm-fieldset" disabled={status === "saving"}>
+            <div className="fm-fields">
+              {isParent ? <>
+                {mode === "enroll" && <TextField {...fieldProps("childName")} label="Child’s name" max={80} />}
+                <TextField {...fieldProps("parentName")} label="Parent or guardian name" autoComplete="name" max={80} />
+                <TextField {...fieldProps("phone")} label="Parent phone number" type="tel" autoComplete="tel" max={24} />
+                {selectField("age", "Child’s age", [...TRIAL_AGES.map(age => ({ value: age, label: `${age} years` })), ...(mode === "trial" ? [{ value: "other", label: "Under 5 or over 14" }] : [])])}
+                {selectField("community", "Community", ["Nambiar Ellegenza", "Nambiar Bellezea", "Another community"])}
+                {selectField("sport", "Sport", ["Football", "Basketball", "Not sure"])}
+              </> : societyStep === 1 ? <>
+                <TextField {...fieldProps("societyName")} label="Society name" full max={120} />
+                <TextField {...fieldProps("locality")} label="Locality and city" full max={120} />
+                <TextField {...fieldProps("childrenCount")} label="Interested children" placeholder="Estimate, or Not sure" max={20} />
+                <TextField {...fieldProps("space")} label="Available space" placeholder="Court, ground or Not sure" max={120} />
+              </> : <>
+                <TextField {...fieldProps("contactName")} label="Your name" autoComplete="name" max={80} />
+                <TextField {...fieldProps("phone")} label="Phone number" type="tel" autoComplete="tel" max={24} />
+                <TextField {...fieldProps("role")} label="Your role" placeholder="Committee, resident or manager" full max={80} />
+                <div className="fm-field fm-full"><label htmlFor="fm-society-message">Anything to add? <span className="fm-optional">(optional)</span></label><textarea id="fm-society-message" name="message" value={drafts.society.message} onChange={event => handleChange("message", event.target.value)} maxLength={500} rows={3} /><span className="fm-error">{errors.message || ""}</span></div>
+              </>}
             </div>
-            <form
-              className="fm-form"
-              data-form-mode="trial"
-              noValidate={true}
-              onSubmit={handleSubmit}
-            >
-              <div className="fm-fields">
-                <TextField
-                  {...fieldProps("parentName")}
-                  label="Parent or guardian name"
-                  autoComplete="name"
-                  placeholder="Your name"
-                  max={80}
-                />
-                <TextField
-                  {...fieldProps("phone")}
-                  label="Parent phone number"
-                  type="tel"
-                  autoComplete="tel"
-                  placeholder="+91 98765 43210"
-                  max={24}
-                />
-                <div className="fm-field">
-                  <label htmlFor="fm-trial-age">Child’s age</label>
-                  <div className="fm-select-wrap">
-                    <select
-                      ref={(element) => {
-                        fieldRefs.current.age = element;
-                      }}
-                      id="fm-trial-age"
-                      name="age"
-                      data-field="age"
-                      required={true}
-                      aria-describedby="fm-trial-age-error fm-age-note"
-                      aria-invalid={errors.age ? "true" : void 0}
-                      value={drafts.trial.age}
-                      onChange={(event) =>
-                        handleChange("age", event.target.value)
-                      }
-                    >
-                      <option value="">Choose age</option>
-                      {TRIAL_AGES.map((age) => (
-                        <option value={age} key={age}>
-                          {age}
-                          {" years"}
-                        </option>
-                      ))}
-                      <option value="other">Under 5 or over 13</option>
-                    </select>
-                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                      <path
-                        d="m7 10 5 5 5-5"
-                        stroke="currentColor"
-                        strokeWidth="1.6"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </div>
-                  <span id="fm-trial-age-error" className="fm-error">
-                    {errors.age || ""}
-                  </span>
-                  <span
-                    id="fm-age-note"
-                    className="fm-hint"
-                    hidden={drafts.trial.age !== "other"}
-                  >
-                    The coach can help you check for a suitable group.
-                  </span>
-                </div>
-                <TextField
-                  {...fieldProps("community")}
-                  label="Community"
-                  placeholder="Your society or locality"
-                  max={120}
-                />
-              </div>
-              <div className="fm-form-footer">
-                <p className="fm-handoff-note">
-                  Review and send your message in WhatsApp.
-                </p>
-                <button className="fm-primary" type="submit">
-                  <span data-trial-button-label="">
-                    {drafts.trial.age === "other"
-                      ? "Ask the coach in WhatsApp"
-                      : "Continue in WhatsApp"}
-                  </span>
-                  <FormArrow />
-                </button>
-                <HandoffResult url={handoffUrl} />
-                <button
-                  className="fm-text-button"
-                  type="button"
-                  data-form-action="enroll"
-                  onClick={() => onSwitchKind("enroll")}
-                >
-                  {"Ready to join? Enroll your child "}
-                  <FormArrow />
-                </button>
-              </div>
-            </form>
-            <a
-              className="fm-privacy"
-              href={FORM_LINKS.privacy}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {"Privacy policy "}
-              <FormArrow />
-            </a>
-          </div>
-        )}
-        {mode === "society" && (
-          <div className="fm-content">
-            <div className="fm-content-top">
-              <p className="fm-mobile-step">
-                {"Step "}
-                {societyStep}
-                {" of 2"}
-              </p>
-              <h3 ref={headingRef} className="fm-main-heading" tabIndex={-1}>
-                {societyStep === 1 ? "Your society" : "Your contact details"}
-              </h3>
-              <p className="fm-intro">
-                {societyStep === 1
-                  ? "Tell us where you’d like to play."
-                  : "Let’s start a conversation."}
-              </p>
-            </div>
-            <form
-              className="fm-form"
-              data-form-mode="society"
-              noValidate={true}
-              onSubmit={handleSubmit}
-            >
-              <div className="fm-fields">
-                {societyStep === 1 ? (
-                  <>
-                    <TextField
-                      {...fieldProps("societyName")}
-                      label="Society name"
-                      placeholder="Your society"
-                      full={true}
-                      max={120}
-                    />
-                    <TextField
-                      {...fieldProps("locality")}
-                      label="Locality and city"
-                      placeholder="Locality, city"
-                      full={true}
-                      max={120}
-                    />
-                  </>
-                ) : (
-                  <>
-                    <TextField
-                      {...fieldProps("contactName")}
-                      label="Your name"
-                      autoComplete="name"
-                      placeholder="Your name"
-                      max={80}
-                    />
-                    <TextField
-                      {...fieldProps("phone")}
-                      label="Phone number"
-                      type="tel"
-                      autoComplete="tel"
-                      placeholder="+91 98765 43210"
-                      max={24}
-                    />
-                    <div className="fm-field fm-full">
-                      <label htmlFor="fm-society-message">
-                        {"Anything to add? "}
-                        <span className="fm-optional">(optional)</span>
-                      </label>
-                      <textarea
-                        ref={(element) => {
-                          fieldRefs.current.message = element;
-                        }}
-                        id="fm-society-message"
-                        name="message"
-                        data-field="message"
-                        maxLength={500}
-                        rows={3}
-                        placeholder="Tell us about your playing space or interested families."
-                        value={drafts.society.message}
-                        onChange={(event) =>
-                          handleChange("message", event.target.value)
-                        }
-                      />
-                    </div>
-                  </>
-                )}
-              </div>
-              <div className="fm-form-footer">
-                {societyStep === 2 && (
-                  <p className="fm-handoff-note">
-                    Review and send your message in WhatsApp.
-                  </p>
-                )}
+            <div className="fm-form-footer">
+              {finalStep && consentControls()}
+              {status !== "saved" && <>
+                {finalStep && <p className="fm-handoff-note">{leadCaptureConfigured ? "Save your details. Then chat, if you like." : "Opens WhatsApp with a pre-filled message. Send it to share your details."}</p>}
                 <div className="fm-actions">
-                  {societyStep === 2 && (
-                    <button
-                      className="fm-back"
-                      type="button"
-                      data-form-action="back"
-                      onClick={() => setSocietyStep(1)}
-                    >
-                      Back
-                    </button>
-                  )}
-                  <button className="fm-primary" type="submit">
-                    {societyStep === 1 ? "Next" : "Continue in WhatsApp"}
-                    <FormArrow />
-                  </button>
+                  {mode === "society" && societyStep === 2 && <button className="fm-back" type="button" onClick={() => { setSocietyStep(1); setErrors({}); }}>Back</button>}
+                  <button className="fm-primary" type="submit" disabled={status === "saving"}><span>{!finalStep ? "Next" : status === "saving" ? "Saving…" : leadCaptureConfigured ? saveError ? "Retry save" : mode === "enroll" ? "Send registration" : "Send enquiry" : "Continue in WhatsApp"}</span><FormArrow /></button>
                 </div>
-                <HandoffResult url={handoffUrl} />
-                <a
-                  className="fm-alternative"
-                  href={FORM_LINKS.societyEnquiry}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {"Use the society enquiry form "}
-                  <FormArrow />
-                </a>
-              </div>
-            </form>
-          </div>
-        )}
-        {mode === "enroll" && (
-          <div className="fm-content fm-enrollment">
-            <div className="fm-content-top">
-              <h3 ref={headingRef} className="fm-main-heading" tabIndex={-1}>
-                A place to play and grow.
-              </h3>
-              <p className="fm-intro">
-                Complete your details in the LetsAimIt registration form.
-              </p>
+              </>}
+              {result()}
+              {mode === "trial" && <button className="fm-text-button" type="button" onClick={() => onSwitchKind("enroll")}>Ready to join? Enrol your child <FormArrow /></button>}
             </div>
-            <div className="fm-enroll-facts">
-              <p>
-                <span>Sessions</span>
-                <strong>2 each week</strong>
-              </p>
-              <p>
-                <span>Duration</span>
-                <strong>45–60 minutes</strong>
-              </p>
-              <p>
-                <span>Communities</span>
-                <strong>
-                  Nambiar Ellegenza
-                  <br />
-                  Nambiar Bellezea
-                </strong>
-              </p>
-            </div>
-            <p className="fm-enroll-note">
-              The coach will confirm your community, batch and timing.
-            </p>
-            <a
-              className="fm-primary"
-              href={FORM_LINKS.registration}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {"Open registration form "}
-              <FormArrow />
-            </a>
-            <button
-              className="fm-text-button"
-              type="button"
-              data-form-action="trial"
-              onClick={() => onSwitchKind("trial")}
-            >
-              {"Try a session first "}
-              <FormArrow />
-            </button>
-          </div>
-        )}
+          </fieldset>
+        </form>}
       </div>
-    </dialog>
-  );
+    </div>
+  </dialog>;
 }
-export {
-  FormArrow,
-  CloseIcon,
-  TextField,
-  FormSidebar,
-  HandoffResult,
-  ContactDialog,
-};
+export { FormArrow, CloseIcon, TextField, FormSidebar, HandoffResult, ContactDialog };
 export default ContactDialog;

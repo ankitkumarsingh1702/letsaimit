@@ -1,3 +1,4 @@
+import { mediaProps } from "../lib/media.js";
 import { useSiteActions } from "../context/SiteActions.jsx";
 import { asset } from "../lib/assets.js";
 function Footer() {
@@ -54,11 +55,11 @@ function Footer() {
       <div className="wrap footer-content">
         <div className="footer-top">
           <div className="footer-intro">
-            <a className="footer-brand" href="#/" aria-label="LetsAimIt home">
+            <a className="footer-brand" href="/" aria-label="LetsAimIt home">
               <span className="footer-logo-plate">
                 <img
                   className="footer-logo"
-                  src={asset("logo.png")}
+                  {...mediaProps("logo.png", "160px")}
                   width="538"
                   height="393"
                   alt="LetsAimIt"
@@ -72,12 +73,12 @@ function Footer() {
           </div>
           <div className="footer-col">
             <h2>Explore</h2>
-            <a href="#/">Home</a>
-            <a href="#/programme">Programme</a>
-            <a href="#/coach">Meet the coach</a>
-            <a href="#/societies">For societies</a>
-            <a href="#/schools">For schools</a>
-            <a href="#/events">Events</a>
+            <a href="/">Home</a>
+            <a href="/programme/">Programme</a>
+            <a href="/coach/">Meet the coach</a>
+            <a href="/societies/">For societies</a>
+            <a href="/schools/">For schools</a>
+            <a href="/events/">Events</a>
           </div>
           <div className="footer-col">
             <h2>Let’s talk</h2>
@@ -86,7 +87,7 @@ function Footer() {
               type="button"
               onClick={(event) => openForm("enroll", event.currentTarget)}
             >
-              Enroll your child
+              Enrol your child
             </button>
             <a
               href="https://wa.me/918868886074"
@@ -95,34 +96,24 @@ function Footer() {
             >
               WhatsApp the coach
             </a>
-            <p>
-              Nambiar Ellegenza
-              <br />
-              Nambiar Bellezea
-              <br />
-              Bengaluru, India
-            </p>
+            <address className="footer-address">
+              Nambiar Ellegenza, Bengaluru
+            </address>
           </div>
           <div className="footer-col">
             <h2>Good to know</h2>
             <a
-              href="https://letsaimit.com/privacy-policy"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/privacy/"
             >
               Privacy
             </a>
             <a
-              href="https://letsaimit.com/terms-and-conditions"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/terms/"
             >
               Terms
             </a>
             <a
-              href="https://letsaimit.com/refund-policy"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/refunds/"
             >
               Refunds
             </a>

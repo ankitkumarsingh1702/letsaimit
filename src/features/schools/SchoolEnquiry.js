@@ -1,5 +1,8 @@
+import LeadConsent from "../../components/LeadConsent.jsx";
+import { leadCaptureConfigured, saveLead, newSubmissionId } from "../../lib/leadCapture.js";
+import { trackEvent } from "../../lib/analytics.js";
 const WHATSAPP_URL = "https://wa.me/918868886074";
-const PRIVACY_URL = "https://letsaimit.com/privacy-policy";
+const PRIVACY_URL = "/privacy/";
 
 const FIELD_ORDER = ["schoolName", "contactName", "city", "phone", "needs"];
 const LIMITS = {
@@ -41,7 +44,7 @@ export function validateSchoolEnquiry(values = {}) {
   if (cleaned.phone && !errors.phone) {
     const digits = cleaned.phone.replace(/\D/g, "");
     if (
-      !/^\+?[0-9 ().-]+$/.test(cleaned.phone) ||
+      !/^\+?[0-9 ()-]+$/.test(cleaned.phone) ||
       digits.length < 8 ||
       digits.length > 15
     ) {
@@ -62,6 +65,7 @@ export function buildSchoolEnquiryUrl(values = {}) {
     `Phone: ${details.phone}`,
     ...(details.needs ? [`Our needs: ${details.needs}`] : []),
     "We would like guidance for our existing PE team.",
+    "Contact consent: agreed. Privacy version: 2026-11-05.",
   ].join("\n");
 
   return `${WHATSAPP_URL}?text=${encodeURIComponent(message)}`;
@@ -80,12 +84,19 @@ export function createSchoolEnquiry(React, Arrow) {
     });
     const [errors, setErrors] = React.useState({});
     const [handoffUrl, setHandoffUrl] = React.useState("");
+    const [consent, setConsent] = React.useState(false);
+    const [saveStatus, setSaveStatus] = React.useState("idle");
+    const [saveError, setSaveError] = React.useState("");
+    const submissionId = React.useRef(null);
+    const requestGeneration = React.useRef(0);
+    React.useEffect(() => () => { requestGeneration.current += 1; }, []);
     const fieldRefs = React.useRef({});
 
     function updateField(name, value) {
       const nextValues = { ...values, [name]: value };
       setValues(nextValues);
       setHandoffUrl("");
+      setSaveStatus("idle"); setSaveError(""); submissionId.current = null;
       if (errors[name]) {
         const nextError = validateSchoolEnquiry(nextValues)[name];
         setErrors((previous) => {
@@ -97,13 +108,15 @@ export function createSchoolEnquiry(React, Arrow) {
       }
     }
 
-    function submitEnquiry(event) {
+    async function submitEnquiry(event) {
       event.preventDefault();
+      if (saveStatus === "saving") return;
       const nextErrors = validateSchoolEnquiry(values);
+      if (!consent) nextErrors.consent = "Please agree before continuing.";
       setErrors(nextErrors);
       setHandoffUrl("");
 
-      const invalidField = FIELD_ORDER.find((name) => nextErrors[name]);
+      const invalidField = [...FIELD_ORDER, "consent"].find((name) => nextErrors[name]);
       if (invalidField) {
         requestAnimationFrame(() => {
           const input = fieldRefs.current[invalidField];
@@ -117,8 +130,20 @@ export function createSchoolEnquiry(React, Arrow) {
 
       const url = buildSchoolEnquiryUrl(values);
       setHandoffUrl(url);
+      setSaveError("");
+      if (leadCaptureConfigured) {
+        setSaveStatus("saving");
+        submissionId.current ||= newSubmissionId();
+        const generation = requestGeneration.current;
+        try {
+          await saveLead("school", cleanValues(values), { agreed: true, guardian: false }, submissionId.current);
+          if (requestGeneration.current === generation) setSaveStatus("saved");
+        } catch (error) { if (requestGeneration.current === generation) { setSaveStatus("error"); setSaveError(error.message); } }
+        return;
+      }
       // Opening WhatsApp prepares a message; the visitor still chooses to send it.
       try {
+        trackEvent("whatsapp_click");
         window.open(url, "_blank", "noopener,noreferrer");
       } catch {
         // The visible link also works when opening a new window is unavailable.
@@ -136,6 +161,7 @@ export function createSchoolEnquiry(React, Arrow) {
         value: values[name],
         maxLength: LIMITS[name],
         required: !optional,
+        disabled: saveStatus === "saving",
         "aria-invalid": error ? true : undefined,
         "aria-describedby": error ? errorId : undefined,
         onChange: (event) => updateField(name, event.target.value),
@@ -182,6 +208,12 @@ export function createSchoolEnquiry(React, Arrow) {
         autoComplete: "tel",
       }),
       field("needs", "Your needs"),
+      h(LeadConsent, {
+        id: "school-consent", checked: consent, guardian: false, disabled: saveStatus === "saving",
+        onChange: value => { setConsent(value); setErrors(previous => ({ ...previous, consent: "" })); setSaveStatus("idle"); setHandoffUrl(""); setSaveError(""); submissionId.current = null; },
+        error: errors.consent,
+        inputRef: element => { fieldRefs.current.consent = element; },
+      }),
       h(
         "div",
         { className: "sk-form-actions sk-field-wide" },
@@ -190,14 +222,15 @@ export function createSchoolEnquiry(React, Arrow) {
           {
             className: "btn btn-lime sk-button sk-button-lime sk-submit",
             type: "submit",
+            disabled: saveStatus === "saving" || saveStatus === "saved",
           },
-          "Continue in WhatsApp",
+          leadCaptureConfigured ? saveStatus === "saving" ? "Saving…" : saveStatus === "saved" ? "Details saved" : saveError ? "Retry save" : "Send enquiry" : "Continue in WhatsApp",
           Arrow ? h(Arrow) : null,
         ),
         h(
           "p",
           { className: "sk-form-note" },
-          "Review your message before sending.",
+          leadCaptureConfigured ? "Save your details. Then chat, if you like." : "Opens WhatsApp with a pre-filled message. Send it to share your details.",
         ),
         h(
           "a",
@@ -210,7 +243,14 @@ export function createSchoolEnquiry(React, Arrow) {
           "Privacy policy",
         ),
       ),
-      handoffUrl
+      saveStatus === "saved"
+        ? h("div", { className: "fm-success sk-field-wide", role: "status" },
+            h("h4", null, "Thank you. Details saved."),
+            h("p", null, "We’ll be in touch about your school."),
+            h("a", { href: handoffUrl, target: "_blank", rel: "noopener noreferrer" }, "Continue in WhatsApp"))
+        : saveError
+          ? h("div", { className: "fm-save-error sk-field-wide", role: "alert" }, h("p", null, saveError), h("a", { href: handoffUrl, target: "_blank", rel: "noopener noreferrer" }, "Contact us in WhatsApp"))
+        : handoffUrl && !leadCaptureConfigured
         ? h(
             "div",
             {

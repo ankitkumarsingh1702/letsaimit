@@ -1,5 +1,7 @@
 node_modules/
 dist/
+.ssr/
+.qa/
 .vercel/
 .DS_Store
 *.log

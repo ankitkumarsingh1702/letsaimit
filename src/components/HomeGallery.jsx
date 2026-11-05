@@ -1,7 +1,7 @@
 import * as React from "react";
 import { ArrowLink } from "./ui.jsx";
 import { galleryPreview } from "../data/gallery.js";
-import { asset } from "../lib/assets.js";
+import { mediaProps } from "../lib/media.js";
 import { Arrow } from "./ui.jsx";
 import { galleryPhotos } from "../data/gallery.js";
 import { PhotoGalleryDialog } from "./PhotoGalleryDialog.jsx";
@@ -29,7 +29,7 @@ function HomeGallery() {
             <br />
             {" A team to belong to."}
           </p>
-          <ArrowLink href="#/programme">Explore the programme</ArrowLink>
+          <ArrowLink href="/programme/">Explore the programme</ArrowLink>
         </div>
       </div>
       <div className="home-moments" id="home-gallery-grid">
@@ -44,12 +44,15 @@ function HomeGallery() {
               style={{
                 "--photo-position": photo.position,
               }}
-              aria-label={`View photo: ${photo.caption}`}
+              aria-label={`View photo: ${photo.alt}`}
               aria-haspopup="dialog"
               onClick={() => openGallery(photo.index)}
             >
               <img
-                src={asset(photo.src)}
+                {...mediaProps(
+                  photo.src,
+                  `(max-width: 700px) ${index === 0 || index === 5 ? "calc(100vw - 40px)" : "calc((100vw - 54px) / 2)"}, (max-width: 1440px) calc((100vw - 128px) / 3), 424px`,
+                )}
                 width={photo.width}
                 height={photo.height}
                 alt={photo.alt}

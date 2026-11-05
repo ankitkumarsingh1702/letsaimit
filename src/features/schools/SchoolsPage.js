@@ -1,5 +1,6 @@
 import * as React from "react";
 import { asset } from "../../lib/assets.js";
+import { mediaProps } from "../../lib/media.js";
 import { createSchoolEnquiry } from "./SchoolEnquiry.js";
 
 export function scrollToSchoolSection(id) {
@@ -73,7 +74,7 @@ export function createSchoolsPage(React, asset) {
     return h(
       "a",
       {
-        href: "#/schools?section=" + target,
+        href: "/schools/?section=" + target,
         className,
         onClick: (event) => {
           event.preventDefault();
@@ -124,7 +125,7 @@ export function createSchoolsPage(React, asset) {
 
   return function SchoolsPage() {
     React.useEffect(() => {
-      const query = window.location.hash.split("?")[1] || "";
+      const query = window.location.search.slice(1) || window.location.hash.split("?")[1] || "";
       const target = new URLSearchParams(query).get("section");
       if (
         !["school-services", "school-approach", "school-enquiry"].includes(
@@ -144,7 +145,7 @@ export function createSchoolsPage(React, asset) {
         { className: "sk-shell sk-hero", "aria-labelledby": "school-title" },
         h("img", {
           className: "sk-hero-image",
-          src: asset("Strategy-for-game-against-opponent.jpg"),
+          ...mediaProps("Strategy-for-game-against-opponent.jpg", "(max-width: 700px) calc(100vw - 24px), (max-width: 1500px) calc(100vw - 64px), 1440px"),
           width: 1600,
           height: 900,
           fetchPriority: "high",
@@ -188,7 +189,7 @@ export function createSchoolsPage(React, asset) {
         h(
           "p",
           { className: "sk-hero-caption" },
-          "From Dhiraj’s sessions in Texas.",
+          "From Dhiraj’s sessions in Frisco, Texas.",
         ),
         h(
           "nav",
@@ -318,7 +319,7 @@ export function createSchoolsPage(React, asset) {
           "figure",
           { className: "sk-coach-photo" },
           h("img", {
-            src: asset("Coaches_training_Pic.webp"),
+            ...mediaProps("Coaches_training_Pic.webp", "(max-width: 700px) calc(100vw - 40px), (max-width: 1400px) 48vw, 640px"),
             width: 2048,
             height: 1536,
             alt: "Dhiraj with fellow coaches at a coaching education event in Texas.",
@@ -349,8 +350,13 @@ export function createSchoolsPage(React, asset) {
             "Former Head Coach, Frisco Soccer Association, Texas.",
           ),
           h(
+            "p",
+            { className: "sk-coach-details" },
+            "Independent Salesforce adviser. A practical approach to goals and progress.",
+          ),
+          h(
             "a",
-            { className: "sk-text-link", href: "#/coach" },
+            { className: "sk-text-link", href: "/coach/" },
             "Meet the coach",
             h(Arrow, { diagonal: true }),
           ),

@@ -1,24 +1,33 @@
 import { useSiteActions } from "../context/SiteActions.jsx";
 import { TrialButton } from "../components/ui.jsx";
-import { asset } from "../lib/assets.js";
+import { mediaProps } from "../lib/media.js";
 import { ProgrammeFilm } from "../components/ProgrammeFilm.jsx";
 import { Arrow } from "../components/ui.jsx";
 var questions = [
   [
+    "Which sports are available?",
+    "Football and basketball at both communities, with fitness activities in each session.",
+  ],
+  [
     "Is this suitable for a beginner?",
-    "Tell the coach your child’s age and experience. They’ll help you find a suitable group.",
+    "Start with a free trial. Share your child’s age and experience so the coach can match them to a suitable group.",
   ],
   [
     "When are the sessions?",
-    "The coach will confirm the current days and times before you join.",
+    "Two sessions each week, 45–60 minutes each, for ages 5–14. Days and times vary by community and age group. Your batch timing is confirmed before you join.",
   ],
   [
     "What should my child bring?",
-    "Ask the coach for the kit list before your first session.",
+    "Comfortable sports clothes, trainers and water. For football, bring shin guards and footwear suited to the playing surface.",
   ],
   [
     "How does the free trial work?",
-    "Send a trial enquiry. The coach will help you agree a suitable time.",
+    "Your first session is free. Request a trial with your sport and community, then wait for your session confirmation before arriving.",
+  ],
+  [
+    "What if we miss a session or leave?",
+    "Missed sessions and voluntary withdrawal are non-refundable after paid enrolment.",
+    true,
   ],
 ];
 function Programme() {
@@ -36,28 +45,28 @@ function Programme() {
             <span className="pg-dot">.</span>
           </h1>
           <p>
-            Football, basketball and fitness.
+            Football. Basketball.
             <br />
-            {" New skills. New friends."}
+            {" Build fitness through play."}
           </p>
           <TrialButton />
         </div>
         <figure className="pg-hero-photo">
           <img
-            src={asset("Initial_days_of_kids_training.jpg")}
+            {...mediaProps("Initial_days_of_kids_training.jpg", "(max-width: 700px) calc(100vw - 40px), (max-width: 1400px) 48vw, 640px")}
             alt="Children running together during Coach Dhiraj’s football training"
             width="1600"
             height="1200"
             fetchPriority="high"
           />
-          <figcaption>From Coach Dhiraj’s sessions in Texas.</figcaption>
+          <figcaption>From Coach Dhiraj’s sessions in Frisco, Texas.</figcaption>
         </figure>
       </section>
       <section className="pg-facts" aria-label="Programme at a glance">
         <dl className="wrap pg-facts-inner">
           <div>
             <dt>Ages</dt>
-            <dd>5–13</dd>
+            <dd>5–14</dd>
           </div>
           <div>
             <dt>Each week</dt>
@@ -116,7 +125,7 @@ function Programme() {
       >
         <div className="pg-fee-panel">
           <h2 id="communities-heading">Our communities</h2>
-          <h3 className="pg-community-heading">2 active communities</h3>
+          <h3 className="pg-community-heading">Play, close to home.</h3>
           <p className="pg-fee-location">Bengaluru</p>
           <ul
             className="pg-community-list"
@@ -127,7 +136,7 @@ function Programme() {
             <li>Nambiar Bellezea</li>
           </ul>
           <p className="pg-community-note">
-            Ask about sessions in your community.
+            Football and basketball at both.
           </p>
           <TrialButton className="btn-dark">Request a free trial</TrialButton>
           <button
@@ -136,13 +145,13 @@ function Programme() {
             data-action="enroll"
             onClick={(event) => openForm("enroll", event.currentTarget)}
           >
-            {"Ready to join? Enroll your child "}
+            {"Ready to join? Enrol your child "}
             <Arrow />
           </button>
         </div>
         <figure className="pg-fee-photo">
           <img
-            src={asset("Game_in_action.jpg")}
+            {...mediaProps("Game_in_action.jpg", "(max-width: 700px) calc(100vw - 40px), (max-width: 1400px) 48vw, 640px")}
             alt="Young football players enjoying a match on a grass field"
             width="1024"
             height="768"
@@ -164,16 +173,14 @@ function Programme() {
           </h2>
           <a
             className="text-link"
-            href="https://letsaimit.com/refund-policy"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/refunds/"
           >
             {"Cancellations "}
             <Arrow />
           </a>
         </div>
         <div className="pg-questions">
-          {questions.map(([question, answer]) => (
+          {questions.map(([question, answer, policyLink]) => (
             <details key={question}>
               <summary>
                 {question}
@@ -188,7 +195,10 @@ function Programme() {
                   />
                 </svg>
               </summary>
-              <p>{answer}</p>
+              <p>
+                {answer}
+                {policyLink && <>{" "}<a href="/refunds/" style={{ textDecoration: "underline" }}>Read the policy and exceptions.</a></>}
+              </p>
             </details>
           ))}
         </div>

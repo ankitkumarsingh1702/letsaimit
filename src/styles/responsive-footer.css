@@ -1,4 +1,4 @@
-/* Phone and tablet refinements. The supplied desktop design stays the baseline. */
+/* Footer typography and phone/tablet refinements. Preserve the existing layout. */
 
 /* Separate artwork keeps all three activities visible at narrow widths. */
 .football-footer .footer-scene {
@@ -22,6 +22,27 @@
 }
 .footer-trial {
   max-width: 100%;
+}
+
+/* Footer actions share the navigation scale instead of inheriting the CTA size. */
+.football-footer .footer-col h2,
+.football-footer .footer-col a,
+.football-footer .footer-col button,
+.football-footer .footer-phone,
+.football-footer .back-top,
+.football-footer .footer-address {
+  font-family: var(--font-body);
+  font-size: var(--type-nav);
+  font-weight: 600;
+  line-height: var(--line-nav);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.football-footer .footer-address {
+  color: #b5ccc0;
+  font-style: normal;
+  font-weight: 400;
+  margin-top: 12px;
 }
 
 /* Keep menus and native dialogs usable on short phone viewports. */

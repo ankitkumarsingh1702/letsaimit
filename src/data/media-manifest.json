@@ -1,0 +1,1372 @@
+{
+  "schema_version": 1,
+  "description": "Responsive derivatives; bundled source originals are unchanged.",
+  "images": {
+    "1st_Kids_Football_coaching_in_US.webp": {
+      "source_sha256": "a18ac7a322672884d1e0cdbd43013f5f8d0c4658041169beda5dedc71d62d507",
+      "original_bytes": 393400,
+      "width": 1600,
+      "height": 1200,
+      "variants": [
+        {
+          "src": "optimised/1st-kids-football-coaching-in-us-a18ac7a3-320.webp",
+          "width": 320,
+          "height": 240,
+          "bytes": 15192,
+          "sha256": "57746631411119221cc656f9afedc4933ecc29c357b8fa6e7f72533085da8540"
+        },
+        {
+          "src": "optimised/1st-kids-football-coaching-in-us-a18ac7a3-640.webp",
+          "width": 640,
+          "height": 480,
+          "bytes": 57838,
+          "sha256": "4d11e3c7157b2d65734d24896c255e73a9abe92b6e3befdce2edddd76b46630c"
+        },
+        {
+          "src": "optimised/1st-kids-football-coaching-in-us-a18ac7a3-960.webp",
+          "width": 960,
+          "height": 720,
+          "bytes": 125454,
+          "sha256": "e12e110bbbf5ba8c26d7a0ea5a52a8ffcbfb256c7cc970ec65653b469943fa0a"
+        },
+        {
+          "src": "optimised/1st-kids-football-coaching-in-us-a18ac7a3-1440.webp",
+          "width": 1440,
+          "height": 1080,
+          "bytes": 263540,
+          "sha256": "43fb8efe9fd7aca9be61727183005a38d60ba26fc47765c741775dad1dbe431d"
+        }
+      ],
+      "thumbnail": {
+        "src": "optimised/1st-kids-football-coaching-in-us-a18ac7a3-thumb.webp",
+        "width": 160,
+        "height": 120,
+        "bytes": 3908,
+        "sha256": "6a88967f1e28635ad77c5bb0a762e0edbf2c813049472ecf436a443863f513d2"
+      }
+    },
+    "Coach_Goalie_conversation_before_the_game.jpg": {
+      "source_sha256": "34bc93c6e47a0d0e9bf5e19570afbef560412678995c0daf4ce9e83179f17951",
+      "original_bytes": 188139,
+      "width": 1600,
+      "height": 1200,
+      "variants": [
+        {
+          "src": "optimised/coach-goalie-conversation-before-the-game-34bc93c6-320.webp",
+          "width": 320,
+          "height": 240,
+          "bytes": 13676,
+          "sha256": "7b49cd7273daf7cd4636fbcd3f5e73b1f6c3550b85671c33c5e0895aa4388430"
+        },
+        {
+          "src": "optimised/coach-goalie-conversation-before-the-game-34bc93c6-640.webp",
+          "width": 640,
+          "height": 480,
+          "bytes": 53216,
+          "sha256": "e0ad8d068df971ed53c675e112db28b5f6f1774a16765cbc935b7f19df1e4ea6"
+        },
+        {
+          "src": "optimised/coach-goalie-conversation-before-the-game-34bc93c6-960.webp",
+          "width": 960,
+          "height": 720,
+          "bytes": 107960,
+          "sha256": "5eeffab23a804ad1264abcbdeeea7f23203469ff3cff7e4fd6bd2aa8761dc5b6"
+        },
+        {
+          "src": "optimised/coach-goalie-conversation-before-the-game-34bc93c6-1440.webp",
+          "width": 1440,
+          "height": 1080,
+          "bytes": 196722,
+          "sha256": "6b0599ea8a12eef90e2af6d22a6e12674e78a3575798c0fbe14ab30a876df33a"
+        }
+      ],
+      "thumbnail": {
+        "src": "optimised/coach-goalie-conversation-before-the-game-34bc93c6-thumb.webp",
+        "width": 160,
+        "height": 120,
+        "bytes": 3430,
+        "sha256": "cb8291090b63573cdfe035358a61857ea17d18bb89c5c6792615d8b6515c263a"
+      }
+    },
+    "Coaches_training_Pic.webp": {
+      "source_sha256": "659aefb5d068b0c2f2834137f5d6260b497759a6bfe1dc9f6700d90feac2e04a",
+      "original_bytes": 388486,
+      "width": 2048,
+      "height": 1536,
+      "variants": [
+        {
+          "src": "optimised/coaches-training-pic-659aefb5-320.webp",
+          "width": 320,
+          "height": 240,
+          "bytes": 16430,
+          "sha256": "aea76e1077a2d1016c8c626eff0e91ef85395a2b6759f7d26d7b1c56d2db967b"
+        },
+        {
+          "src": "optimised/coaches-training-pic-659aefb5-640.webp",
+          "width": 640,
+          "height": 480,
+          "bytes": 50786,
+          "sha256": "f5e1d1ca5127be038e1f936c64ecbb5cb9513684c86a22d68b755162ec7b6bdd"
+        },
+        {
+          "src": "optimised/coaches-training-pic-659aefb5-960.webp",
+          "width": 960,
+          "height": 720,
+          "bytes": 97822,
+          "sha256": "f0ca8a7e1307851b341bbe82dcb15e9c0522753f57e038203502424830092420"
+        },
+        {
+          "src": "optimised/coaches-training-pic-659aefb5-1440.webp",
+          "width": 1440,
+          "height": 1080,
+          "bytes": 183726,
+          "sha256": "5e20b67e4c82a48602bdfbc8e96710b59389fbf76e1ca4824d823ad1cb702e0a"
+        }
+      ],
+      "thumbnail": {
+        "src": "optimised/coaches-training-pic-659aefb5-thumb.webp",
+        "width": 160,
+        "height": 120,
+        "bytes": 5078,
+        "sha256": "dae14894c24cdee67933aa6659aa138fef4f47fbd4a71d124a79466bfe7f299f"
+      }
+    },
+    "Defining_Strategy.jpg": {
+      "source_sha256": "4f2eae274ceb2644f92034268b2c7dc3b2a2b41c9f0f493c43920ee62f4a8aee",
+      "original_bytes": 76401,
+      "width": 1024,
+      "height": 768,
+      "variants": [
+        {
+          "src": "optimised/defining-strategy-4f2eae27-320.webp",
+          "width": 320,
+          "height": 240,
+          "bytes": 11190,
+          "sha256": "4c69ca09f1f38f3567924853b820b99d3022bced914368cc0162c5e879f1f4b2"
+        },
+        {
+          "src": "optimised/defining-strategy-4f2eae27-640.webp",
+          "width": 640,
+          "height": 480,
+          "bytes": 40326,
+          "sha256": "0d218d5a98172ca2f437f9fecf959ab49f91fd7bea89fa1dccc8647fdb0315e1"
+        },
+        {
+          "src": "optimised/defining-strategy-4f2eae27-960.webp",
+          "width": 960,
+          "height": 720,
+          "bytes": 80746,
+          "sha256": "3be535b33fd88a494e2cec49689bc0a975d97d02f6c8c9301853b270047afffb"
+        },
+        {
+          "src": "optimised/defining-strategy-4f2eae27-1024.webp",
+          "width": 1024,
+          "height": 768,
+          "bytes": 90406,
+          "sha256": "5f21f733d323eb4495b95f95ed6c361977b9b1f7c9ce7464b3b84e7e9eff2c66"
+        }
+      ],
+      "thumbnail": {
+        "src": "optimised/defining-strategy-4f2eae27-thumb.webp",
+        "width": 160,
+        "height": 120,
+        "bytes": 3162,
+        "sha256": "1aabdf413e48eb75450a85d377da51b8374999139ee002b163a68e4e64d700da"
+      }
+    },
+    "Evening_Class_for_4th_Graders.jpg": {
+      "source_sha256": "963f70c69a6279a0fbc42a66e8c7c4591cd68aac4340099b4fdc204d98f50d86",
+      "original_bytes": 79726,
+      "width": 1600,
+      "height": 900,
+      "variants": [
+        {
+          "src": "optimised/evening-class-for-4th-graders-963f70c6-320.webp",
+          "width": 320,
+          "height": 180,
+          "bytes": 6762,
+          "sha256": "689b82e3e01398759344f777e9d9f1cc6f8bf397eca8f5ffe2af42ae6602f482"
+        },
+        {
+          "src": "optimised/evening-class-for-4th-graders-963f70c6-640.webp",
+          "width": 640,
+          "height": 360,
+          "bytes": 21430,
+          "sha256": "a56b041ae83365c1bfb56b1735a6764925642cc5cb8b0e0c65fdabea976d1f82"
+        },
+        {
+          "src": "optimised/evening-class-for-4th-graders-963f70c6-960.webp",
+          "width": 960,
+          "height": 540,
+          "bytes": 38302,
+          "sha256": "cb17db89707124014f4a866ba888262dc1b41059d9ea43e0bd0a003dd9f2eca0"
+        },
+        {
+          "src": "optimised/evening-class-for-4th-graders-963f70c6-1440.webp",
+          "width": 1440,
+          "height": 810,
+          "bytes": 66320,
+          "sha256": "7bfe316754ef1df0bdad56442c2a3f58cce6d0e8d6a8be449395670fcfe2d5e6"
+        }
+      ],
+      "thumbnail": {
+        "src": "optimised/evening-class-for-4th-graders-963f70c6-thumb.webp",
+        "width": 160,
+        "height": 90,
+        "bytes": 1966,
+        "sha256": "56af8967f16431a51b88b343e988e82103192d75a712f6c7fda125d33077867f"
+      }
+    },
+    "Evening_Classes_for_5th_Graders.jpg": {
+      "source_sha256": "b0612987e5dcb8ced9ff0e019a77cbef766f87bf1a18181b89c783cc590d071a",
+      "original_bytes": 146455,
+      "width": 1600,
+      "height": 1200,
+      "variants": [
+        {
+          "src": "optimised/evening-classes-for-5th-graders-b0612987-320.webp",
+          "width": 320,
+          "height": 240,
+          "bytes": 8808,
+          "sha256": "93eebbea8e813f6f4f449658dcde55807b9bc94aff0d3a84b02d9eebfe51d9e3"
+        },
+        {
+          "src": "optimised/evening-classes-for-5th-graders-b0612987-640.webp",
+          "width": 640,
+          "height": 480,
+          "bytes": 37896,
+          "sha256": "d2608b742697725ad4a8c2223392711da9ba9a44b405c4968f77384dddb0261b"
+        },
+        {
+          "src": "optimised/evening-classes-for-5th-graders-b0612987-960.webp",
+          "width": 960,
+          "height": 720,
+          "bytes": 78414,
+          "sha256": "9bac2b19ca2978b8a4eac3903094c9eeb933ddaefcf36ba0198ed76c3ca28326"
+        },
+        {
+          "src": "optimised/evening-classes-for-5th-graders-b0612987-1440.webp",
+          "width": 1440,
+          "height": 1080,
+          "bytes": 142570,
+          "sha256": "365f22ab38bca262f8a8b458f997df64207bf4a62425e18062fdf126a7576a04"
+        }
+      ],
+      "thumbnail": {
+        "src": "optimised/evening-classes-for-5th-graders-b0612987-thumb.webp",
+        "width": 160,
+        "height": 120,
+        "bytes": 1990,
+        "sha256": "489f97b988094df1f8127ace9131b43faabb54656994376d284cdfde34c607ce"
+      }
+    },
+    "Evening_Sessions.jpg": {
+      "source_sha256": "ce54fb9aea763a13fe04fbbeee5b4f19dcb2bc7de3dacacc8268bddd2dfd4814",
+      "original_bytes": 129452,
+      "width": 1600,
+      "height": 1200,
+      "variants": [
+        {
+          "src": "optimised/evening-sessions-ce54fb9a-320.webp",
+          "width": 320,
+          "height": 240,
+          "bytes": 9974,
+          "sha256": "4a3aa6e5c2a859108b4545bf3e0d9070576a2096ab3a64a6b31a5318b2c1f9b8"
+        },
+        {
+          "src": "optimised/evening-sessions-ce54fb9a-640.webp",
+          "width": 640,
+          "height": 480,
+          "bytes": 34112,
+          "sha256": "e3c4fc97dce3aaf10a7d2c1d9f6f11fbcad03ebda205125f99987d7679812748"
+        },
+        {
+          "src": "optimised/evening-sessions-ce54fb9a-960.webp",
+          "width": 960,
+          "height": 720,
+          "bytes": 64174,
+          "sha256": "d12927790914e5e69219cdf09274086295020a3fbb35c475614afb53f83cecdf"
+        },
+        {
+          "src": "optimised/evening-sessions-ce54fb9a-1440.webp",
+          "width": 1440,
+          "height": 1080,
+          "bytes": 112650,
+          "sha256": "7bb523e45c0cecb9f6fd65d94e69d1ada25f2419ec9b5343d9fab6acf7c8b781"
+        }
+      ],
+      "thumbnail": {
+        "src": "optimised/evening-sessions-ce54fb9a-thumb.webp",
+        "width": 160,
+        "height": 120,
+        "bytes": 2590,
+        "sha256": "1ef486604619c6e2a588e2b3e21c6cf89d8793ab0047d7738280e8dd46519dac"
+      }
+    },
+    "Evening_class_for_10-12_Age_Group_batch.jpg": {
+      "source_sha256": "ed0ead9fc6caa111bcb77d60d270e3552c61c7bc80372fd07801b5a60e978a7c",
+      "original_bytes": 82632,
+      "width": 1600,
+      "height": 639,
+      "variants": [
+        {
+          "src": "optimised/evening-class-for-10-12-age-group-batch-ed0ead9f-320.webp",
+          "width": 320,
+          "height": 128,
+          "bytes": 4840,
+          "sha256": "9ef0f4a280e8dffada980902d3d9ac724b5137927d301cbb54600dd5189af55c"
+        },
+        {
+          "src": "optimised/evening-class-for-10-12-age-group-batch-ed0ead9f-640.webp",
+          "width": 640,
+          "height": 256,
+          "bytes": 20022,
+          "sha256": "372e814c63f8225379490d366944086679bec9bf543bb4e91554f86cd0f70e1f"
+        },
+        {
+          "src": "optimised/evening-class-for-10-12-age-group-batch-ed0ead9f-960.webp",
+          "width": 960,
+          "height": 383,
+          "bytes": 42888,
+          "sha256": "9114d7b356ed17b26a0186e4c9bf6b12ef19d0491ea4e35b518a3390d8d51d80"
+        },
+        {
+          "src": "optimised/evening-class-for-10-12-age-group-batch-ed0ead9f-1440.webp",
+          "width": 1440,
+          "height": 575,
+          "bytes": 79160,
+          "sha256": "49015354a499e4e188b62898c438dd030297a2e0e51243ad6177eab4049b2fe2"
+        }
+      ],
+      "thumbnail": {
+        "src": "optimised/evening-class-for-10-12-age-group-batch-ed0ead9f-thumb.webp",
+        "width": 160,
+        "height": 64,
+        "bytes": 1152,
+        "sha256": "0a3d9e3beebc1c164ae5047ace08311dd7c96bb1648366385a8def1cfb2b3c8c"
+      }
+    },
+    "Evening_class_for_6th_graders.jpg": {
+      "source_sha256": "cab2ccdbd54f9a71d50772f10ed2e22e45ca8c10c86ffba39fe205b04234d45d",
+      "original_bytes": 85914,
+      "width": 1600,
+      "height": 1200,
+      "variants": [
+        {
+          "src": "optimised/evening-class-for-6th-graders-cab2ccdb-320.webp",
+          "width": 320,
+          "height": 240,
+          "bytes": 9134,
+          "sha256": "0fc7af7dcbbef9cc60b5f8219a18ce8ab542469267d1d0d9471774b71cbd4cc7"
+        },
+        {
+          "src": "optimised/evening-class-for-6th-graders-cab2ccdb-640.webp",
+          "width": 640,
+          "height": 480,
+          "bytes": 24868,
+          "sha256": "7e396e0ebff460016e94a5da1358583e8e870de3dc1c3db5ae1e6092c4aa6b99"
+        },
+        {
+          "src": "optimised/evening-class-for-6th-graders-cab2ccdb-960.webp",
+          "width": 960,
+          "height": 720,
+          "bytes": 41792,
+          "sha256": "7109a939cbfb3fef565c287b7f82d94222e9108be446c4237bf7d28ceb512009"
+        },
+        {
+          "src": "optimised/evening-class-for-6th-graders-cab2ccdb-1440.webp",
+          "width": 1440,
+          "height": 1080,
+          "bytes": 68778,
+          "sha256": "5d450d7d7354eba7a0c420938e1dcf331baa64c8a7b410846dc77f5af47188f3"
+        }
+      ],
+      "thumbnail": {
+        "src": "optimised/evening-class-for-6th-graders-cab2ccdb-thumb.webp",
+        "width": 160,
+        "height": 120,
+        "bytes": 2430,
+        "sha256": "5d8820114ee97d71b0e04c9a26777393fba1d44529d52b1cb6f371d5b847cebc"
+      }
+    },
+    "Game_in_action.jpg": {
+      "source_sha256": "b81bc8659a7589ca2ed97581b7dd045f07c59445d431f3b3936367af16ec43e1",
+      "original_bytes": 67789,
+      "width": 1024,
+      "height": 768,
+      "variants": [
+        {
+          "src": "optimised/game-in-action-b81bc865-320.webp",
+          "width": 320,
+          "height": 240,
+          "bytes": 9188,
+          "sha256": "f780e578c7ade0570ec8f365c4f15defb5152b8a78f530e189c0d5f800b35bc5"
+        },
+        {
+          "src": "optimised/game-in-action-b81bc865-640.webp",
+          "width": 640,
+          "height": 480,
+          "bytes": 37046,
+          "sha256": "b91095e545975ce4375704e8d93ed256bdc70770e599f07b482ebb1a92049aba"
+        },
+        {
+          "src": "optimised/game-in-action-b81bc865-960.webp",
+          "width": 960,
+          "height": 720,
+          "bytes": 73348,
+          "sha256": "83e82cab8f84d87430944cdf1fd476b60a12d8cb9300784aabb107b547aba193"
+        },
+        {
+          "src": "optimised/game-in-action-b81bc865-1024.webp",
+          "width": 1024,
+          "height": 768,
+          "bytes": 80996,
+          "sha256": "2d66aa75bfdda5ad8f14f2b5dd290ba6da33185e1d6227d8cc8f0db65fe1b089"
+        }
+      ],
+      "thumbnail": {
+        "src": "optimised/game-in-action-b81bc865-thumb.webp",
+        "width": 160,
+        "height": 120,
+        "bytes": 2504,
+        "sha256": "5f5f91527ed4cf362f99b20e6dcd160c5a5fad448517dd133e1e6a054bb161a0"
+      }
+    },
+    "Group_Photo_of_5th_Graders.jpg": {
+      "source_sha256": "e0d81b0cb800863f81015441d573015e3d7b965efa54ebbd2cb1306c8b7f7ea1",
+      "original_bytes": 237312,
+      "width": 1600,
+      "height": 1200,
+      "variants": [
+        {
+          "src": "optimised/group-photo-of-5th-graders-e0d81b0c-320.webp",
+          "width": 320,
+          "height": 240,
+          "bytes": 22842,
+          "sha256": "9c43c4dfdd0f6a51bf83ab862dab4801508fed2920c1975d57c8a1af347450fa"
+        },
+        {
+          "src": "optimised/group-photo-of-5th-graders-e0d81b0c-640.webp",
+          "width": 640,
+          "height": 480,
+          "bytes": 77992,
+          "sha256": "297d38bf8638946b0382951eed46d509697441120b6e0d9d9a3c43bf3ffa1fce"
+        },
+        {
+          "src": "optimised/group-photo-of-5th-graders-e0d81b0c-960.webp",
+          "width": 960,
+          "height": 720,
+          "bytes": 147766,
+          "sha256": "ade77951dd528b339c853775ef103cf3f691d061693dc7386aff5ba32dd5099a"
+        },
+        {
+          "src": "optimised/group-photo-of-5th-graders-e0d81b0c-1440.webp",
+          "width": 1440,
+          "height": 1080,
+          "bytes": 262258,
+          "sha256": "4386934fe7b7cb541aac8183b77d196ca5851694047705d9f87cb94bfb594c0b"
+        }
+      ],
+      "thumbnail": {
+        "src": "optimised/group-photo-of-5th-graders-e0d81b0c-thumb.webp",
+        "width": 160,
+        "height": 120,
+        "bytes": 5562,
+        "sha256": "99b1c532b7336cda886d3f2ccff4d5ee386be629d3c257df4593416533c608f6"
+      }
+    },
+    "Initial_days_of_kids_training.jpg": {
+      "source_sha256": "6fac9aadac30d38edc16b70f01b0187524556f99dfb83b7fd9265a2412fe290b",
+      "original_bytes": 241933,
+      "width": 1600,
+      "height": 1200,
+      "variants": [
+        {
+          "src": "optimised/initial-days-of-kids-training-6fac9aad-320.webp",
+          "width": 320,
+          "height": 240,
+          "bytes": 20418,
+          "sha256": "5c3ffe24263106c09a4b1f475249eb47ead80889988bf6a8d2e33ed92f73f7b1"
+        },
+        {
+          "src": "optimised/initial-days-of-kids-training-6fac9aad-640.webp",
+          "width": 640,
+          "height": 480,
+          "bytes": 77606,
+          "sha256": "8186416f5f1d903fcc22e005ab9517bee194ad453b16f36fa5edecd4ab18262c"
+        },
+        {
+          "src": "optimised/initial-days-of-kids-training-6fac9aad-960.webp",
+          "width": 960,
+          "height": 720,
+          "bytes": 151212,
+          "sha256": "1b20f2beda60633153a38690a9385074842f634b7f6451cbd43f4931815a012f"
+        },
+        {
+          "src": "optimised/initial-days-of-kids-training-6fac9aad-1440.webp",
+          "width": 1440,
+          "height": 1080,
+          "bytes": 263742,
+          "sha256": "e8937dd2e7d1d0c762c90dfba687147688c888ef5aa545c5a20db7a9519371b0"
+        }
+      ],
+      "thumbnail": {
+        "src": "optimised/initial-days-of-kids-training-6fac9aad-thumb.webp",
+        "width": 160,
+        "height": 120,
+        "bytes": 4530,
+        "sha256": "f28e56357d1f6cfc8f4c801b72e2de7de21cf492e19c2ed6489731b5b2ce7d78"
+      }
+    },
+    "Morning_Classes_with_6th_Graders.jpg": {
+      "source_sha256": "2916418236b5f091af93a5a5eba24e81b2323d0d1bf664930fc0b4e298f5786d",
+      "original_bytes": 120505,
+      "width": 1600,
+      "height": 1200,
+      "variants": [
+        {
+          "src": "optimised/morning-classes-with-6th-graders-29164182-320.webp",
+          "width": 320,
+          "height": 240,
+          "bytes": 8056,
+          "sha256": "b2f568cdc6c3c87e3c457683ae6d6c73fab53635d4e0f3a733ab4dea3c6ffda0"
+        },
+        {
+          "src": "optimised/morning-classes-with-6th-graders-29164182-640.webp",
+          "width": 640,
+          "height": 480,
+          "bytes": 28786,
+          "sha256": "b192e344536b06b6482ec1af58219b3e0426a624ec86a7d1848d4b8c9b2a2c9e"
+        },
+        {
+          "src": "optimised/morning-classes-with-6th-graders-29164182-960.webp",
+          "width": 960,
+          "height": 720,
+          "bytes": 60960,
+          "sha256": "41c9b30973bb46c222f0e1d8ae4776f4a409c5d039dbf10fc6908708d4355fe5"
+        },
+        {
+          "src": "optimised/morning-classes-with-6th-graders-29164182-1440.webp",
+          "width": 1440,
+          "height": 1080,
+          "bytes": 115014,
+          "sha256": "a087b0cf3b9b596b6f05d4ec7c9dcdd0d0ef8b3c6125e27e36371a81b4a14ee7"
+        }
+      ],
+      "thumbnail": {
+        "src": "optimised/morning-classes-with-6th-graders-29164182-thumb.webp",
+        "width": 160,
+        "height": 120,
+        "bytes": 2322,
+        "sha256": "5b469d1f07ad5534deedbb745414305968fc97f1af79cf9ec7e7a14c2dd39569"
+      }
+    },
+    "Parents_Players_Coach_pic_post_Game.jpg": {
+      "source_sha256": "6a3d87b0a98b0384af72f28f020e0b07e18ba31fd566ff0bbf1dc926b9397549",
+      "original_bytes": 194911,
+      "width": 1600,
+      "height": 1200,
+      "variants": [
+        {
+          "src": "optimised/parents-players-coach-pic-post-game-6a3d87b0-320.webp",
+          "width": 320,
+          "height": 240,
+          "bytes": 16696,
+          "sha256": "0d7f63a8647a981d44e952841ad477ace364204f87bb02351adf5e8f2e81a262"
+        },
+        {
+          "src": "optimised/parents-players-coach-pic-post-game-6a3d87b0-640.webp",
+          "width": 640,
+          "height": 480,
+          "bytes": 55454,
+          "sha256": "0d9ecc04abd8ac4c2d8d6846fce1cdd8bce514e588f5eb8e66d9a8dcf491af03"
+        },
+        {
+          "src": "optimised/parents-players-coach-pic-post-game-6a3d87b0-960.webp",
+          "width": 960,
+          "height": 720,
+          "bytes": 107986,
+          "sha256": "8126f48c433624bd811942b04d304411169bfd9479a98b843813811bceb9f02f"
+        },
+        {
+          "src": "optimised/parents-players-coach-pic-post-game-6a3d87b0-1440.webp",
+          "width": 1440,
+          "height": 1080,
+          "bytes": 197020,
+          "sha256": "4da660f8b24bf2dade96c24e363ba0b689e395d91246dbd45881209c78ce0007"
+        }
+      ],
+      "thumbnail": {
+        "src": "optimised/parents-players-coach-pic-post-game-6a3d87b0-thumb.webp",
+        "width": 160,
+        "height": 120,
+        "bytes": 4494,
+        "sha256": "d94c871295b5c689255eb3148ebed62b64c0e31a5619b72f0b8e6ebff8ce6d58"
+      }
+    },
+    "Pic-post-winning-the-game.jpg": {
+      "source_sha256": "d0f8a2a34c6e8c4af3ae44978a0e324195dbca78997d0b54046f4b02d5608618",
+      "original_bytes": 207503,
+      "width": 1600,
+      "height": 1200,
+      "variants": [
+        {
+          "src": "optimised/pic-post-winning-the-game-d0f8a2a3-320.webp",
+          "width": 320,
+          "height": 240,
+          "bytes": 18066,
+          "sha256": "9490bfd422282013b2ff1bbbb34697753152943129b585dad4b74bce007dce66"
+        },
+        {
+          "src": "optimised/pic-post-winning-the-game-d0f8a2a3-640.webp",
+          "width": 640,
+          "height": 480,
+          "bytes": 62366,
+          "sha256": "144196698e6f9222ab1e7c593139f27a1ed2a31df1ec70c436970a9ffb16793f"
+        },
+        {
+          "src": "optimised/pic-post-winning-the-game-d0f8a2a3-960.webp",
+          "width": 960,
+          "height": 720,
+          "bytes": 121048,
+          "sha256": "d4a8315a69309f3cb34d960a8e92edaa62cf3ec94bdcb4057299c40780d09ea7"
+        },
+        {
+          "src": "optimised/pic-post-winning-the-game-d0f8a2a3-1440.webp",
+          "width": 1440,
+          "height": 1080,
+          "bytes": 216252,
+          "sha256": "493367fa342b8969a7a8bcac0b6cf38f52bb5a4cea54d88551364807d5bc7823"
+        }
+      ],
+      "thumbnail": {
+        "src": "optimised/pic-post-winning-the-game-d0f8a2a3-thumb.webp",
+        "width": 160,
+        "height": 120,
+        "bytes": 4930,
+        "sha256": "a126ed26ddc276b92d4688102710771e8ddea65bd35688cfa5cb52cfbe94e77b"
+      }
+    },
+    "Post-Match-Players-Coach-Pic.jpg": {
+      "source_sha256": "4a9f9ffa16b4bbdcbf3a6041d483cece30ae4d019e1fcd01bea2b0efd228d621",
+      "original_bytes": 68735,
+      "width": 1024,
+      "height": 768,
+      "variants": [
+        {
+          "src": "optimised/post-match-players-coach-pic-4a9f9ffa-320.webp",
+          "width": 320,
+          "height": 240,
+          "bytes": 9720,
+          "sha256": "28685aa6668c51fba759248bcf4620c87bc6a549fac789f283851eff76d57070"
+        },
+        {
+          "src": "optimised/post-match-players-coach-pic-4a9f9ffa-640.webp",
+          "width": 640,
+          "height": 480,
+          "bytes": 34464,
+          "sha256": "de74d52649d39b88d3130e076ea5bc691a9b339609d94fb0480ca146b9ec2c3f"
+        },
+        {
+          "src": "optimised/post-match-players-coach-pic-4a9f9ffa-960.webp",
+          "width": 960,
+          "height": 720,
+          "bytes": 70546,
+          "sha256": "a0cadb10f4c7d45b0b382507124d7b5fc272e6dd9b7700af1455151ffbed837c"
+        },
+        {
+          "src": "optimised/post-match-players-coach-pic-4a9f9ffa-1024.webp",
+          "width": 1024,
+          "height": 768,
+          "bytes": 78924,
+          "sha256": "78be1bdb3c80efd530058aefab96e5015e48cb279076455b67c14d3588295054"
+        }
+      ],
+      "thumbnail": {
+        "src": "optimised/post-match-players-coach-pic-4a9f9ffa-thumb.webp",
+        "width": 160,
+        "height": 120,
+        "bytes": 2770,
+        "sha256": "c79dc8a51df04070a221907533dac9b92a7f51a0b80fa6344ca8d13350b11fb7"
+      }
+    },
+    "Shortlisting-final-11-players-for-the-game.jpg": {
+      "source_sha256": "9acead8a8d0ba1931bae4d7fc26d950529ec46789e874646911a46c381ac0bd0",
+      "original_bytes": 112159,
+      "width": 1600,
+      "height": 900,
+      "variants": [
+        {
+          "src": "optimised/shortlisting-final-11-players-for-the-game-9acead8a-320.webp",
+          "width": 320,
+          "height": 180,
+          "bytes": 9058,
+          "sha256": "56aa592ad82f5c3507cca74b78cabbce21d5662ec6762e58125ba855f55864ae"
+        },
+        {
+          "src": "optimised/shortlisting-final-11-players-for-the-game-9acead8a-640.webp",
+          "width": 640,
+          "height": 360,
+          "bytes": 28732,
+          "sha256": "d3877aa39956ca9af1deb2a18bdd0b11839b853d00659bf21a1dc170daccb370"
+        },
+        {
+          "src": "optimised/shortlisting-final-11-players-for-the-game-9acead8a-960.webp",
+          "width": 960,
+          "height": 540,
+          "bytes": 57228,
+          "sha256": "3c3fe559cf3fe9101b1019aff8766615be9a1615260a7dfefca11848f6b4f143"
+        },
+        {
+          "src": "optimised/shortlisting-final-11-players-for-the-game-9acead8a-1440.webp",
+          "width": 1440,
+          "height": 810,
+          "bytes": 106950,
+          "sha256": "df7b767b3d061a65123890b4cc2144ad09856beb8f4eadeccaaed2ae50ce6ef4"
+        }
+      ],
+      "thumbnail": {
+        "src": "optimised/shortlisting-final-11-players-for-the-game-9acead8a-thumb.webp",
+        "width": 160,
+        "height": 90,
+        "bytes": 2630,
+        "sha256": "3cbc8f365c3987fa7aa20540da6f3bf3c5bb821bc5e660c8ad7567d46c067056"
+      }
+    },
+    "Strategy-for-game-against-opponent.jpg": {
+      "source_sha256": "3b70488eade58b2d0313460419db50c42d9de9168c1c9a949ac1ab0365e8fa8d",
+      "original_bytes": 144520,
+      "width": 1600,
+      "height": 900,
+      "variants": [
+        {
+          "src": "optimised/strategy-for-game-against-opponent-3b70488e-320.webp",
+          "width": 320,
+          "height": 180,
+          "bytes": 10928,
+          "sha256": "9c1b92f4b048a66b2c5904365c20ebf58de3cfdb89345613ce73a9636c39aebc"
+        },
+        {
+          "src": "optimised/strategy-for-game-against-opponent-3b70488e-640.webp",
+          "width": 640,
+          "height": 360,
+          "bytes": 38634,
+          "sha256": "41cca99f2029c67b0186ab4fdac7199d600bf2ce071c9e4685b0449b04de138a"
+        },
+        {
+          "src": "optimised/strategy-for-game-against-opponent-3b70488e-960.webp",
+          "width": 960,
+          "height": 540,
+          "bytes": 78118,
+          "sha256": "3c6ab999df272b3c246154236fbdb010899a79273eaa7fa214fa400ffc833335"
+        },
+        {
+          "src": "optimised/strategy-for-game-against-opponent-3b70488e-1440.webp",
+          "width": 1440,
+          "height": 810,
+          "bytes": 147994,
+          "sha256": "a5ffe91f3092465561e71fb3143bbff57d34d289fd48c458ea873b4b1832b931"
+        }
+      ],
+      "thumbnail": {
+        "src": "optimised/strategy-for-game-against-opponent-3b70488e-thumb.webp",
+        "width": 160,
+        "height": 90,
+        "bytes": 3044,
+        "sha256": "0f7b1a0fa851ab4baa5ba9055305e6574d925167154227a29fb22ff9a59a9c45"
+      }
+    },
+    "Team-Selection-Sessions.jpg": {
+      "source_sha256": "81db094b5122652752ddc3c451a72cb389f37f8f09ef3f67ed5fde8033a6de02",
+      "original_bytes": 167877,
+      "width": 1600,
+      "height": 1200,
+      "variants": [
+        {
+          "src": "optimised/team-selection-sessions-81db094b-320.webp",
+          "width": 320,
+          "height": 240,
+          "bytes": 15070,
+          "sha256": "d9eb367dc2fcc420bf8fd7c028c500e296e42876932c7ddcadea6ba2b3539e8f"
+        },
+        {
+          "src": "optimised/team-selection-sessions-81db094b-640.webp",
+          "width": 640,
+          "height": 480,
+          "bytes": 52050,
+          "sha256": "019077abbfc876a85ba3a0e5a0c09e355519f258f549521503722cb658654ade"
+        },
+        {
+          "src": "optimised/team-selection-sessions-81db094b-960.webp",
+          "width": 960,
+          "height": 720,
+          "bytes": 95858,
+          "sha256": "2d4f3e96c9b90c9f42e8d87c5869eadd1ff825c73e2dc8f1bc5b030b84b740cd"
+        },
+        {
+          "src": "optimised/team-selection-sessions-81db094b-1440.webp",
+          "width": 1440,
+          "height": 1080,
+          "bytes": 158390,
+          "sha256": "af837b17e10a55cda4760d3842700a2a17a4e8516279ef033f6c9ea94d5439c5"
+        }
+      ],
+      "thumbnail": {
+        "src": "optimised/team-selection-sessions-81db094b-thumb.webp",
+        "width": 160,
+        "height": 120,
+        "bytes": 3902,
+        "sha256": "b1fecdc3907ab7ac465d27b22b7e14d591c21cf6af060749708ecb0cb530a272"
+      }
+    },
+    "coach-and-player-cutout.png": {
+      "source_sha256": "eb5374fa38e9c18a45a3a2d452c73e07330e18c6ecb0d7f45e9ce3f37a8fd4eb",
+      "original_bytes": 411660,
+      "width": 1448,
+      "height": 1086,
+      "variants": [
+        {
+          "src": "optimised/coach-and-player-cutout-eb5374fa-320.webp",
+          "width": 320,
+          "height": 240,
+          "bytes": 10066,
+          "sha256": "69cb06b1e87a873158586a790826ba03b1110b903962e65c130640b0c53bf6fd"
+        },
+        {
+          "src": "optimised/coach-and-player-cutout-eb5374fa-640.webp",
+          "width": 640,
+          "height": 480,
+          "bytes": 24796,
+          "sha256": "cc5de9cd375516e954cc894c52780d3a1a67153e75d0c135b5501d2e8272dd75"
+        },
+        {
+          "src": "optimised/coach-and-player-cutout-eb5374fa-960.webp",
+          "width": 960,
+          "height": 720,
+          "bytes": 44208,
+          "sha256": "0ef5765c67ef2690f6acc48c77a8e105ae961752467ebcbf00ad3dd295ae4a1c"
+        },
+        {
+          "src": "optimised/coach-and-player-cutout-eb5374fa-1440.webp",
+          "width": 1440,
+          "height": 1080,
+          "bytes": 77754,
+          "sha256": "78dd29145d8c5a7e9d23774414d7069199e28eea039d70587d18538214f03c8c"
+        }
+      ],
+      "thumbnail": {
+        "src": "optimised/coach-and-player-cutout-eb5374fa-thumb.webp",
+        "width": 160,
+        "height": 120,
+        "bytes": 4310,
+        "sha256": "08c1392abefd0d50cc686be1689470c5be5bdcacc33effe6092c43dcfab6662a"
+      }
+    },
+    "ellegenza-coach-huddle.jpg": {
+      "source_sha256": "834fa31310ebe98cbcd288e273468f5327eead652d804fddce615aa22e39e1ba",
+      "original_bytes": 2654418,
+      "width": 4032,
+      "height": 3024,
+      "variants": [
+        {
+          "src": "optimised/ellegenza-coach-huddle-834fa313-320.webp",
+          "width": 320,
+          "height": 240,
+          "bytes": 17912,
+          "sha256": "57045ba44140441e6403b1c3d07d4f27b743e5a67f09c39ca45f043fb89cce1d"
+        },
+        {
+          "src": "optimised/ellegenza-coach-huddle-834fa313-640.webp",
+          "width": 640,
+          "height": 480,
+          "bytes": 67854,
+          "sha256": "346706f252f2b98c6bffaeebb137a1d47a89de2a4cf72f9c46563a4a50fa950e"
+        },
+        {
+          "src": "optimised/ellegenza-coach-huddle-834fa313-960.webp",
+          "width": 960,
+          "height": 720,
+          "bytes": 152866,
+          "sha256": "8583dce9083e687edc52345adaaa283bb9805cf710729ff4b8bf9f45b472e9e8"
+        },
+        {
+          "src": "optimised/ellegenza-coach-huddle-834fa313-1440.webp",
+          "width": 1440,
+          "height": 1080,
+          "bytes": 347484,
+          "sha256": "ba5fd64c9ac16142abe2e8c0d5f6c649fe1d7a54520164fd95573449f202ce76"
+        }
+      ],
+      "thumbnail": {
+        "src": "optimised/ellegenza-coach-huddle-834fa313-thumb.webp",
+        "width": 160,
+        "height": 120,
+        "bytes": 5028,
+        "sha256": "e863aad40536457d83c846c839c4bec3b49209c2761800973ca882faf8b60e69"
+      }
+    },
+    "ellegenza-match-action.jpg": {
+      "source_sha256": "b719bac272073bd45d4e6511120bdcef08cc05f7c7a4bb13f8c1e4765358ef27",
+      "original_bytes": 391652,
+      "width": 1600,
+      "height": 1070,
+      "variants": [
+        {
+          "src": "optimised/ellegenza-match-action-b719bac2-320.webp",
+          "width": 320,
+          "height": 214,
+          "bytes": 14718,
+          "sha256": "e297e94f771e40637cf8fd43232f7d8759b7d727ae41b723414f3d53611f049d"
+        },
+        {
+          "src": "optimised/ellegenza-match-action-b719bac2-640.webp",
+          "width": 640,
+          "height": 428,
+          "bytes": 39408,
+          "sha256": "2d9561b318a27aa5c488ba590eb3016f9046a585f6bbb07a6a599b98d5c67a4d"
+        },
+        {
+          "src": "optimised/ellegenza-match-action-b719bac2-960.webp",
+          "width": 960,
+          "height": 642,
+          "bytes": 67692,
+          "sha256": "a73740cb2d407f33a41ca379667f0f5f4a61ab448400343963f1b8c64f771574"
+        },
+        {
+          "src": "optimised/ellegenza-match-action-b719bac2-1440.webp",
+          "width": 1440,
+          "height": 963,
+          "bytes": 109424,
+          "sha256": "6a03c014f87c8ed5382b25f9e73994790b2754959f61103db081f23bbfaf9fd3"
+        }
+      ],
+      "thumbnail": {
+        "src": "optimised/ellegenza-match-action-b719bac2-thumb.webp",
+        "width": 160,
+        "height": 107,
+        "bytes": 4266,
+        "sha256": "1f51b7c390667482e23159a070827941d9e8a151c1fe09ec1a785eb995169068"
+      }
+    },
+    "ellegenza-team-lineup.jpg": {
+      "source_sha256": "50fd0e6e96f385bb9738b0d827d586d87e90fcad06d25d5c3c0cc689ab277309",
+      "original_bytes": 354811,
+      "width": 1600,
+      "height": 1070,
+      "variants": [
+        {
+          "src": "optimised/ellegenza-team-lineup-50fd0e6e-320.webp",
+          "width": 320,
+          "height": 214,
+          "bytes": 17314,
+          "sha256": "f1bfe63f7e61547aeee6c59a052cd5e1076672236772d71a473c6cf21f7ae3d2"
+        },
+        {
+          "src": "optimised/ellegenza-team-lineup-50fd0e6e-640.webp",
+          "width": 640,
+          "height": 428,
+          "bytes": 58006,
+          "sha256": "89a7bfbe3e475b4789a306c1652327e8162088fda2ff526354e20ec7f7a92c18"
+        },
+        {
+          "src": "optimised/ellegenza-team-lineup-50fd0e6e-960.webp",
+          "width": 960,
+          "height": 642,
+          "bytes": 112748,
+          "sha256": "442acad76972add4c813bf81b9f988679475e347668527aebb044a1751b10a1c"
+        },
+        {
+          "src": "optimised/ellegenza-team-lineup-50fd0e6e-1440.webp",
+          "width": 1440,
+          "height": 963,
+          "bytes": 199034,
+          "sha256": "0ec4f2d73ea85f6546f595da5732d7b7264e1311fd62f36ea9cef8f64a8584d6"
+        }
+      ],
+      "thumbnail": {
+        "src": "optimised/ellegenza-team-lineup-50fd0e6e-thumb.webp",
+        "width": 160,
+        "height": 107,
+        "bytes": 4632,
+        "sha256": "fc3293e744fa168b06b55e0eb1184c7f392d435d18ebdf0d18da75875469a8fb"
+      }
+    },
+    "ellegenza-trophy-moment.jpg": {
+      "source_sha256": "8b8e9867bca12303033e486407868b22153ac548002b0ede4456cb12b3b35bf9",
+      "original_bytes": 311682,
+      "width": 1600,
+      "height": 1070,
+      "variants": [
+        {
+          "src": "optimised/ellegenza-trophy-moment-8b8e9867-320.webp",
+          "width": 320,
+          "height": 214,
+          "bytes": 17068,
+          "sha256": "aa0897c58cfa0b4a3847a4db03009f795b059d74992c77f15aea673da654e947"
+        },
+        {
+          "src": "optimised/ellegenza-trophy-moment-8b8e9867-640.webp",
+          "width": 640,
+          "height": 428,
+          "bytes": 53680,
+          "sha256": "05b6227cad477d3442c017164a957d0fddaf3d69dacfbbe1274075c806375fd0"
+        },
+        {
+          "src": "optimised/ellegenza-trophy-moment-8b8e9867-960.webp",
+          "width": 960,
+          "height": 642,
+          "bytes": 100282,
+          "sha256": "6f14016eae37997943e5dca1ef8be6a3ebbdee1f8c0dea211974f9fc6cdad010"
+        },
+        {
+          "src": "optimised/ellegenza-trophy-moment-8b8e9867-1440.webp",
+          "width": 1440,
+          "height": 963,
+          "bytes": 169586,
+          "sha256": "accf540bbd0f6b64c2be2188f076a49c5dc4a6891390bc8d681f2d9ead4e0038"
+        }
+      ],
+      "thumbnail": {
+        "src": "optimised/ellegenza-trophy-moment-8b8e9867-thumb.webp",
+        "width": 160,
+        "height": 107,
+        "bytes": 4876,
+        "sha256": "286d41fdd52ab1ece1a06b2945b0b85e75a9e24f3a244a5ee15cb77233c0d19b"
+      }
+    },
+    "ellegenza-young-players.jpg": {
+      "source_sha256": "763827f7e40285a087bf51720d6f353c79863e3bde45e38f2ae3d22fb604a77a",
+      "original_bytes": 651063,
+      "width": 1600,
+      "height": 1070,
+      "variants": [
+        {
+          "src": "optimised/ellegenza-young-players-763827f7-320.webp",
+          "width": 320,
+          "height": 214,
+          "bytes": 20222,
+          "sha256": "caa42d05f1b84d4d203511288f6c16e226f826b996055321ed33a340075e4adb"
+        },
+        {
+          "src": "optimised/ellegenza-young-players-763827f7-640.webp",
+          "width": 640,
+          "height": 428,
+          "bytes": 66374,
+          "sha256": "2f7cf6d40964310c6be95e2db815e3e762e2feb165b1705f07e14f02e516c11e"
+        },
+        {
+          "src": "optimised/ellegenza-young-players-763827f7-960.webp",
+          "width": 960,
+          "height": 642,
+          "bytes": 125440,
+          "sha256": "7ab11418222db2b6d1eaba55132c7f8d967e36880d893ab01522736194f818c0"
+        },
+        {
+          "src": "optimised/ellegenza-young-players-763827f7-1440.webp",
+          "width": 1440,
+          "height": 963,
+          "bytes": 214516,
+          "sha256": "9920518c317a4ac172a09c30c602f4da97862021eab91da395cd21c483bc0425"
+        }
+      ],
+      "thumbnail": {
+        "src": "optimised/ellegenza-young-players-763827f7-thumb.webp",
+        "width": 160,
+        "height": 107,
+        "bytes": 5756,
+        "sha256": "2571ffea5d273ff22cb286e4bdec509deb3e670c5245e26c4f792bd599c9513e"
+      }
+    },
+    "football-film-poster.jpg": {
+      "source_sha256": "4296333daa077f105516e265e55a6e6fda3c67ff199807e8d8c00589f3a2639c",
+      "original_bytes": 563522,
+      "width": 1600,
+      "height": 900,
+      "variants": [
+        {
+          "src": "optimised/football-film-poster-4296333d-320.webp",
+          "width": 320,
+          "height": 180,
+          "bytes": 13608,
+          "sha256": "d1de7b0ad724c6c4e340010bb62ed1a88da8a0f44eb7b6aa70e5d47079f44c53"
+        },
+        {
+          "src": "optimised/football-film-poster-4296333d-640.webp",
+          "width": 640,
+          "height": 360,
+          "bytes": 62120,
+          "sha256": "7c2631541bad4dc85a18793457c683e4ffd5b851d09ce838e72b622c901b12ab"
+        },
+        {
+          "src": "optimised/football-film-poster-4296333d-960.webp",
+          "width": 960,
+          "height": 540,
+          "bytes": 139558,
+          "sha256": "855e82250e51d6cb9091360b4908c6daf1ca9d1eb88775a33819c7f2e9b34e6c"
+        },
+        {
+          "src": "optimised/football-film-poster-4296333d-1440.webp",
+          "width": 1440,
+          "height": 810,
+          "bytes": 265998,
+          "sha256": "497861ad5d0e172977d23410391583f97d0027749ee102d44fdda6c79e459b6d"
+        }
+      ],
+      "thumbnail": {
+        "src": "optimised/football-film-poster-4296333d-thumb.webp",
+        "width": 160,
+        "height": 90,
+        "bytes": 2756,
+        "sha256": "d5626edf986ffb74c9203457e4bfd166489a3a94536cb07ad9ab619f852cd82e"
+      }
+    },
+    "image1.jpeg": {
+      "source_sha256": "f91fb792690361514db0d1850701d3bb9dd13fe3b61b006b4b5c990f6b2f36db",
+      "original_bytes": 75624,
+      "width": 640,
+      "height": 640,
+      "variants": [
+        {
+          "src": "optimised/image1-f91fb792-320.webp",
+          "width": 320,
+          "height": 320,
+          "bytes": 12884,
+          "sha256": "c720f2232c9facbc03220db2f386a6c26b52accdd356a093a3ad4c158f8b6017"
+        },
+        {
+          "src": "optimised/image1-f91fb792-640.webp",
+          "width": 640,
+          "height": 640,
+          "bytes": 40254,
+          "sha256": "0409a2c209ba7c12860f81a19e4af7b97ee4e31ac18304821b63e5e05e7d61ba"
+        }
+      ],
+      "thumbnail": {
+        "src": "optimised/image1-f91fb792-thumb.webp",
+        "width": 160,
+        "height": 160,
+        "bytes": 3858,
+        "sha256": "dbacbc4a1cff9da9bf129a99f392ffbb6372ff30f0789f271a7890f8b028562a"
+      }
+    },
+    "image2.jpeg": {
+      "source_sha256": "a02f4b000d9a7fa66fb1654bf91b8ad8585c337fe1a907e72bfd8f1bb6f9df3e",
+      "original_bytes": 878010,
+      "width": 2048,
+      "height": 1536,
+      "variants": [
+        {
+          "src": "optimised/image2-a02f4b00-320.webp",
+          "width": 320,
+          "height": 240,
+          "bytes": 16486,
+          "sha256": "5ece3f9154efaba1e86d21c642b3da6ea782b87189c1d02f93c69d734841856a"
+        },
+        {
+          "src": "optimised/image2-a02f4b00-640.webp",
+          "width": 640,
+          "height": 480,
+          "bytes": 68864,
+          "sha256": "c63469fc5e230067c75d59b0fbd94b72ac810e2e6ab7e327e0927206c3149ebd"
+        },
+        {
+          "src": "optimised/image2-a02f4b00-960.webp",
+          "width": 960,
+          "height": 720,
+          "bytes": 152792,
+          "sha256": "2f56a785b9037144c21e627f7f20430c07d1206643bfcc0497edc70aaf930342"
+        },
+        {
+          "src": "optimised/image2-a02f4b00-1440.webp",
+          "width": 1440,
+          "height": 1080,
+          "bytes": 313676,
+          "sha256": "90b8e63d0ed3ea00ecb3eb15e62a4ee19f7516f5367c9f43ecd4081450be78ed"
+        }
+      ],
+      "thumbnail": {
+        "src": "optimised/image2-a02f4b00-thumb.webp",
+        "width": 160,
+        "height": 120,
+        "bytes": 3602,
+        "sha256": "2b74920c741d60953ed864b6e39ac5ef404c2e12e420a5043640863542de8892"
+      }
+    },
+    "image3.jpeg": {
+      "source_sha256": "ad618ad06ed944963b598524c9769798419a19c581ea5dd85a6c52ccd274b497",
+      "original_bytes": 594222,
+      "width": 2048,
+      "height": 1536,
+      "variants": [
+        {
+          "src": "optimised/image3-ad618ad0-320.webp",
+          "width": 320,
+          "height": 240,
+          "bytes": 12432,
+          "sha256": "7f5fac2d2d66278bd705302cc0bede9f9ab5ab2b30e0c34776e67a3375981e50"
+        },
+        {
+          "src": "optimised/image3-ad618ad0-640.webp",
+          "width": 640,
+          "height": 480,
+          "bytes": 42340,
+          "sha256": "03b46014d46a25c61bef8946f4b6d035b88186bf56b01dfc6a8085b5c3d074a0"
+        },
+        {
+          "src": "optimised/image3-ad618ad0-960.webp",
+          "width": 960,
+          "height": 720,
+          "bytes": 89958,
+          "sha256": "4a2971c33ffa1425737bacc714a6b65a43df563158b9a24320ee8541a641d094"
+        },
+        {
+          "src": "optimised/image3-ad618ad0-1440.webp",
+          "width": 1440,
+          "height": 1080,
+          "bytes": 172896,
+          "sha256": "8eb563713397119cab419552078064317b53f72e9b523d0f7415914e3bf6b79d"
+        }
+      ],
+      "thumbnail": {
+        "src": "optimised/image3-ad618ad0-thumb.webp",
+        "width": 160,
+        "height": 120,
+        "bytes": 3492,
+        "sha256": "5c3a555face813bcf7b977afbb114a2532cb702c81046e1c3059f5746a38c7e4"
+      }
+    },
+    "logo.png": {
+      "source_sha256": "3a9ef56e278148d5e0d62fbbdb1465f747e4fb6811305be347da63c2c5b725cf",
+      "original_bytes": 116955,
+      "width": 554,
+      "height": 402,
+      "variants": [
+        {
+          "src": "optimised/logo-3a9ef56e-160.webp",
+          "width": 160,
+          "height": 116,
+          "bytes": 13118,
+          "sha256": "1ad6975b7185c4b96840bde283fd915407c05383312fe626e1775956e36ee290"
+        },
+        {
+          "src": "optimised/logo-3a9ef56e-320.webp",
+          "width": 320,
+          "height": 232,
+          "bytes": 37962,
+          "sha256": "68d728fe9de21896a40d22c56ebdf591740bb3862eac61ecfdfc51a87184e0ab"
+        },
+        {
+          "src": "optimised/logo-3a9ef56e-554.webp",
+          "width": 554,
+          "height": 402,
+          "bytes": 77640,
+          "sha256": "3bebcd213cec2f53fe7d212b22c2739cae0229f6e68564aa99639546eef05a68"
+        }
+      ],
+      "thumbnail": {
+        "src": "optimised/logo-3a9ef56e-thumb.webp",
+        "width": 160,
+        "height": 116,
+        "bytes": 13118,
+        "sha256": "1ad6975b7185c4b96840bde283fd915407c05383312fe626e1775956e36ee290"
+      }
+    },
+    "p1.jpg": {
+      "source_sha256": "a423829cf2918c07110043036627105034b6bff8254bd3bf4db521b87b94078a",
+      "original_bytes": 138637,
+      "width": 1280,
+      "height": 960,
+      "variants": [
+        {
+          "src": "optimised/p1-a423829c-320.webp",
+          "width": 320,
+          "height": 240,
+          "bytes": 21792,
+          "sha256": "dd93bf9d5402215111fc9331d82aa646aff7433a379eab16d79a5a8db0df7514"
+        },
+        {
+          "src": "optimised/p1-a423829c-640.webp",
+          "width": 640,
+          "height": 480,
+          "bytes": 64112,
+          "sha256": "df33f31d012264a09be673dbfccfcfa006a1840af9b6cc747304dc1a52f0f042"
+        },
+        {
+          "src": "optimised/p1-a423829c-960.webp",
+          "width": 960,
+          "height": 720,
+          "bytes": 107090,
+          "sha256": "9f2a5458e87d0c80a690e205a6fd3a0a118ba784fdb475b3343350c081ac71ba"
+        },
+        {
+          "src": "optimised/p1-a423829c-1280.webp",
+          "width": 1280,
+          "height": 960,
+          "bytes": 148900,
+          "sha256": "a2143b215803b469b58ae510008de674914c5b9d5ca24b2d461cb7a5eb452c9b"
+        }
+      ],
+      "thumbnail": {
+        "src": "optimised/p1-a423829c-thumb.webp",
+        "width": 160,
+        "height": 120,
+        "bytes": 6500,
+        "sha256": "061b18c5ed393da1e9ed4c7f021e829ab373aa97a90a84cf8dee83b20ed3c6fe"
+      }
+    },
+    "p2.jpg": {
+      "source_sha256": "05bd3de8da4ff8c58d7eb0081edd1508ba60b9312d5ee108d0f381e9cf88eb63",
+      "original_bytes": 126412,
+      "width": 1600,
+      "height": 1200,
+      "variants": [
+        {
+          "src": "optimised/p2-05bd3de8-320.webp",
+          "width": 320,
+          "height": 240,
+          "bytes": 14150,
+          "sha256": "960c1a5f9d863a4a70a13c6170dcf34246ec23bea30bd7ad68d0c3e0d0376cb9"
+        },
+        {
+          "src": "optimised/p2-05bd3de8-640.webp",
+          "width": 640,
+          "height": 480,
+          "bytes": 37100,
+          "sha256": "a87ca7fb1bfb36fc6e027699c5754392b8851aa659c0d99eef2c13e4f66ed5a1"
+        },
+        {
+          "src": "optimised/p2-05bd3de8-960.webp",
+          "width": 960,
+          "height": 720,
+          "bytes": 61878,
+          "sha256": "4aecbea7f0dcdc0c356126c14f1736390f35c82e1ce143f17bc786db8250381f"
+        },
+        {
+          "src": "optimised/p2-05bd3de8-1440.webp",
+          "width": 1440,
+          "height": 1080,
+          "bytes": 101630,
+          "sha256": "eaabd82f7917962b3c7b339413610965b51329dfb5c2e7c11d38b37536cc1772"
+        }
+      ],
+      "thumbnail": {
+        "src": "optimised/p2-05bd3de8-thumb.webp",
+        "width": 160,
+        "height": 120,
+        "bytes": 4584,
+        "sha256": "b2c1dd12e04c999fb8ef0e8a2eac0e72f4e6382aa87c95c8bd7b733f1db5c150"
+      }
+    }
+  },
+  "videos": {
+    "football-film.mp4": {
+      "src": "optimised/football-film-5a1145fc-720p.mp4",
+      "source_sha256": "5a1145fc02c9392b39cc4f9bf30afa9fc42dc1018032d406695f84eb1e9fc599",
+      "original_bytes": 6697054,
+      "bytes": 1613989,
+      "sha256": "26e7d231fb4b7e5aa5f18597e34f6c152aef22143123b0875e9994803a1938d0",
+      "width": 1280,
+      "height": 720
+    }
+  }
+}

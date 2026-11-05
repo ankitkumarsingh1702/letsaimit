@@ -1,6 +1,7 @@
 import { useSiteActions } from "../context/SiteActions.jsx";
 import { TrialButton } from "../components/ui.jsx";
 import { asset } from "../lib/assets.js";
+import { mediaProps } from "../lib/media.js";
 import CoachStory from "../features/stories/CoachStory.js";
 import { Arrow } from "../components/ui.jsx";
 var credentials = [
@@ -54,10 +55,10 @@ function Coach() {
         </div>
         <figure className="co-hero-photo">
           <img
-            src={asset("Coach_Goalie_conversation_before_the_game.jpg")}
+            {...mediaProps("Coach_Goalie_conversation_before_the_game.jpg", "(max-width: 700px) calc(100vw - 40px), (max-width: 1400px) 48vw, 640px")}
             width="1600"
             height="1200"
-            alt="Coach Dhiraj talking with a young goalkeeper before a game in Texas"
+            alt="Coach Dhiraj talking with a young goalkeeper before a game in Frisco, Texas"
             decoding="async"
             fetchPriority="high"
           />
@@ -69,7 +70,7 @@ function Coach() {
       <section className="co-experience" aria-labelledby="co-experience-title">
         <div className="wrap co-experience-inner">
           <h2 className="display" id="co-experience-title">
-            From Dallas.
+            From Frisco, Texas.
             <br /> <span>To your community.</span>
           </h2>
           <p>
@@ -143,10 +144,10 @@ function Coach() {
       <section className="co-teaching wrap" aria-label="The coaching approach">
         <figure className="co-teaching-photo">
           <img
-            src={asset("Defining_Strategy.jpg")}
+            {...mediaProps("Defining_Strategy.jpg", "(max-width: 700px) calc(100vw - 40px), (max-width: 1400px) 48vw, 640px")}
             width="1024"
             height="768"
-            alt="Coach Dhiraj explaining a game to his young players in Texas"
+            alt="Coach Dhiraj explaining a game to his young players in Frisco, Texas"
             loading="lazy"
             decoding="async"
           />

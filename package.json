@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Complete current LetsAimIt React website, including all six pages, shared header/footer and local media.",
+  "description": "Complete LetsAimIt React website with nine pages, shared navigation, local media and Google Sheets integration setup.",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
-    "build": "vite build",
+    "build": "vite build && node scripts/prerender.mjs && node scripts/prune-deployment.mjs",
     "preview": "vite preview --host 0.0.0.0",
     "verify:assets": "node scripts/verify-assets.mjs",
     "test": "node --test"

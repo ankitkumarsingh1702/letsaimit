@@ -1,5 +1,6 @@
 import * as React from "react";
 import { asset } from "../../lib/assets.js";
+import { mediaProps } from "../../lib/media.js";
 // Images are from the owner's Ellegenza event-photo collection.
 export const EVENTS_PHOTOS = [
   {
@@ -132,7 +133,7 @@ export function createEventsPage(React, asset) {
       "a",
       {
         className,
-        href: "#/events?section=" + target,
+        href: "/events/?section=" + target,
         onClick: (event) => {
           event.preventDefault();
           scrollToEventsSection(target);
@@ -148,7 +149,9 @@ export function createEventsPage(React, asset) {
       "figure",
       { className },
       h("img", {
-        src: asset(photo.src),
+        ...mediaProps(photo.src, className === "ev-photo-card"
+          ? "(max-width: 700px) 78vw, (max-width: 1200px) 28vw, 350px"
+          : "(max-width: 700px) calc(100vw - 64px), (max-width: 1400px) 46vw, 620px"),
         alt: photo.alt,
         width: photo.width,
         height: photo.height,
@@ -172,7 +175,7 @@ export function createEventsPage(React, asset) {
 
   return function EventsPage() {
     React.useEffect(() => {
-      const query = window.location.hash.split("?")[1] || "";
+      const query = window.location.search.slice(1) || window.location.hash.split("?")[1] || "";
       const target = new URLSearchParams(query).get("section");
       if (!["events-upcoming", "events-past"].includes(target))
         return undefined;
@@ -313,7 +316,7 @@ export function createEventsPage(React, asset) {
               "Ask on WhatsApp",
               h(Arrow),
             ),
-            h("p", { className: "ev-action-note" }, "Review. Then send."),
+            h("p", { className: "ev-action-note" }, "Opens WhatsApp with a pre-filled message."),
           ),
         ),
       ),

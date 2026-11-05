@@ -1,5 +1,6 @@
 import * as React from "react";
 import { asset } from "../../lib/assets.js";
+import { mediaProps } from "../../lib/media.js";
 import { PARENT_TESTIMONIALS } from "./testimonials.js";
 
 export function storyExcerpt(story) {
@@ -386,7 +387,7 @@ export function createParentStories(React, asset) {
             "figure",
             { className: "ps-context" },
             h("img", {
-              src: asset("Initial_days_of_kids_training.jpg"),
+              ...mediaProps("Initial_days_of_kids_training.jpg", "(max-width: 1000px) 72px, 96px"),
               alt: "Children running during a coaching session in Frisco, Texas.",
               width: 1600,
               height: 1200,
