@@ -2,6 +2,23 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "vite",
   "installCommand": "npm ci",
-  "buildCommand": "if [ \"$VERCEL_GIT_COMMIT_REF\" = uat ]; then export VITE_SITE_ORIGIN=https://uat.letsaimit.com; fi; npm run build",
-  "outputDirectory": "dist"
+  "buildCommand": "if [ \"$VERCEL_ENV\" = production ]; then export VITE_SITE_ORIGIN=https://letsaimit.com; elif [ \"$VERCEL_GIT_COMMIT_REF\" = uat ]; then export VITE_SITE_ORIGIN=https://uat.letsaimit.com; fi; npm run build",
+  "outputDirectory": "dist",
+  "redirects": [
+    {
+      "source": "/privacy-policy",
+      "destination": "/privacy/",
+      "permanent": true
+    },
+    {
+      "source": "/terms-and-conditions",
+      "destination": "/terms/",
+      "permanent": true
+    },
+    {
+      "source": "/refund-policy",
+      "destination": "/refunds/",
+      "permanent": true
+    }
+  ]
 }
