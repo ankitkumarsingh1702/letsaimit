@@ -198,7 +198,7 @@ function Team({ members, user, onInvite, onRemove }) {
   </section>;
 }
 
-function AuthorizedAdmin({ auth }) {
+export function AuthorizedAdmin({ auth }) {
   const { rows, members, loading, error, liveState, lastSynced, refresh, save, review, inviteMember, removeMember } = useAdminRegister(auth);
   const [filters, setFilters] = React.useState(defaultFilters);
   const [datePreset, setDatePreset] = React.useState("all");
@@ -336,7 +336,7 @@ function AuthorizedAdmin({ auth }) {
         <footer className="adm-footer">{hasLoaded ? <><span>Counts include all saved requests, including any test submissions.</span><span>{periodLabel} · Synced {formatIST(lastSynced, "time")} IST</span></> : <><span>Waiting for the saved register.</span><span>Asia/Kolkata</span></>}</footer>
       </div>
     </div>
-    <RequestDetail row={selectedRow} open={Boolean(selectedRow)} onClose={closeRequest} onSave={saveFollowUp} onReview={reviewRequest} initialDecision={selectedRow?.id === reviewIntent?.id ? reviewIntent.decision : null} assignees={assignees} canEdit onDraftChange={onDraftChange} />
+    <RequestDetail row={selectedRow} open={Boolean(selectedRow)} onClose={closeRequest} onSave={saveFollowUp} onReview={reviewRequest} initialDecision={reviewIntent && selectedRow?.id === reviewIntent.id ? reviewIntent.decision : null} assignees={assignees} canEdit onDraftChange={onDraftChange} />
     {toast && <div className="adm-toast" role="status"><AdminIcon name="check" /><span>{toast}</span><button type="button" className="adm-icon-button" aria-label="Dismiss message" onClick={() => setToast("")}><AdminIcon name="close" /></button></div>}
   </div>;
 }

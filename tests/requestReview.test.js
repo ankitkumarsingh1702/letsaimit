@@ -7,6 +7,19 @@ import { toAdminRequest, filterRows, buildRegisterCsv } from "../src/features/ad
 const id = "0d2560a9-0049-45e1-8ea0-4a6e016b374c";
 const accepted = { id, revision: 3, review_decision: "accepted", reviewed_at: "2026-11-10T10:00:00Z", reviewed_by: "reviewer@example.test", status: "new", metadata: {} };
 
+test("the authorized dashboard renders without an email intent or selected request", async () => {
+  const [{ createServer }, React, { renderToStaticMarkup }] = await Promise.all([import("vite"), import("react"), import("react-dom/server")]);
+  const vite = await createServer({ server: { middlewareMode: true }, appType: "custom" });
+  try {
+    const { AuthorizedAdmin } = await vite.ssrLoadModule("/src/features/admin/AdminPage.jsx");
+    const auth = { client: null, user: { id: "authorized-admin", email: "admin@example.test", displayName: "Test admin" }, checkAccess: async () => true, signOut: async () => {} };
+    const html = renderToStaticMarkup(React.createElement(AuthorizedAdmin, { auth }));
+    assert.match(html, /Dashboard/);
+    assert.match(html, /Loading saved requests/);
+    assert.doesNotMatch(html, /Confirm acceptance|Confirm decline/);
+  } finally { await vite.close(); }
+});
+
 test("email GET parameters are only validated navigation intent, never review RPC calls", () => {
   assert.deepEqual(readReviewIntent(`?requestId=${id}&requestedDecision=accept`), { id, decision: "accepted" });
   assert.deepEqual(readReviewIntent(`?requestId=${id}&requestedDecision=decline`), { id, decision: "declined" });
