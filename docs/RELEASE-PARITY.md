@@ -162,7 +162,7 @@ deployed compact CRM remains the live UAT baseline above.
 
 | Evidence | Record |
 | --- | --- |
-| Branch / selected target | `codex/admin-email-notifications`; UAT only |
+| Branch / selected target | `codex/admin-email-notifications`, application commit `1ec7e35`; UAT only |
 | Parent contract | Google sign-in before final save; server-bound user-ID ownership; private `/parent/` projection; no email-based claim of existing rows; bound answers and drafts clear on sign-out/account change |
 | Admin contract | Separate audited Accept/Decline action, explicit confirmation, revision conflicts; email GET links navigate only; same Google account may use parent and authorized admin capabilities |
 | Notifications | Durable per-recipient jobs, current-membership check, protected POST worker, bounded retries and leases; activity-only four-hour digests with separately labelled late activity |
@@ -170,7 +170,7 @@ deployed compact CRM remains the live UAT baseline above.
 | Prepared backend | New migration `20261109204510_parent_review_notifications.sql`; `admin-notifications` Edge Function; dispatch defaults OFF; no historical alert backfill |
 | Local automated verification | 183 tests passed after final fixes; optimized/prerendered 13-route build and 59-asset verification passed; Deno 2.9.6 checks passed for original modules and generated single-file editor bundle; diff checks passed |
 | Database test limit | PGlite verifies the complete ordered migration chain, grants/RLS, owner isolation, review/idempotency/conflicts, queue leases and digest carry-forward. The late-visibility regression models activity becoming visible after a frozen window; it is not a hosted multi-session test |
-| Hosted state | SQL draft staged in the signed-in UAT dashboard, not executed. Function/secrets, Vault wiring, schedule execution and live Google parent journey are pending. No email has been sent or inbox receipt verified |
+| Hosted state | New SQL draft opened, but editor contents were not successfully verified and no SQL was executed. Function/secrets pages did not render through the Chrome connection. CLI authentication remains absent. Function/secrets, Vault wiring, schedule execution and live Google parent journey are pending. No email has been sent or inbox receipt verified |
 | Sender / secrets | Operator confirmed a Google sender; credential values remain outside source. CLI authentication is not established by the existing dashboard session |
 | Legacy integrations | Parent trial/enrol Apps Script modes retired in source; society/school paths preserved. Previously published Apps Script versions/native forms were not remotely audited or removed |
 | Production | No production source, alias, backend or provider configuration changed. Separate production readiness remains pending as listed above |
