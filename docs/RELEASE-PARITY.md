@@ -4,9 +4,9 @@ This ledger records evidence, not permission to deploy. It is project-local.
 The default **merge and deploy** target is UAT. Production work requires the
 explicit **merge and deploy to prod** instruction.
 
-Latest UAT application release: `d0b738a1c404e77204d49b2d0709b4cdc54defb4`
-(compact CRM presentation). See the 10 November evidence below. The 9 November
-tables remain a dated record of backend/configuration readiness.
+Latest UAT application release: `6f2b9be4f71776af6398f115a70a3678766ad459`
+(Google parent requests and admin notifications, including the direct-dashboard
+fix). See the 10 November evidence below. Earlier tables remain a dated record.
 
 ## Public identity contract
 
@@ -155,27 +155,35 @@ outstanding production backend setup, grant access or apply a database migration
 New Google round-trip/denied-access and parent-form receipt tests were not
 repeated for this presentation-only release; their earlier evidence remains dated.
 
-## Pending notification release — 10 November 2026
+## UAT release evidence — 10 November 2026, parent requests and notifications
 
-This is prepared source, **not an activated hosted release**. The currently
-deployed compact CRM remains the live UAT baseline above.
+The frontend, database changes, notification worker and scheduler are activated
+on UAT. This does not activate production or the deferred payment stage.
 
 | Evidence | Record |
 | --- | --- |
-| Branch / selected target | `codex/admin-email-notifications`, application commit `1ec7e35`; UAT only |
+| Source / selected target | Feature source `1ec7e35`, followed by direct-dashboard fix `6f2b9be4f71776af6398f115a70a3678766ad459`; merged to `uat` only |
 | Parent contract | Google sign-in before final save; server-bound user-ID ownership; private `/parent/` projection; no email-based claim of existing rows; bound answers and drafts clear on sign-out/account change |
 | Admin contract | Separate audited Accept/Decline action, explicit confirmation, revision conflicts; email GET links navigate only; same Google account may use parent and authorized admin capabilities |
 | Notifications | Durable per-recipient jobs, current-membership check, protected POST worker, bounded retries and leases; activity-only four-hour digests with separately labelled late activity |
 | Payment / coach scope | No Razorpay requests, charges, subscription workflow or coach workspace activated |
-| Prepared backend | New migration `20261109204510_parent_review_notifications.sql`; `admin-notifications` Edge Function; dispatch defaults OFF; no historical alert backfill |
-| Local automated verification | 183 tests passed after final fixes; optimized/prerendered 13-route build and 59-asset verification passed; Deno 2.9.6 checks passed for original modules and generated single-file editor bundle; diff checks passed |
+| Backend | Migration `20261109204510_parent_review_notifications.sql` applied as one transaction; `admin-notifications` Edge Function deployed; all seven settings and two matching Vault entries configured; dispatch enabled after protected-worker checks; no historical alert backfill |
+| Local automated verification | 184 tests passed after the live-found direct-dashboard fix, including an actual authorized-component render without email intent; optimized/prerendered 13-route build and 59-asset verification passed; Deno 2.9.6 checks passed for original modules and generated single-file editor bundle; diff checks and independent source review passed |
 | Database test limit | PGlite verifies the complete ordered migration chain, grants/RLS, owner isolation, review/idempotency/conflicts, queue leases and digest carry-forward. The late-visibility regression models activity becoming visible after a frozen window; it is not a hosted multi-session test |
-| Hosted state | The Supabase dashboard recovered in a fresh Chrome window. `admin-notifications` was deployed from the checked single-file bundle and gateway JWT verification saved OFF, using its custom backend bearer check. All seven function settings were saved. GET returns 405 and unsigned POST 401. Migration 5 was then applied as one transaction: SQL Editor showed Success; an authenticated worker POST returns 200/ok with zero jobs while dispatch is OFF. Vault wiring, schedule and live parent/delivery verification remain pending |
-| Sender / secrets | Operator confirmed a Google sender; credential values remain outside source. CLI authentication is not established by the existing dashboard session |
+| Application deployment | `dpl_EFGjqPYki51dMbkCE2y92abXqegg`, READY, Git source `6f2b9be4f71776af6398f115a70a3678766ad459`; aliases include `https://uat.letsaimit.com`. Documentation-only descendants may redeploy the same application source |
+| Protected worker | Dashboard gateway JWT check saved OFF because the function checks its narrow backend bearer. Live GET 405, unsigned POST 401, correctly authenticated POST 200; public submission, parent-read and worker-claim RPCs reject anonymous calls with 401/42501 |
+| Live database authorization | Anonymous and authenticated direct INSERT grants are false; private queue/settings/activity tables have RLS with no app-role table access; worker RPCs deny anon/authenticated and permit service role; parent-list and review operations retain their separate ownership/membership checks |
+| Scheduler | Exactly one active `letsaimit-admin-notifications` job, every minute, with the expected wake command. Actual cron runs succeeded and worker HTTP calls returned 200. Four-hour closed-window summaries are configured; no closed-window summary delivery was forced or observed during this verification |
+| Live parent / Google journey | Existing verified Google identity saved one clearly labelled synthetic trial and received a matching saved confirmation. Only its new owned request appeared in My requests; old unowned records were not claimed by contact email. Sign-out cleared the list and the bound name/email/phone/consent in the globally mounted form. A fresh Google account-choice round trip returned to `/parent/`, restoring the saved Accepted request and the same account's Dashboard link |
+| Live email / review | The one synthetic request created four recipient jobs; all four were marked sent after Gmail SMTP acceptance on attempt 1. The sender account's inbox was opened and its received HTML email inspected. The email review link opened the test drawer; an owner-authenticated Accepted decision with revision 2 was observed, with Payment has not been requested. The parent view refreshed to Accepted without a document reload. Separate inbox placement for the other three recipients was not inspected; no payment or parent-outcome email was sent |
+| Live direct dashboard / CSV | Fresh plain `/admin/` exposed a null-intent crash during verification. The guarded fix and component-render regression were released, and the plain dashboard then showed Live, seven saved requests and four team members. Filtering to the synthetic request and exporting produced one saved row and 28 columns, including accepted review, nonempty reviewed_at_utc and reviewed_by |
+| Sender / secrets | Operator-confirmed Gmail sender and private App Password are stored in backend settings only. A 24-hour deployment token restricted to this UAT project and the required capabilities was created through the authorized account UI and stored privately outside Git; it is separate from the persistent runtime worker credential |
+| Deployment administration limits | All five schema files are manually applied, but `supabase_migrations.schema_migrations` is absent. Official CLI history repair failed with DbConfigIpv6Error; schema files were not rerun and substitute version records were not invented. CLI security Advisors returned 403 because the narrow token lacks advisors_read; the targeted live grants/RLS checks above passed, but no provider-wide Advisor pass is claimed |
 | Legacy integrations | Parent trial/enrol Apps Script modes retired in source; society/school paths preserved. Previously published Apps Script versions/native forms were not remotely audited or removed |
-| Production | No production source, alias, backend or provider configuration changed. Separate production readiness remains pending as listed above |
+| Production | No production source, alias, backend or provider configuration changed. `main` remains `372be17da151f45d42c54b42b36d2d50ef51758a`; fetched homepage SHA-256 remained `6f32fc0cc051d17e1817e189f7a442bfe17b5e93a41e1a0bfeba0efb4aa5dc87`. Separate production readiness remains pending as listed above |
 
-Before merging to `uat`, apply the reviewed backend changes, deploy the worker,
-privately configure the matching secrets/Vault values, and verify the coordinated
-release. Do not describe local previews as delivered emails or activate a frontend
-whose required backend contract is still missing.
+One deliberately labelled UAT request remains as verification data; it represents
+no real child. Screenshots of the received email, parent state and corrected
+register are private local artifacts. Production promotion must carry this source,
+the five ordered migrations and corresponding runtime settings to a separately
+configured production backend after explicit production authorization.

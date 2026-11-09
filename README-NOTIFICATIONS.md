@@ -5,6 +5,13 @@ Supabase and Google sign-in flow. Razorpay and a coach workspace are not include
 Website production requires its own explicit release authorization and configured
 backend; do not point it at the UAT database to activate these features.
 
+Activated on UAT on 10 November 2026. Live verification covered a Google parent
+save, four SMTP-accepted admin alerts, the sender's inbox, saved review/parent
+tracking, sign-out cleanup, a fresh Google round trip and the 28-column CSV.
+Four-hour summaries are scheduled; a scheduled summary delivery was not forced
+or observed in that check. See `docs/RELEASE-PARITY.md` for source/deployment
+references and the separate migration-history administration limitation.
+
 ## Product contract
 
 - Parents may enter answers before signing in. A verified Google account is
@@ -62,6 +69,14 @@ This repository uses Supabase CLI 3.x semantics. Read command `--help`; do not
 guess remote-target flags or apply a migration to a default target. CLI login is
 not established merely because the dashboard is signed in. Browser access must
 not be converted into an extracted token.
+
+Reuse the configured runtime secrets for later releases. The Google App Password
+authenticates SMTP; it is not a Supabase deployment token. A short-lived,
+project-scoped operator token authorizes deployment only, and its expiry does not
+stop the running notification worker. Use an existing authorized token when
+available, explicitly targeting the UAT project; never widen account access just
+to run an account-wide project listing. Official account token creation is
+distinct from extracting browser session credentials.
 
 For the Supabase browser editor, a single-file build of the same source is available:
 

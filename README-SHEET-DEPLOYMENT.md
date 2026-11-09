@@ -7,11 +7,11 @@ Approved staff sign in with Google at `/sign-in/` and open the private dashboard
 Google supplies staff identity; it does not store responses in Forms or Sheets.
 CSV is a private download from the saved register, not its storage format.
 
-The pending parent authentication and notification release is documented in
-[README-NOTIFICATIONS.md](README-NOTIFICATIONS.md). Its migration changes final
-submission to require Google sign-in and adds private parent tracking, admin
-review and queued email alerts. The older live checks below remain dated;
-they do not establish that this new release is activated.
+Parent authentication and notifications were activated on UAT on 10 November
+2026. [README-NOTIFICATIONS.md](README-NOTIFICATIONS.md) documents Google sign-in
+before final submission, private parent tracking, admin review and queued email
+alerts. See the latest release ledger for live delivery and login evidence;
+the older checks below remain a dated record.
 
 This setup is **UAT only**:
 
@@ -62,8 +62,8 @@ established migration workflow:
 2. `supabase/migrations/20261109083344_registration_function_privileges.sql`
 3. `supabase/migrations/20261109121642_lock_admin_membership_to_operator.sql`
 4. `supabase/migrations/20261109123953_restore_controlled_admin_invitations.sql`
-5. `supabase/migrations/20261109204510_parent_review_notifications.sql` — pending
-   hosted application; deploy with the matching frontend and notification worker.
+5. `supabase/migrations/20261109204510_parent_review_notifications.sql` — applied
+   to UAT on 10 November 2026 with the matching frontend and notification worker.
 
 The second migration makes `is_admin` an authenticated, security-invoker wrapper
 and removes application-role access to the optional dashboard RLS helper.
@@ -75,6 +75,13 @@ broad membership-write rules. The following migration restores validated Gmail
 invitations and protected revocation for current Google admins. This live UAT
 application of the migrations does not establish their application to a future
 production backend.
+
+These five files were applied manually through the SQL editor. The CLI history
+table is absent. An official `migration repair --status applied` attempt could
+not connect because this network lacks IPv6. Do not rerun the existing schema
+files as a workaround. Reconcile the five verified versions with CLI history
+using an approved working database connection before a future automated schema
+push; the manual application evidence is retained in the release ledger.
 
 The initial owner is a **separate privileged operator step**, not a public signup
 or an email embedded in the schema migration. Open
