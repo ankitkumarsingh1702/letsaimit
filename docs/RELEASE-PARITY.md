@@ -4,9 +4,10 @@ This ledger records evidence, not permission to deploy. It is project-local.
 The default **merge and deploy** target is UAT. Production work requires the
 explicit **merge and deploy to prod** instruction.
 
-Latest UAT application release: `6f2b9be4f71776af6398f115a70a3678766ad459`
-(Google parent requests and admin notifications, including the direct-dashboard
-fix). See the 10 November evidence below. Earlier tables remain a dated record.
+Latest UAT application release: `0ced92e5343008fb941d14cb82119c6aed26fed6`
+(monthly billing implementation; live payment activation is paused pending
+Razorpay credentials and webhook setup). See the 10 November evidence below.
+Earlier tables remain a dated record.
 
 ## Public identity contract
 
@@ -187,3 +188,36 @@ no real child. Screenshots of the received email, parent state and corrected
 register are private local artifacts. Production promotion must carry this source,
 the five ordered migrations and corresponding runtime settings to a separately
 configured production backend after explicit production authorization.
+
+## UAT release evidence — 10 November 2026, monthly billing
+
+This release deploys the implementation and backend with billing **disabled**.
+It does not establish a live Razorpay charge, payment receipt or reminder email.
+The existing parent/admin registration and notification release stays active.
+
+| Evidence | Record |
+| --- | --- |
+| Authorized target | UAT only, with live Razorpay credentials requested by the user for an explicitly disclosed ₹1 team checkout. Website production remains unchanged |
+| Tested source | Frontend `240f793`, complete application `0ced92e5343008fb941d14cb82119c6aed26fed6`, fast-forwarded to `uat` |
+| Product flow | Existing Google parent consent and admin review; new enrolment billing consent; approved new enrolments can create monthly Razorpay hosted invoices after activation. Trials remain free. No automatic debit mandate or coach workspace added |
+| Amount / dates | Regular price ₹600, team amount ₹1; first invoice due approval + four days; following months billed on the 1st and due end-of-5th IST; ₹100 per overdue day is the accepted regular fee policy, with preview-only fees during team testing. Account prices are frozen to their accepted terms |
+| Dashboard | Compact admin Billing tab and parent-owned invoice history; payment/invoice links, captured/refunded/outstanding totals, saved-row CSV, explicit all-time/filter scope, latest-1,000 limit disclosure, silent visible-tab refresh and audited stop-future-billing action |
+| Automated checks | 250 tests passed, including 13 new billing SQL tests and financial boundary/provider/webhook/email/UI tests. Optimized/prerendered build, 59-asset verification, Deno 2.9.6 checks of both function entrypoints and diff checks passed |
+| Applied UAT schema | `20261109225158_monthly_billing_invoices.sql` applied in one explicit transaction using the scoped deployment credential; schema cache reload sent. The six ordered source migrations are applied on UAT, with the previously recorded manual history limitation unchanged |
+| Live source comparison | All 15 new/replaced billing/submit function bodies, security modes and search paths match the source. The preserved pre-existing validator differs only in whitespace; normalized source is identical |
+| Live authorization | All six private billing tables have RLS enabled and no anon/authenticated table access. Worker RPC execution is denied to app roles. Actual anonymous calls to own/admin invoice lists and job claims returned 401/42501; public pricing terms returned 200 with enabled=false |
+| Functions / secrets | `billing-worker` and `razorpay-webhook` deployed via API bundling. The billing worker was redeployed after final frozen email-policy fixes. Existing SMTP/bearer configuration is reused; a dedicated backend-only Razorpay webhook secret is saved. No live Razorpay Key ID/Secret was configured in the inspected project secret inventory |
+| Scheduler | One active minute scheduler `letsaimit-billing-worker`, with a saved billing-worker Vault URL and the existing private worker bearer. Disabled billing prevents wake/queue/claim/dispatch; no invoice or account was backfilled |
+| Live endpoint checks | Unsigned worker POST 401; unsigned/invalid webhook signature 401. A self-generated signed synthetic event returned 200, duplicate delivery returned 200, and SQL showed one matching event. This is a self-signed integration probe, not evidence that Razorpay delivered an event. Authorized worker returned 503/not_configured without live API keys |
+| UAT deployment | `dpl_D1qZ1TJnLH5CukRJ9L3wTdmkKhDE`, READY, SHA `0ced92e5343008fb941d14cb82119c6aed26fed6`, alias `https://uat.letsaimit.com`. Billing page HTTP200; published JavaScript contains billing RPCs and excludes live-key/private-secret identifiers |
+| Actual financial state | Billing enabled=false; zero billing accounts and zero invoices. No real payment, refund, live checkout, scheduled parent reminder or billing email has been performed or claimed |
+| Provider UI / outstanding boundary | Correct signed-in LetsAimIt Razorpay live account inspected. Websites & API keys remained in its loading state after a fresh window and reload; no usable key controls appeared. A separate live webhook form was prepared with the endpoint, operator alert email and nine invoice/payment/refund events, but not created. The user was asked to enter existing/live credentials privately and complete the new webhook credential entry, as required by Chrome's computer-use policy |
+| Live browser scope | Provider setup inspected in Chrome. UAT billing HTTP/source checks completed; an authenticated browser billing/payment journey remains pending the active credential handoff. Do not describe API/source checks as a completed parent checkout |
+| Website production | Remote `main` remains `372be17da151f45d42c54b42b36d2d50ef51758a`; production homepage SHA-256 remains `6f32fc0cc051d17e1817e189f7a442bfe17b5e93a41e1a0bfeba0efb4aa5dc87`. No production code, DNS, backend or billing activation changed |
+
+The manual migration-history repair and provider Advisor permission limitations
+recorded for the earlier release still apply. No broad credential was created to
+remove those limitations. A future production promotion must carry this code and
+its ordered migration, use its own configured backend, and verify the chosen
+price, credentials and webhook without copying UAT records or silently upgrading
+consented ₹1 accounts. See [README-BILLING.md](../README-BILLING.md).
