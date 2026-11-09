@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "npm install --ignore-scripts --no-audit --no-fund",
+  "buildCommand": "npm run build",
+  "outputDirectory": "public",
+  "crons": [
+    {
+      "path": "/api/cron/supabase",
+      "schedule": "0 6 */3 * *"
+    }
+  ]
+}

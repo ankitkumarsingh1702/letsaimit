@@ -3,11 +3,5 @@
   "framework": "vite",
   "installCommand": "npm ci",
   "buildCommand": "if [ \"$VERCEL_GIT_COMMIT_REF\" = uat ]; then export VITE_SITE_ORIGIN=https://uat.letsaimit.com; fi; npm run build",
-  "outputDirectory": "dist",
-  "crons": [
-    {
-      "path": "/api/cron/supabase",
-      "schedule": "0 6 */3 * *"
-    }
-  ]
+  "outputDirectory": "dist"
 }
