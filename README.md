@@ -53,18 +53,13 @@ School services remain consultancy for the school's existing PE team. Salesforce
 
 ## What is connected now
 
-**Direct Google Sheet capture is prepared, not activated.** The connected account did not have edit access to the existing LetsAimIt forms or response Sheet, and the browser was signed out of Google. There is no deployed Apps Script endpoint in this package.
+On **UAT**, parents request a trial or enrol inside the React site. Supabase validates and saves each submission before the site shows confirmation. WhatsApp is an optional next step. Retries reuse a submission ID; editing answers starts a new request. Parent email addresses may repeat for siblings.
 
-Without that endpoint:
+Invited Gmail admins sign in at [uat.letsaimit.com/admin/](https://uat.letsaimit.com/admin/) to use the live register, edit follow-up details, manage access and download saved rows as CSV. Google provides admin identity; parent submissions are stored in Supabase, not Google Forms or Sheets. The separate `letsaimit-uat-health` Vercel project tracks `uat` and runs the database health schedule.
 
-- Trial, society and school forms clearly prepare a WhatsApp message. The visitor must send it.
-- Enrolment opens the existing public Google registration form after the guardian and terms checks. Google stores a response when the visitor submits it; this package does not verify whether that older form is linked to a Sheet.
-- No client-side message falsely claims that an enquiry has been saved.
-- No response data is stored in browser local storage.
+See [registration deployment and verification](README-SHEET-DEPLOYMENT.md) for the database migrations, Google OAuth configuration, environment variables, access controls, scheduler and observed checks. The production website at `letsaimit.com` remains on its separate release path.
 
-To activate direct capture, follow [integrations/google-sheets/README.md](integrations/google-sheets/README.md). Deploy `Code.gs` in the intended owner account, set `VITE_LEAD_ENDPOINT` to the returned `/exec` URL, verify a synthetic save from the published origin, then rebuild and publish. The UI switches to Save → confirmation → optional WhatsApp only after configuration. It checks a matching Google acknowledgement before showing success. Retries reuse a submission ID; editing details creates a new one.
-
-The optional `setupRegistrationForms()` function creates four consent-equipped Google Forms connected to the same private workbook. It does not alter the older public forms or import their responses. No notification email API is needed. Response Sheets must remain Restricted.
+Society and school enquiries retain their existing WhatsApp handoff while `VITE_LEAD_ENDPOINT` is blank. Their optional historical Apps Script integration remains documented in [integrations/google-sheets/README.md](integrations/google-sheets/README.md); parent registration does not use it. No registration responses are stored in browser local storage.
 
 ## Configuration
 
@@ -73,7 +68,10 @@ Copy `.env.example` to `.env.local` if changing configuration. These are public 
 | Variable | Purpose |
 | --- | --- |
 | `VITE_SITE_ORIGIN` | Canonical HTTPS origin. Defaults to the current ChatGPT.site URL. Use `https://letsaimit.com` when deploying there. |
-| `VITE_LEAD_ENDPOINT` | Owner-deployed Google Apps Script `/exec` URL. Blank until connected. |
+| `VITE_LEAD_ENDPOINT` | Optional legacy school/society Apps Script URL; blank for their WhatsApp handoff. |
+| `VITE_SUPABASE_URL` | Public Supabase project URL for the intended environment. |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Public Supabase key; private access is enforced by database rules. |
+| `VITE_SUPABASE_ANON_KEY` | Optional legacy public-key fallback. |
 | `VITE_GA4_ID` | Optional GA4 measurement ID. Blank; analytics are not active. |
 | `VITE_GA4_MANUAL_EVENTS_ONLY_CONFIRMED` | Set `true` only after disabling automatic Enhanced Measurement and user-provided data collection in the GA4 stream. |
 
@@ -115,7 +113,8 @@ Run `npm run verify:assets` to check the 54 original assets against the prior ap
 ## Supporting notes
 
 - [Sharing and deployment](docs/SHARING-DEPLOYMENT.md)
-- [Google registration setup](integrations/google-sheets/README.md)
+- [Native registration and private register](README-SHEET-DEPLOYMENT.md)
+- [Optional school/society capture](integrations/google-sheets/README.md)
 - [Policy sources and assumptions](docs/POLICY-SOURCES.md)
 - [Update verification and remaining dependencies](docs/UPDATE-VERIFICATION.md)
 
