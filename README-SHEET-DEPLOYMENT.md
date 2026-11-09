@@ -50,14 +50,17 @@ established migration workflow:
 1. `supabase/migrations/20261109080830_registration_register.sql`
 2. `supabase/migrations/20261109083344_registration_function_privileges.sql`
 3. `supabase/migrations/20261109121642_lock_admin_membership_to_operator.sql`
+4. `supabase/migrations/20261109123953_restore_controlled_admin_invitations.sql`
 
 The second migration makes `is_admin` an authenticated, security-invoker wrapper
 and removes application-role access to the optional dashboard RLS helper.
 Apply complete files, including functions, triggers, grants and policies;
 copying only table definitions is insufficient. The first two migrations were applied
 to the live UAT project on 9 November 2026. The third is a forward change that
-accepts normalized company-domain Google email addresses and makes membership
-read-only to application roles. Apply it before configuring the approved team.
+accepts normalized company-domain Google email addresses and removes the earlier
+broad membership-write rules. The following migration restores validated Gmail
+invitations and protected revocation for current Google admins. Apply both forward
+changes before configuring the initial approved team.
 
 The initial owner is a **separate privileged operator step**, not a public signup
 or an email embedded in the schema migration. Open
@@ -80,14 +83,16 @@ The checked-in database contract is:
 | --- | --- |
 | Anonymous parent | Execute `submit_registration` for a validated save and receipt. Direct INSERT is limited to the four intake columns and remains trigger-validated. No registration/allowlist reads, edits or deletes. |
 | Signed-in, unlisted account | No private records or team access. Google login alone does not establish membership. |
-| Allowlisted Google admin | Read registrations and membership; update only status, follow-up notes and assignee. Membership changes require a privileged operator. The database also permits authorized registration deletion, although the current grid does not expose a delete action. |
+| Allowlisted Google admin | Read registrations and membership; update only status, follow-up notes and assignee. Invite validated Gmail admins and revoke non-owner access; protected owner and last-admin rules remain enforced. The database also permits authorized registration deletion, although the current grid does not expose a delete action. |
 | Database operator | Bootstrap the protected owner and carry out deliberate privileged maintenance. |
 
 Both tables have RLS enabled. Anonymous INSERT grants apply only to `full_name`,
 `email`, `phone` and `metadata`. Authenticated UPDATE grants apply only to the
 three follow-up columns. Policies require current allowlist membership and a
-Google-authenticated identity for private operations. The app has no membership mutation privileges or invite controls. Existing owner
-and last-admin protections remain in place for privileged maintenance.
+Google-authenticated identity for private operations. The app may insert only an invited email address; it cannot set owner status or
+modify identities. New app invitations accept Gmail addresses only. Existing
+company-domain Google identities are configured by an operator. Protected owners
+and the last remaining admin cannot be removed.
 
 Submitted contact/child details, consent and receipt identity stay immutable to
 ordinary admin edits. Retries use the same submission ID and fingerprint; a
@@ -130,12 +135,17 @@ The configuration steps below document that setup for future reproduction.
    an email draft to the existing public programme contact; it does not send a
    message, save a request or grant membership automatically.
 
-The four exact addresses are operator configuration, not public source. Prepare
+The four initial exact addresses are operator configuration, not public source. Prepare
 the access synchronization in the ignored `supabase/configure-admin-access.sql.local`
 file. Apply it only to the named UAT project after the required browser access-change
 confirmation. It preserves the current owner, adds the approved three other
-accounts, removes unapproved memberships and returns the final membership list.
-The Team screen is read-only; changing the approved team is an operator action.
+accounts and returns the membership list. It does not remove later valid invitations.
+The Team screen allows current admins to invite additional Gmail accounts and revoke
+non-owner access. Input is trimmed and lowercased; malformed/non-Gmail addresses and
+duplicates receive clear errors, while the database remains the final authority.
+The existing company-domain account remains supported; adding further company
+accounts requires deliberate operator configuration. No invitation email is sent
+automatically. Share the `/sign-in/` link after a successful invite.
 
 The app uses Supabase Auth's PKCE flow. See the official
 [Google sign-in setup](https://supabase.com/docs/guides/auth/social-sign-in/auth-google).

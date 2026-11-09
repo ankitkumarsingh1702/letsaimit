@@ -1,6 +1,7 @@
-import { followUpPatch, toAdminRequest } from "./admin-model.js";
+import { followUpPatch, toAdminRequest, validateAdminInvite, toAdminMember } from "./admin-model.js";
 
 export const SAFE_COLUMNS = "id,submission_id,full_name,email,phone,metadata,status,notes,assignee,revision,created,updated,updated_by";
+export const MEMBER_COLUMNS = "email,is_owner,created_at,created_by";
 const BATCH_SIZE = 500;
 
 /** Read every saved page. The caller checks current access before and after. */
@@ -50,4 +51,40 @@ export function mergeSavedRequests(current, incoming) {
     const saved = previous.get(row.id);
     return saved && saved.revision > row.revision ? saved : row;
   });
+}
+
+function membershipError(message, code = "unconfirmed") {
+  return Object.assign(new Error(message), { code });
+}
+
+export async function inviteAdminMembership(client, value, members = []) {
+  const checked = validateAdminInvite(value, members);
+  if (!checked.ok) throw membershipError(checked.error, checked.code);
+  const { data, error } = await client.from("allowed_admins").insert({ email: checked.email }).select(MEMBER_COLUMNS);
+  if (error) throw error;
+  if (data?.length !== 1 || data[0].email !== checked.email || data[0].is_owner !== false) {
+    throw membershipError("The invitation could not be confirmed. Refresh the team and try again.");
+  }
+  const { data: saved, error: readError } = await client.from("allowed_admins").select(MEMBER_COLUMNS).eq("email", checked.email).maybeSingle();
+  if (readError) throw readError;
+  if (!saved || saved.email !== checked.email || !Number.isFinite(Date.parse(saved.created_at))) {
+    throw membershipError("The invitation could not be confirmed. Refresh the team and try again.");
+  }
+  return toAdminMember(saved);
+}
+
+/** A self-removal is confirmed by the caller's fresh access check, never an anonymous table read. */
+export async function removeAdminMembership(client, member, { self = false } = {}) {
+  if (!member?.email || member.role === "owner") throw membershipError("The owner keeps access.", "protected");
+  const { data, error } = await client.from("allowed_admins").delete().eq("email", member.email).select(MEMBER_COLUMNS);
+  if (error) throw error;
+  if (data?.length !== 1 || data[0].email !== member.email) {
+    throw membershipError("This account could not be removed. Refresh the team and try again.");
+  }
+  if (!self) {
+    const { data: stillSaved, error: readError } = await client.from("allowed_admins").select("email").eq("email", member.email).maybeSingle();
+    if (readError) throw readError;
+    if (stillSaved) throw membershipError("This account still has access. Refresh the team and try again.");
+  }
+  return { email: member.email, self };
 }

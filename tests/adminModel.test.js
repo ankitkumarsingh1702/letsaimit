@@ -1,7 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { toAdminRequest, followUpPatch, filterRows, paginateRows, deriveSummary, periodForPreset, defaultFilters, buildRegisterCsv, formatAge } from "../src/features/admin/admin-model.js";
-import { fetchSavedRequests, saveRequestFollowUp, mergeSavedRequests, SAFE_COLUMNS } from "../src/features/admin/adminTransport.js";
+import { toAdminRequest, followUpPatch, filterRows, paginateRows, deriveSummary, periodForPreset, defaultFilters, buildRegisterCsv, formatAge, validateAdminInvite, toAdminMember } from "../src/features/admin/admin-model.js";
+import { fetchSavedRequests, saveRequestFollowUp, mergeSavedRequests, SAFE_COLUMNS, MEMBER_COLUMNS, inviteAdminMembership, removeAdminMembership } from "../src/features/admin/adminTransport.js";
+import { settleMembershipFailure } from "../src/features/admin/useAdminRegister.js";
 
 function record(id = "row-1", revision = 1) {
   return { id, submission_id: `submission-${id}`, full_name: "Parent, नाम", email: "parent@example.com", phone: "+919876543210", metadata: {
@@ -20,7 +21,7 @@ function fakeClient(responses) {
   const client = { from(table) {
     const call = { table }; calls.push(call);
     const builder = {};
-    for (const method of ["select", "update", "eq", "order", "range", "maybeSingle"]) {
+    for (const method of ["select", "update", "insert", "delete", "eq", "order", "range", "maybeSingle"]) {
       builder[method] = (...args) => { (call[method] ||= []).push(args); return builder; };
     }
     builder.then = (resolve, reject) => Promise.resolve(responses.shift()).then(resolve, reject);
@@ -143,4 +144,84 @@ test("deleted row, unavailable server and invalid save acknowledgement never rep
 test("a late refresh cannot roll a saved edit back, while server-deleted rows leave the register", () => {
   const saved = { id: "row", revision: 3, adminNotes: "new" };
   assert.deepEqual(mergeSavedRequests([saved, { id: "deleted", revision: 1 }], [{ id: "row", revision: 2, adminNotes: "old" }]), [saved]);
+});
+
+test("Gmail invitations normalize identity and reject malformed, company, control and duplicate input", () => {
+  assert.deepEqual(validateAdminInvite("  New.Admin+trial@GMAIL.COM  "), { ok: true, email: "new.admin+trial@gmail.com" });
+  for (const value of ["", "ankit@hushh.ai", "bad name@gmail.com", ".name@gmail.com", "name.@gmail.com", "na..me@gmail.com", "name@@gmail.com", "name@gmail.com.evil.test", "name@gmail.com\n", "\tname@gmail.com", "na\u0085me@gmail.com", `${"a".repeat(65)}@gmail.com`]) {
+    assert.equal(validateAdminInvite(value).ok, false, value);
+  }
+  assert.equal(validateAdminInvite(" EXISTING@GMAIL.COM ", [{ email: "existing@gmail.com" }]).code, "duplicate");
+  assert.equal(toAdminMember({ email: "company@hushh.ai", is_owner: false }).email, "company@hushh.ai");
+});
+
+test("invitation writes only the normalized email and returns confirmed server audit metadata", async () => {
+  const saved = { email: "new@gmail.com", is_owner: false, created_at: "2026-11-09T12:00:00Z", created_by: "current@gmail.com" };
+  const { client, calls } = fakeClient([{ data: [saved] }, { data: saved }]);
+  const member = await inviteAdminMembership(client, " New@Gmail.com ");
+  assert.deepEqual(calls[0].insert[0], [{ email: "new@gmail.com" }]);
+  assert.equal(calls[0].select[0][0], MEMBER_COLUMNS);
+  assert.deepEqual(calls[1].eq[0], ["email", "new@gmail.com"]);
+  assert.equal(member.role, "admin"); assert.equal(member.addedAt, saved.created_at); assert.equal(member.addedBy, saved.created_by);
+});
+
+test("duplicate races, server failures and missing confirmation never fabricate an invitation", async () => {
+  const duplicate = fakeClient([{ error: { code: "23505", message: "duplicate" } }]);
+  await assert.rejects(inviteAdminMembership(duplicate.client, "new@gmail.com"), error => error.code === "23505");
+  const localDuplicate = fakeClient([]);
+  await assert.rejects(inviteAdminMembership(localDuplicate.client, "new@gmail.com", [{ email: "new@gmail.com" }]), error => error.code === "duplicate");
+  assert.equal(localDuplicate.calls.length, 0);
+  const noAck = fakeClient([{ data: [] }]);
+  await assert.rejects(inviteAdminMembership(noAck.client, "new@gmail.com"), /could not be confirmed/);
+  const saved = { email: "new@gmail.com", is_owner: false, created_at: "2026-11-09T12:00:00Z" };
+  const failedRead = fakeClient([{ data: [saved] }, { error: new Error("offline") }]);
+  await assert.rejects(inviteAdminMembership(failedRead.client, "new@gmail.com"), /offline/);
+});
+
+test("removing another member requires the exact returned deleted row and a confirmed absence", async () => {
+  const saved = { email: "other@gmail.com", is_owner: false };
+  const { client, calls } = fakeClient([{ data: [saved] }, { data: null }]);
+  assert.deepEqual(await removeAdminMembership(client, { email: saved.email, role: "admin" }), { email: saved.email, self: false });
+  assert.deepEqual(calls[0].eq[0], ["email", saved.email]);
+  assert.equal(calls[0].delete.length, 1); assert.equal(calls.length, 2);
+  const stillPresent = fakeClient([{ data: [saved] }, { data: saved }]);
+  await assert.rejects(removeAdminMembership(stillPresent.client, { email: saved.email, role: "admin" }), /still has access/);
+});
+
+test("owner removal, missing delete acknowledgements and network errors never report revoked access", async () => {
+  const owner = fakeClient([]);
+  await assert.rejects(removeAdminMembership(owner.client, { email: "owner@gmail.com", role: "owner" }), /owner keeps access/);
+  assert.equal(owner.calls.length, 0);
+  const noAck = fakeClient([{ data: [] }]);
+  await assert.rejects(removeAdminMembership(noAck.client, { email: "other@gmail.com", role: "admin" }), /could not be removed/);
+  const failed = fakeClient([{ error: new Error("offline") }]);
+  await assert.rejects(removeAdminMembership(failed.client, { email: "other@gmail.com", role: "admin" }), /offline/);
+});
+
+test("self-removal requires a delete acknowledgement and leaves authorization confirmation to the shared auth check", async () => {
+  const member = { email: "self@gmail.com", role: "admin" };
+  const { client, calls } = fakeClient([{ data: [{ email: member.email, is_owner: false }] }]);
+  assert.deepEqual(await removeAdminMembership(client, member, { self: true }), { email: member.email, self: true });
+  assert.equal(calls.length, 1, "a removed account must not query the private table anonymously");
+});
+
+test("ambiguous issued self-removal signs out before either a stale allowed result or a failed access check", async () => {
+  for (const checkFails of [false, true]) {
+    const events = [];
+    await settleMembershipFailure({ selfRemovalIssued: true,
+      signOut: async () => { events.push("sign_out"); },
+      checkAccess: async () => { events.push("check_access"); if (checkFails) throw new Error("offline"); return true; },
+    });
+    assert.deepEqual(events, ["sign_out", "check_access"]);
+  }
+});
+
+test("another account's failed removal or an unissued self-removal preserves the current sign-in", async () => {
+  let signOuts = 0;
+  let checks = 0;
+  await settleMembershipFailure({ selfRemovalIssued: false,
+    signOut: async () => { signOuts += 1; },
+    checkAccess: async () => { checks += 1; return true; },
+  });
+  assert.equal(signOuts, 0); assert.equal(checks, 1);
 });

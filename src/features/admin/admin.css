@@ -124,11 +124,18 @@ body[data-page="admin"] #main { min-height: 100dvh; padding-block: 24px; }
 .adm-empty p { font-size: 12px; color: #788c71; margin-bottom: 23px; }
 .adm-empty-icon { display: inline-flex; padding: 18px; border-radius: 18px; background: #f0f5e9; margin-bottom: 18px; color: #76936c; }
 .adm-team-card { max-width: 1050px; }
+.adm-invite-form { display: flex; align-items: flex-start; gap: 16px; padding: 0 26px 22px; }
+.adm-invite-form > .adm-field { flex: 1; max-width: 500px; }
+.adm-invite-form > .adm-button { margin-top: 22px; }
+.adm-invite-form .adm-dialog-note { margin-top: 0; }
+.adm-invite-form .adm-error { margin-top: 0; }
+.adm-team-notice { padding: 12px 26px; color: #456a38; background: #f2f7eb; font-size: 12px; }
 .adm-team-list { padding: 0 26px; }
 .adm-team-row { display: flex; align-items: center; gap: 16px; padding: 25px 0; border-top: 1px solid #edf1e9; }
 .adm-team-person { flex: 1; display: grid; gap: 4px; min-width: 0; }
 .adm-team-person strong { font-size: 12px; font-weight: 600; overflow-wrap: anywhere; }
 .adm-team-person > span { font-size: 10px; color: #809279; }
+.adm-team-person > span { overflow-wrap: anywhere; }
 .adm-role-badge { background: #eef3e8; color: #547148; padding: 5px 10px; border-radius: 6px; font-size: 10px; }
 .adm-owner-protected { min-width: 86px; display: inline-flex; align-items: center; justify-content: flex-end; gap: 5px; color: #98a48e; font-size: 10px; }
 .adm-owner-protected svg { width: 13px; height: 13px; }
@@ -247,6 +254,9 @@ body[data-page="admin"] #main { min-height: 100dvh; }
   .adm-register-note { align-items: flex-start; line-height: 1.7; font-size: 12px; }
   .adm-register-note svg { margin-top: 3px; }
   .adm-team-list { padding-inline: 20px; }
+  .adm-invite-form { padding-inline: 20px; flex-direction: column; gap: 12px; }
+  .adm-invite-form > .adm-field { width: 100%; max-width: none; }
+  .adm-invite-form > .adm-button { margin-top: 0; }
   .adm-team-row { display: grid; grid-template-columns: 35px 1fr auto; gap: 11px; padding-block: 22px; }
   .adm-team-row .adm-avatar { width: 35px; height: 35px; font-size: 10px; }
   .adm-team-row .adm-role-badge { grid-column: 2; justify-self: start; font-size: 11px; }

@@ -9,6 +9,8 @@ const migrationNames = (await readdir(migrationDirectory)).filter(name => name.e
 const migrations = await Promise.all(migrationNames.map(name => readFile(new URL(name, migrationDirectory), "utf8")));
 const ownerEmail = "owner@example.com";
 const secondEmail = "second@company.test";
+const invitedEmail = "invited.admin@gmail.com";
+const invitedId = "10000000-0000-4000-8000-000000000003";
 const ownerId = "10000000-0000-4000-8000-000000000001";
 const secondId = "10000000-0000-4000-8000-000000000002";
 
@@ -25,7 +27,7 @@ function payload(formType = "trial") {
   };
 }
 
-test("Supabase migration validates persistence, RLS, idempotency and operator-managed access in PostgreSQL", async context => {
+test("Supabase migration validates persistence, RLS, idempotency and controlled admin invitations in PostgreSQL", async context => {
   const database = new PGlite();
   context.after(() => database.close());
   // Supabase Auth normally supplies these functions and roles. The test supplies
@@ -161,7 +163,7 @@ test("Supabase migration validates persistence, RLS, idempotency and operator-ma
     assert.equal((await asRole("anon", {}, () => submit(first))).duplicate, true);
   });
 
-  await context.test("operator can allow a company Google identity without broadening app membership privileges", async () => {
+  await context.test("operator-seeded company Google identities remain valid members", async () => {
     await database.query("insert into public.allowed_admins (email, created_by) values ($1, 'operator test')", [` ${secondEmail.toUpperCase()} `]);
     const added = (await database.query("select * from public.allowed_admins where email=$1", [secondEmail])).rows[0];
     assert.equal(added.email, secondEmail);
@@ -174,25 +176,70 @@ test("Supabase migration validates persistence, RLS, idempotency and operator-ma
     await assert.rejects(database.query("delete from public.allowed_admins where email=$1", [ownerEmail]), { code: "42501" });
   });
 
-  await context.test("authenticated admins cannot invite, revoke, rename or promote any member", async () => {
+  await context.test("current Google admins can invite normalized Gmail accounts with server-owned audit fields", async () => {
+    // A current company-domain Google member can also invite, not just an owner.
+    await asRole("authenticated", google(secondEmail, secondId), async () => {
+      const inserted = await database.query("insert into public.allowed_admins (email) values ($1) returning *", [` ${invitedEmail.toUpperCase()} `]);
+      assert.equal(inserted.rows[0].email, invitedEmail);
+      assert.equal(inserted.rows[0].is_owner, false);
+      assert.equal(inserted.rows[0].created_by, secondEmail);
+      assert.ok(Number.isFinite(Date.parse(inserted.rows[0].created_at)));
+      await assert.rejects(database.query("insert into public.allowed_admins (email) values ($1)", [invitedEmail.toUpperCase()]), { code: "23505" });
+      for (const email of ["new@company.test", "not-an-email", "user@gmail.com.evil.test", ".user@gmail.com", "user.@gmail.com", "user..name@gmail.com", "bad\\u0001@gmail.com", "x".repeat(65) + "@gmail.com"]) {
+        const input = email.replace("\\u0001", "\u0001");
+        await assert.rejects(database.query("insert into public.allowed_admins (email) values ($1)", [input]), { code: "22023" });
+      }
+    });
+    assert.equal((await asRole("authenticated", google(invitedEmail, invitedId), () => database.query("select public.is_admin() as allowed"))).rows[0].allowed, true);
+    await asRole("authenticated", google(invitedEmail, invitedId), async () => {
+      // Invited admins receive the same controlled invite/revoke capability.
+      await database.query("insert into public.allowed_admins (email) values ('nested.invite@gmail.com')");
+      await database.query("delete from public.allowed_admins where email='nested.invite@gmail.com'");
+    });
+  });
+
+  await context.test("admin invitation grants exclude owner promotion, audit forgery and identity updates", async () => {
     await asRole("authenticated", google(), async () => {
-      await assert.rejects(database.query("insert into public.allowed_admins (email) values ('new@company.test')"), { code: "42501" });
-      await assert.rejects(database.query("insert into public.allowed_admins (email,is_owner) values ('forged@example.com',true)"), { code: "42501" });
-      await assert.rejects(database.query("update public.allowed_admins set email='changed@company.test' where email=$1", [secondEmail]), { code: "42501" });
+      await assert.rejects(database.query("insert into public.allowed_admins (email,is_owner) values ('forged@gmail.com',true)"), { code: "42501" });
+      await assert.rejects(database.query("insert into public.allowed_admins (email,created_by) values ('forged@gmail.com','someone else')"), { code: "42501" });
+      await assert.rejects(database.query("update public.allowed_admins set email='changed@gmail.com' where email=$1", [secondEmail]), { code: "42501" });
       await assert.rejects(database.query("update public.allowed_admins set is_owner=true where email=$1", [secondEmail]), { code: "42501" });
-      await assert.rejects(database.query("delete from public.allowed_admins where email=$1", [secondEmail]), { code: "42501" });
-      const members = (await database.query("select email from public.allowed_admins order by email")).rows.map(row => row.email);
-      assert.deepEqual(members, [ownerEmail, secondEmail]);
+      await assert.rejects(database.query("delete from public.allowed_admins where email=$1", [ownerEmail]), { code: "42501" });
     });
     const privileges = await database.query(`
       select has_table_privilege('authenticated', 'public.allowed_admins', 'select') as can_read,
-        has_any_column_privilege('authenticated', 'public.allowed_admins', 'insert') as can_insert,
+        has_table_privilege('authenticated', 'public.allowed_admins', 'insert') as can_insert_any_column,
+        has_column_privilege('authenticated', 'public.allowed_admins', 'email', 'insert') as can_invite_email,
+        has_column_privilege('authenticated', 'public.allowed_admins', 'is_owner', 'insert') as can_set_owner,
         has_any_column_privilege('authenticated', 'public.allowed_admins', 'update') as can_update,
         has_table_privilege('authenticated', 'public.allowed_admins', 'delete') as can_delete
     `);
-    assert.deepEqual(privileges.rows[0], { can_read: true, can_insert: false, can_update: false, can_delete: false });
-    const policies = await database.query("select polcmd from pg_policy where polrelid='public.allowed_admins'::regclass");
-    assert.deepEqual(policies.rows, [{ polcmd: "r" }]);
+    assert.deepEqual(privileges.rows[0], { can_read: true, can_insert_any_column: false, can_invite_email: true, can_set_owner: false, can_update: false, can_delete: true });
+    const policies = await database.query("select polcmd from pg_policy where polrelid='public.allowed_admins'::regclass order by polcmd");
+    assert.deepEqual(policies.rows, [{ polcmd: "a" }, { polcmd: "d" }, { polcmd: "r" }]);
+  });
+
+  await context.test("anonymous and unlisted Google accounts cannot invite or remove members", async () => {
+    await asRole("anon", {}, async () => {
+      await assert.rejects(database.query("insert into public.allowed_admins (email) values ('outsider@gmail.com')"), { code: "42501" });
+      await assert.rejects(database.query("delete from public.allowed_admins where email=$1", [invitedEmail]), { code: "42501" });
+    });
+    await asRole("authenticated", google("outsider@gmail.com", invitedId), async () => {
+      await assert.rejects(database.query("insert into public.allowed_admins (email) values ('outsider@gmail.com')"), { code: "42501" });
+      assert.deepEqual((await database.query("delete from public.allowed_admins where email=$1 returning email", [invitedEmail])).rows, []);
+      assert.deepEqual((await database.query("select email from public.allowed_admins")).rows, []);
+    });
+  });
+
+  await context.test("admin revocation denies an invited Gmail even with its stale Google JWT", async () => {
+    const removed = await asRole("authenticated", google(), () => database.query("delete from public.allowed_admins where email=$1 returning email", [invitedEmail]));
+    assert.deepEqual(removed.rows, [{ email: invitedEmail }]);
+    await asRole("authenticated", google(invitedEmail, invitedId), async () => {
+      assert.equal((await database.query("select public.is_admin() as allowed")).rows[0].allowed, false);
+      assert.equal((await database.query("select * from public.registrations")).rows.length, 0);
+      await assert.rejects(database.query("insert into public.allowed_admins (email) values ('new.invite@gmail.com')"), { code: "42501" });
+      assert.deepEqual((await database.query("delete from public.allowed_admins where email=$1 returning email", [ownerEmail])).rows, []);
+    });
   });
 
   await context.test("operator revocation denies a company account even with the same stale Google JWT", async () => {
@@ -243,6 +290,7 @@ test("Supabase migration validates persistence, RLS, idempotency and operator-ma
   await context.test("the database also protects the last non-owner admin", async () => {
     // Privileged SQL is the documented recovery boundary for changing owners.
     await database.query("update public.allowed_admins set is_owner=false where email=$1", [ownerEmail]);
+    await asRole("authenticated", google(), () => assert.rejects(database.query("delete from public.allowed_admins where email=$1", [ownerEmail]), { code: "42501" }));
     await assert.rejects(database.query("delete from public.allowed_admins where email=$1", [ownerEmail]), { code: "42501" });
     assert.equal((await database.query("select count(*)::int as count from public.allowed_admins")).rows[0].count, 1);
   });

@@ -17,6 +17,28 @@ export function formatAge(age) {
   return Number.isInteger(years) && years >= 5 && years <= 14 ? `${years} years` : 'Not provided';
 }
 
+/** Invitation identity is an exact Gmail address; Google still verifies sign-in. */
+export function validateAdminInvite(value, members = []) {
+  if (typeof value !== 'string' || /[\u0000-\u001F\u007F-\u009F]/u.test(value)) {
+    return { ok: false, code: 'invalid', error: 'Enter a valid Gmail address.' };
+  }
+  const email = value.trim().toLowerCase();
+  const local = email.split('@')[0];
+  if (email.length > 254 || local.length > 64 || !/^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@gmail\.com$/.test(email)
+    || local.startsWith('.') || local.endsWith('.') || local.includes('..')) {
+    return { ok: false, code: 'invalid', error: 'Enter a valid Gmail address.' };
+  }
+  if (members.some(member => String(member.email || '').trim().toLowerCase() === email)) {
+    return { ok: false, code: 'duplicate', error: 'This account already has access.' };
+  }
+  return { ok: true, email };
+}
+
+export function toAdminMember(record, currentEmail = '') {
+  return { email: record.email, role: record.is_owner === true ? 'owner' : 'admin',
+    addedAt: record.created_at, addedBy: record.created_by || '', isCurrentUser: record.email === currentEmail };
+}
+
 const statuses = STATUS_OPTIONS.map(({ value }) => value);
 const collator = new Intl.Collator('en-IN', { numeric: true, sensitivity: 'base' });
 const text = (value) => String(value ?? '');

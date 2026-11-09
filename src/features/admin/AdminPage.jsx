@@ -5,7 +5,7 @@ import SignIn from "../../pages/SignIn.jsx";
 import RequestDetail from "./RequestDetail.jsx";
 import AdminOverview from "./AdminOverview.jsx";
 import { useAdminRegister } from "./useAdminRegister.js";
-import { filterRows, paginateRows, deriveSummary, formatIST, formatAge, periodForPreset, defaultFilters, buildRegisterCsv, STATUS_OPTIONS, FORM_LABELS } from "./admin-model.js";
+import { filterRows, paginateRows, deriveSummary, formatIST, formatAge, periodForPreset, defaultFilters, buildRegisterCsv, STATUS_OPTIONS, FORM_LABELS, validateAdminInvite } from "./admin-model.js";
 import "./admin.css";
 
 const VIEWS = [
@@ -104,20 +104,83 @@ function Register({ rows, filtered, pagination, filters, setFilter, resetFilters
   </section>;
 }
 
-function Team({ members, user }) {
+function RemoveAccessDialog({ member, self, busy, error, onClose, onConfirm }) {
+  const ref = React.useRef(null);
+  const heading = React.useId();
+  React.useEffect(() => {
+    const dialog = ref.current;
+    const opener = document.activeElement;
+    dialog.showModal();
+    return () => { dialog.close(); if (opener?.isConnected) opener.focus(); };
+  }, []);
+  return <dialog ref={ref} className="adm-dialog" aria-labelledby={heading} onCancel={event => { event.preventDefault(); if (!busy) onClose(); }}>
+    <div className="adm-dialog-inner"><div className="adm-dialog-head"><h2 id={heading}>Remove admin access?</h2><button type="button" className="adm-icon-button" aria-label="Close access removal" disabled={busy} onClick={onClose}><AdminIcon name="close" /></button></div>
+      <p className="adm-dialog-copy">{member.email}</p><p className="adm-dialog-note">{self ? "Your admin access will be removed and you will be signed out." : "This account will no longer be able to open the private register."}</p>
+      {error && <p className="adm-error" role="alert">{error}</p>}
+      <div className="adm-dialog-actions"><button type="button" className="adm-button adm-button-white" disabled={busy} onClick={onClose}>Keep access</button><button type="button" className="adm-button adm-button-dark" disabled={busy} onClick={onConfirm}>{busy ? "Removing…" : "Remove access"}</button></div>
+    </div>
+  </dialog>;
+}
+
+function Team({ members, user, onInvite, onRemove }) {
+  const [email, setEmail] = React.useState("");
+  const [touched, setTouched] = React.useState(false);
+  const [inviteError, setInviteError] = React.useState("");
+  const [removeError, setRemoveError] = React.useState("");
+  const [notice, setNotice] = React.useState("");
+  const [busy, setBusy] = React.useState("");
+  const [removing, setRemoving] = React.useState(null);
+  const field = React.useRef(null);
+  const alive = React.useRef(true);
+  const prefix = React.useId();
+  React.useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
+  const validation = validateAdminInvite(email, members);
+  const fieldError = touched ? (!validation.ok ? validation.error : inviteError) : "";
+  async function invite(event) {
+    event.preventDefault();
+    if (busy) return;
+    setTouched(true); setInviteError(""); setNotice("");
+    if (!validation.ok) { field.current?.focus(); return; }
+    setBusy("invite");
+    try {
+      const result = await onInvite(validation.email);
+      if (!alive.current) return;
+      if (result.ok) { setEmail(""); setTouched(false); setNotice(`Access added for ${validation.email}. They can now sign in with Google.`); }
+      else { setInviteError(result.error); field.current?.focus(); }
+    } catch { if (alive.current) setInviteError("The invitation could not be confirmed. Your email is kept. Please retry."); }
+    finally { if (alive.current) setBusy(""); }
+  }
+  async function remove() {
+    if (busy || !removing) return;
+    setBusy(removing.email); setRemoveError(""); setNotice("");
+    try {
+      const result = await onRemove(removing.email);
+      if (!alive.current) return;
+      if (result.ok) { setNotice(`Access removed for ${removing.email}.`); setRemoving(null); }
+      else setRemoveError(result.error);
+    } catch { if (alive.current) setRemoveError("Access removal could not be confirmed. Please retry."); }
+    finally { if (alive.current) setBusy(""); }
+  }
   return <section className="adm-card adm-team-card" aria-labelledby="adm-team-heading">
     <div className="adm-card-heading"><div><h2 id="adm-team-heading">Team access</h2><p>{members.length} approved accounts</p></div></div>
+    <form className="adm-invite-form" onSubmit={invite} noValidate aria-label="Invite an admin">
+      <div className="adm-field"><label htmlFor={`${prefix}-email`}>Invite a Gmail account</label><input ref={field} id={`${prefix}-email`} name="admin-email" type="email" autoComplete="off" required maxLength={254} placeholder="name@gmail.com" value={email} disabled={Boolean(busy)} aria-invalid={fieldError ? true : undefined} aria-describedby={`${prefix}-hint${fieldError ? ` ${prefix}-error` : ""}`} onBlur={() => setTouched(true)} onChange={event => { setEmail(event.target.value); setInviteError(""); setNotice(""); }} /><p className="adm-dialog-note" id={`${prefix}-hint`}>They can sign in with Google after access is saved.</p>{fieldError && <p className="adm-error" id={`${prefix}-error`} role="alert">{fieldError}</p>}</div>
+      <button type="submit" className="adm-button adm-button-dark" disabled={Boolean(busy)}>{busy === "invite" ? "Adding…" : "Add admin"}</button>
+    </form>
+    {notice && <p className="adm-team-notice" role="status">{notice}</p>}
     <div className="adm-team-list">{members.map(member => <div className="adm-team-row" key={member.email}>
       <Avatar name={member.email === user.email ? user.displayName : member.email.split("@")[0].replaceAll(".", " ")} />
-      <div className="adm-team-person"><strong>{member.email}</strong><span>{member.email === user.email ? "You" : "Approved account"}</span></div>
+      <div className="adm-team-person"><strong>{member.email}</strong><span>{member.email === user.email ? "You" : "Approved account"}</span><span>Added {formatIST(member.addedAt)} IST{member.addedBy ? ` by ${member.addedBy}` : ""}</span></div>
       <span className="adm-role-badge">{member.role === "owner" ? "Owner" : "Admin"}</span>
+      <button type="button" className="adm-text-button adm-danger-text" disabled={Boolean(busy) || member.role === "owner" || members.length <= 1} aria-label={member.role === "owner" ? `Owner access protected for ${member.email}` : `Remove admin access for ${member.email}`} onClick={() => { setRemoveError(""); setRemoving(member); }}>{member.role === "owner" ? "Owner protected" : member.email === user.email ? "Remove my access" : "Remove"}</button>
     </div>)}</div>
-    <div className="adm-team-note"><AdminIcon name="shield" /><p>Only approved accounts can open this register. Access is managed by the site owner.</p></div>
+    <div className="adm-team-note"><AdminIcon name="shield" /><p>Approved admins can add Gmail accounts and remove admin access. The owner keeps access.</p></div>
+    {removing && <RemoveAccessDialog member={removing} self={removing.email === user.email} busy={busy === removing.email} error={removeError} onClose={() => { setRemoving(null); setRemoveError(""); }} onConfirm={remove} />}
   </section>;
 }
 
 function AuthorizedAdmin({ auth }) {
-  const { rows, members, loading, error, liveState, lastSynced, refresh, save } = useAdminRegister(auth);
+  const { rows, members, loading, error, liveState, lastSynced, refresh, save, inviteMember, removeMember } = useAdminRegister(auth);
   const [filters, setFilters] = React.useState(defaultFilters);
   const [datePreset, setDatePreset] = React.useState("all");
   const [referenceIso, setReferenceIso] = React.useState(() => new Date().toISOString());
@@ -137,7 +200,7 @@ function AuthorizedAdmin({ auth }) {
   const selectedRow = rows.find(row => row.id === selectedDetailId) || selectedSnapshot;
   const assignees = React.useMemo(() => [...new Set([...members.map(member => member.email), ...rows.map(row => row.assignee).filter(Boolean)])], [rows, members]);
   const hasDraft = Object.values(editsById).some(edit => ["dirty", "saving", "error"].includes(edit.state));
-  const uiAuth = React.useMemo(() => ({ user: auth.user, permissions: { readRegister: true, editFollowUp: true, exportCsv: true, manageAdmins: false } }), [auth.user]);
+  const uiAuth = React.useMemo(() => ({ user: auth.user, permissions: { readRegister: true, editFollowUp: true, exportCsv: true, manageAdmins: true } }), [auth.user]);
 
   React.useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
   React.useEffect(() => {
@@ -230,7 +293,7 @@ function AuthorizedAdmin({ auth }) {
         <div className="adm-page-heading"><div><h1 ref={headingRef} tabIndex={-1}>{title}</h1><p className="adm-date">{formatIST(referenceIso, "date")} · IST{hasDraft && <span>Unsaved changes</span>}</p></div><div className="adm-page-actions">{view !== "team" && <FilterSelect label="Period" value={datePreset} onChange={setPeriod}><option value="all">All dates</option><option value="today">Today</option><option value="last7">Last 7 days</option></FilterSelect>}{view === "overview" && hasLoaded && <button className="adm-button adm-button-outline" type="button" onClick={() => exportCsv({ period: filters.period })} disabled={!hasLoaded || exporting || loading}>Export CSV</button>}</div></div>
         {error && <div className="adm-notice adm-notice-error" role="alert"><p>{error}{hasLoaded && ` Showing the last saved snapshot from ${formatIST(lastSynced)} IST.`}</p><button className="adm-text-button" type="button" onClick={refresh}>Retry</button></div>}
         {auth.error && <div className="adm-notice" role="status">{auth.error}</div>}
-        {!hasLoaded ? <div className="adm-card adm-empty" role="status"><h2>{loading ? "Loading saved requests…" : "Register not loaded"}</h2>{!loading && <p>Saved requests and team details will appear when the connection is restored.</p>}</div> : view === "overview" ? <AdminOverview rows={overviewRows} summary={summary} members={members} auth={uiAuth} onOpen={openRequest} onViewRegister={viewRegister} onTeam={() => changeView("team")} Icon={AdminIcon} Avatar={Avatar} StatusBadge={StatusBadge} /> : view === "register" ? <Register rows={rows} filtered={filtered} pagination={pagination} filters={filters} setFilter={setFilter} resetFilters={resetFilters} onOpen={openRequest} onExport={() => exportCsv(filters)} canExport={!exporting} assignees={assignees} datePreset={datePreset} onDatePreset={setPeriod} /> : <Team members={members} user={auth.user} />}
+        {!hasLoaded ? <div className="adm-card adm-empty" role="status"><h2>{loading ? "Loading saved requests…" : "Register not loaded"}</h2>{!loading && <p>Saved requests and team details will appear when the connection is restored.</p>}</div> : view === "overview" ? <AdminOverview rows={overviewRows} summary={summary} members={members} auth={uiAuth} onOpen={openRequest} onViewRegister={viewRegister} onTeam={() => changeView("team")} Icon={AdminIcon} Avatar={Avatar} StatusBadge={StatusBadge} /> : view === "register" ? <Register rows={rows} filtered={filtered} pagination={pagination} filters={filters} setFilter={setFilter} resetFilters={resetFilters} onOpen={openRequest} onExport={() => exportCsv(filters)} canExport={!exporting} assignees={assignees} datePreset={datePreset} onDatePreset={setPeriod} /> : <Team members={members} user={auth.user} onInvite={inviteMember} onRemove={removeMember} />}
         <footer className="adm-footer">{hasLoaded ? <><span>Counts include all saved requests, including any test submissions.</span><span>{periodLabel} · Synced {formatIST(lastSynced, "time")} IST</span></> : <><span>Waiting for the saved register.</span><span>Asia/Kolkata</span></>}</footer>
       </div>
     </div>
