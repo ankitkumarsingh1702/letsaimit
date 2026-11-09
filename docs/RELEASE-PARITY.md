@@ -4,6 +4,10 @@ This ledger records evidence, not permission to deploy. It is project-local.
 The default **merge and deploy** target is UAT. Production work requires the
 explicit **merge and deploy to prod** instruction.
 
+Latest UAT application release: `d0b738a1c404e77204d49b2d0709b4cdc54defb4`
+(compact CRM presentation). See the 10 November evidence below. The 9 November
+tables remain a dated record of backend/configuration readiness.
+
 ## Public identity contract
 
 | Setting | Required value in both environments |
@@ -127,3 +131,26 @@ side effect of a website release.
 
 Repository skill and guidance changes alone do not establish a runtime fix,
 an applied migration, a deployed release or the user's live journey.
+
+## UAT release evidence — 10 November 2026, compact CRM
+
+| Evidence | Record |
+| --- | --- |
+| Authorized target | User explicitly requested the compact Stripe-reference CRM UI, merge and deploy to UAT |
+| Application source / merge | `d0b738a1c404e77204d49b2d0709b4cdc54defb4`, fast-forwarded from `codex/compact-admin-crm` to `uat` |
+| Interface change | Compact neutral shell, summary metric strip and tables; 11 separate single-line Register columns; five-column Team table; smaller right-side request drawer with full contact, consent and audit details |
+| Architecture / data parity | Presentation-only change across six JSX/CSS files. Auth, Supabase transport, store, DTOs, CSV serializer, dependencies, environment values and database migrations are unchanged. This source can carry the same UI to production when that target is explicitly authorized and configured |
+| Automated verification | All 123 existing tests passed, including PostgreSQL/RLS, membership, release-guard, follow-up revision and CSV tests; optimized/prerendered build passed; 59 assets verified; diff checks and independent UI source review passed |
+| Application deployment | `dpl_5kFEvhrKfpyr9qa2UXd4gGwinHta`, READY, Git source `d0b738a1c404e77204d49b2d0709b4cdc54defb4`, alias `https://uat.letsaimit.com` |
+| Live dashboard | Existing approved Google session displayed name/email/photo. Six saved requests, four trials, one confirmed enrolment request, three new follow-ups, status totals 3/1/2/0 and four team accounts matched the register. Site activity remains Not tracked |
+| Live register / drawer | Separate columns and single-line rows observed; search reduced six rows to the expected one; full parent/contact fields, follow-up controls and expandable consent/revision details were accessible. A draft remained present during inspection. Saving a temporary note on a labelled UAT test request advanced its revision, and restoring the original empty note saved successfully without a document reload. No parent-submitted values or memberships were changed |
+| Live CSV | Filtered export completed; downloaded CSV parsed as 25 columns and one expected saved test row, with the restored empty note and no temporary draft text |
+| Live refresh scope | Live connection badge observed; existing realtime invalidation, visible-tab five-second polling, hidden-tab pause and revision-safe merge code remain unchanged. This release did not run a separate two-browser broadcast test or submit a new parent form |
+| Responsive verification scope | Mobile overflow, labelled scroll regions, 16px mobile inputs, focus behavior and short-height drawer scrolling reviewed in source. Live visual inspection was desktop; no device-sized browser run is claimed |
+| Screenshot evidence | Private local artifacts under `.codex/artifacts/letsaimit/compact-crm` in the operator home; screenshots and registration CSV are not committed to Git |
+| Website production | No production deployment or configuration change. Remote `main` remains `372be17da151f45d42c54b42b36d2d50ef51758a`; fetched homepage SHA-256 remains `6f32fc0cc051d17e1817e189f7a442bfe17b5e93a41e1a0bfeba0efb4aa5dc87` |
+
+This CRM release did not change Google branding/provider settings, complete the
+outstanding production backend setup, grant access or apply a database migration.
+New Google round-trip/denied-access and parent-form receipt tests were not
+repeated for this presentation-only release; their earlier evidence remains dated.
