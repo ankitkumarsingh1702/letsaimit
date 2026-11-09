@@ -1,0 +1,12 @@
+{
+  "name": "letsaimit-uat-health",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "build": "node build.mjs"
+  }
+}

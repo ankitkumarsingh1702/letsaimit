@@ -32,9 +32,9 @@ placeholders are not credentials.
 | `VITE_GA4_ID` | Optional analytics ID; leave blank while analytics is unconfigured. |
 | `VITE_GA4_MANUAL_EVENTS_ONLY_CONFIRMED` | `false` until the documented GA4 configuration is verified. |
 | `VITE_LEAD_ENDPOINT` | Legacy school/society Apps Script setting; leave blank for their existing WhatsApp handoff. Parent registration does not use it. |
-| `SUPABASE_URL` | Server-only health-handler setting; the same UAT Supabase URL. |
-| `SUPABASE_PUBLISHABLE_KEY` | Project public key used by the health handler; no service-role privilege is needed. |
-| `CRON_SECRET` | Server-only random secret authorizing the health endpoint; store privately. |
+| `SUPABASE_URL` | Server-only health setting; the same UAT Supabase URL. Required on the dedicated health project's Production environment. |
+| `SUPABASE_PUBLISHABLE_KEY` | UAT public project key used by the health handler; no service-role privilege is needed. |
+| `CRON_SECRET` | Server-only random secret authorizing the health endpoint. The dedicated service uses its own secret, separate from the website's UAT health secret. |
 
 `VITE_` values enter the public JavaScript bundle. Never put a database password,
 service-role/secret key, Google client secret or `CRON_SECRET` there. The public
@@ -148,25 +148,50 @@ Removing access blocks subsequent authorized operations. It cannot recall
 already viewed information or downloaded CSV files. Authorization comes from
 Supabase Auth and current database policies, not a hidden URL or `noindex`.
 
-## Three-day health check and actual scheduler behavior
+## Dedicated UAT health service and scheduler
 
-`api/cron/supabase.js` accepts only an authenticated GET with
+The separate Vercel project **`letsaimit-uat-health`**
+(`prj_b2ukrZEvKBocsCwMcYuiMCMuJL47`) executes the schedule. Its repository
+root directory is `deployment/uat-health`; it serves only the health API and a
+small identifying page. It uses the existing Hobby team and the same UAT
+Supabase database, `https://nlgfcmywgwibvmbsgkox.supabase.co`.
+
+Configure this project's **Production branch as `uat`**. Vercel requires a
+Production deployment to execute cron jobs, so this service uses that execution
+environment to check the UAT database. The main `letsaimit` website's Production
+branch remains `main`; this does not promote the UAT website or change its
+production data. The website root `vercel.json` no longer contains the schedule.
+
+Use these settings on the **health project**, not the website project:
+
+- Root directory: `deployment/uat-health`; framework: Other.
+- Build command: `npm run build`; output directory: `public`.
+- The checked-in install command is
+  `npm install --ignore-scripts --no-audit --no-fund`.
+- Production environment: only `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` and
+  its independent `CRON_SECRET`. No `VITE_` variables or Google OAuth secrets.
+
+Deploy the service from `uat` after those settings are saved. A change to its
+secret requires a new deployment; retain its secret in the operator's secret
+manager independently of the website health endpoint's secret.
+
+`deployment/uat-health/api/cron/supabase.js` accepts only an authenticated GET with
 `Authorization: Bearer <CRON_SECRET>`. It invokes only `registration_health`,
 a non-data RPC, and returns `{"ok":true}` after a successful database response.
 Missing configuration or a failed check returns 503; a bad secret returns 401.
-It exposes no registrations, keys or provider exceptions.
+It exposes no registrations, keys or provider exceptions. The website's
+`api/cron/supabase.js` re-exports the same handler and retains its separate
+environment settings.
 
-The checked-in schedule is `0 6 */3 * *`: 06:00 UTC / 11:30 IST on days 1, 4,
-7 and subsequent three-day steps within each month. It resets at month
-boundaries rather than guaranteeing exactly 72 hours. Hobby can invoke the job
-anywhere within the scheduled hour.
+The service's own `vercel.json` contains `0 6 */3 * *`: 06:00 UTC / 11:30 IST
+on days 1, 4, 7 and subsequent three-day steps within each month. It resets at
+month boundaries rather than guaranteeing exactly 72 hours. Hobby can invoke
+the job anywhere within the scheduled hour.
 
-**Vercel executes cron schedules only on Production deployments.** The current
-`uat` Preview deployment does not run an automatic schedule merely because
-`vercel.json` contains one. This setup does not authorize promoting the public
-production site. Automatic UAT scheduling needs a separately provisioned UAT
-scheduling deployment or approved external scheduler, with its database target
-kept UAT-only. Until verified, run the authenticated manual check below.
+After its Production deployment is READY, inspect this service's Cron Jobs page
+and use **Run now** to verify an authorized invocation. Record that result
+separately from a future invocation triggered by the three-day schedule.
+The website's `uat` Preview deployment does not execute the schedule itself.
 [Vercel cron management](https://vercel.com/docs/schedules/cron-jobs/manage-cron-jobs),
 [scheduling limits](https://vercel.com/docs/schedules/cron-jobs/usage-and-pricing)
 
@@ -176,9 +201,9 @@ Review the account's actual plan, usage and pausing notifications. A three-day
 request is not an always-on commitment.
 [Supabase project pausing](https://supabase.com/docs/guides/platform/free-project-pausing)
 
-After deploying the handler with its server settings, run this in an interactive
-terminal. It reads the secret without echoing it or placing it in command
-arguments, refuses redirects, and prints only a health result:
+After deploying the dedicated service, run this in an interactive terminal using
+**that service's** secret. It reads the secret without echoing it or placing it
+in command arguments, refuses redirects, and prints only a health result:
 
 ```sh
 python3 - <<'PY'
@@ -195,7 +220,7 @@ secret = getpass.getpass("UAT cron secret (hidden): ")
 if not secret:
     raise SystemExit("No secret supplied.")
 request = urllib.request.Request(
-    "https://uat.letsaimit.com/api/cron/supabase",
+    "https://letsaimit-uat-health.vercel.app/api/cron/supabase",
     headers={"Authorization": "Bearer " + secret},
 )
 try:
@@ -221,6 +246,7 @@ npm ci
 npm test
 npm run verify:assets
 VITE_SITE_ORIGIN=https://uat.letsaimit.com npm run build
+npm --prefix deployment/uat-health run build
 ```
 
 Merge the verified change into `uat` and wait for its Vercel Preview build.
@@ -249,8 +275,9 @@ The following were observed against live UAT:
 
 The browser journeys for an unlisted Google login, revocation of an active
 admin, and competing edits by two real admins remain unproven. Local SQL tests
-cover their authorization and conflict rules. No active automatic UAT cron
-schedule was demonstrated; the Preview scheduling limitation above still applies.
+cover their authorization and conflict rules. The dedicated health project has
+been created; its deployment and Run now results must be recorded after
+verification. A future three-day scheduled invocation has not yet been observed.
 
 Verification has separate layers:
 
