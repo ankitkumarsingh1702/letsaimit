@@ -201,8 +201,7 @@ export function AdminPage() {
 
   const loadMembers = useCallback(async ({ quiet = false } = {}) => {
     if (!client) return;
-    if (!quiet) setMembersLoading(true);
-    setMemberError("");
+    if (!quiet) { setMembersLoading(true); setMemberError(""); }
     try {
       if (!await verifyAccess()) return;
       const epoch = accessEpoch.current;
