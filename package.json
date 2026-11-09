@@ -15,10 +15,17 @@
     "node": ">=22.12.0"
   },
   "dependencies": {
+    "@supabase/supabase-js": "2.119.0",
+    "ag-grid-community": "36.3.0",
+    "ag-grid-react": "36.3.0",
+    "libphonenumber-js": "1.13.15",
     "react": "19.3.1",
-    "react-dom": "19.3.1"
+    "react-dom": "19.3.1",
+    "react-hook-form": "7.91.0",
+    "zod": "4.6.7"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "0.5.15",
     "@vitejs/plugin-react": "6.1.2",
     "vite": "8.3.5"
   }

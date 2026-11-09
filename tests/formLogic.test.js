@@ -61,13 +61,16 @@ test('trial WhatsApp draft keeps the chosen sport and consent and encodes punctu
     'Community: Elm / West',
     'Sport: Basketball',
     'Please confirm a suitable group and session time.',
-    'Parent/guardian and contact consent: agreed. Privacy version: 2026-11-05.',
+    'Parent/guardian and contact consent: agreed. Privacy version: 2026-11-09.',
   ].join('\n');
   assert.equal(prepareMessage('trial', draft), message);
   const url = new URL(createWhatsAppUrl('trial', draft));
   assert.equal(`${url.origin}${url.pathname}`, FORM_LINKS.whatsapp);
   assert.equal(url.searchParams.get('text'), message);
   assert.match(prepareMessage('trial', { ...draft, age: 'other' }), /Child’s age: Under 5 or over 14 — please advise/);
+  const enrolment = prepareMessage('enroll', { ...draft, childName: 'Dev' });
+  assert.match(enrolment, /Privacy version: 2026-11-09\./);
+  assert.match(enrolment, /Programme terms and cancellation policy accepted: 2026-11-05\./);
 });
 
 test('society message includes the first-step draft and only a nonblank optional message', () => {

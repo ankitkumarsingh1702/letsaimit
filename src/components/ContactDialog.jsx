@@ -1,3 +1,4 @@
+import ParentRegistration from "../features/registration/ParentRegistration.jsx";
 import LeadConsent from "./LeadConsent.jsx";
 import { leadCaptureConfigured, saveLead, newSubmissionId } from "../lib/leadCapture.js";
 import { trackEvent } from "../lib/analytics.js";
@@ -6,8 +7,6 @@ import { createInitialDrafts } from "../lib/formLogic.js";
 import { fieldError } from "../lib/formLogic.js";
 import { validateForm } from "../lib/formLogic.js";
 import { createWhatsAppUrl } from "../lib/formLogic.js";
-import { TRIAL_AGES } from "../lib/formLogic.js";
-import { FORM_LINKS } from "../lib/formLogic.js";
 function FormArrow() {
   return (
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -194,6 +193,7 @@ function HandoffResult({ url }) {
 }
 function ContactDialog({ kind, onClose, onSwitchKind }) {
   const dialogRef = React.useRef(null);
+  const parentForms = React.useRef({});
   const headingRef = React.useRef(null);
   const fieldRefs = React.useRef({});
   const submissionIds = React.useRef({});
@@ -230,6 +230,11 @@ function ContactDialog({ kind, onClose, onSwitchKind }) {
     headingRef.current?.focus({ preventScroll: true });
   }, [societyStep]);
   React.useEffect(() => () => document.body.classList.remove("form-open"), []);
+  React.useEffect(() => {
+    if (kind === "enroll" && parentForms.current.trial && parentForms.current.enroll) {
+      parentForms.current.enroll.carryTrial(parentForms.current.trial.getValues());
+    }
+  }, [kind]);
 
   function handleChange(name, value) {
     setDrafts(previous => ({ ...previous, [mode]: { ...previous[mode], [name]: value } }));
@@ -276,21 +281,8 @@ function ContactDialog({ kind, onClose, onSwitchKind }) {
       if (requestGeneration.current === generation) setStatus("saved");
     } catch (error) { if (requestGeneration.current === generation) { setSaveError(error.message); setStatus("error"); } }
   }
-  function openRegistration() {
-    const nextErrors = {}; checkConsent(nextErrors); setErrors(nextErrors);
-    if (!focusError(nextErrors)) window.open(FORM_LINKS.registration, "_blank", "noopener,noreferrer");
-  }
   function fieldProps(name) {
     return { mode, name, value: drafts[mode][name], onChange: handleChange, error: errors[name], inputRef: element => { fieldRefs.current[name] = element; } };
-  }
-  function selectField(name, label, options) {
-    const id = `fm-${mode}-${name}`;
-    return <div className="fm-field"><label htmlFor={id}>{label}</label><div className="fm-select-wrap">
-      <select id={id} name={name} value={drafts[mode][name]} onChange={event => handleChange(name, event.target.value)} required aria-invalid={errors[name] ? true : undefined} aria-describedby={`${id}-error`} ref={element => { fieldRefs.current[name] = element; }}>
-        <option value="">Choose {name === "age" ? "age" : name}</option>
-        {options.map(option => <option value={option.value ?? option} key={option.value ?? option}>{option.label ?? option}</option>)}
-      </select><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m7 10 5 5 5-5" stroke="currentColor" strokeWidth="1.6" /></svg>
-    </div><span id={`${id}-error`} className="fm-error">{errors[name] || ""}</span></div>;
   }
   function consentControls() {
     return <>
@@ -308,7 +300,6 @@ function ContactDialog({ kind, onClose, onSwitchKind }) {
     if (!leadCaptureConfigured) return <HandoffResult url={handoffUrl} />;
     return null;
   }
-  const externalEnrol = mode === "enroll" && !leadCaptureConfigured;
   return <dialog ref={dialogRef} id="contact-dialog" className="contact-dialog" aria-labelledby="fm-dialog-title" data-mode={mode}
     onCancel={event => { event.preventDefault(); onClose(); }}
     onClose={() => { document.body.classList.remove("form-open"); if (kind && !dialogRef.current?.open) onClose(); }}
@@ -316,29 +307,18 @@ function ContactDialog({ kind, onClose, onSwitchKind }) {
     <div className="fm-shell">
       <button className="fm-close" type="button" aria-label="Close enquiry panel" onClick={onClose}><CloseIcon /></button>
       <FormSidebar mode={mode} societyStep={societyStep} />
-      <div className={`fm-content${externalEnrol ? " fm-enrollment" : ""}`}>
+      <div className="fm-content">
         <div className="fm-content-top">
           {mode === "society" && <p className="fm-mobile-step">Step {societyStep} of 2</p>}
           <h3 ref={headingRef} className="fm-main-heading" tabIndex={-1}>{mode === "society" ? societyStep === 1 ? "Your society" : "Your contact details" : mode === "enroll" ? "Join the programme." : "Your first session. Free."}</h3>
           <p className="fm-intro">{mode === "society" ? "Make room for play." : mode === "enroll" ? "Register with a parent or guardian." : "Choose a sport. We’ll confirm a time."}</p>
         </div>
-        {externalEnrol ? <>
-          <div className="fm-enroll-facts"><p><span>Ages</span><strong>5–14</strong></p><p><span>Sessions</span><strong>2 each week · 45–60 min</strong></p><p><span>Communities</span><strong>Nambiar Ellegenza<br />Nambiar Bellezea</strong></p></div>
-          {consentControls()}
-          <button className="fm-primary" type="button" onClick={openRegistration}>Open registration form <FormArrow /></button>
-          <p className="fm-handoff-note">Opens Google Forms. Submit there to register.</p>
-          <button className="fm-text-button" type="button" onClick={() => onSwitchKind("trial")}>Try a session first <FormArrow /></button>
-        </> : <form className="fm-form" data-form-mode={mode} noValidate onSubmit={handleSubmit}>
+        <ParentRegistration ref={form => { parentForms.current.trial = form; }} mode="trial" active={kind === "trial"} onSwitchKind={onSwitchKind} Arrow={FormArrow} />
+        <ParentRegistration ref={form => { parentForms.current.enroll = form; }} mode="enroll" active={kind === "enroll"} onSwitchKind={onSwitchKind} Arrow={FormArrow} />
+        {!isParent &&<form className="fm-form" data-form-mode={mode} noValidate onSubmit={handleSubmit}>
           <fieldset className="fm-fieldset" disabled={status === "saving"}>
             <div className="fm-fields">
-              {isParent ? <>
-                {mode === "enroll" && <TextField {...fieldProps("childName")} label="Child’s name" max={80} />}
-                <TextField {...fieldProps("parentName")} label="Parent or guardian name" autoComplete="name" max={80} />
-                <TextField {...fieldProps("phone")} label="Parent phone number" type="tel" autoComplete="tel" max={24} />
-                {selectField("age", "Child’s age", [...TRIAL_AGES.map(age => ({ value: age, label: `${age} years` })), ...(mode === "trial" ? [{ value: "other", label: "Under 5 or over 14" }] : [])])}
-                {selectField("community", "Community", ["Nambiar Ellegenza", "Nambiar Bellezea", "Another community"])}
-                {selectField("sport", "Sport", ["Football", "Basketball", "Not sure"])}
-              </> : societyStep === 1 ? <>
+              {societyStep === 1 ? <>
                 <TextField {...fieldProps("societyName")} label="Society name" full max={120} />
                 <TextField {...fieldProps("locality")} label="Locality and city" full max={120} />
                 <TextField {...fieldProps("childrenCount")} label="Interested children" placeholder="Estimate, or Not sure" max={20} />
@@ -360,7 +340,6 @@ function ContactDialog({ kind, onClose, onSwitchKind }) {
                 </div>
               </>}
               {result()}
-              {mode === "trial" && <button className="fm-text-button" type="button" onClick={() => onSwitchKind("enroll")}>Ready to join? Enrol your child <FormArrow /></button>}
             </div>
           </fieldset>
         </form>}

@@ -1,0 +1,11 @@
+.registration-country { position: relative; }
+.registration-country .fm-hint { display: block; margin-top: 7px; font-size: 12px; }
+.registration-countries { position: absolute; z-index: 20; top: 49px; left: 0; right: 0; max-height: 220px; overflow-y: auto; overscroll-behavior: contain; margin: 0; padding: 5px; border: 1px solid var(--line); border-radius: 8px; background: var(--white); box-shadow: 0 10px 28px #143e3522; list-style: none; }
+.registration-countries li { padding: 10px 8px; border-radius: 5px; cursor: pointer; }
+.registration-countries li[data-active], .registration-countries li:hover { background: var(--sage); }
+.registration-countries li[aria-selected="true"] { font-weight: 700; }
+.registration-countries li > span:last-child { white-space: nowrap; }
+.registration-form .registration-phone-hint { font-size: 12px; line-height: 1.5; }
+.registration-form .fm-error { font-size: 13px; line-height: 1.5; }
+.registration-form .registration-terms { margin-top: 14px; }
+.registration-form .registration-result a { text-decoration: underline; text-underline-offset: 3px; }

@@ -31,6 +31,8 @@ function PolicyContact() {
 }
 
 function PolicyLayout({ page, title, intro, summary, children }) {
+  const updated = page === "privacy" ? { label: "9 November 2026", date: "2026-11-09" } :
+    { label: POLICY_UPDATED, date: "2026-11-05" };
   return (
     <div className="legal-page wrap">
       <header className="legal-hero">
@@ -38,7 +40,7 @@ function PolicyLayout({ page, title, intro, summary, children }) {
         <h1 className="display">{title}</h1>
         <p className="legal-intro">{intro}</p>
         <p className="legal-updated">
-          Updated <time dateTime="2026-11-05">{POLICY_UPDATED}</time>
+          Updated <time dateTime={updated.date}>{updated.label}</time>
         </p>
       </header>
       <nav className="legal-nav" aria-label="Policies">
@@ -76,15 +78,17 @@ function Privacy() {
     >
       <PolicySection title="What you share">
         <p>
-          Enquiries may include your name, phone number, community, chosen sport
-          and your child’s age group. School and society forms also ask about
-          your organisation, role and requirements. We keep the messages and
-          consent choices you submit with the enquiry.
+          Trial requests include the parent or guardian’s name, email address,
+          phone number and country code, community, chosen sport and the child’s
+          age group. Child registration also asks for the child’s name, address
+          and an optional note for the coach. School and society enquiries ask
+          about your organisation, role and requirements. We keep the details,
+          messages and consent choices you submit with your request.
         </p>
         <p>
-          Enrolment may need further details for participation and safety. We
-          explain these before asking. Please do not put medical records,
-          identity documents or payment-card details in an enquiry form.
+          Please do not put medical records, identity documents or payment-card
+          details in these forms or in your note for the coach. If further
+          information is needed for participation, we explain this before asking.
         </p>
       </PolicySection>
       <PolicySection title="Why we need it">
@@ -96,9 +100,10 @@ function Privacy() {
       </PolicySection>
       <PolicySection title="Parents decide">
         <p>
-          A parent or legal guardian must submit a child’s details. Our enquiry
-          form asks for consent to use those details and contact you about the
-          request. School and society enquiries use the adult contact’s consent.
+          A parent or legal guardian must submit a child’s details. Our trial
+          and registration forms ask for consent to use those details and
+          contact you about the request. School and society enquiries use the
+          adult contact’s consent.
         </p>
         <p>
           Permission for public photos or videos is separate and optional.
@@ -107,10 +112,17 @@ function Privacy() {
       </PolicySection>
       <PolicySection title="Forms and messages">
         <p>
-          If you complete a linked Google Form, Google processes that submission
-          and LetsAimIt uses the response to manage your request. If you open
-          WhatsApp, you choose whether to send the prepared message. Those
-          services have their own privacy terms.
+          Trial requests and child registrations are completed inside LetsAimIt
+          and saved to a private hosted register. The website shows confirmation
+          only after it receives a saved receipt. Invited staff use Google to
+          verify their identity when signing in to the register; Google sign-in
+          does not store parent registration responses in Google Forms or Sheets.
+        </p>
+        <p>
+          WhatsApp is an optional next step after a saved parent request. School
+          and society enquiries may use a prepared WhatsApp message. Opening
+          WhatsApp does not send a message: you choose whether to press Send.
+          WhatsApp and staff sign-in services have their own privacy terms.
         </p>
         <p>
           We do not publish form responses. Access is limited to the people and
@@ -121,8 +133,9 @@ function Privacy() {
       <PolicySection title="Website analytics">
         <p>
           Usage analytics are off until configured. Where offered, they run only
-          after you choose to allow them. Enquiry text, names, phone numbers and
-          children’s details are excluded from our analytics events. You can
+          after you choose to allow them. Enquiry text, names, email addresses,
+          phone numbers, addresses, notes and children’s details are excluded
+          from our analytics events. You can
           decline analytics and still use every form.
         </p>
       </PolicySection>
