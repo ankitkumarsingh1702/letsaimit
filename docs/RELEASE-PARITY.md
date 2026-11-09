@@ -106,17 +106,18 @@ The separate `letsaimit-uat-health` service deliberately uses Vercel's
 evidence of a production registration backend and must not be retargeted as a
 side effect of a website release.
 
-## Next release evidence
+## UAT release evidence — 9 November 2026
 
 | Evidence | Current record |
 | --- | --- |
 | Selected target / triggering instruction | Branding and project-workflow work; no production release authorized by this ledger |
-| Tested UAT source SHA for the next release | Pending: record after the current changes pass UAT verification |
-| Automated checks for that source | Current working tree: 123 tests passed, including seven release-guard tests; final release SHA still pending |
+| Tested application source | `4e62f70fcb5c10ad80aa7ce62cccccaf3c24dc66` |
+| Automated checks for that source | 123 tests passed, including seven release-guard tests; optimized build and 59-asset verification passed locally; Vercel UAT build passed its configuration guard |
 | Target database and applied migration versions | UAT `nlgfcmywgwibvmbsgkox`: all four ordered migrations applied 9 November 2026; production target/migrations pending |
-| Deployed source SHA and deployment URL/ID | Pending: record after the authorized deployment is ready |
+| Deployed source SHA and deployment URL/ID | `4e62f70fcb5c10ad80aa7ce62cccccaf3c24dc66`, deployment `dpl_HWrQt2jMhBSaTXrqtGXbavbJisMy` READY and aliased to `https://uat.letsaimit.com` |
 | Google public-name / homepage / policy verification | LetsAimIt name, favicon-180 logo and production homepage/privacy/terms saved; Google brand verification awaits Search Console ownership and the stated 24-hour wait before retry |
-| Live registration, edit, denied-access and CSV verification | Pending: record completed journeys separately from source/tests |
+| Live verification for this change | Reloaded the authenticated UAT dashboard: Google name/email/photo displayed, four saved test requests and Live status present. HTTPS sign-in HTML has production privacy/terms links. Registration saving, saved edits, anonymous-read denial and four-row CSV were verified on the preceding UAT release; they were not re-exercised by this presentation-only change |
+| Website production | `main` remains `372be17da151f45d42c54b42b36d2d50ef51758a`; homepage response SHA-256 remains `6f32fc0cc051d17e1817e189f7a442bfe17b5e93a41e1a0bfeba0efb4aa5dc87` |
 | Production promotion source SHA | Pending explicit **merge and deploy to prod** and production readiness |
 
 Repository skill and guidance changes alone do not establish a runtime fix,
