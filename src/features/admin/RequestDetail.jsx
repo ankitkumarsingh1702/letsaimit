@@ -339,7 +339,7 @@ export default function RequestDetail({
               <div className="adm-detail-eyebrow">
                 <span>{row.formType === "enrol" ? "Enrolment request" : "Trial request"}</span>
               </div>
-              <h2 ref={titleRef} id={titleId} tabIndex={-1}>
+              <h2 ref={titleRef} id={titleId} tabIndex={-1} title={row.parentName}>
                 {row.parentName}
               </h2>
               <p className="adm-detail-submitted">{displayTime(row.submittedAt)}</p>
@@ -362,13 +362,11 @@ export default function RequestDetail({
                 <Fact label="Age">{formatAge(row.age)}</Fact>
                 <Fact label="Sport">{row.sport}</Fact>
                 <Fact label="Community">{row.community}</Fact>
+                <Fact label="Phone">{row.phone}</Fact>
+                <Fact label="Email">{row.email}</Fact>
               </dl>
 
               <div className="adm-detail-contact">
-                <div className="adm-detail-contact-values">
-                  <span>{row.phone || "No phone provided"}</span>
-                  <span>{row.email || "No email provided"}</span>
-                </div>
                 <div className="adm-detail-contact-actions" >
                   {[
                     ["call", "Call"],

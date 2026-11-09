@@ -47,60 +47,67 @@ function Avatar({ name, src = null, small = false }) {
 }
 
 function FilterSelect({ label, value, onChange, children }) {
-  return <label className="adm-field"><span>{label}</span><select value={value || ""} onChange={event => onChange(event.target.value || null)}>{children}</select></label>;
+  return <label className="adm-field"><span>{label}</span><select aria-label={label} value={value || ""} onChange={event => onChange(event.target.value || null)}>{children}</select></label>;
 }
 
 function Register({ rows, filtered, pagination, filters, setFilter, resetFilters, onOpen, onExport, canExport, assignees, datePreset, onDatePreset }) {
   const activeFilters = [filters.status, filters.community, filters.sport, filters.assignee, filters.onlyUnassigned, datePreset !== "all"].filter(Boolean).length;
   const hasFilters = Boolean(filters.query || filters.formType || activeFilters);
   const unique = key => [...new Set(rows.map(row => row[key]).filter(Boolean))];
+  function openFromRow(event, id) {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    if (event.target?.closest?.('a, button, input, select, textarea, summary, [role="button"], [contenteditable="true"]')) return;
+    if (window.getSelection?.()?.toString().trim()) return;
+    onOpen(id);
+  }
+  const textCell = (value, className = "") => <span className={`adm-cell-text ${className}`.trim()} title={value || undefined}>{value || "—"}</span>;
   return <section className="adm-register" aria-label="Saved request register">
-    <div className="adm-register-top">
-      <details className="adm-filters">
-        <summary className="adm-button adm-button-white"><AdminIcon name="filter" />Filters {activeFilters > 0 && <span className="adm-count">{activeFilters}</span>}</summary>
-        <div className="adm-filter-panel">
-          <div className="adm-filter-heading"><strong>Filter requests</strong><button className="adm-text-button" type="button" onClick={resetFilters}>Reset</button></div>
-          <div className="adm-filter-grid">
-            <FilterSelect label="Period" value={datePreset} onChange={onDatePreset}><option value="today">Today</option><option value="last7">Last 7 days</option><option value="all">All dates</option></FilterSelect>
-            <FilterSelect label="Status" value={filters.status} onChange={value => setFilter("status", value)}><option value="">All statuses</option>{STATUS_OPTIONS.map(item => <option key={item.value} value={item.value}>{item.label}</option>)}</FilterSelect>
-            <FilterSelect label="Community" value={filters.community} onChange={value => setFilter("community", value)}><option value="">All communities</option>{unique("community").map(value => <option key={value}>{value}</option>)}</FilterSelect>
-            <FilterSelect label="Sport" value={filters.sport} onChange={value => setFilter("sport", value)}><option value="">All sports</option>{[...new Set([...unique("sport"), "Not sure"])].map(value => <option key={value}>{value}</option>)}</FilterSelect>
-            <FilterSelect label="Assigned to" value={filters.assignee} onChange={value => setFilter("assignee", value)}><option value="">Anyone</option>{assignees.map(value => <option key={value}>{value}</option>)}</FilterSelect>
-            <FilterSelect label="Sort" value={filters.sort.direction} onChange={value => setFilter("sort", { field: "submittedAt", direction: value })}><option value="desc">Newest first</option><option value="asc">Oldest first</option></FilterSelect>
-          </div>
-          <label className="adm-check-label"><input type="checkbox" checked={filters.onlyUnassigned} onChange={event => setFilter("onlyUnassigned", event.target.checked)} />Unassigned only</label>
-          <p className="adm-filter-note">India time (IST)</p>
-        </div>
-      </details>
-      <button className="adm-button adm-button-dark" type="button" onClick={onExport} disabled={!canExport || !filtered.length}><AdminIcon name="download" />Export CSV</button>
-    </div>
-    <div className="adm-register-subhead">
+    <div className="adm-register-toolbar">
       <div className="adm-type-tabs" role="group" aria-label="Request type">{[[null, "All"], ["trial", "Trial"], ["enrol", "Enrolment"]].map(([value, label]) => <button type="button" key={label} aria-pressed={filters.formType === value} onClick={() => setFilter("formType", value)}>{label}</button>)}</div>
-      <p aria-live="polite">{filtered.length} of {rows.length} requests{hasFilters && <button type="button" className="adm-text-button" onClick={resetFilters}>Clear filters</button>}</p>
+      <div className="adm-toolbar-actions">
+        <details className="adm-filters">
+          <summary className="adm-button adm-button-white"><AdminIcon name="filter" />Filters {activeFilters > 0 && <span className="adm-count">{activeFilters}</span>}</summary>
+          <div className="adm-filter-panel">
+            <div className="adm-filter-heading"><strong>Filter requests</strong><button className="adm-text-button" type="button" onClick={resetFilters}>Reset</button></div>
+            <div className="adm-filter-grid">
+              <FilterSelect label="Period" value={datePreset} onChange={onDatePreset}><option value="today">Today</option><option value="last7">Last 7 days</option><option value="all">All dates</option></FilterSelect>
+              <FilterSelect label="Status" value={filters.status} onChange={value => setFilter("status", value)}><option value="">All statuses</option>{STATUS_OPTIONS.map(item => <option key={item.value} value={item.value}>{item.label}</option>)}</FilterSelect>
+              <FilterSelect label="Community" value={filters.community} onChange={value => setFilter("community", value)}><option value="">All communities</option>{unique("community").map(value => <option key={value}>{value}</option>)}</FilterSelect>
+              <FilterSelect label="Sport" value={filters.sport} onChange={value => setFilter("sport", value)}><option value="">All sports</option>{[...new Set([...unique("sport"), "Not sure"])].map(value => <option key={value}>{value}</option>)}</FilterSelect>
+              <FilterSelect label="Assigned to" value={filters.assignee} onChange={value => setFilter("assignee", value)}><option value="">Anyone</option>{assignees.map(value => <option key={value}>{value}</option>)}</FilterSelect>
+              <FilterSelect label="Sort" value={filters.sort.direction} onChange={value => setFilter("sort", { field: "submittedAt", direction: value })}><option value="desc">Newest first</option><option value="asc">Oldest first</option></FilterSelect>
+            </div>
+            <label className="adm-check-label"><input type="checkbox" checked={filters.onlyUnassigned} onChange={event => setFilter("onlyUnassigned", event.target.checked)} />Unassigned only</label>
+            <p className="adm-filter-note">India time (IST)</p>
+          </div>
+        </details>
+        <button className="adm-button adm-button-white" type="button" onClick={onExport} disabled={!canExport || !filtered.length}><AdminIcon name="download" />Export CSV</button>
+      </div>
     </div>
+    <div className="adm-register-subhead"><p aria-live="polite">{filtered.length} of {rows.length} requests{hasFilters && <button type="button" className="adm-text-button" onClick={resetFilters}>Clear filters</button>}</p><span className="adm-table-hint">Scroll to see all columns</span></div>
     <div className="adm-card adm-register-card">
-      {filtered.length === 0 ? <div className="adm-empty"><span className="adm-empty-icon"><AdminIcon name="search" /></span><h2>No matches</h2><p>Try another search.</p><button className="adm-button adm-button-dark" type="button" onClick={resetFilters}>Clear filters</button></div> : <>
-        <div className="adm-table-wrap"><table className="adm-table">
-          <caption className="adm-sr-only">Saved requests. Select a parent to open their details.</caption>
-          <thead><tr><th scope="col">Parent</th><th scope="col">Programme</th><th scope="col">Status</th><th scope="col">Assigned</th><th scope="col">Received</th><th scope="col"><span className="adm-sr-only">Details</span></th></tr></thead>
-          <tbody>{pagination.rows.map(row => <tr key={row.id}>
-            <td><button className="adm-parent-button" type="button" onClick={() => onOpen(row.id)}><strong>{row.parentName}</strong><span>{FORM_LABELS[row.formType]} · {formatAge(row.age)}</span></button></td>
-            <td><strong className="adm-cell-title">{row.sport}</strong><span className="adm-cell-sub">{row.community}</span></td>
+      {filtered.length === 0 ? <div className="adm-empty"><h2>No matches</h2><p>Try another search.</p><button className="adm-button adm-button-white" type="button" onClick={resetFilters}>Clear filters</button></div> : <>
+        <div className="adm-table-wrap" role="region" aria-label="Saved requests table, scroll horizontally for all columns" tabIndex={0}><table className="adm-table adm-register-table">
+          <caption className="adm-sr-only">Saved requests. Open a parent’s details to review and edit follow-up. Times are in India Standard Time.</caption>
+          <colgroup><col className="adm-col-parent" /><col className="adm-col-child" /><col className="adm-col-type" /><col className="adm-col-age" /><col className="adm-col-sport" /><col className="adm-col-community" /><col className="adm-col-email" /><col className="adm-col-phone" /><col className="adm-col-status" /><col className="adm-col-assigned" /><col className="adm-col-received" /></colgroup>
+          <thead><tr><th scope="col">Parent</th><th scope="col">Child</th><th scope="col">Type</th><th scope="col">Age</th><th scope="col">Sport</th><th scope="col">Community</th><th scope="col">Email</th><th scope="col">Phone</th><th scope="col">Status</th><th scope="col">Assigned</th><th scope="col" title="India Standard Time">Received</th></tr></thead>
+          <tbody>{pagination.rows.map(row => <tr key={row.id} className="adm-clickable-row" onClick={event => openFromRow(event, row.id)}>
+            <td><button className="adm-parent-button" type="button" aria-label={`Open ${row.parentName || "request"} details`} title={row.parentName} onClick={() => onOpen(row.id)}>{row.parentName || "—"}</button></td>
+            <td>{textCell(row.childName)}</td>
+            <td>{textCell(FORM_LABELS[row.formType] || row.formType)}</td>
+            <td>{textCell(formatAge(row.age))}</td>
+            <td>{textCell(row.sport)}</td>
+            <td>{textCell(row.community)}</td>
+            <td>{row.links?.email ? <a className="adm-cell-link adm-cell-text" href={row.links.email} title={row.email}>{row.email}</a> : textCell(row.email)}</td>
+            <td>{row.links?.call ? <a className="adm-cell-link adm-cell-text adm-numeric" href={row.links.call} title={row.phone}>{row.phone}</a> : textCell(row.phone, "adm-numeric")}</td>
             <td><StatusBadge status={row.status} /></td>
-            <td><span className={`adm-assignee${row.assignee ? "" : " adm-unassigned"}`}>{row.assignee || "Unassigned"}</span></td>
-            <td><span className="adm-cell-title adm-nowrap">{formatIST(row.submittedAt, "time")}</span><span className="adm-cell-sub">{formatIST(row.submittedAt, "date")} · IST</span></td>
-            <td><button className="adm-icon-button" type="button" aria-label={`View ${row.parentName} details`} onClick={() => onOpen(row.id)}><AdminIcon name="arrow" /></button></td>
+            <td>{textCell(row.assignee || "Unassigned", row.assignee ? "" : "adm-unassigned")}</td>
+            <td><time className="adm-cell-text adm-numeric" dateTime={row.submittedAt} title={`${formatIST(row.submittedAt)} IST`}>{formatIST(row.submittedAt)}</time></td>
           </tr>)}</tbody>
         </table></div>
-        <div className="adm-request-cards">{pagination.rows.map(row => <article key={row.id} className="adm-request-card">
-          <div className="adm-request-card-top"><strong>{row.parentName}</strong><StatusBadge status={row.status} /></div>
-          <p>{FORM_LABELS[row.formType]} · {formatAge(row.age)} · {row.sport}</p><p>{row.community}</p>
-          <div className="adm-request-card-bottom"><span>{row.assignee || "Unassigned"}<span>{formatIST(row.submittedAt)} IST</span></span><button className="adm-text-button" type="button" onClick={() => onOpen(row.id)} aria-label={`View ${row.parentName} details`}>View <AdminIcon name="arrow" /></button></div>
-        </article>)}</div>
         <div className="adm-pagination"><span>{filtered.length} saved {filtered.length === 1 ? "request" : "requests"}</span><div><label><span className="adm-sr-only">Rows per page</span><select value={filters.pageSize} onChange={event => setFilter("pageSize", Number(event.target.value))}><option value="10">10 per page</option><option value="25">25 per page</option><option value="50">50 per page</option></select></label><button className="adm-icon-button" type="button" aria-label="Previous page" disabled={pagination.page <= 1} onClick={() => setFilter("page", pagination.page - 1)}><AdminIcon name="arrow" style={{ transform: "rotate(180deg)" }} /></button><span>{pagination.page} / {pagination.totalPages || 1}</span><button className="adm-icon-button" type="button" aria-label="Next page" disabled={!pagination.hasNextPage} onClick={() => setFilter("page", pagination.page + 1)}><AdminIcon name="arrow" /></button></div></div>
       </>}
     </div>
-    <p className="adm-register-note"><AdminIcon name="download" />Filtered saved requests.</p>
   </section>;
 }
 
@@ -168,12 +175,20 @@ function Team({ members, user, onInvite, onRemove }) {
       <button type="submit" className="adm-button adm-button-dark" disabled={Boolean(busy)}>{busy === "invite" ? "Adding…" : "Add admin"}</button>
     </form>
     {notice && <p className="adm-team-notice" role="status">{notice}</p>}
-    <div className="adm-team-list">{members.map(member => <div className="adm-team-row" key={member.email}>
-      <Avatar name={member.email === user.email ? user.displayName : member.email.split("@")[0].replaceAll(".", " ")} src={member.email === user.email ? user.avatarUrl : null} />
-      <div className="adm-team-person"><strong>{member.email}</strong><span>{member.email === user.email ? "You" : "Approved account"}</span><span>Added {formatIST(member.addedAt)} IST{member.addedBy ? ` by ${member.addedBy}` : ""}</span></div>
-      <span className="adm-role-badge">{member.role === "owner" ? "Owner" : "Admin"}</span>
-      <button type="button" className="adm-text-button adm-danger-text" disabled={Boolean(busy) || member.role === "owner" || members.length <= 1} aria-label={member.role === "owner" ? `Owner access protected for ${member.email}` : `Remove admin access for ${member.email}`} onClick={() => { setRemoveError(""); setRemoving(member); }}>{member.role === "owner" ? "Owner protected" : member.email === user.email ? "Remove my access" : "Remove"}</button>
-    </div>)}</div>
+    <div className="adm-table-wrap adm-team-table-wrap" role="region" aria-label="Team access table, scroll horizontally for all columns" tabIndex={0}>
+      <table className="adm-table adm-team-table">
+        <caption className="adm-sr-only">Approved admin accounts and saved access history. Times are in India Standard Time.</caption>
+        <colgroup><col className="adm-col-account" /><col className="adm-col-role" /><col className="adm-col-added" /><col className="adm-col-addedby" /><col className="adm-col-actions" /></colgroup>
+        <thead><tr><th scope="col">Account</th><th scope="col">Role</th><th scope="col" title="India Standard Time">Added</th><th scope="col">Added by</th><th scope="col">Actions</th></tr></thead>
+        <tbody>{members.map(member => <tr key={member.email}>
+          <td><div className="adm-team-account"><Avatar name={member.email === user.email ? user.displayName : member.email} src={member.email === user.email ? user.avatarUrl : null} /><span className="adm-cell-text" title={member.email}>{member.email}</span>{member.email === user.email && <span className="adm-you-label">You</span>}</div></td>
+          <td><span className="adm-role-badge">{member.role === "owner" ? "Owner" : "Admin"}</span></td>
+          <td><time className="adm-cell-text adm-numeric" dateTime={member.addedAt} title={`${formatIST(member.addedAt)} IST`}>{formatIST(member.addedAt)}</time></td>
+          <td><span className="adm-cell-text" title={member.addedBy || undefined}>{member.addedBy || "—"}</span></td>
+          <td><button type="button" className="adm-text-button adm-danger-text" disabled={Boolean(busy) || member.role === "owner" || members.length <= 1} aria-label={member.role === "owner" ? `Owner access protected for ${member.email}` : `Remove admin access for ${member.email}`} onClick={() => { setRemoveError(""); setRemoving(member); }}>{member.role === "owner" ? "Owner protected" : member.email === user.email ? "Remove my access" : "Remove"}</button></td>
+        </tr>)}</tbody>
+      </table>
+    </div>
     <div className="adm-team-note"><AdminIcon name="shield" /><p>Approved admins can add Gmail accounts and remove admin access. The owner keeps access.</p></div>
     {removing && <RemoveAccessDialog member={removing} self={removing.email === user.email} busy={busy === removing.email} error={removeError} onClose={() => { setRemoving(null); setRemoveError(""); }} onConfirm={remove} />}
   </section>;
@@ -287,7 +302,7 @@ function AuthorizedAdmin({ auth }) {
     <div className="adm-workspace">
       <header className="adm-topbar">
         <label className="adm-search adm-global-search"><AdminIcon name="search" /><span className="adm-sr-only">Search requests</span><input type="search" placeholder="Search requests" value={filters.query} onChange={event => searchRequests(event.target.value)} /></label>
-        <div className="adm-topbar-right"><span className="adm-live-state" role="status">{!hasLoaded ? "Not synced" : liveState === "live" ? "Live" : liveState === "paused" ? "Paused" : liveState === "reconnecting" ? "Reconnecting" : "Connecting"}</span><div className="adm-user"><Avatar name={auth.user.displayName || auth.user.email} src={auth.user.avatarUrl} small /><span><strong>{auth.user.displayName || auth.user.email}</strong><span>{auth.user.email}</span></span></div><details className="adm-mobile-tools"><summary aria-label="Workspace actions"><AdminIcon name="more" /></summary><div className="adm-tools-popup"><a href="/"><AdminIcon name="external" />Website</a><button type="button" onClick={refresh}><AdminIcon name="reset" />Refresh register</button><button type="button" onClick={auth.signOut}><AdminIcon name="exit" />Sign out</button></div></details></div>
+        <div className="adm-topbar-right"><span className="adm-live-state" data-state={hasLoaded ? liveState : "not_synced"} role="status">{!hasLoaded ? "Not synced" : liveState === "live" ? "Live" : liveState === "paused" ? "Paused" : liveState === "reconnecting" ? "Reconnecting" : "Connecting"}</span><div className="adm-user"><Avatar name={auth.user.displayName || auth.user.email} src={auth.user.avatarUrl} small /><span><strong>{auth.user.displayName || auth.user.email}</strong><span>{auth.user.email}</span></span></div><details className="adm-mobile-tools"><summary aria-label="Workspace actions"><AdminIcon name="more" /></summary><div className="adm-tools-popup"><a href="/"><AdminIcon name="external" />Website</a><button type="button" onClick={refresh}><AdminIcon name="reset" />Refresh register</button><button type="button" onClick={auth.signOut}><AdminIcon name="exit" />Sign out</button></div></details></div>
       </header>
       <div className="adm-content">
         <div className="adm-page-heading"><div><h1 ref={headingRef} tabIndex={-1}>{title}</h1><p className="adm-date">{formatIST(referenceIso, "date")} · IST{hasDraft && <span>Unsaved changes</span>}</p></div><div className="adm-page-actions">{view !== "team" && <FilterSelect label="Period" value={datePreset} onChange={setPeriod}><option value="all">All dates</option><option value="today">Today</option><option value="last7">Last 7 days</option></FilterSelect>}{view === "overview" && hasLoaded && <button className="adm-button adm-button-outline" type="button" onClick={() => exportCsv({ period: filters.period })} disabled={!hasLoaded || exporting || loading}>Export CSV</button>}</div></div>
