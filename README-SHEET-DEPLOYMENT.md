@@ -44,10 +44,17 @@ over the legacy anon-key variable.
 
 ## Database and separate owner bootstrap
 
-Apply `supabase/migrations/20261109080830_registration_register.sql` to the UAT
-project using the Supabase SQL editor or its established migration workflow.
-Apply the complete file, including functions, triggers, grants and policies;
-copying only the table definitions is insufficient.
+Apply these migrations in order using the UAT project's SQL editor or its
+established migration workflow:
+
+1. `supabase/migrations/20261109080830_registration_register.sql`
+2. `supabase/migrations/20261109083344_registration_function_privileges.sql`
+
+The second migration makes `is_admin` an authenticated, security-invoker wrapper
+and removes application-role access to the optional dashboard RLS helper.
+Apply complete files, including functions, triggers, grants and policies;
+copying only table definitions is insufficient. Both migrations were applied
+to the live UAT project on 9 November 2026.
 
 The initial owner is a **separate privileged operator step**, not a public signup
 or an email embedded in the schema migration. Open
@@ -57,7 +64,8 @@ exact Gmail address and run it through the privileged SQL editor. The unchanged
 template refuses to run, and an existing different owner requires separate
 review. Keep real addresses out
 of shared migration history. Until bootstrapped, an empty allowlist denies
-staff access.
+staff access. The live UAT owner was seeded separately on 9 November 2026 and
+its Google login was verified. The committed template contains no real Gmail.
 
 Do not resolve an access failure with an unrestricted `grant all`. Table grants
 and row policies are separate checks: a missing grant fails before an RLS
@@ -86,8 +94,15 @@ addresses may repeat for siblings.
 
 ## Google sign-in configuration
 
-**Google OAuth configuration and a successful live admin login are not yet
-verified.** A project or migration result does not establish that login works.
+**Google OAuth and the live owner's admin login were verified on 9 November
+2026.** The configured Google Cloud project is `letsaimit-uat-20261109`.
+The Google provider is enabled in the UAT Supabase project; the owner entered
+its client secret directly into provider settings. The client uses basic
+identity/email/profile access, without Gmail mailbox access.
+
+Google OAuth publishing was confirmed as **In production**. This is the OAuth
+application's audience status; the website and database remain UAT-only.
+The configuration steps below document that setup for future reproduction.
 
 1. Configure Google's OAuth consent screen and create an OAuth **Web application**
    client. Add intended staff as test users if Google's Testing mode requires it.
@@ -212,6 +227,31 @@ Merge the verified change into `uat` and wait for its Vercel Preview build.
 Do not merge to `main` or reuse the UAT database for production during this setup.
 Confirm the deployed frontend uses the intended public project URL/key.
 
+### Observed live UAT checks — 9 November 2026
+
+[PR #1](https://github.com/ankitkumarsingh1702/letsaimit/pull/1) was merged to
+`uat` at commit `d691b1c1bcdac475dbcc922592fad96b990ac551`.
+[Vercel deployment 98qHQPZtB7jGmxbAwAy5hMMVcfgx](https://vercel.com/ankit-kumar-singhs-projects-390074cd/letsaimit/98qHQPZtB7jGmxbAwAy5hMMVcfgx)
+reached READY, and its GitHub deployment status is successful.
+
+The following were observed against live UAT:
+
+- A real Google owner login opened the private admin grid and initially showed
+  three synthetic records.
+- A parent trial request for age 14 was submitted through the UAT website,
+  saved successfully and appeared as the fourth synthetic record in the open
+  admin grid without a manual reload. Realtime and fallback refresh were enabled.
+- A record's **Contacted** status was saved successfully.
+- The browser downloaded CSV containing four saved data rows and 21 columns at
+  the time of verification; it parsed correctly and retained the saved status.
+- The health endpoint returned HTTP 200 for an authorized request and HTTP 401
+  for an unsigned request.
+
+The browser journeys for an unlisted Google login, revocation of an active
+admin, and competing edits by two real admins remain unproven. Local SQL tests
+cover their authorization and conflict rules. No active automatic UAT cron
+schedule was demonstrated; the Preview scheduling limitation above still applies.
+
 Verification has separate layers:
 
 - Automated tests: shared field rules, drafts/focus, transport failures/receipts,
@@ -228,5 +268,6 @@ Local tests, a public save, a migration result and a Google sign-in test are
 separate evidence. Record what actually passed; a frontend deployment alone
 does not prove OAuth or scheduled-job readiness.
 
-The bootstrap template is not evidence of a live owner row. Mark the owner as
-seeded only after the operator action and its result have been confirmed.
+Keep future verification notes specific to the actual environment and checks.
+Do not put real owner emails, OAuth secrets, session tokens or private parent
+records into this guide or migration history.

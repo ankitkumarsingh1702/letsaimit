@@ -1,10 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import { PGlite } from "@electric-sql/pglite";
 
-const migration = await readFile(new URL("../supabase/migrations/20261109080830_registration_register.sql", import.meta.url), "utf8");
+const migrationDirectory = new URL("../supabase/migrations/", import.meta.url);
+const migrationNames = (await readdir(migrationDirectory)).filter(name => name.endsWith(".sql")).sort();
+const migrations = await Promise.all(migrationNames.map(name => readFile(new URL(name, migrationDirectory), "utf8")));
 const ownerEmail = "owner@gmail.com";
 const ownerId = "10000000-0000-4000-8000-000000000001";
 const secondId = "10000000-0000-4000-8000-000000000002";
@@ -40,7 +42,17 @@ test("Supabase migration validates persistence, RLS, idempotency and admin manag
     grant usage on schema auth to anon, authenticated;
     grant execute on function auth.jwt(), auth.uid() to anon, authenticated;
   `);
-  await database.exec(migration);
+  await database.exec(`
+    create function public.rls_auto_enable() returns event_trigger
+    language plpgsql security definer as $$
+    begin
+      perform set_config('test.auto_rls_event_ran', 'yes', false);
+    end;
+    $$;
+    create event trigger test_auto_rls on ddl_command_end
+      when tag in ('CREATE TABLE') execute function public.rls_auto_enable();
+  `);
+  for (const migration of migrations) await database.exec(migration);
   await database.query("insert into public.allowed_admins (email, is_owner) values ($1, true)", [ownerEmail]);
 
   async function asRole(role, claims, operation) {
@@ -180,9 +192,24 @@ test("Supabase migration validates persistence, RLS, idempotency and admin manag
 
   await context.test("private helpers cannot be invoked as public validation or data endpoints", async () => {
     await asRole("anon", {}, async () => {
-      assert.equal((await database.query("select public.is_admin() as allowed")).rows[0].allowed, false);
+      await assert.rejects(database.query("select public.is_admin()"), { code: "42501" });
       await assert.rejects(database.query("select private.normalized_registration($1::jsonb)", [JSON.stringify(payload())]), { code: "42501" });
     });
+  });
+
+  await context.test("admin wrapper is invoker-only and dashboard event trigger remains usable", async () => {
+    const mode = await database.query("select prosecdef from pg_proc where oid='public.is_admin()'::regprocedure");
+    assert.equal(mode.rows[0].prosecdef, false);
+    const permissions = await database.query(`
+      select has_function_privilege('anon', 'public.is_admin()', 'execute') as anonymous_admin,
+        has_function_privilege('authenticated', 'public.is_admin()', 'execute') as signed_in_admin,
+        has_function_privilege('anon', 'public.rls_auto_enable()', 'execute') as anonymous_trigger,
+        has_function_privilege('authenticated', 'public.rls_auto_enable()', 'execute') as signed_in_trigger
+    `);
+    assert.deepEqual(permissions.rows[0], { anonymous_admin: false, signed_in_admin: true, anonymous_trigger: false, signed_in_trigger: false });
+    await database.exec("select set_config('test.auto_rls_event_ran', 'no', false); create table public.auto_rls_probe (id integer)");
+    assert.equal((await database.query("select current_setting('test.auto_rls_event_ran') as ran")).rows[0].ran, "yes");
+    await database.exec("drop table public.auto_rls_probe");
   });
 
   await context.test("the database also protects the last non-owner admin", async () => {
@@ -191,4 +218,19 @@ test("Supabase migration validates persistence, RLS, idempotency and admin manag
     await asRole("authenticated", google(), () => assert.rejects(database.query("delete from public.allowed_admins where email=$1", [ownerEmail]), { code: "42501" }));
     assert.equal((await database.query("select count(*)::int as count from public.allowed_admins")).rows[0].count, 1);
   });
+});
+
+test("function privilege cleanup supports projects without the optional dashboard trigger", async context => {
+  const database = new PGlite();
+  context.after(() => database.close());
+  await database.exec(`
+    create role anon nologin;
+    create role authenticated nologin;
+    create function public.is_admin() returns boolean language sql security definer as $$ select false; $$;
+  `);
+  const cleanupIndex = migrationNames.indexOf("20261109083344_registration_function_privileges.sql");
+  assert.notEqual(cleanupIndex, -1);
+  await database.exec(migrations[cleanupIndex]);
+  assert.equal((await database.query("select to_regprocedure('public.rls_auto_enable()') as trigger_function")).rows[0].trigger_function, null);
+  await assert.rejects(database.exec("set role anon; select public.is_admin()"), { code: "42501" });
 });
