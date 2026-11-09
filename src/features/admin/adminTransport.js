@@ -1,6 +1,7 @@
 import { followUpPatch, toAdminRequest, validateAdminInvite, toAdminMember } from "./admin-model.js";
+import { reviewArguments } from "./review-contract.js";
 
-export const SAFE_COLUMNS = "id,submission_id,full_name,email,phone,metadata,status,notes,assignee,revision,created,updated,updated_by";
+export const SAFE_COLUMNS = "id,submission_id,full_name,email,phone,metadata,status,notes,assignee,revision,created,updated,updated_by,review_decision,reviewed_at,reviewed_by";
 export const MEMBER_COLUMNS = "email,is_owner,created_at,created_by";
 const BATCH_SIZE = 500;
 
@@ -51,6 +52,21 @@ export function mergeSavedRequests(current, incoming) {
     const saved = previous.get(row.id);
     return saved && saved.revision > row.revision ? saved : row;
   });
+}
+
+export async function saveRequestReview(client, id, decision, expectedRevision) {
+  const { data, error } = await client.rpc("review_registration", reviewArguments(id, decision, expectedRevision));
+  if (error && !["PT409", "P0002"].includes(error.code)) throw error;
+  const record = Array.isArray(data) ? data[0] : data;
+  if (!error && record?.id === id && record.review_decision === decision && Number(record.revision) >= expectedRevision && Number.isFinite(Date.parse(record.reviewed_at))) {
+    return { ok: true, row: toAdminRequest(record) };
+  }
+  if (error) {
+    const { data: latest, error: readError } = await client.from("registrations").select(SAFE_COLUMNS).eq("id", id).maybeSingle();
+    if (readError) throw readError;
+    return { ok: false, code: latest ? "conflict" : "not_found", latest: latest ? toAdminRequest(latest) : null, error: latest ? "This request changed. Review the latest decision before trying again." : "This request is no longer available." };
+  }
+  throw new Error("The saved decision could not be confirmed. Refresh before trying again.");
 }
 
 function membershipError(message, code = "unconfirmed") {

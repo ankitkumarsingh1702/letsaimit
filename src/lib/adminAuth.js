@@ -28,6 +28,34 @@ export function googleProfilePresentation(identity, email) {
   return { displayName, avatarUrl };
 }
 
+const verifiedIdentityForError = new WeakMap();
+export function verifiedGoogleUserAfterAdminError(error) {
+  return error && typeof error === "object" ? verifiedIdentityForError.get(error) || null : null;
+}
+export function isConfirmedAccessDenial(error) {
+  return [401, 403].includes(error?.status) || ["42501", "PGRST301", "PGRST302", "PGRST303"].includes(error?.code);
+}
+/** Only a fresh identity verified before an admin-only failure may retain parent capability after denial. */
+export function identityAfterAccessFailure(error, previousUser) {
+  const verified = verifiedGoogleUserAfterAdminError(error);
+  return verified || (isConfirmedAccessDenial(error) ? null : previousUser);
+}
+
+function authIdentity(identity) {
+  const email = String(identity.email || "").trim().toLowerCase();
+  return { id: identity.id, email, ...googleProfilePresentation(identity, email), role: null,
+    isGoogle: Boolean(identity.id && email && identity.app_metadata?.provider === "google") };
+}
+
+/** Parent capability needs verified Google identity, independently of the private admin allowlist. */
+export async function readGoogleUser(client) {
+  if (!client) return null;
+  const { data, error } = await client.auth.getUser();
+  if (error && error.name !== "AuthSessionMissingError") throw error;
+  const user = data?.user ? authIdentity(data.user) : null;
+  return user?.isGoogle ? user : null;
+}
+
 /** Google verifies identity; the current database allowlist grants access. */
 export async function readAdminSession(client) {
   if (!client) return { phase: "not_configured", user: null, error: "Team sign-in is not configured. Please contact LetsAimIt." };
@@ -35,14 +63,11 @@ export async function readAdminSession(client) {
   if (error && error.name !== "AuthSessionMissingError") throw error;
   const identity = data?.user;
   if (!identity) return { phase: "signed_out", user: null, error: "" };
-  const email = String(identity.email || "").trim().toLowerCase();
-  const user = {
-    id: identity.id, email,
-    ...googleProfilePresentation(identity, email),
-    role: null,
-  };
+  const user = authIdentity(identity);
+  const email = user.email;
   // User-editable metadata is presentation only, never an authorization source.
-  if (!identity.id || !email || identity.app_metadata?.provider !== "google") return { phase: "denied", user, error: "" };
+  if (!user.isGoogle) return { phase: "denied", user, error: "" };
+  try {
   const access = await client.rpc("is_admin");
   if (access.error) throw access.error;
   if (access.data !== true) return { phase: "denied", user, error: "" };
@@ -50,6 +75,11 @@ export async function readAdminSession(client) {
   if (membership.error) throw membership.error;
   if (!membership.data) return { phase: "denied", user, error: "" };
   return { phase: "authorized", user: { ...user, role: membership.data.is_owner ? "owner" : "admin" }, error: "" };
+  } catch (cause) {
+    const error = cause && typeof cause === "object" ? cause : new Error("Admin access could not be checked.");
+    verifiedIdentityForError.set(error, user);
+    throw error;
+  }
 }
 
 export function googleSignInOptions(origin) {

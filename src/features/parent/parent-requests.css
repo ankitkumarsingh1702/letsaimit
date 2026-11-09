@@ -1,0 +1,26 @@
+.parent-requests { padding-block: 48px 64px; min-height: 60vh; }
+.parent-requests-heading { display: flex; justify-content: space-between; align-items: start; gap: 24px; margin-bottom: 24px; }
+.parent-requests-heading h1 { margin: 0 0 10px; font-family: var(--font-body); font-size: clamp(28px, 4vw, 40px); letter-spacing: -.035em; }
+.parent-requests-heading p, .parent-request-note { color: var(--muted); font-size: 14px; line-height: 1.7; }
+.parent-request-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.parent-request-actions .btn { border: 1px solid var(--line); }
+.parent-request-actions button:disabled { opacity: .6; cursor: wait; }
+.parent-request-account { display: flex; align-items: center; gap: 12px; padding: 16px 0; margin-bottom: 20px; border-block: 1px solid var(--line); }
+.parent-request-account > span { display: grid; gap: 4px; min-width: 0; font-size: 14px; overflow-wrap: anywhere; }
+.parent-request-account > span > span { color: var(--muted); }
+.parent-request-account > a { margin-left: auto; color: var(--green); text-decoration: underline; font-size: 13px; }
+.parent-request-scroll { max-width: 100%; overflow-x: auto; margin-block: 20px; border: 1px solid var(--line); border-radius: 6px; }
+.parent-request-scroll:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+.parent-request-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+.parent-request-table th, .parent-request-table td { padding: 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.parent-request-table th { background: var(--soft); font-weight: 600; }
+.parent-request-table tbody tr:last-child td { border-bottom: 0; }
+.parent-request-count { padding: 12px; text-align: left; color: var(--muted); }
+.parent-request-error { padding: 12px; border: 1px solid #cfb5ad; border-radius: 5px; color: #7c3e31; font-size: 14px; }
+.parent-request-note { margin-block: 20px; }
+@media (max-width: 700px) {
+  .parent-requests-heading { flex-direction: column; gap: 16px; }
+  .parent-request-account { flex-wrap: wrap; }
+  .parent-request-account > a { width: 100%; margin-left: 0; }
+  .signin-role-tabs[data-entry-count="2"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

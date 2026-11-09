@@ -8,6 +8,8 @@ import AdminOverview from "./AdminOverview.jsx";
 import { useAdminRegister } from "./useAdminRegister.js";
 import { filterRows, paginateRows, deriveSummary, formatIST, formatAge, periodForPreset, defaultFilters, buildRegisterCsv, STATUS_OPTIONS, FORM_LABELS, validateAdminInvite } from "./admin-model.js";
 import "./admin.css";
+import { REVIEW_OPTIONS, readReviewIntent } from "./review-contract.js";
+import { consumeAuthReturnTarget } from "../../lib/authReturn.js";
 
 const VIEWS = [
   { id: "overview", label: "Dashboard", icon: "overview" },
@@ -51,7 +53,7 @@ function FilterSelect({ label, value, onChange, children }) {
 }
 
 function Register({ rows, filtered, pagination, filters, setFilter, resetFilters, onOpen, onExport, canExport, assignees, datePreset, onDatePreset }) {
-  const activeFilters = [filters.status, filters.community, filters.sport, filters.assignee, filters.onlyUnassigned, datePreset !== "all"].filter(Boolean).length;
+  const activeFilters = [filters.status, filters.reviewDecision, filters.community, filters.sport, filters.assignee, filters.onlyUnassigned, datePreset !== "all"].filter(Boolean).length;
   const hasFilters = Boolean(filters.query || filters.formType || activeFilters);
   const unique = key => [...new Set(rows.map(row => row[key]).filter(Boolean))];
   function openFromRow(event, id) {
@@ -72,6 +74,7 @@ function Register({ rows, filtered, pagination, filters, setFilter, resetFilters
             <div className="adm-filter-grid">
               <FilterSelect label="Period" value={datePreset} onChange={onDatePreset}><option value="today">Today</option><option value="last7">Last 7 days</option><option value="all">All dates</option></FilterSelect>
               <FilterSelect label="Status" value={filters.status} onChange={value => setFilter("status", value)}><option value="">All statuses</option>{STATUS_OPTIONS.map(item => <option key={item.value} value={item.value}>{item.label}</option>)}</FilterSelect>
+              <FilterSelect label="Review" value={filters.reviewDecision} onChange={value => setFilter("reviewDecision", value)}><option value="">All decisions</option>{REVIEW_OPTIONS.map(item => <option key={item.value} value={item.value}>{item.label}</option>)}</FilterSelect>
               <FilterSelect label="Community" value={filters.community} onChange={value => setFilter("community", value)}><option value="">All communities</option>{unique("community").map(value => <option key={value}>{value}</option>)}</FilterSelect>
               <FilterSelect label="Sport" value={filters.sport} onChange={value => setFilter("sport", value)}><option value="">All sports</option>{[...new Set([...unique("sport"), "Not sure"])].map(value => <option key={value}>{value}</option>)}</FilterSelect>
               <FilterSelect label="Assigned to" value={filters.assignee} onChange={value => setFilter("assignee", value)}><option value="">Anyone</option>{assignees.map(value => <option key={value}>{value}</option>)}</FilterSelect>
@@ -89,8 +92,8 @@ function Register({ rows, filtered, pagination, filters, setFilter, resetFilters
       {filtered.length === 0 ? <div className="adm-empty"><h2>No matches</h2><p>Try another search.</p><button className="adm-button adm-button-white" type="button" onClick={resetFilters}>Clear filters</button></div> : <>
         <div className="adm-table-wrap" role="region" aria-label="Saved requests table, scroll horizontally for all columns" tabIndex={0}><table className="adm-table adm-register-table">
           <caption className="adm-sr-only">Saved requests. Open a parent’s details to review and edit follow-up. Times are in India Standard Time.</caption>
-          <colgroup><col className="adm-col-parent" /><col className="adm-col-child" /><col className="adm-col-type" /><col className="adm-col-age" /><col className="adm-col-sport" /><col className="adm-col-community" /><col className="adm-col-email" /><col className="adm-col-phone" /><col className="adm-col-status" /><col className="adm-col-assigned" /><col className="adm-col-received" /></colgroup>
-          <thead><tr><th scope="col">Parent</th><th scope="col">Child</th><th scope="col">Type</th><th scope="col">Age</th><th scope="col">Sport</th><th scope="col">Community</th><th scope="col">Email</th><th scope="col">Phone</th><th scope="col">Status</th><th scope="col">Assigned</th><th scope="col" title="India Standard Time">Received</th></tr></thead>
+          <colgroup><col className="adm-col-parent" /><col className="adm-col-child" /><col className="adm-col-type" /><col className="adm-col-age" /><col className="adm-col-sport" /><col className="adm-col-community" /><col className="adm-col-email" /><col className="adm-col-phone" /><col className="adm-col-status" /><col className="adm-col-review" /><col className="adm-col-assigned" /><col className="adm-col-received" /></colgroup>
+          <thead><tr><th scope="col">Parent</th><th scope="col">Child</th><th scope="col">Type</th><th scope="col">Age</th><th scope="col">Sport</th><th scope="col">Community</th><th scope="col">Email</th><th scope="col">Phone</th><th scope="col">Status</th><th scope="col">Review</th><th scope="col">Assigned</th><th scope="col" title="India Standard Time">Received</th></tr></thead>
           <tbody>{pagination.rows.map(row => <tr key={row.id} className="adm-clickable-row" onClick={event => openFromRow(event, row.id)}>
             <td><button className="adm-parent-button" type="button" aria-label={`Open ${row.parentName || "request"} details`} title={row.parentName} onClick={() => onOpen(row.id)}>{row.parentName || "—"}</button></td>
             <td>{textCell(row.childName)}</td>
@@ -101,6 +104,7 @@ function Register({ rows, filtered, pagination, filters, setFilter, resetFilters
             <td>{row.links?.email ? <a className="adm-cell-link adm-cell-text" href={row.links.email} title={row.email}>{row.email}</a> : textCell(row.email)}</td>
             <td>{row.links?.call ? <a className="adm-cell-link adm-cell-text adm-numeric" href={row.links.call} title={row.phone}>{row.phone}</a> : textCell(row.phone, "adm-numeric")}</td>
             <td><StatusBadge status={row.status} /></td>
+            <td>{textCell(REVIEW_OPTIONS.find(item => item.value === row.reviewDecision)?.label || "Pending review")}</td>
             <td>{textCell(row.assignee || "Unassigned", row.assignee ? "" : "adm-unassigned")}</td>
             <td><time className="adm-cell-text adm-numeric" dateTime={row.submittedAt} title={`${formatIST(row.submittedAt)} IST`}>{formatIST(row.submittedAt)}</time></td>
           </tr>)}</tbody>
@@ -195,13 +199,15 @@ function Team({ members, user, onInvite, onRemove }) {
 }
 
 function AuthorizedAdmin({ auth }) {
-  const { rows, members, loading, error, liveState, lastSynced, refresh, save, inviteMember, removeMember } = useAdminRegister(auth);
+  const { rows, members, loading, error, liveState, lastSynced, refresh, save, review, inviteMember, removeMember } = useAdminRegister(auth);
   const [filters, setFilters] = React.useState(defaultFilters);
   const [datePreset, setDatePreset] = React.useState("all");
   const [referenceIso, setReferenceIso] = React.useState(() => new Date().toISOString());
   const [view, setView] = React.useState("overview");
   const [selectedDetailId, setSelectedDetailId] = React.useState(null);
   const [selectedSnapshot, setSelectedSnapshot] = React.useState(null);
+  const [reviewIntent] = React.useState(() => typeof window === "undefined" ? null : readReviewIntent(window.location.search));
+  const intentOpened = React.useRef(false);
   const [editsById, setEditsById] = React.useState({});
   const [toast, setToast] = React.useState("");
   const [exporting, setExporting] = React.useState(false);
@@ -216,6 +222,19 @@ function AuthorizedAdmin({ auth }) {
   const assignees = React.useMemo(() => [...new Set([...members.map(member => member.email), ...rows.map(row => row.assignee).filter(Boolean)])], [rows, members]);
   const hasDraft = Object.values(editsById).some(edit => ["dirty", "saving", "error"].includes(edit.state));
   const uiAuth = React.useMemo(() => ({ user: auth.user, permissions: { readRegister: true, editFollowUp: true, exportCsv: true, manageAdmins: true } }), [auth.user]);
+
+  React.useEffect(() => {
+    if (!hasLoaded || !reviewIntent || intentOpened.current) return;
+    intentOpened.current = true;
+    setView("register");
+    const found = rows.find(row => row.id === reviewIntent.id);
+    if (found) { setSelectedSnapshot(found); setSelectedDetailId(found.id); }
+    else setToast("This request is no longer available in the saved register.");
+    // Consume navigation intent, never a decision. A confirmed POST/RPC is required to decide.
+    const url = new URL(window.location.href);
+    url.searchParams.delete("requestId"); url.searchParams.delete("requestedDecision");
+    window.history.replaceState(null, "", url.pathname + url.search + url.hash);
+  }, [hasLoaded, reviewIntent, rows]);
 
   React.useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
   React.useEffect(() => {
@@ -273,6 +292,11 @@ function AuthorizedAdmin({ auth }) {
     if (alive.current && result.ok) setToast("Changes saved. The team can see your update.");
     return result;
   }
+  async function reviewRequest(id, decision, expectedRevision) {
+    const result = await review(id, decision, expectedRevision);
+    if (alive.current && result.ok) setToast(decision === "accepted" ? "Request accepted. No payment has been requested." : "Request declined.");
+    return result;
+  }
   async function exportCsv(exportFilters) {
     if (!hasLoaded) return;
     setExporting(true);
@@ -312,13 +336,26 @@ function AuthorizedAdmin({ auth }) {
         <footer className="adm-footer">{hasLoaded ? <><span>Counts include all saved requests, including any test submissions.</span><span>{periodLabel} · Synced {formatIST(lastSynced, "time")} IST</span></> : <><span>Waiting for the saved register.</span><span>Asia/Kolkata</span></>}</footer>
       </div>
     </div>
-    <RequestDetail row={selectedRow} open={Boolean(selectedRow)} onClose={closeRequest} onSave={saveFollowUp} assignees={assignees} canEdit onDraftChange={onDraftChange} />
+    <RequestDetail row={selectedRow} open={Boolean(selectedRow)} onClose={closeRequest} onSave={saveFollowUp} onReview={reviewRequest} initialDecision={selectedRow?.id === reviewIntent?.id ? reviewIntent.decision : null} assignees={assignees} canEdit onDraftChange={onDraftChange} />
     {toast && <div className="adm-toast" role="status"><AdminIcon name="check" /><span>{toast}</span><button type="button" className="adm-icon-button" aria-label="Dismiss message" onClick={() => setToast("")}><AdminIcon name="close" /></button></div>}
   </div>;
 }
 
 export function AdminPage() {
   const auth = useAdminAuth();
+  const [returnTarget, setReturnTarget] = React.useState(null);
+  const [returnChecked, setReturnChecked] = React.useState(false);
+  const returnRead = React.useRef(false);
+  React.useEffect(() => {
+    if (returnRead.current) return;
+    returnRead.current = true;
+    setReturnTarget(consumeAuthReturnTarget()); setReturnChecked(true);
+  }, []);
+  const returning = Boolean(returnTarget && typeof window !== "undefined" && returnTarget !== window.location.pathname + window.location.search);
+  React.useEffect(() => {
+    if (returning && auth.user?.isGoogle && !["checking", "signing_in", "signing_out"].includes(auth.phase)) window.location.replace(returnTarget);
+  }, [returning, returnTarget, auth.phase, auth.user?.isGoogle]);
+  if (!returnChecked || returning && auth.user?.isGoogle) return <p className="adm-empty" role="status">Opening your page…</p>;
   // Unmounting destroys private rows and drafts immediately on sign-out/revocation.
   if (auth.phase !== "authorized" || !auth.user) return <SignIn />;
   return <AuthorizedAdmin key={auth.user.id} auth={auth} />;

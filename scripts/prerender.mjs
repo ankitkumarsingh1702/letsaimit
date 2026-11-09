@@ -38,7 +38,7 @@ function metadata(page, details) {
     `<title>${escape(title)}</title>`,
     `<meta name="description" content="${escape(details.description)}" />`,
     `<link rel="canonical" href="${escape(url)}" />`,
-    `<meta name="robots" content="${["notfound", "admin", "signin"].includes(page) ? "noindex, follow" : "index, follow, max-image-preview:large"}" />`,
+    `<meta name="robots" content="${["notfound", "admin", "signin", "parent"].includes(page) ? "noindex, follow" : "index, follow, max-image-preview:large"}" />`,
     '<meta property="og:type" content="website" />',
     '<meta property="og:site_name" content="LetsAimIt" />',
     '<meta property="og:locale" content="en_IN" />',

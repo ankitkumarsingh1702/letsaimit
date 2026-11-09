@@ -31,7 +31,7 @@ function PolicyContact() {
 }
 
 function PolicyLayout({ page, title, intro, summary, children }) {
-  const updated = page === "privacy" ? { label: "9 November 2026", date: "2026-11-09" } :
+  const updated = page === "privacy" ? { label: "10 November 2026", date: "2026-11-10" } :
     { label: POLICY_UPDATED, date: "2026-11-05" };
   return (
     <div className="legal-page wrap">
@@ -117,13 +117,18 @@ function Privacy() {
           confirmation only after it receives a saved receipt.
         </p>
         <p>
-          Invited staff sign in with Google. We receive their Google account ID
+          Parents and invited staff sign in with Google. We receive their Google account ID
           and, where available, their name, email address and profile photo. We
-          use these details to identify invited staff and display the signed-in
-          account. This sign-in does not give us access to Gmail messages or
+          use these details to link a parent to their own submitted requests,
+          check staff access and display the signed-in account. One account can
+          be used as both a parent and an approved team member. This sign-in does not give us access to Gmail messages or
           mailboxes. Parent registration responses stay in the private Supabase
           register; they are not stored in Google Forms or Sheets by this sign-in.
         </p>
+        <p>Approved admins receive email alerts with the details needed to review
+          a new trial or enrolment request, and activity summaries. Review links
+          require admin sign-in before a decision is saved. An accepted request
+          does not mean a payment has been made.</p>
         <p>
           WhatsApp is an optional next step after a saved parent request. School
           and society enquiries may use a prepared WhatsApp message. Opening

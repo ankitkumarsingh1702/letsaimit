@@ -1,4 +1,5 @@
 import * as React from "react";
+import ReviewDecision from "./ReviewDecision.jsx";
 import { ADMIN_NOTE_LIMIT, formatAge } from "./admin-model.js";
 import "./request-detail.css";
 
@@ -118,6 +119,8 @@ export default function RequestDetail({
   open,
   onClose,
   onSave,
+  onReview,
+  initialDecision = null,
   assignees = [],
   canEdit = true,
   onDraftChange,
@@ -139,6 +142,7 @@ export default function RequestDetail({
   const [savedMessage, setSavedMessage] = React.useState("");
   const [conflictLatest, setConflictLatest] = React.useState(null);
   const [confirmDiscard, setConfirmDiscard] = React.useState(false);
+  const [reviewBusy, setReviewBusy] = React.useState(false);
   const prefix = React.useId();
   const titleId = `${prefix}-title`;
   const formId = `${prefix}-follow-up`;
@@ -219,7 +223,7 @@ export default function RequestDetail({
   }
 
   function requestClose() {
-    if (saving) return;
+    if (saving || reviewBusy) return;
     if (dirty) {
       if (!confirmDiscard) editingFocusRef.current = document.activeElement;
       setConfirmDiscard(true);
@@ -251,7 +255,7 @@ export default function RequestDetail({
 
   async function saveFollowUp(event) {
     event.preventDefault();
-    if (!canEdit || savingRef.current || saving || !dirty || !currentEdit || !onSave) return;
+    if (!canEdit || savingRef.current || saving || reviewBusy || !dirty || !currentEdit || !onSave) return;
     savingRef.current = true;
     const requestSequence = ++saveSequenceRef.current;
     const submittedDraft = { ...currentEdit.values };
@@ -349,7 +353,7 @@ export default function RequestDetail({
               className="adm-detail-close"
               aria-label="Close request"
               onClick={requestClose}
-              disabled={saving}
+              disabled={saving || reviewBusy}
             >
               <DrawerIcon name="close" />
             </button>
@@ -403,6 +407,8 @@ export default function RequestDetail({
               )}
             </section>
 
+            {onReview && <ReviewDecision key={row.id} row={row} initialDecision={initialDecision} canReview={canEdit && !dirty && !saving} onReview={onReview} onBusyChange={setReviewBusy} />}
+
             <section className="adm-detail-section adm-detail-follow-up" aria-labelledby={`${prefix}-follow-up-title`}>
               <div className="adm-detail-section-heading">
                 <h3 id={`${prefix}-follow-up-title`}>Follow-up</h3>
@@ -411,7 +417,7 @@ export default function RequestDetail({
                 </span>
               </div>
               <form id={formId} onSubmit={saveFollowUp}>
-                <fieldset disabled={!canEdit || saving}>
+                <fieldset disabled={!canEdit || saving || reviewBusy}>
                   <div className="adm-detail-fields">
                     <label htmlFor={`${prefix}-status`}>
                       Status
@@ -506,7 +512,7 @@ export default function RequestDetail({
                   </span>
                 </div>
                 <div className="adm-detail-footer-actions">
-                  <button type="button" className="adm-detail-button adm-detail-button--quiet" onClick={requestClose} disabled={saving}>
+                  <button type="button" className="adm-detail-button adm-detail-button--quiet" onClick={requestClose} disabled={saving || reviewBusy}>
                     {dirty ? "Cancel" : "Close"}
                   </button>
                   {canEdit && (
@@ -514,7 +520,7 @@ export default function RequestDetail({
                       type="submit"
                       form={formId}
                       className="adm-detail-button adm-detail-button--primary"
-                      disabled={!dirty || saving || !onSave || Boolean(conflictLatest)}
+                      disabled={!dirty || saving || reviewBusy || !onSave || Boolean(conflictLatest)}
                       aria-busy={saving}
                     >
                       {saving ? "Saving…" : "Save changes"}

@@ -92,7 +92,8 @@ body[data-page="admin"] #main { min-height: 100dvh; padding: 0; }
 .adm-table-wrap:focus-visible { outline-offset: -2px; }
 .adm-register-card > .adm-table-wrap { max-height: 72dvh; }
 .adm-table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; text-align: left; background: #fff; }
-.adm-register-table { min-width: 1590px; }
+.adm-register-table { min-width: 1710px; }
+.adm-col-review { width: 120px; }
 .adm-table th { position: sticky; top: 0; z-index: 2; height: 33px; padding: 7px 11px; border-bottom: 1px solid #dfe5e0; background: #f8faf8; color: #68746d; font-size: 11px; line-height: 18px; font-weight: 500; white-space: nowrap; }
 .adm-table td { height: 38px; padding: 6px 11px; border-bottom: 1px solid #edf0ed; border-right: 1px solid #f3f5f3; color: #506055; background: #fff; font-size: 12px; line-height: 24px; white-space: nowrap; }
 .adm-table td:last-child { border-right: 0; }

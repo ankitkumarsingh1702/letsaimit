@@ -1,0 +1,5 @@
+project_id = "letsaimit"
+
+[functions.admin-notifications]
+# A narrow backend-only bearer secret is checked by the handler. No public-key access.
+verify_jwt = false

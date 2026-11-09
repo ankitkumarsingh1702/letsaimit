@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { fetchSavedRequests, mergeSavedRequests, saveRequestFollowUp, inviteAdminMembership, removeAdminMembership, MEMBER_COLUMNS } from "./adminTransport.js";
+import { fetchSavedRequests, mergeSavedRequests, saveRequestFollowUp, saveRequestReview, inviteAdminMembership, removeAdminMembership, MEMBER_COLUMNS } from "./adminTransport.js";
 import { toAdminMember, validateAdminInvite } from "./admin-model.js";
 
 /** A failed delete response may follow a committed self-removal. Clear local access first. */
@@ -106,6 +106,18 @@ export function useAdminRegister({ client, user, checkAccess, signOut }) {
     }
   }, [client]);
 
+  const review = useCallback(async (id, decision, expectedRevision) => {
+    try {
+      if (!await authRef.current.checkAccess() || !alive.current) return { ok: false, error: "Admin access is required." };
+      const result = await saveRequestReview(client, id, decision, expectedRevision);
+      if (!await authRef.current.checkAccess() || !alive.current) return { ok: false, error: "Your access changed. Please sign in again." };
+      const row = result.ok ? result.row : result.latest;
+      if (row) setRows(current => current.map(saved => saved.id === id && saved.revision <= row.revision ? row : saved));
+      if (result.ok) setLastSynced(new Date().toISOString());
+      return result;
+    } catch { return { ok: false, error: "The decision could not be confirmed. Refresh the request before retrying." }; }
+  }, [client]);
+
   const changeMembership = useCallback(async (kind, value) => {
     if (mutationLock.current) return { ok: false, error: "Please wait for the current access change." };
     const checked = kind === "invite" ? validateAdminInvite(value, membersRef.current) : null;
@@ -151,5 +163,5 @@ export function useAdminRegister({ client, user, checkAccess, signOut }) {
   const inviteMember = useCallback(email => changeMembership("invite", email), [changeMembership]);
   const removeMember = useCallback(email => changeMembership("remove", email), [changeMembership]);
 
-  return { rows, members, loading, error, liveState, lastSynced, refresh, save, inviteMember, removeMember };
+  return { rows, members, loading, error, liveState, lastSynced, refresh, save, review, inviteMember, removeMember };
 }

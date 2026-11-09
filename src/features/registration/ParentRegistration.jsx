@@ -6,9 +6,12 @@ import { parseRegistration, REGISTRATION_AGES, REGISTRATION_COMMUNITIES, REGISTR
 import { carryTrialToEnrol, createRegistrationDraft, nationalPhoneLimit, sanitizePhoneInput } from "./registrationDraft.js";
 import { firstInvalidRegistrationField, parentRegistrationResolver } from "./registrationResolver.js";
 import CountryCombobox from "./CountryCombobox.jsx";
+import { useAdminAuth } from "../../context/AdminAuth.jsx";
+import { storeRegistrationDraft, consumeRegistrationDraft, clearRegistrationDraft, clearRegistrationDrafts, shouldClearBoundRegistration, canConfirmRegistrationReceipt } from "./registrationDraft.js";
 import "./registration.css";
 
 const ParentRegistration = forwardRef(function ParentRegistration({ mode, active, onSwitchKind, Arrow }, ref) {
+  const auth = useAdminAuth();
   const { register, control, handleSubmit, getValues, reset, setValue, setError, setFocus, getFieldState, formState: { errors } } = useForm({
     defaultValues: createRegistrationDraft(), mode: "onTouched", reValidateMode: "onChange",
     resolver: parentRegistrationResolver(mode), shouldFocusError: false,
@@ -18,20 +21,36 @@ const ParentRegistration = forwardRef(function ParentRegistration({ mode, active
   const [status, setStatus] = useState("idle");
   const [saveError, setSaveError] = useState("");
   const [handoffUrl, setHandoffUrl] = useState("");
+  const [restored, setRestored] = useState(false);
   const submissionId = useRef(null);
+  const submissionUserId = useRef(null);
   const pending = useRef(false);
   const requestGeneration = useRef(0);
   const activeRef = useRef(active);
+  const googleUserId = auth.user?.isGoogle ? auth.user.id : null;
+  const boundAccount = useRef(googleUserId);
   const isEnrol = mode === "enroll";
   useLayoutEffect(() => {
     activeRef.current = active;
     requestGeneration.current += 1;
     if (active) {
+      const kept = consumeRegistrationDraft(mode);
+      if (kept) { reset(kept); setRestored(true); submissionId.current = null; submissionUserId.current = null; }
       setStatus(pending.current ? "saving" : "idle");
       setSaveError(""); setHandoffUrl("");
     }
     return () => { activeRef.current = false; requestGeneration.current += 1; };
   }, [active]);
+  useLayoutEffect(() => {
+    if (shouldClearBoundRegistration(boundAccount.current, googleUserId)) {
+      reset(createRegistrationDraft()); clearRegistrationDrafts(); setRestored(false);
+    }
+    boundAccount.current = googleUserId;
+    requestGeneration.current += 1;
+    submissionId.current = null; submissionUserId.current = null;
+    setStatus("idle"); setSaveError(""); setHandoffUrl("");
+    setValue("consent", false); setValue("terms", false);
+  }, [googleUserId, reset, setValue]);
   useImperativeHandle(ref, () => ({
     getValues,
     carryTrial: trial => {
@@ -44,6 +63,7 @@ const ParentRegistration = forwardRef(function ParentRegistration({ mode, active
   }), [getValues, reset]);
 
   function markEdited() {
+    requestGeneration.current += 1;
     submissionId.current = null;
     setStatus("idle"); setSaveError(""); setHandoffUrl("");
   }
@@ -73,15 +93,36 @@ const ParentRegistration = forwardRef(function ParentRegistration({ mode, active
   async function submit(values) {
     if (!active || pending.current) return;
     pending.current = true;
-    setStatus("saving"); setSaveError("");
-    const id = submissionId.current ||= newSubmissionId();
+    setStatus("verifying"); setSaveError("");
     const generation = requestGeneration.current;
     try {
       const data = parseRegistration(mode, values);
-      await saveRegistration(isEnrol ? "enrol" : "trial", data, { agreed: true, guardian: true, terms: isEnrol }, id);
+      const actor = await auth.verifyGoogleUser();
       if (!activeRef.current || requestGeneration.current !== generation) return;
+      if (!actor) {
+        if (auth.user?.isGoogle) throw new Error("Your Google account changed. Sign in again before sending.");
+        if (!storeRegistrationDraft(mode, values)) throw new Error("Your browser could not keep these answers for sign-in. Allow this site's session storage and try again.");
+        setStatus("signing_in");
+        await auth.signIn(`/parent/?resume=${isEnrol ? "enrol" : "trial"}`);
+        return;
+      }
+      if (!auth.user?.isGoogle || auth.user.id !== actor.id) {
+        setValue("consent", false); setValue("terms", false);
+        setSaveError("Check the Google account shown below and confirm consent again before sending.");
+        setStatus("idle");
+        return;
+      }
+      if (submissionUserId.current !== actor.id) { submissionId.current = null; submissionUserId.current = actor.id; }
+      const id = submissionId.current ||= newSubmissionId();
+      setStatus("saving");
+      const receipt = await saveRegistration(isEnrol ? "enrol" : "trial", data, { agreed: true, guardian: true, terms: isEnrol }, id);
+      const currentActor = await auth.verifyGoogleUser();
+      if (!currentActor || currentActor.id !== actor.id) throw new Error("Your Google account changed. Check the account and submit again.");
+      if (!canConfirmRegistrationReceipt({ submittedUserId: actor.id, verifiedUser: currentActor, generation, currentGeneration: requestGeneration.current, active: activeRef.current })) return;
+      clearRegistrationDraft(mode); setRestored(false);
       setHandoffUrl(createWhatsAppUrl(mode, data));
       setStatus("saved");
+      window.dispatchEvent(new CustomEvent("letsaimit:registration-saved", { detail: { userId: actor.id, requestId: receipt.id } }));
     } catch (error) {
       if (!activeRef.current || requestGeneration.current !== generation) return;
       if (typeof error.field === "string" && Object.hasOwn(createRegistrationDraft(), error.field)) {
@@ -121,7 +162,7 @@ const ParentRegistration = forwardRef(function ParentRegistration({ mode, active
 
   return <form className="fm-form registration-form" data-form-mode={mode} hidden={!active} style={!active ? { display: "none" } : undefined}
     noValidate onSubmit={handleSubmit(submit, focusInvalid)} onChange={event => { if (event.target.name) markEdited(); }}>
-    <fieldset className="fm-fieldset" disabled={!active || status === "saving"}>
+    <fieldset className="fm-fieldset" disabled={!active || ["verifying", "saving", "signing_in"].includes(status)}>
       <div className="fm-fields">
         {isEnrol && input("childName", "Child’s name", { maxLength: 80, autoComplete: "off" })}
         {input("parentName", "Parent or guardian name", { maxLength: 80, autoComplete: "name" })}
@@ -145,6 +186,8 @@ const ParentRegistration = forwardRef(function ParentRegistration({ mode, active
         {isEnrol && input("note", "Note for the coach", { full: true, multiline: true, optional: true, maxLength: 500 })}
       </div>
       <div className="fm-form-footer">
+        {restored && <p className="fm-handoff-note" role="status">Your answers are back. Please review them and confirm consent again before sending.</p>}
+        {auth.user?.isGoogle ? <p className="fm-handoff-note">Submitting as {auth.user.email}. <a href="/parent/">My requests</a></p> : <p className="fm-handoff-note">Continue with Google before sending. We will keep these answers in this tab for 30 minutes.</p>}
         <div className="fm-full sk-consent"><label className="fm-consent" htmlFor={fieldId("consent")}>
           <input id={fieldId("consent")} type="checkbox" {...register("consent")} required aria-invalid={errors.consent ? true : undefined} aria-describedby={`${fieldId("consent")}-error`} />
           <span>I am the parent or guardian. I agree to use of these details for this enquiry and a reply from LetsAimIt. <a href="/privacy/" target="_blank" rel="noopener noreferrer">Privacy policy</a></span>
@@ -155,8 +198,8 @@ const ParentRegistration = forwardRef(function ParentRegistration({ mode, active
         </label>{errorMessage("terms")}</div>}
         {status !== "saved" && <>
           <p className="fm-handoff-note">Your details are saved before we show confirmation.</p>
-          <button className="fm-primary" type="submit" disabled={status === "saving"}>
-            <span>{status === "saving" ? "Saving…" : saveError ? "Retry save" : isEnrol ? "Send registration" : "Request a free trial"}</span><Arrow />
+          <button className="fm-primary" type="submit" disabled={["verifying", "saving", "signing_in"].includes(status) || ["checking", "signing_in", "signing_out"].includes(auth.phase)}>
+            <span>{status === "verifying" ? "Checking Google…" : status === "saving" ? "Saving…" : status === "signing_in" ? "Opening Google…" : !auth.user?.isGoogle ? "Continue with Google" : saveError ? "Retry save" : isEnrol ? "Send registration" : "Request a free trial"}</span><Arrow />
           </button>
         </>}
         {saveError && <div className="fm-save-error" role="alert"><p>{saveError}</p><p>Your answers are still here. Please retry to confirm the save.</p></div>}

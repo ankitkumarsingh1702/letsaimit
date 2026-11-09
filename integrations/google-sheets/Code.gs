@@ -1,20 +1,22 @@
 /**
- * LetsAimIt registration storage for Google Apps Script (V8 runtime).
+ * Legacy LetsAimIt society/school enquiry storage for Apps Script (V8 runtime).
  *
  * Owner setup: run setupLeadSheet(), then deploy as a Web app executing as you.
- * The workbook remains private. Anonymous visitors can only submit a lead;
+ * The workbook remains private. Anonymous visitors can only submit an enquiry;
  * this script never returns records, spreadsheet URLs, or personal details.
+ * Parent trial/enrolment submissions require Google on the canonical website.
  *
  * See README.md before deployment. No email alerts, paid API, or client secret.
  */
 const LEAD_CONFIG = Object.freeze({
   consentVersion: '2026-11-05',
   sheetProperty: 'LETSAIMIT_LEAD_SHEET_ID',
-  siteOrigin: 'https://letsaimit-review.one92843.chatgpt.site',
+  siteOrigin: 'https://letsaimit.com',
   maxBodyBytes: 16384,
   phone: '+91 88688 86074',
 });
 
+// Retired parent tab metadata stays for historical submission-ID checks only.
 const LEAD_SCHEMAS = Object.freeze({
   trial: {
     tab: 'Trial',
@@ -41,6 +43,7 @@ const LEAD_SCHEMAS = Object.freeze({
     labels: ['School', 'City', 'Contact name', 'Phone', 'Contact role', 'Support needed'],
   },
 });
+const ACTIVE_LEGACY_FORM_TYPES = Object.freeze(['society', 'school']);
 
 const LEAD_BASE_HEADERS = Object.freeze([
   'Submission ID', 'Received (UTC)', 'Consent version', 'Consent recorded (UTC)',
@@ -148,6 +151,7 @@ function parseRequest_(event) {
 
 function validateLead_(request) {
   const formType = request.formType;
+  rejectRetiredParentForm_(formType);
   if (typeof formType !== 'string' || !Object.prototype.hasOwnProperty.call(LEAD_SCHEMAS, formType)) {
     throw leadError_('VALIDATION_ERROR', 'Choose a valid form.', 'formType');
   }
@@ -205,6 +209,14 @@ function validateLead_(request) {
     submissionId: request.submissionId.toLowerCase(), formType: formType,
     guardian: parentForm, terms: formType === 'enrol', data: data,
   };
+}
+
+function rejectRetiredParentForm_(kind) {
+  if (['trial', 'enrol', 'enroll'].indexOf(kind) === -1) return;
+  const message = 'Parent trial and enrolment submissions have moved. Use https://letsaimit.com/ and sign in with Google before submitting.';
+  const error = leadError_('PARENT_REGISTRATION_RETIRED', message, 'formType');
+  error.message = message; // Also clear when an owner calls a native-form helper.
+  throw error;
 }
 
 function textField_(value, field, limit, required) {
@@ -309,7 +321,7 @@ function setupLeadSheet() {
 }
 
 /**
- * Optional: create four native Google Forms linked to this private workbook.
+ * Optional: create society/school native Google Forms for this private workbook.
  * Google creates separate response tabs for these forms. They do not write to
  * the direct web-app tabs above. Running this again reuses completed forms.
  */
@@ -325,7 +337,7 @@ function setupRegistrationForms() {
     const links = {privacy: origin + '/privacy/', terms: origin + '/terms/', refunds: origin + '/refunds/'};
     const output = {};
 
-    Object.keys(LEAD_SCHEMAS).forEach(function (kind) {
+    ACTIVE_LEGACY_FORM_TYPES.forEach(function (kind) {
       const idKey = 'LETSAIMIT_FORM_' + kind.toUpperCase();
       const readyKey = idKey + '_READY_VERSION';
       const savedId = properties.getProperty(idKey);
@@ -357,6 +369,7 @@ function setupRegistrationForms() {
 }
 
 function configureNativeForm_(form, kind, links) {
+  rejectRetiredParentForm_(kind);
   const parentForm = kind === 'trial' || kind === 'enrol';
   const intro = kind === 'trial'
     ? 'Your first session is free. We’ll confirm a suitable group and time.'

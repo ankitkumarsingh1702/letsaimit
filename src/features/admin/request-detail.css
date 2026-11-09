@@ -13,6 +13,11 @@ body.adm-detail-open { overflow: hidden; }
 .adm-detail-close:hover:not(:disabled) { background: #f5f7f5; }
 .adm-detail-body { flex: 1; min-height: 0; padding: 17px 22px; overflow-y: auto; overscroll-behavior-y: contain; scrollbar-gutter: stable; }
 .adm-detail-section + .adm-detail-section { margin-top: 20px; padding-top: 18px; border-top: 1px solid #e6eae6; }
+.adm-review-note { margin-block: 8px; color: #60736c; font-size: 12px; line-height: 20px; overflow-wrap: anywhere; }
+.adm-review-actions { display: flex; gap: 7px; margin-top: 10px; }
+.adm-review-confirm { margin-top: 10px; padding: 10px; border: 1px solid #dce4de; border-radius: 5px; }
+.adm-review-confirm p { margin-bottom: 10px; font-size: 12px; }
+.adm-review button:disabled { opacity: .6; cursor: not-allowed; }
 .adm-detail-facts { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; margin: 0; }
 .adm-detail-fact { display: grid; grid-template-columns: 112px minmax(0, 1fr); align-items: baseline; gap: 12px; min-width: 0; padding: 7px 0; border-bottom: 1px solid #f0f2f0; }
 .adm-detail-fact--wide { grid-column: 1 / -1; }

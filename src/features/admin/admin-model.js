@@ -55,7 +55,7 @@ export function filterRows(rows, filters = {}) {
   const end = period.endExclusiveUtc == null ? Infinity : dateValue(period.endExclusiveUtc);
   const dateField = period.dateField === 'updated' ? 'updatedAt' : 'submittedAt';
   const hasPeriod = start !== -Infinity || end !== Infinity;
-  const exactFields = ['formType', 'status', 'community', 'sport', 'assignee'];
+  const exactFields = ['formType', 'status', 'reviewDecision', 'community', 'sport', 'assignee'];
   const matches = rows.filter((row) => {
     if (exactFields.some((field) => filters[field] != null && filters[field] !== '' && row[field] !== filters[field])) return false;
     if (filters.onlyUnassigned && text(row.assignee).trim()) return false;
@@ -197,6 +197,9 @@ const CSV_COLUMNS = [
   ['revision', (row) => row.revision],
   ['updated_at_utc', (row) => row.updatedAt],
   ['updated_by', (row) => row.updatedBy],
+  ['review_decision', (row) => row.reviewDecision],
+  ['reviewed_at_utc', (row) => row.reviewedAt],
+  ['reviewed_by', (row) => row.reviewedBy],
 ];
 export const CSV_HEADERS = CSV_COLUMNS.map(([header]) => header);
 
@@ -237,6 +240,8 @@ export function toAdminRequest(record) {
     community: meta.community || '', sport: meta.sport || 'Not sure', address: meta.address || '', parentNote: meta.note || '',
     consent: { guardianConsent: meta.guardianConsent === true, termsAccepted: meta.termsAccepted === true, consentVersion: meta.consentVersion || '', termsVersion: meta.termsVersion || '' },
     status: record.status || 'new', assignee: record.assignee || '', adminNotes: record.notes || '', revision: Number(record.revision),
+    reviewDecision: ['accepted', 'declined'].includes(record.review_decision) ? record.review_decision : 'pending',
+    reviewedAt: record.reviewed_at || null, reviewedBy: record.reviewed_by || '',
     links: { call: /^\+[1-9]\d{7,14}$/.test(phone) ? `tel:${phone}` : null, email: /^[^\s@?]+@[^\s@?]+$/.test(email) ? `mailto:${email}` : null, whatsapp: /^\+[1-9]\d{7,14}$/.test(phone) ? `https://wa.me/${phone.slice(1)}` : null },
   };
 }

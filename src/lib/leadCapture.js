@@ -27,6 +27,7 @@ export async function submitRegistration({ formType, data, consent, submissionId
       } }).abortSignal(controller.signal);
     if (controller.signal.aborted) throw new DOMException("Aborted", "AbortError");
     if (error) {
+      if (["42501", "PGRST301", "PGRST302", "PGRST303"].includes(error.code)) throw new Error("Please sign in with Google before sending. Your answers are still here.");
       throw new Error(["23505", "PT409"].includes(error.code) ? "These details changed. Edit the form and submit again." : "We couldn’t save your details. Please retry.");
     }
     if (receipt?.ok !== true || receipt.submissionId !== submissionId || typeof receipt.duplicate !== "boolean" ||

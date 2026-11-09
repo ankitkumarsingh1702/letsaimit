@@ -11,6 +11,7 @@ import { Privacy, Terms, Refunds } from "./pages/Legal.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import Admin from "./pages/Admin.jsx";
 import SignIn from "./pages/SignIn.jsx";
+import ParentRequests from "./features/parent/ParentRequests.jsx";
 import { AdminAuthProvider } from "./context/AdminAuth.jsx";
 import AnalyticsConsent from "./components/AnalyticsConsent.jsx";
 import { SiteActionsProvider } from "./context/SiteActions.jsx";
@@ -30,6 +31,7 @@ var pages = {
   refunds: Refunds,
   admin: Admin,
   signin: SignIn,
+  parent: ParentRequests,
   notfound: NotFound,
 };
 var formKinds = new Set(["trial", "society", "enroll"]);

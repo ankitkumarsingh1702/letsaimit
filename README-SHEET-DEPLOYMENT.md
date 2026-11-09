@@ -7,6 +7,12 @@ Approved staff sign in with Google at `/sign-in/` and open the private dashboard
 Google supplies staff identity; it does not store responses in Forms or Sheets.
 CSV is a private download from the saved register, not its storage format.
 
+The pending parent authentication and notification release is documented in
+[README-NOTIFICATIONS.md](README-NOTIFICATIONS.md). Its migration changes final
+submission to require Google sign-in and adds private parent tracking, admin
+review and queued email alerts. The older live checks below remain dated;
+they do not establish that this new release is activated.
+
 This setup is **UAT only**:
 
 - Website: `https://uat.letsaimit.com`
@@ -56,6 +62,8 @@ established migration workflow:
 2. `supabase/migrations/20261109083344_registration_function_privileges.sql`
 3. `supabase/migrations/20261109121642_lock_admin_membership_to_operator.sql`
 4. `supabase/migrations/20261109123953_restore_controlled_admin_invitations.sql`
+5. `supabase/migrations/20261109204510_parent_review_notifications.sql` — pending
+   hosted application; deploy with the matching frontend and notification worker.
 
 The second migration makes `is_admin` an authenticated, security-invoker wrapper
 and removes application-role access to the optional dashboard RLS helper.
@@ -87,14 +95,16 @@ The checked-in database contract is:
 
 | Caller | Operations |
 | --- | --- |
-| Anonymous parent | Execute `submit_registration` for a validated save and receipt. Direct INSERT is limited to the four intake columns and remains trigger-validated. No registration/allowlist reads, edits or deletes. |
-| Signed-in, unlisted account | No private records or team access. Google login alone does not establish membership. |
-| Allowlisted Google admin | Read registrations and membership; update only status, follow-up notes and assignee. Invite validated Gmail admins and revoke non-owner access; protected owner and last-admin rules remain enforced. The database also permits authorized registration deletion, although the current grid does not expose a delete action. |
+| Anonymous parent | Enter answers locally; final database submission and private reads are denied after migration 5. |
+| Google parent | Execute `submit_registration` for a validated save and receipt. `list_my_registrations` returns only that verified user ID's projected requests; it excludes contact details and internal notes. Existing unclaimed rows are not claimed by matching email. |
+| Signed-in, unlisted account | May use the parent flow; no team register or membership access. Google login alone does not establish admin membership. |
+| Allowlisted Google admin | Read registrations and membership; update only status, follow-up notes and assignee directly. Explicit Accept/Decline uses the audited, revision-checked `review_registration` RPC. Invite validated Gmail admins and revoke non-owner access; protected owner and last-admin rules remain enforced. Authorized deletion remains a database capability, not a grid action. |
 | Database operator | Bootstrap the protected owner and carry out deliberate privileged maintenance. |
 
-Both tables have RLS enabled. Anonymous INSERT grants apply only to `full_name`,
-`email`, `phone` and `metadata`. Authenticated UPDATE grants apply only to the
-three follow-up columns. Policies require current allowlist membership and a
+Both public tables have RLS enabled. Migration 5 removes anonymous save execution
+and direct application INSERT grants. New parent ownership is assigned on the
+server; parents read through a restricted projection RPC. Authenticated direct
+UPDATE grants apply only to the three follow-up columns. Admin policies require current allowlist membership and a
 Google-authenticated identity for private operations. The app may insert only an invited email address; it cannot set owner status or
 modify identities. New app invitations accept Gmail addresses only. Existing
 company-domain Google identities are configured by an operator. Protected owners
@@ -105,6 +115,9 @@ ordinary admin edits. Retries use the same submission ID and fingerprint; a
 changed payload using that ID conflicts. Parent privacy consent is version
 `2026-11-09`; unchanged programme terms remain `2026-11-05`. Parent email
 addresses may repeat for siblings.
+
+One Google identity can be a parent and an approved admin simultaneously.
+Coach permissions are independent and are not implemented by this release.
 
 ## Google sign-in configuration
 
@@ -387,8 +400,9 @@ Verification has separate layers:
 - Automated tests: shared field rules, drafts/focus, transport failures/receipts,
   SQL grants/RLS/triggers, concurrent saves, retry/conflict behavior, row revisions
   and health-handler authorization.
-- Signed-out UAT browser: save trial/enrolment once; confirm only after a matching
-  receipt; preserve failed drafts; make WhatsApp optional.
+- Parent UAT browser after migration 5: enter answers signed out, complete Google
+  sign-in, review consent again and submit once; confirm only after a matching
+  receipt. Verify own-row isolation, sign-out cleanup and account changes.
 - Staff journey: real Google login, unlisted account denial, invitations and
   revocation, two-admin conflicts, live updates and private CSV download.
 - Operations: a successful live health request and, when provisioned, an observed

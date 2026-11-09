@@ -35,7 +35,10 @@ test("Supabase migration validates persistence, RLS, idempotency and controlled 
   await database.exec(`
     create role anon nologin;
     create role authenticated nologin;
+    create role service_role nologin;
     create schema auth;
+    create table auth.users (id uuid primary key);
+    insert into auth.users (id) values ('10000000-0000-4000-8000-000000000001'), ('10000000-0000-4000-8000-000000000002'), ('10000000-0000-4000-8000-000000000003');
     create function auth.jwt() returns jsonb language sql stable as $$
       select coalesce(nullif(current_setting('request.jwt.claims', true), ''), '{}')::jsonb;
     $$;
@@ -77,8 +80,8 @@ test("Supabase migration validates persistence, RLS, idempotency and controlled 
     assert.deepEqual((await asRole("anon", {}, () => database.query("select public.registration_health() as healthy"))).rows, [{ healthy: true }]);
   });
 
-  await context.test("anonymous RPC commits canonical data and returns only a safe receipt", async () => {
-    receipt = await asRole("anon", {}, () => submit(first));
+  await context.test("Google-authenticated RPC commits canonical data and returns only a safe receipt", async () => {
+    receipt = await asRole("authenticated", google(), () => submit(first));
     assert.equal(receipt.ok, true);
     assert.equal(receipt.submissionId, first.metadata.submissionId);
     assert.equal(receipt.duplicate, false);
@@ -100,27 +103,25 @@ test("Supabase migration validates persistence, RLS, idempotency and controlled 
     });
   });
 
-  await context.test("public direct INSERT is validated and cannot set internal fields", async () => {
+  await context.test("anonymous submission and direct INSERT are no longer accepted", async () => {
     const input = payload();
     await asRole("anon", {}, async () => {
-      await database.query("insert into public.registrations (full_name, email, phone, metadata) values ($1,$2,$3,$4::jsonb)", [input.full_name, input.email, input.phone, JSON.stringify(input.metadata)]);
-      const invalid = payload();
-      invalid.metadata.guardianConsent = false;
-      await assert.rejects(database.query("insert into public.registrations (full_name,email,phone,metadata) values ($1,$2,$3,$4::jsonb)", [invalid.full_name, invalid.email, invalid.phone, JSON.stringify(invalid.metadata)]), { code: "22023" });
-      await assert.rejects(database.query("insert into public.registrations (full_name,email,phone,metadata,status) values ($1,$2,$3,$4::jsonb,'confirmed')", [input.full_name, input.email, input.phone, JSON.stringify(input.metadata)]), { code: "42501" });
+      await assert.rejects(submit(input), { code: "42501" });
+      await assert.rejects(database.query("insert into public.registrations (full_name,email,phone,metadata) values ($1,$2,$3,$4::jsonb)", [input.full_name,input.email,input.phone,JSON.stringify(input.metadata)]), { code: "42501" });
     });
+    await asRole("authenticated", google(), () => assert.rejects(database.query("insert into public.registrations (full_name,email,phone,metadata) values ($1,$2,$3,$4::jsonb)", [input.full_name,input.email,input.phone,JSON.stringify(input.metadata)]), { code: "42501" }));
   });
 
   await context.test("same-ID retry returns the existing row and changed details conflict", async () => {
-    const retry = await asRole("anon", {}, () => submit(first));
+    const retry = await asRole("authenticated", google(), () => submit(first));
     assert.deepEqual(retry, { ...receipt, duplicate: true });
-    await asRole("anon", {}, () => assert.rejects(submit({ ...first, full_name: "Changed" }), { code: "PT409" }));
+    await asRole("authenticated", google(), () => assert.rejects(submit({ ...first, full_name: "Changed" }), { code: "PT409" }));
     assert.equal((await database.query("select count(*)::int as count from public.registrations where submission_id = $1", [first.metadata.submissionId])).rows[0].count, 1);
   });
 
   await context.test("parallel save calls retain independent IDs and deduplicate repeated IDs", async () => {
     const repeated = payload();
-    const results = await asRole("anon", {}, () => Promise.all([repeated, repeated, payload()].map(submit)));
+    const results = await asRole("authenticated", google(), () => Promise.all([repeated, repeated, payload()].map(submit)));
     assert.equal(results[0].id, results[1].id);
     assert.equal(results.filter(result => result.duplicate).length, 1);
     assert.notEqual(results[0].id, results[2].id);
@@ -130,11 +131,11 @@ test("Supabase migration validates persistence, RLS, idempotency and controlled 
     for (const [field, value] of [["guardianConsent", false], ["consentVersion", "2026-11-05"], ["termsVersion", "old"], ["termsAccepted", false], ["age", "15"], ["sport", "unknown"], ["childName", ""], ["address", ""]]) {
       const input = payload("enrol");
       input.metadata[field] = value;
-      await asRole("anon", {}, () => assert.rejects(submit(input), { code: "22023" }));
+      await asRole("authenticated", google(), () => assert.rejects(submit(input), { code: "22023" }));
     }
     const other = payload();
     other.metadata.age = "other";
-    assert.equal((await asRole("anon", {}, () => submit(other))).ok, true);
+    assert.equal((await asRole("authenticated", google(), () => submit(other))).ok, true);
   });
 
   await context.test("Google identity, current allowlist and non-null user ID are all required", async () => {
@@ -160,7 +161,7 @@ test("Supabase migration validates persistence, RLS, idempotency and controlled 
       assert.equal(stale.rows.length, 0);
       await assert.rejects(database.query("update public.registrations set full_name='Changed' where id=$1", [receipt.id]), { code: "42501" });
     });
-    assert.equal((await asRole("anon", {}, () => submit(first))).duplicate, true);
+    assert.equal((await asRole("authenticated", google(), () => submit(first))).duplicate, true);
   });
 
   await context.test("operator-seeded company Google identities remain valid members", async () => {
@@ -254,7 +255,7 @@ test("Supabase migration validates persistence, RLS, idempotency and controlled 
   });
 
   await context.test("only allowlisted Google admins can delete registration records", async () => {
-    const saved = await asRole("anon", {}, () => submit(payload()));
+    const saved = await asRole("authenticated", google(), () => submit(payload()));
     await asRole("anon", {}, () => assert.rejects(database.query("delete from public.registrations where id=$1", [saved.id]), { code: "42501" }));
     await asRole("authenticated", google("outsider@gmail.com", secondId), async () => {
       const denied = await database.query("delete from public.registrations where id=$1 returning id", [saved.id]);

@@ -154,3 +154,28 @@ This CRM release did not change Google branding/provider settings, complete the
 outstanding production backend setup, grant access or apply a database migration.
 New Google round-trip/denied-access and parent-form receipt tests were not
 repeated for this presentation-only release; their earlier evidence remains dated.
+
+## Pending notification release — 10 November 2026
+
+This is prepared source, **not an activated hosted release**. The currently
+deployed compact CRM remains the live UAT baseline above.
+
+| Evidence | Record |
+| --- | --- |
+| Branch / selected target | `codex/admin-email-notifications`; UAT only |
+| Parent contract | Google sign-in before final save; server-bound user-ID ownership; private `/parent/` projection; no email-based claim of existing rows; bound answers and drafts clear on sign-out/account change |
+| Admin contract | Separate audited Accept/Decline action, explicit confirmation, revision conflicts; email GET links navigate only; same Google account may use parent and authorized admin capabilities |
+| Notifications | Durable per-recipient jobs, current-membership check, protected POST worker, bounded retries and leases; activity-only four-hour digests with separately labelled late activity |
+| Payment / coach scope | No Razorpay requests, charges, subscription workflow or coach workspace activated |
+| Prepared backend | New migration `20261109204510_parent_review_notifications.sql`; `admin-notifications` Edge Function; dispatch defaults OFF; no historical alert backfill |
+| Local automated verification | 183 tests passed after final fixes; optimized/prerendered 13-route build and 59-asset verification passed; Deno 2.9.6 checks passed for original modules and generated single-file editor bundle; diff checks passed |
+| Database test limit | PGlite verifies the complete ordered migration chain, grants/RLS, owner isolation, review/idempotency/conflicts, queue leases and digest carry-forward. The late-visibility regression models activity becoming visible after a frozen window; it is not a hosted multi-session test |
+| Hosted state | SQL draft staged in the signed-in UAT dashboard, not executed. Function/secrets, Vault wiring, schedule execution and live Google parent journey are pending. No email has been sent or inbox receipt verified |
+| Sender / secrets | Operator confirmed a Google sender; credential values remain outside source. CLI authentication is not established by the existing dashboard session |
+| Legacy integrations | Parent trial/enrol Apps Script modes retired in source; society/school paths preserved. Previously published Apps Script versions/native forms were not remotely audited or removed |
+| Production | No production source, alias, backend or provider configuration changed. Separate production readiness remains pending as listed above |
+
+Before merging to `uat`, apply the reviewed backend changes, deploy the worker,
+privately configure the matching secrets/Vault values, and verify the coordinated
+release. Do not describe local previews as delivered emails or activate a frontend
+whose required backend contract is still missing.

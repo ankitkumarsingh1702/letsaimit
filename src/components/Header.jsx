@@ -44,7 +44,7 @@ function Header({ page, onSkipToContent }) {
   let headerRef = React.useRef(null);
   let menuToggleRef = React.useRef(null);
   let { openForm } = useSiteActions();
-  let { phase } = useAdminAuth();
+  let { phase, user } = useAdminAuth();
   let actionKind =
     page === "events"
       ? "event"
@@ -99,6 +99,10 @@ function Header({ page, onSkipToContent }) {
     }
   }
   function renderNavLink(item) {
+    if (item.page === "signin" && user?.isGoogle) return <React.Fragment key={item.page}>
+      <a href="/parent/" data-route="parent" aria-current={page === "parent" ? "page" : undefined} onClick={closeMenu}>My requests</a>
+      {phase === "authorized" && <a href="/admin/" data-route="admin" aria-current={page === "admin" ? "page" : undefined} onClick={closeMenu}>Dashboard</a>}
+    </React.Fragment>;
     const isAdminLink = item.page === "signin" && phase === "authorized";
     const targetPage = isAdminLink ? "admin" : item.page;
     return (

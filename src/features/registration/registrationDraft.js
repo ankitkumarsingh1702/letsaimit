@@ -5,6 +5,59 @@ export function createRegistrationDraft() {
   return { childName: "", parentName: "", phone: "", phoneCountry: "IN", age: "", community: "", otherCommunity: "", sport: "", email: "", address: "", note: "", consent: false, terms: false };
 }
 
+const DRAFT_AGE_MS = 30 * 60 * 1000;
+const draftLimits = { childName: 80, parentName: 80, phone: 40, phoneCountry: 2, age: 10, community: 120, otherCommunity: 120, sport: 40, email: 254, address: 500, note: 500 };
+function draftStorage() { try { return typeof window === "undefined" ? null : window.sessionStorage; } catch { return null; } }
+function draftKey(mode) { return ["trial", "enrol", "enroll"].includes(mode) ? `letsaimit.parent.draft.${mode === "trial" ? "trial" : "enrol"}.v1` : null; }
+function boundedDraft(values) {
+  if (!values || typeof values !== "object" || Array.isArray(values)) return null;
+  const clean = createRegistrationDraft();
+  for (const [key, max] of Object.entries(draftLimits)) {
+    if (typeof values[key] !== "string" || values[key].length > max) return null;
+    clean[key] = values[key];
+  }
+  if (!getCountries().includes(clean.phoneCountry)) return null;
+  // Consent must be reviewed again after leaving the site for Google.
+  clean.consent = false; clean.terms = false;
+  return clean;
+}
+
+/** Preserve only bounded answers in this tab; never an auth token or a prior consent/save. */
+export function storeRegistrationDraft(mode, values, storage = draftStorage(), now = Date.now()) {
+  const key = draftKey(mode); const draft = boundedDraft(values);
+  if (!key || !draft || !storage || !Number.isFinite(now)) return false;
+  try { storage.setItem(key, JSON.stringify({ savedAt: now, expiresAt: now + DRAFT_AGE_MS, values: draft })); return true; }
+  catch { return false; }
+}
+
+export function consumeRegistrationDraft(mode, storage = draftStorage(), now = Date.now()) {
+  const key = draftKey(mode);
+  if (!key) return null;
+  try {
+    const raw = storage?.getItem(key); storage?.removeItem(key);
+    if (!raw || !Number.isFinite(now)) return null;
+    const entry = JSON.parse(raw);
+    if (!entry || !Number.isFinite(entry.savedAt) || entry.expiresAt !== entry.savedAt + DRAFT_AGE_MS || now < entry.savedAt || now >= entry.expiresAt) return null;
+    return boundedDraft(entry.values);
+  } catch { return null; }
+}
+
+export function clearRegistrationDraft(mode, storage = draftStorage()) {
+  try { const key = draftKey(mode); if (key) storage?.removeItem(key); } catch { /* No persistent fallback. */ }
+}
+export function clearRegistrationDrafts(storage = draftStorage()) {
+  clearRegistrationDraft("trial", storage); clearRegistrationDraft("enrol", storage);
+}
+export function shouldClearBoundRegistration(previousUserId, nextGoogleUserId) {
+  return Boolean(previousUserId && previousUserId !== nextGoogleUserId);
+}
+
+/** A saved response belongs only to the still-active submission and freshly verified Google actor. */
+export function canConfirmRegistrationReceipt({ submittedUserId, verifiedUser, generation, currentGeneration, active }) {
+  return active === true && Boolean(submittedUserId) && verifiedUser?.isGoogle === true &&
+    verifiedUser.id === submittedUserId && generation === currentGeneration;
+}
+
 /** Seed blank registration answers; never transfer consent, terms or a previous save. */
 export function carryTrialToEnrol(trial, enrol = createRegistrationDraft()) {
   const result = { ...enrol };
