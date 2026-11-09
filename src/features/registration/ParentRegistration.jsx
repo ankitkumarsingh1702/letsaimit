@@ -1,4 +1,4 @@
-import { forwardRef, useImperativeHandle, useLayoutEffect, useRef, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { createWhatsAppUrl } from "../../lib/formLogic.js";
 import { newSubmissionId, saveRegistration } from "../../lib/leadCapture.js";
@@ -8,13 +8,18 @@ import { firstInvalidRegistrationField, parentRegistrationResolver } from "./reg
 import CountryCombobox from "./CountryCombobox.jsx";
 import { useAdminAuth } from "../../context/AdminAuth.jsx";
 import { storeRegistrationDraft, consumeRegistrationDraft, clearRegistrationDraft, clearRegistrationDrafts, shouldClearBoundRegistration, canConfirmRegistrationReceipt } from "./registrationDraft.js";
+import { fetchBillingTerms, formatMoney } from "../billing/billingData.js";
 import "./registration.css";
 
 const ParentRegistration = forwardRef(function ParentRegistration({ mode, active, onSwitchKind, Arrow }, ref) {
   const auth = useAdminAuth();
+  const isEnrol = mode === "enroll";
+  const [billingTerms, setBillingTerms] = useState(null);
+  const [billingError, setBillingError] = useState("");
+  const [billingRetry, setBillingRetry] = useState(0);
   const { register, control, handleSubmit, getValues, reset, setValue, setError, setFocus, getFieldState, formState: { errors } } = useForm({
     defaultValues: createRegistrationDraft(), mode: "onTouched", reValidateMode: "onChange",
-    resolver: parentRegistrationResolver(mode), shouldFocusError: false,
+    resolver: parentRegistrationResolver(mode, { billingRequired: billingTerms?.enabled === true }), shouldFocusError: false,
   });
   const phoneCountry = useWatch({ control, name: "phoneCountry" });
   const community = useWatch({ control, name: "community" });
@@ -29,7 +34,16 @@ const ParentRegistration = forwardRef(function ParentRegistration({ mode, active
   const activeRef = useRef(active);
   const googleUserId = auth.user?.isGoogle ? auth.user.id : null;
   const boundAccount = useRef(googleUserId);
-  const isEnrol = mode === "enroll";
+  useEffect(() => {
+    if (!active || !isEnrol) return;
+    let current = true;
+    setBillingTerms(null); setBillingError(""); setValue("billingConsent", false); setValue("billingTermsVersion", "");
+    fetchBillingTerms(auth.client).then(terms => {
+      if (!current) return;
+      setBillingTerms(terms); setValue("billingTermsVersion", terms.version);
+    }).catch(error => { if (current) setBillingError(error.message); });
+    return () => { current = false; };
+  }, [active, isEnrol, auth.client, googleUserId, billingRetry, setValue]);
   useLayoutEffect(() => {
     activeRef.current = active;
     requestGeneration.current += 1;
@@ -49,7 +63,7 @@ const ParentRegistration = forwardRef(function ParentRegistration({ mode, active
     requestGeneration.current += 1;
     submissionId.current = null; submissionUserId.current = null;
     setStatus("idle"); setSaveError(""); setHandoffUrl("");
-    setValue("consent", false); setValue("terms", false);
+    setValue("consent", false); setValue("terms", false); setValue("billingConsent", false);
   }, [googleUserId, reset, setValue]);
   useImperativeHandle(ref, () => ({
     getValues,
@@ -96,7 +110,11 @@ const ParentRegistration = forwardRef(function ParentRegistration({ mode, active
     setStatus("verifying"); setSaveError("");
     const generation = requestGeneration.current;
     try {
-      const data = parseRegistration(mode, values);
+      if (isEnrol && !billingTerms) throw new Error("Payment details could not load. Retry payment details below.");
+      if (isEnrol && billingTerms.enabled && (values.billingConsent !== true || values.billingTermsVersion !== billingTerms.version)) {
+        throw Object.assign(new Error("Please review the monthly payment details and agree before sending."), { field: "billingConsent" });
+      }
+      const data = { ...parseRegistration(mode, values), ...(isEnrol ? { billingConsent: billingTerms.enabled && values.billingConsent === true, billingTermsVersion: billingTerms.version } : {}) };
       const actor = await auth.verifyGoogleUser();
       if (!activeRef.current || requestGeneration.current !== generation) return;
       if (!actor) {
@@ -107,7 +125,7 @@ const ParentRegistration = forwardRef(function ParentRegistration({ mode, active
         return;
       }
       if (!auth.user?.isGoogle || auth.user.id !== actor.id) {
-        setValue("consent", false); setValue("terms", false);
+        setValue("consent", false); setValue("terms", false); setValue("billingConsent", false);
         setSaveError("Check the Google account shown below and confirm consent again before sending.");
         setStatus("idle");
         return;
@@ -125,6 +143,9 @@ const ParentRegistration = forwardRef(function ParentRegistration({ mode, active
       window.dispatchEvent(new CustomEvent("letsaimit:registration-saved", { detail: { userId: actor.id, requestId: receipt.id } }));
     } catch (error) {
       if (!activeRef.current || requestGeneration.current !== generation) return;
+      if (error.code === "billing_terms_changed") {
+        setValue("billingConsent", false); setBillingRetry(value => value + 1);
+      }
       if (typeof error.field === "string" && Object.hasOwn(createRegistrationDraft(), error.field)) {
         setError(error.field, { type: "server", message: error.message }, { shouldFocus: true });
       }
@@ -196,9 +217,20 @@ const ParentRegistration = forwardRef(function ParentRegistration({ mode, active
           <input id={fieldId("terms")} type="checkbox" {...register("terms")} required aria-invalid={errors.terms ? true : undefined} aria-describedby={`${fieldId("terms")}-error`} />
           <span>I accept the <a href="/terms/" target="_blank" rel="noopener noreferrer">programme terms</a> and <a href="/refunds/" target="_blank" rel="noopener noreferrer">cancellation policy</a>. Paid enrolment is non-refundable for personal absence or withdrawal.</span>
         </label>{errorMessage("terms")}</div>}
+        {isEnrol && <div className="registration-billing" aria-label="Monthly payment details">
+          {!billingTerms ? <div className="registration-billing-loading"><p role={billingError ? "alert" : "status"}>{billingError || "Loading payment details…"}</p>{billingError && <button type="button" className="fm-text-button" onClick={() => setBillingRetry(value => value + 1)}>Retry payment details</button>}</div> : !billingTerms.enabled ? <p className="fm-handoff-note">Payment setup pending. No payment now.</p> : <>
+            <h4>{billingTerms.teamTesting ? "Team payment" : "Monthly programme"} · {formatMoney(billingTerms.chargeAmountPaise)}/month</h4>
+            {billingTerms.teamTesting && <p>Regular price: {formatMoney(billingTerms.regularAmountPaise)}/month. This enrolment uses {formatMoney(billingTerms.chargeAmountPaise)}.</p>}
+            <p>First payment: within four days of approval. Later invoices: 1st of each month, due by the 5th.</p>
+            <p>{billingTerms.teamTesting ? `${formatMoney(billingTerms.lateFeePaise)}/day late fee is a preview. It will not be charged during team testing.` : billingTerms.lateFeesEnabled ? `${formatMoney(billingTerms.lateFeePaise)}/day after each due date while unpaid.` : "Late fees are not enabled."} No automatic debit.</p>
+            <label className="fm-consent" htmlFor={fieldId("billingConsent")}><input id={fieldId("billingConsent")} type="checkbox" {...register("billingConsent")} required aria-invalid={errors.billingConsent ? true : undefined} aria-describedby={`${fieldId("billingConsent")}-error`} /><span>I agree to monthly invoices of {formatMoney(billingTerms.chargeAmountPaise)}. I will pay securely on Razorpay after approval.</span></label>
+            {errorMessage("billingConsent")}
+          </>}
+          <input type="hidden" {...register("billingTermsVersion")} />
+        </div>}
         {status !== "saved" && <>
           <p className="fm-handoff-note">Your details are saved before we show confirmation.</p>
-          <button className="fm-primary" type="submit" disabled={["verifying", "saving", "signing_in"].includes(status) || ["checking", "signing_in", "signing_out"].includes(auth.phase)}>
+          <button className="fm-primary" type="submit" disabled={["verifying", "saving", "signing_in"].includes(status) || ["checking", "signing_in", "signing_out"].includes(auth.phase) || isEnrol && !billingTerms}>
             <span>{status === "verifying" ? "Checking Google…" : status === "saving" ? "Saving…" : status === "signing_in" ? "Opening Google…" : !auth.user?.isGoogle ? "Continue with Google" : saveError ? "Retry save" : isEnrol ? "Send registration" : "Request a free trial"}</span><Arrow />
           </button>
         </>}

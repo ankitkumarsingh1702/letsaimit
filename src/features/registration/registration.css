@@ -9,3 +9,9 @@
 .registration-form .fm-error { font-size: 13px; line-height: 1.5; }
 .registration-form .registration-terms { margin-top: 14px; }
 .registration-form .registration-result a { text-decoration: underline; text-underline-offset: 3px; }
+.registration-billing { margin-block: 14px; padding: 13px 14px; border: 1px solid #dce5da; border-radius: 6px; background: #f8faf5; }
+.registration-billing h4 { margin: 0 0 7px; color: #234d3b; font: 600 13px/1.5 var(--font-body); }
+.registration-billing > p, .registration-billing-loading > p { margin: 0 0 7px; color: #637468; font-size: 11px; line-height: 1.65; }
+.registration-billing .fm-consent { margin-top: 12px; }
+.registration-billing .fm-consent > span { font-size: 11px; }
+.registration-billing .fm-error { font-size: 11px; }

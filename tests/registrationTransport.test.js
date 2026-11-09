@@ -12,6 +12,15 @@ const receipt = { ok: true, id: 'abcdefghijklmno', submissionId: request.submiss
 const response = result => ({ data: result, error: null });
 const client = action => ({ rpc: (name, payload) => ({ abortSignal: signal => action(name, payload, signal) }) });
 
+test('billing terms changes require renewed consent without exposing raw provider errors', async () => {
+  await assert.rejects(submitRegistration(request, {
+    client: client(async () => ({ error: { code: 'PT412', message: 'sensitive internal detail' } })), onSaved: () => assert.fail('must not count a save'),
+  }), error => error.code === 'billing_terms_changed' && error.field === 'billingConsent' && /Review the updated details/.test(error.message) && !error.message.includes('sensitive'));
+  await assert.rejects(submitRegistration(request, {
+    client: client(async () => ({ error: { code: '22023', details: 'billingConsent', message: 'sensitive internal detail' } })), onSaved: () => assert.fail('must not count a save'),
+  }), error => error.field === 'billingConsent' && /accept the monthly payment details/.test(error.message) && !error.message.includes('sensitive'));
+});
+
 test('parent data is sent to the submission RPC and a durable receipt is awaited before success', async () => {
   let release;
   const saved = [];

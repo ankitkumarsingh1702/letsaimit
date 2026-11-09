@@ -28,6 +28,8 @@ export async function submitRegistration({ formType, data, consent, submissionId
     if (controller.signal.aborted) throw new DOMException("Aborted", "AbortError");
     if (error) {
       if (["42501", "PGRST301", "PGRST302", "PGRST303"].includes(error.code)) throw new Error("Please sign in with Google before sending. Your answers are still here.");
+      if (error.code === "PT412") throw Object.assign(new Error("Payment details changed. Review the updated details and confirm them again."), { code: "billing_terms_changed", field: "billingConsent" });
+      if (error.code === "22023" && error.details === "billingConsent") throw Object.assign(new Error("Please read and accept the monthly payment details."), { field: "billingConsent" });
       throw new Error(["23505", "PT409"].includes(error.code) ? "These details changed. Edit the form and submit again." : "We couldn’t save your details. Please retry.");
     }
     if (receipt?.ok !== true || receipt.submissionId !== submissionId || typeof receipt.duplicate !== "boolean" ||

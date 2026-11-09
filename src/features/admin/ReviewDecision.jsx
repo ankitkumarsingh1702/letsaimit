@@ -36,11 +36,11 @@ export default function ReviewDecision({ row, initialDecision, canReview, onRevi
   const decided = row.reviewDecision !== "pending";
   return <section className="adm-detail-section adm-review" aria-labelledby={`${prefix}-title`}>
     <div className="adm-detail-section-heading"><h3 id={`${prefix}-title`}>Request review</h3><span className="adm-detail-edit-state">{REVIEW_OPTIONS.find(item => item.value === row.reviewDecision)?.label || "Pending review"}</span></div>
-    {decided ? <p className="adm-review-note">{row.reviewDecision === "accepted" ? "Accepted" : "Declined"}{row.reviewedAt ? ` · ${formatIST(row.reviewedAt)} IST` : ""}{row.reviewedBy ? ` · ${row.reviewedBy}` : ""}. {row.reviewDecision === "accepted" && "Payment has not been requested."}</p> : <>
-      <p className="adm-review-note">Review this {row.formType === "enrol" ? "enrolment" : "trial"} request. Accepting records the decision; it does not request or collect payment.</p>
+    {decided ? <p className="adm-review-note">{row.reviewDecision === "accepted" ? "Accepted" : "Declined"}{row.reviewedAt ? ` · ${formatIST(row.reviewedAt)} IST` : ""}{row.reviewedBy ? ` · ${row.reviewedBy}` : ""}. {row.reviewDecision === "accepted" && (row.formType === "enrol" ? "Check Billing for the payment request." : "Free trial. No payment needed.")}</p> : <>
+      <p className="adm-review-note">{row.formType === "enrol" ? "An invoice is created only with current payment consent. The parent pays securely on Razorpay." : "Review this free trial. No payment is requested."}</p>
       {!canReview && <p className="adm-review-note">Save or cancel your follow-up changes before reviewing.</p>}
       {choice ? <div className="adm-review-confirm" role="group" aria-label="Confirm request review">
-        <p>{choice === "accepted" ? "Accept" : "Decline"} this request for {row.parentName}?</p>
+        <p>{choice === "accepted" && row.formType === "enrol" ? `Accept ${row.parentName}’s enrolment?` : `${choice === "accepted" ? "Accept" : "Decline"} this request for ${row.parentName}?`}</p>
         <div className="adm-detail-footer-actions"><button type="button" className="adm-detail-button adm-detail-button--quiet" disabled={busy} onClick={() => { setChoice(null); setError(""); }}>Cancel review</button><button type="button" className="adm-detail-button adm-detail-button--primary" disabled={busy || !canReview} onClick={confirm}>{busy ? "Saving decision…" : choice === "accepted" ? "Confirm acceptance" : "Confirm decline"}</button></div>
       </div> : <div className="adm-review-actions"><button type="button" className="adm-detail-button adm-detail-button--primary" disabled={!canReview || busy} onClick={() => setChoice("accepted")}>Accept</button><button type="button" className="adm-detail-button adm-detail-button--quiet" disabled={!canReview || busy} onClick={() => setChoice("declined")}>Decline</button></div>}
     </>}

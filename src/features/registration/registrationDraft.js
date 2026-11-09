@@ -2,7 +2,7 @@ import { AsYouType, getCountries, getCountryCallingCode, Metadata, parsePhoneNum
 
 export const SHARED_PARENT_FIELDS = Object.freeze(["parentName", "email", "phone", "phoneCountry", "age", "community", "otherCommunity", "sport"]);
 export function createRegistrationDraft() {
-  return { childName: "", parentName: "", phone: "", phoneCountry: "IN", age: "", community: "", otherCommunity: "", sport: "", email: "", address: "", note: "", consent: false, terms: false };
+  return { childName: "", parentName: "", phone: "", phoneCountry: "IN", age: "", community: "", otherCommunity: "", sport: "", email: "", address: "", note: "", consent: false, terms: false, billingConsent: false, billingTermsVersion: "" };
 }
 
 const DRAFT_AGE_MS = 30 * 60 * 1000;
@@ -18,7 +18,7 @@ function boundedDraft(values) {
   }
   if (!getCountries().includes(clean.phoneCountry)) return null;
   // Consent must be reviewed again after leaving the site for Google.
-  clean.consent = false; clean.terms = false;
+  clean.consent = false; clean.terms = false; clean.billingConsent = false; clean.billingTermsVersion = "";
   return clean;
 }
 

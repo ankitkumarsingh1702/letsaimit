@@ -10,10 +10,12 @@ import { filterRows, paginateRows, deriveSummary, formatIST, formatAge, periodFo
 import "./admin.css";
 import { REVIEW_OPTIONS, readReviewIntent } from "./review-contract.js";
 import { consumeAuthReturnTarget } from "../../lib/authReturn.js";
+import BillingPanel from "../billing/BillingPanel.jsx";
 
 const VIEWS = [
   { id: "overview", label: "Dashboard", icon: "overview" },
   { id: "register", label: "Register", icon: "register" },
+  { id: "billing", label: "Billing", icon: "billing" },
   { id: "team", label: "Team", icon: "team" },
 ];
 
@@ -22,6 +24,7 @@ function AdminIcon({ name, ...props }) {
     overview: <><rect x="3" y="3" width="7" height="7" rx="2" /><rect x="14" y="3" width="7" height="7" rx="2" /><rect x="3" y="14" width="7" height="7" rx="2" /><rect x="14" y="14" width="7" height="7" rx="2" /></>,
     register: <><rect x="4" y="3" width="16" height="18" rx="3" /><path d="M8 8h8M8 12h8M8 16h5" /></>,
     team: <><circle cx="9" cy="8" r="3" /><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 5a3 3 0 0 1 0 6M18 15a5 5 0 0 1 3 5" /></>,
+    billing: <><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 10h18M7 15h4" /></>,
     arrow: <path d="M5 12h14m-6-6 6 6-6 6" />,
     external: <><path d="M13 4h7v7m0-7L10 14" /><path d="M9 5H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4" /></>,
     more: <><circle cx="5" cy="12" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /></>,
@@ -203,7 +206,7 @@ export function AuthorizedAdmin({ auth }) {
   const [filters, setFilters] = React.useState(defaultFilters);
   const [datePreset, setDatePreset] = React.useState("all");
   const [referenceIso, setReferenceIso] = React.useState(() => new Date().toISOString());
-  const [view, setView] = React.useState("overview");
+  const [view, setView] = React.useState(() => typeof window !== "undefined" && new URLSearchParams(window.location.search).get("view") === "billing" ? "billing" : "overview");
   const [selectedDetailId, setSelectedDetailId] = React.useState(null);
   const [selectedSnapshot, setSelectedSnapshot] = React.useState(null);
   const [reviewIntent] = React.useState(() => typeof window === "undefined" ? null : readReviewIntent(window.location.search));
@@ -294,7 +297,10 @@ export function AuthorizedAdmin({ auth }) {
   }
   async function reviewRequest(id, decision, expectedRevision) {
     const result = await review(id, decision, expectedRevision);
-    if (alive.current && result.ok) setToast(decision === "accepted" ? "Request accepted. No payment has been requested." : "Request declined.");
+    if (alive.current && result.ok) {
+      setToast(decision === "accepted" ? result.row.formType === "enrol" ? "Enrolment accepted. Check Billing for invoices." : "Trial accepted. No payment needed." : "Request declined.");
+      window.dispatchEvent(new Event("letsaimit:billing-changed"));
+    }
     return result;
   }
   async function exportCsv(exportFilters) {
@@ -313,7 +319,7 @@ export function AuthorizedAdmin({ auth }) {
     finally { if (alive.current) setExporting(false); }
   }
   const onDraftChange = React.useCallback((id, draft) => setEditsById(previous => ({ ...previous, [id]: draft })), []);
-  const title = view === "overview" ? "Dashboard" : view === "register" ? "Register" : "Team";
+  const title = VIEWS.find(item => item.id === view)?.label || "Dashboard";
   const periodLabel = datePreset === "today" ? "Today" : datePreset === "last7" ? "Last 7 days" : "All dates";
 
   return <div className="adm-app">
@@ -329,10 +335,10 @@ export function AuthorizedAdmin({ auth }) {
         <div className="adm-topbar-right"><span className="adm-live-state" data-state={hasLoaded ? liveState : "not_synced"} role="status">{!hasLoaded ? "Not synced" : liveState === "live" ? "Live" : liveState === "paused" ? "Paused" : liveState === "reconnecting" ? "Reconnecting" : "Connecting"}</span><div className="adm-user"><Avatar name={auth.user.displayName || auth.user.email} src={auth.user.avatarUrl} small /><span><strong>{auth.user.displayName || auth.user.email}</strong><span>{auth.user.email}</span></span></div><details className="adm-mobile-tools"><summary aria-label="Workspace actions"><AdminIcon name="more" /></summary><div className="adm-tools-popup"><a href="/"><AdminIcon name="external" />Website</a><button type="button" onClick={refresh}><AdminIcon name="reset" />Refresh register</button><button type="button" onClick={auth.signOut}><AdminIcon name="exit" />Sign out</button></div></details></div>
       </header>
       <div className="adm-content">
-        <div className="adm-page-heading"><div><h1 ref={headingRef} tabIndex={-1}>{title}</h1><p className="adm-date">{formatIST(referenceIso, "date")} · IST{hasDraft && <span>Unsaved changes</span>}</p></div><div className="adm-page-actions">{view !== "team" && <FilterSelect label="Period" value={datePreset} onChange={setPeriod}><option value="all">All dates</option><option value="today">Today</option><option value="last7">Last 7 days</option></FilterSelect>}{view === "overview" && hasLoaded && <button className="adm-button adm-button-outline" type="button" onClick={() => exportCsv({ period: filters.period })} disabled={!hasLoaded || exporting || loading}>Export CSV</button>}</div></div>
+        <div className="adm-page-heading"><div><h1 ref={headingRef} tabIndex={-1}>{title}</h1><p className="adm-date">{formatIST(referenceIso, "date")} · IST{hasDraft && <span>Unsaved changes</span>}</p></div><div className="adm-page-actions">{["overview", "register"].includes(view) && <FilterSelect label="Period" value={datePreset} onChange={setPeriod}><option value="all">All dates</option><option value="today">Today</option><option value="last7">Last 7 days</option></FilterSelect>}{view === "overview" && hasLoaded && <button className="adm-button adm-button-outline" type="button" onClick={() => exportCsv({ period: filters.period })} disabled={!hasLoaded || exporting || loading}>Export CSV</button>}</div></div>
         {error && <div className="adm-notice adm-notice-error" role="alert"><p>{error}{hasLoaded && ` Showing the last saved snapshot from ${formatIST(lastSynced)} IST.`}</p><button className="adm-text-button" type="button" onClick={refresh}>Retry</button></div>}
         {auth.error && <div className="adm-notice" role="status">{auth.error}</div>}
-        {!hasLoaded ? <div className="adm-card adm-empty" role="status"><h2>{loading ? "Loading saved requests…" : "Register not loaded"}</h2>{!loading && <p>Saved requests and team details will appear when the connection is restored.</p>}</div> : view === "overview" ? <AdminOverview rows={overviewRows} summary={summary} members={members} auth={uiAuth} onOpen={openRequest} onViewRegister={viewRegister} onTeam={() => changeView("team")} Icon={AdminIcon} Avatar={Avatar} StatusBadge={StatusBadge} /> : view === "register" ? <Register rows={rows} filtered={filtered} pagination={pagination} filters={filters} setFilter={setFilter} resetFilters={resetFilters} onOpen={openRequest} onExport={() => exportCsv(filters)} canExport={!exporting} assignees={assignees} datePreset={datePreset} onDatePreset={setPeriod} /> : <Team members={members} user={auth.user} onInvite={inviteMember} onRemove={removeMember} />}
+        {view === "billing" ? <BillingPanel key={auth.user.id} auth={auth} admin onOpenRequest={openRequest} /> : !hasLoaded ? <div className="adm-card adm-empty" role="status"><h2>{loading ? "Loading saved requests…" : "Register not loaded"}</h2>{!loading && <p>Saved requests and team details will appear when the connection is restored.</p>}</div> : view === "overview" ? <AdminOverview rows={overviewRows} summary={summary} members={members} auth={uiAuth} onOpen={openRequest} onViewRegister={viewRegister} onTeam={() => changeView("team")} Icon={AdminIcon} Avatar={Avatar} StatusBadge={StatusBadge} /> : view === "register" ? <Register rows={rows} filtered={filtered} pagination={pagination} filters={filters} setFilter={setFilter} resetFilters={resetFilters} onOpen={openRequest} onExport={() => exportCsv(filters)} canExport={!exporting} assignees={assignees} datePreset={datePreset} onDatePreset={setPeriod} /> : <Team members={members} user={auth.user} onInvite={inviteMember} onRemove={removeMember} />}
         <footer className="adm-footer">{hasLoaded ? <><span>Counts include all saved requests, including any test submissions.</span><span>{periodLabel} · Synced {formatIST(lastSynced, "time")} IST</span></> : <><span>Waiting for the saved register.</span><span>Asia/Kolkata</span></>}</footer>
       </div>
     </div>
