@@ -1,6 +1,6 @@
 import "../styles/legal.css";
 
-const POLICY_UPDATED = "5 November 2026";
+const POLICY_UPDATED = "10 November 2026";
 const POLICY_LINKS = [
   { key: "privacy", label: "Privacy", href: "/privacy/" },
   { key: "terms", label: "Terms", href: "/terms/" },
@@ -32,7 +32,7 @@ function PolicyContact() {
 
 function PolicyLayout({ page, title, intro, summary, children }) {
   const updated = page === "privacy" ? { label: "10 November 2026", date: "2026-11-10" } :
-    { label: POLICY_UPDATED, date: "2026-11-05" };
+    { label: POLICY_UPDATED, date: "2026-11-10" };
   return (
     <div className="legal-page wrap">
       <header className="legal-hero">
@@ -130,6 +130,13 @@ function Privacy() {
           require admin sign-in before a decision is saved. An accepted request
           does not mean a payment has been made.</p>
         <p>
+          For approved paid enrolments, we share the parent’s name, contact email,
+          phone number and invoice amount with Razorpay to prepare a secure payment
+          link. We keep invoice references, payment status and refund status in
+          our private register, and email invoices, receipts and unpaid reminders.
+          Card details and payment authentication stay with Razorpay.
+        </p>
+        <p>
           WhatsApp is an optional next step after a saved parent request. School
           and society enquiries may use a prepared WhatsApp message. Opening
           WhatsApp does not send a message: you choose whether to press Send.
@@ -210,6 +217,18 @@ function Terms() {
           A parent or legal guardian completes enrolment. We share the agreed
           programme period, fee and schedule before payment. Your child’s place
           is confirmed after payment and our confirmation.
+        </p>
+        <p>
+          Monthly invoices are issued on the 1st and are due by the 5th. Your
+          first invoice is due four days after approval. You pay each invoice
+          through Razorpay; this does not authorise an automatic debit. The form
+          shows the actual monthly amount before you agree. A ₹1 team payment
+          does not become a ₹600 payment without new consent.
+        </p>
+        <p>
+          Where enabled in your agreed payment details, a ₹100 late fee applies
+          for each overdue day after the due date. Late fees appear separately.
+          They are previews only during ₹1 team testing. Free trials have no fee.
         </p>
         <p>
           Once paid enrolment is confirmed, fees are non-refundable for personal

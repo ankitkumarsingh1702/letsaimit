@@ -1,0 +1,28 @@
+{
+  "version": "5",
+  "specifiers": {
+    "npm:nodemailer@10.4.0": "10.4.0"
+  },
+  "npm": {
+    "nodemailer@10.4.0": {
+      "integrity": "sha512-fyy6r4Q5euRJ9Qr3Cts9K7SZrfe9zmz9oLOYiAR02MEJRDRci+99y0OoYBYBgpLffOqkkjXrB/d26VfiMje/kA=="
+    }
+  },
+  "workspace": {
+    "packageJson": {
+      "dependencies": [
+        "npm:@electric-sql/pglite@0.5.15",
+        "npm:@supabase/supabase-js@2.119.0",
+        "npm:@vitejs/plugin-react@6.1.2",
+        "npm:ag-grid-community@36.3.0",
+        "npm:ag-grid-react@36.3.0",
+        "npm:libphonenumber-js@1.13.15",
+        "npm:react-dom@19.3.1",
+        "npm:react-hook-form@7.91.0",
+        "npm:react@19.3.1",
+        "npm:vite@8.3.5",
+        "npm:zod@4.6.7"
+      ]
+    }
+  }
+}

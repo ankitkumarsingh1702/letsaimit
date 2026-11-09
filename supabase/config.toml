@@ -3,3 +3,11 @@ project_id = "letsaimit"
 [functions.admin-notifications]
 # A narrow backend-only bearer secret is checked by the handler. No public-key access.
 verify_jwt = false
+
+[functions.billing-worker]
+# Backend-only bearer guard; public bodies never select bills or recipients.
+verify_jwt = false
+
+[functions.razorpay-webhook]
+# Razorpay HMAC authenticates the raw body; Supabase session JWTs do not apply.
+verify_jwt = false
