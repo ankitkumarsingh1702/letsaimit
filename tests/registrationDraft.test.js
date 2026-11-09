@@ -31,6 +31,20 @@ test("phone masking strips formatting and letters and caps India at ten national
   assert.equal(nationalPhoneLimit("IN"), 10);
   assert.deepEqual(sanitizePhoneInput(""), { phoneCountry: "IN", phone: "" });
 });
+test("country digit caps use actual significant-number lengths, not parsed dummy prefixes", () => {
+  for (const country of ["US", "CA", "GB", "IN"]) assert.equal(nationalPhoneLimit(country), 10, country);
+  assert.equal(nationalPhoneLimit("BR"), 11);
+  assert.equal(nationalPhoneLimit("AT"), 13);
+  assert.equal(nationalPhoneLimit("DE"), 13, "Germany remains within the 15-digit E.164 total including +49");
+});
+test("US and Canadian masks cap national input at ten digits while valid dial-code pastes normalize", () => {
+  for (const [country, national, international] of [["US", "2025550123", "+1 202 555 0123"], ["CA", "4165550123", "+1 416 555 0123"]]) {
+    assert.equal(sanitizePhoneInput(national + "99", country).phone.replace(/\D/g, ""), national, country);
+    const pasted = sanitizePhoneInput(international, "IN", { preserveOverflow: true });
+    assert.equal(pasted.phoneCountry, country);
+    assert.equal(pasted.phone.replace(/\D/g, ""), national);
+  }
+});
 test("international paste removes the dial code without losing the national digits", () => {
   assert.equal(sanitizePhoneInput("+91 (98765) 43210").phone.replace(/\D/g, ""), "9876543210");
   const british = sanitizePhoneInput("+44 7400 123456", "IN");

@@ -1,4 +1,4 @@
-import { AsYouType, getCountries, getCountryCallingCode, parsePhoneNumberFromString, validatePhoneNumberLength } from "libphonenumber-js/max";
+import { AsYouType, getCountries, getCountryCallingCode, Metadata, parsePhoneNumberFromString } from "libphonenumber-js/max";
 
 export const SHARED_PARENT_FIELDS = Object.freeze(["parentName", "email", "phone", "phoneCountry", "age", "community", "otherCommunity", "sport"]);
 export function createRegistrationDraft() {
@@ -20,10 +20,14 @@ export function carryTrialToEnrol(trial, enrol = createRegistrationDraft()) {
 const limits = new Map();
 export function nationalPhoneLimit(country = "IN") {
   if (!limits.has(country)) {
-    let maximum = country === "IN" ? 10 : 15 - getCountryCallingCode(country).length;
-    if (country !== "IN") {
-      while (maximum > 1 && validatePhoneNumberLength("1".repeat(maximum), country) === "TOO_LONG") maximum -= 1;
-    }
+    // Read significant-number lengths directly. Parsing a fabricated number can
+    // remove national/calling prefixes and overestimate the allowed digit count.
+    const metadata = new Metadata();
+    metadata.selectNumberingPlan(country);
+    const maximum = country === "IN" ? 10 : Math.min(
+      Math.max(...metadata.numberingPlan.possibleLengths()),
+      15 - getCountryCallingCode(country).length,
+    );
     limits.set(country, maximum);
   }
   return limits.get(country);
