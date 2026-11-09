@@ -156,7 +156,7 @@ root directory is `deployment/uat-health`; it serves only the health API and a
 small identifying page. It uses the existing Hobby team and the same UAT
 Supabase database, `https://nlgfcmywgwibvmbsgkox.supabase.co`.
 
-Configure this project's **Production branch as `uat`**. Vercel requires a
+This project's **Production branch is `uat`**. Vercel requires a
 Production deployment to execute cron jobs, so this service uses that execution
 environment to check the UAT database. The main `letsaimit` website's Production
 branch remains `main`; this does not promote the UAT website or change its
@@ -268,6 +268,8 @@ The following were observed against live UAT:
   saved successfully and appeared as the fourth synthetic record in the open
   admin grid without a manual reload. Realtime and fallback refresh were enabled.
 - A record's **Contacted** status was saved successfully.
+- Signing out immediately cleared the private grid. Adding the existing owner
+  showed a duplicate-access message that survived the background refresh.
 - The browser downloaded CSV containing four saved data rows and 21 columns at
   the time of verification; it parsed correctly and retained the saved status.
 - The health endpoint returned HTTP 200 for an authorized request and HTTP 401
@@ -275,9 +277,20 @@ The following were observed against live UAT:
 
 The browser journeys for an unlisted Google login, revocation of an active
 admin, and competing edits by two real admins remain unproven. Local SQL tests
-cover their authorization and conflict rules. The dedicated health project has
-been created; its deployment and Run now results must be recorded after
-verification. A future three-day scheduled invocation has not yet been observed.
+cover their authorization and conflict rules.
+
+The dedicated health service was subsequently deployed from
+[PR #3](https://github.com/ankitkumarsingh1702/letsaimit/pull/3), merged to `uat`
+at `7e222bda2984ced59a13f83103ee8d88df36c7c9`. Deployment
+`dpl_GVs7z8qnGJQmThZdmc2VWSfwjFJB` reached READY at
+[`letsaimit-uat-health.vercel.app`](https://letsaimit-uat-health.vercel.app).
+Its Vercel Cron Jobs page showed `/api/cron/supabase` as **Active** with
+`0 6 */3 * *`. An authenticated request returned HTTP 200 with `{"ok":true}`;
+an unsigned request returned HTTP 401. The dashboard's **Run** action also
+produced a GET `/api/cron/supabase` request with HTTP 200 in Vercel Request Logs
+at `2026-11-09T08:54:22.859Z`, confirming Vercel's credential delivery. A future
+three-day scheduled invocation has not yet been observed; activation, the manual
+endpoint checks and the platform-triggered test are verified.
 
 Verification has separate layers:
 
