@@ -9,7 +9,7 @@
     "public_url": "https://letsaimit-review.one92843.chatgpt.site/"
   },
   "file_count": 59,
-  "total_bytes": 19695925,
+  "total_bytes": 19695831,
   "notes": [
     "Paths are relative to the exported project root. Generated application JavaScript and CSS are not part of this media manifest.",
     "Includes 39 images, one local MP4, five WOFF2 fonts, and nine license/provenance files. All files match the published snapshot byte for byte.",
@@ -19,7 +19,7 @@
     "Coaching photographs retain their original context. The testimonial image is a coaching-context photo, not a parent portrait.",
     "External contact, registration, social, policy and credit links require internet when followed. Images, fonts and video do not use external hotlinks.",
     "Source notes and font licenses are preserved. See EVENT-ASSETS.json, STORIES-SOURCES.json and FOOTER-ART-DIRECTION-2026-11-04.md for later additions.",
-    "The 9 November 2026 updated ZIP adds the sign-in ribbon, Google brand mark and self-hosted Google Sans button font with notices; these additions are verified against the supplied ZIP."
+    "The 9 November 2026 updated ZIP adds the sign-in ribbon, Google brand mark and self-hosted Google Sans button font with notices; these additions are verified against the supplied ZIP. Font license wording is preserved with normalized line endings and trailing whitespace."
   ],
   "files": [
     {
@@ -373,8 +373,8 @@
     {
       "path": "public/assets/fonts/GoogleSans-OFL.txt",
       "kind": "license-or-source-record",
-      "bytes": 4488,
-      "sha256": "2b75ef20f13d83a7514aee452c4782c20cdc9ff2dee17600f44d37a06d4fb958"
+      "bytes": 4394,
+      "sha256": "54c290753de0b8a368e9438005a69b878596e24d902dbbc0ff300291d6db2389"
     }
   ]
 }
