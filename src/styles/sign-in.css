@@ -1,0 +1,261 @@
+/* The shared brand scale stays in site.css; this compact entry page is scoped. */
+.signin-account { overflow-wrap: anywhere; color: var(--green); font-size: 13px; margin: -20px 0 24px; }
+.signin-access-help { color: var(--muted); font-size: 12px; line-height: 1.6; margin: 12px 0; }
+.signin-text-button { display: block; margin: 12px auto 0; border: 0; background: transparent; color: var(--green); text-decoration: underline; cursor: pointer; font: inherit; font-size: 13px; }
+@font-face {
+  font-family: "Google Sans";
+  src: url("/assets/fonts/google-sans-medium.woff") format("woff");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+.signin-page {
+  min-height: calc(100svh - var(--header));
+  display: grid;
+  align-items: center;
+  background: var(--soft);
+  padding: clamp(40px, 6vw, 88px) 32px 36px;
+}
+.signin-wrap {
+  width: min(1104px, 100%);
+  margin-inline: auto;
+}
+.signin-card {
+  display: grid;
+  grid-template-columns: 40% 60%;
+  min-height: 620px;
+  border-radius: 30px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 28px 64px -26px rgb(20 62 53 / 25%), 0 4px 20px rgb(20 62 53 / 4%);
+}
+.signin-visual {
+  position: relative;
+  isolation: isolate;
+  min-width: 0;
+  background: #10392f;
+}
+.signin-ribbon {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  object-position: 48% center;
+  user-select: none;
+  pointer-events: none;
+}
+.signin-art-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 42%, rgb(7 36 28 / 18%) 80%, rgb(7 36 28 / 34%));
+  pointer-events: none;
+}
+.signin-role-tabs {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  width: 154px;
+  transform: translateY(-50%);
+  display: grid;
+  gap: 14px;
+}
+.signin-role-tab {
+  position: relative;
+  border: 0;
+  border-radius: 28px 0 0 28px;
+  background: rgb(9 39 31 / 48%);
+  color: #fff;
+  padding: 16px 20px;
+  min-height: 56px;
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 600;
+  transition: background 160ms, color 160ms;
+}
+.signin-role-tab:hover:not([aria-selected="true"]) {
+  background: rgb(9 39 31 / 72%);
+}
+.signin-role-tab[aria-selected="true"] {
+  background: #fff;
+  color: var(--green);
+}
+.signin-role-tab[aria-selected="true"]::before,
+.signin-role-tab[aria-selected="true"]::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+}
+.signin-role-tab[aria-selected="true"]::before {
+  top: -20px;
+  background: radial-gradient(circle at 0 0, transparent 19.5px, #fff 20px);
+}
+.signin-role-tab[aria-selected="true"]::after {
+  bottom: -20px;
+  background: radial-gradient(circle at 0 100%, transparent 19.5px, #fff 20px);
+}
+.signin-role-tab:focus-visible {
+  outline: 2px solid var(--lime);
+  outline-offset: -5px;
+}
+.signin-role-tab[aria-selected="true"]:focus-visible {
+  outline-color: var(--green);
+}
+.signin-panel {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  padding: 70px 64px 64px;
+}
+.signin-panel:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: -10px;
+}
+.signin-content {
+  width: min(356px, 100%);
+  text-align: center;
+}
+.signin-role-icon {
+  display: grid;
+  place-items: center;
+  width: 78px;
+  height: 78px;
+  margin: 0 auto 25px;
+  border-radius: 50%;
+  color: var(--lime);
+  background: radial-gradient(circle at 26% 20%, #397b61, var(--green) 70%);
+  box-shadow: 0 8px 22px rgb(20 62 53 / 18%), inset 0 1px 1px rgb(255 255 255 / 25%);
+}
+.signin-role-icon svg {
+  width: 34px;
+  height: 34px;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.signin-content h1 {
+  font-family: var(--font-display);
+  font-size: 40px;
+  line-height: 48px;
+  font-weight: 700;
+  letter-spacing: -1.8px;
+  margin: 0;
+  color: var(--green);
+}
+.signin-description {
+  margin: 12px 0 38px;
+  font-size: 16px;
+  line-height: 26px;
+  color: var(--muted);
+}
+.signin-google {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 54px;
+  padding: 14px 20px;
+  border: 1px solid #747775;
+  border-radius: 10px;
+  background: #fff;
+  color: #1f1f1f;
+  font-family: "Google Sans", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 500;
+  transition: background 160ms, box-shadow 160ms;
+}
+.signin-google:hover:not(:disabled) {
+  background: #f8faf8;
+  box-shadow: 0 3px 10px rgb(20 62 53 / 7%);
+}
+.signin-google:active:not(:disabled) { background: #eef2ef; }
+.signin-google:disabled { opacity: .7; }
+.signin-google img { flex: 0 0 20px; width: 20px; height: 20px; }
+.signin-status {
+  min-height: 48px;
+  margin: 12px 0 10px;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--muted);
+}
+.signin-legal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 20px;
+}
+.signin-legal a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  text-underline-offset: 4px;
+}
+.signin-legal a:hover { color: var(--green); text-decoration: underline; }
+.signin-home {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  gap: 9px;
+  min-height: 44px;
+  margin: 24px auto 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 22px;
+}
+.signin-home svg { width: 17px; height: 17px; }
+.signin-home:hover { color: var(--green); }
+
+@media (min-width: 701px) and (max-width: 1000px) {
+  .signin-card { min-height: 560px; grid-template-columns: 38% 62%; }
+  .signin-panel { padding: 52px 40px; }
+  .signin-role-tabs { width: 134px; }
+}
+@media (max-width: 700px) {
+  .signin-page { padding: 28px 20px 24px; align-items: start; }
+  .signin-card { grid-template-columns: 1fr; min-height: 0; border-radius: 24px; }
+  .signin-visual { height: 192px; }
+  .signin-ribbon { object-position: center 43%; }
+  .signin-art-shade { background: linear-gradient(180deg, transparent 15%, rgb(7 36 28 / 22%) 100%); }
+  .signin-role-tabs {
+    top: auto;
+    bottom: 0;
+    right: 16px;
+    left: 16px;
+    width: auto;
+    transform: none;
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+  .signin-role-tab { min-height: 52px; padding: 14px 8px; border-radius: 18px 18px 0 0; font-size: 14px; line-height: 24px; }
+  .signin-role-tab[aria-selected="true"]::before,
+  .signin-role-tab[aria-selected="true"]::after { display: none; }
+  .signin-panel { padding: 38px 24px 28px; }
+  .signin-role-icon { width: 66px; height: 66px; margin-bottom: 20px; }
+  .signin-role-icon svg { width: 29px; height: 29px; }
+  .signin-content h1 { font-size: 32px; line-height: 40px; letter-spacing: -1.2px; }
+  .signin-description { margin: 10px 0 28px; }
+  .signin-status { min-height: 40px; margin-bottom: 0; }
+  .signin-home { margin-top: 18px; }
+}
+@media (max-width: 360px) {
+  .signin-page { padding-inline: 16px; }
+  .signin-visual { height: 166px; }
+  .signin-panel { padding-inline: 20px; }
+  .signin-google { gap: 10px; padding-inline: 12px; font-size: 15px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .signin-role-tab, .signin-google { transition: none; }
+}

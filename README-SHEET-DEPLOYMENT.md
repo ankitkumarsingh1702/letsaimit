@@ -3,7 +3,7 @@
 The existing React/Vite website stays on Vercel. Parents submit trial requests
 and child registrations inside the site. Supabase stores records in Postgres
 and returns a matching saved receipt before the website confirms receipt.
-Invited staff sign in with Google at `/admin/` and use AG Grid Community.
+Approved staff sign in with Google at `/sign-in/` and open the private dashboard at `/admin/`.
 Google supplies staff identity; it does not store responses in Forms or Sheets.
 CSV is a private download from the saved register, not its storage format.
 
@@ -49,12 +49,15 @@ established migration workflow:
 
 1. `supabase/migrations/20261109080830_registration_register.sql`
 2. `supabase/migrations/20261109083344_registration_function_privileges.sql`
+3. `supabase/migrations/20261109121642_lock_admin_membership_to_operator.sql`
 
 The second migration makes `is_admin` an authenticated, security-invoker wrapper
 and removes application-role access to the optional dashboard RLS helper.
 Apply complete files, including functions, triggers, grants and policies;
-copying only table definitions is insufficient. Both migrations were applied
-to the live UAT project on 9 November 2026.
+copying only table definitions is insufficient. The first two migrations were applied
+to the live UAT project on 9 November 2026. The third is a forward change that
+accepts normalized company-domain Google email addresses and makes membership
+read-only to application roles. Apply it before configuring the approved team.
 
 The initial owner is a **separate privileged operator step**, not a public signup
 or an email embedded in the schema migration. Open
@@ -77,14 +80,14 @@ The checked-in database contract is:
 | --- | --- |
 | Anonymous parent | Execute `submit_registration` for a validated save and receipt. Direct INSERT is limited to the four intake columns and remains trigger-validated. No registration/allowlist reads, edits or deletes. |
 | Signed-in, unlisted account | No private records or team access. Google login alone does not establish membership. |
-| Allowlisted Google admin | Read registrations and membership; update only status, follow-up notes and assignee; add/remove admins. The database also permits authorized registration deletion, although the current grid does not expose a delete action. |
+| Allowlisted Google admin | Read registrations and membership; update only status, follow-up notes and assignee. Membership changes require a privileged operator. The database also permits authorized registration deletion, although the current grid does not expose a delete action. |
 | Database operator | Bootstrap the protected owner and carry out deliberate privileged maintenance. |
 
 Both tables have RLS enabled. Anonymous INSERT grants apply only to `full_name`,
 `email`, `phone` and `metadata`. Authenticated UPDATE grants apply only to the
 three follow-up columns. Policies require current allowlist membership and a
-Google-authenticated identity for private operations. The owner cannot be
-removed through the app; a transaction protects the last-admin boundary.
+Google-authenticated identity for private operations. The app has no membership mutation privileges or invite controls. Existing owner
+and last-admin protections remain in place for privileged maintenance.
 
 Submitted contact/child details, consent and receipt identity stay immutable to
 ordinary admin edits. Retries use the same submission ID and fingerprint; a
@@ -119,22 +122,40 @@ The configuration steps below document that setup for future reproduction.
 4. In Supabase Authentication URL Configuration, set the UAT Site URL and allow
    `https://uat.letsaimit.com/admin/` as the application redirect. This differs
    from Google's Supabase callback URL.
-5. After owner bootstrap, test the actual Google round trip from `/admin/`.
-   Under **Admin access**, add another exact Gmail address and verify that
-   account separately. Adding membership does not send an invitation email.
-   An unlisted Gmail must remain denied.
+5. After operator configuration, test the actual Google round trip from `/sign-in/`.
+   The button uses the existing Supabase Google provider and the same stored OAuth
+   client configuration; no client secret is added to React. Confirm the **Team**
+   view contains exactly the four approved identities, including the company Google
+   account. An unlisted Google account must remain denied. **Request access** opens
+   an email draft to the existing public programme contact; it does not send a
+   message, save a request or grant membership automatically.
+
+The four exact addresses are operator configuration, not public source. Prepare
+the access synchronization in the ignored `supabase/configure-admin-access.sql.local`
+file. Apply it only to the named UAT project after the required browser access-change
+confirmation. It preserves the current owner, adds the approved three other
+accounts, removes unapproved memberships and returns the final membership list.
+The Team screen is read-only; changing the approved team is an operator action.
 
 The app uses Supabase Auth's PKCE flow. See the official
 [Google sign-in setup](https://supabase.com/docs/guides/auth/social-sign-in/auth-google).
 No Gmail mailbox permissions are required for this identity flow.
 
-## Live grid, conflicts and CSV
+## Live dashboard, conflicts and CSV
 
-The grid loads saved rows with paging, offers search/filter/sort and keeps
-follow-up edits as drafts until **Save**. Updates include the row revision;
+The dashboard and register load all saved pages, offer search/filter/sort and keep
+follow-up edits as drafts until **Save**. Summary cards and register use the same
+IST date period. Counts represent saved requests, including any UAT test submissions;
+they are not unique children, payments or attendance. Website engagement remains
+untracked. Request details show immutable parent/child input, consent and safe
+Call/Email/WhatsApp actions. Opening a contact link never marks a request contacted. Updates include the row revision;
 a competing edit cannot silently overwrite a newer revision. Review the latest
 row before resaving a retained draft. CSV contains saved values, rather than
-unsaved edits, and formula-like cells are neutralized for spreadsheet use.
+unsaved edits, and formula-like cells are neutralized for spreadsheet use. CSV includes every
+matching saved page and excludes unsaved drafts. An initial load failure shows
+a retry state instead of fabricated zero metrics. On sign-out or access revocation,
+private views and drafts unmount. A sign-out gate prevents queued checks from
+restoring the previous identity; overlapping access checks share their result.
 
 The migration adds `registrations` to `supabase_realtime` where that publication
 exists. Confirm its membership in the hosted project's Realtime settings.

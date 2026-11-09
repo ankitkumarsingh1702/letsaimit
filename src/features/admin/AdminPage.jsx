@@ -1,463 +1,249 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { AllCommunityModule, themeQuartz } from "ag-grid-community";
-import { AgGridReact } from "ag-grid-react";
-import { getSupabaseClient } from "../../lib/supabase.js";
+import * as React from "react";
+import { mediaProps } from "../../lib/media.js";
+import { useAdminAuth } from "../../context/AdminAuth.jsx";
+import SignIn from "../../pages/SignIn.jsx";
+import RequestDetail from "./RequestDetail.jsx";
+import AdminOverview from "./AdminOverview.jsx";
+import { useAdminRegister } from "./useAdminRegister.js";
+import { filterRows, paginateRows, deriveSummary, formatIST, formatAge, periodForPreset, defaultFilters, buildRegisterCsv, STATUS_OPTIONS, FORM_LABELS } from "./admin-model.js";
 import "./admin.css";
-import { mergeSavedRegistrations, normalizeRegistration, safeCsvValue } from "./adminData.js";
 
-const SAFE_COLUMNS = "id,submission_id,full_name,email,phone,metadata,status,notes,assignee,revision,created,updated,updated_by";
-const STATUSES = ["new", "contacted", "confirmed", "closed"];
-const STATUS_NAMES = { new: "New", contacted: "Contacted", confirmed: "Confirmed", closed: "Closed" };
-const EDITABLE = new Set(["status", "notes", "assignee"]);
-const MODULES = [AllCommunityModule];
-const gridTheme = themeQuartz.withParams({
-  accentColor: "#143e35", backgroundColor: "#ffffff", foregroundColor: "#143e35",
-  borderColor: "#dce4de", headerBackgroundColor: "#edf3e2", headerTextColor: "#143e35",
-  oddRowBackgroundColor: "#f8faf6", fontFamily: "'Plus Jakarta Sans', Arial, sans-serif",
-  fontSize: 13, headerFontSize: 12, wrapperBorderRadius: 12, spacing: 8,
-});
+const VIEWS = [
+  { id: "overview", label: "Dashboard", icon: "overview" },
+  { id: "register", label: "Register", icon: "register" },
+  { id: "team", label: "Team", icon: "team" },
+];
 
-function label(value) { return STATUS_NAMES[value] || String(value || "—"); }
-function formatDate(value) {
-  if (!value) return "—";
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" });
+function AdminIcon({ name, ...props }) {
+  const paths = {
+    overview: <><rect x="3" y="3" width="7" height="7" rx="2" /><rect x="14" y="3" width="7" height="7" rx="2" /><rect x="3" y="14" width="7" height="7" rx="2" /><rect x="14" y="14" width="7" height="7" rx="2" /></>,
+    register: <><rect x="4" y="3" width="16" height="18" rx="3" /><path d="M8 8h8M8 12h8M8 16h5" /></>,
+    team: <><circle cx="9" cy="8" r="3" /><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 5a3 3 0 0 1 0 6M18 15a5 5 0 0 1 3 5" /></>,
+    arrow: <path d="M5 12h14m-6-6 6 6-6 6" />,
+    external: <><path d="M13 4h7v7m0-7L10 14" /><path d="M9 5H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4" /></>,
+    more: <><circle cx="5" cy="12" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /></>,
+    search: <><circle cx="10.5" cy="10.5" r="6.5" /><path d="m16 16 5 5" /></>,
+    filter: <><path d="M4 6h16M4 12h16M4 18h16" /><circle cx="8" cy="6" r="2" /><circle cx="16" cy="12" r="2" /><circle cx="10" cy="18" r="2" /></>,
+    download: <><path d="M12 3v12m-5-5 5 5 5-5M4 16v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4" /></>,
+    close: <path d="m6 6 12 12M6 18 18 6" />,
+    plus: <path d="M12 5v14M5 12h14" />,
+    clock: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
+    check: <path d="m5 12 4 4L19 6" />,
+    reset: <><path d="M4 9a8 8 0 1 1 0 7M4 3v6h6" /></>,
+    exit: <><path d="M9 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4M13 7l5 5-5 5M8 12h13" /></>,
+    shield: <><path d="m12 3 8 3v5c0 5-4 8-8 10-4-2-8-5-8-10V6l8-3Z" /><path d="m8 12 3 3 5-6" /></>,
+    ball: <><circle cx="12" cy="12" r="9" /><path d="m12 7 5 4-2 6H9l-2-6 5-4Zm0-4v4M3.5 9l3.5 2M5.5 19l3.5-2m6 0 3.5 2M17 11l3.5-2" /></>,
+  };
+  return <svg className="adm-icon" viewBox="0 0 24 24" aria-hidden="true" {...props}>{paths[name] || paths.register}</svg>;
 }
-function readValue(value) {
-  if (value === true) return "Yes";
-  if (value === false) return "No";
-  if (value == null || value === "") return "—";
-  return typeof value === "object" ? JSON.stringify(value) : String(value);
+
+function StatusBadge({ status }) {
+  return <span className={`adm-status adm-status-${status}`}><span aria-hidden="true" />{STATUS_OPTIONS.find(item => item.value === status)?.label || status}</span>;
 }
-function isPermissionError(error) {
-  return [401, 403].includes(error?.status) || ["42501", "PGRST301", "PGRST302", "PGRST303"].includes(error?.code);
+
+function Avatar({ name, small = false }) {
+  const letters = name.split(/\s+/).filter(Boolean).map(word => word[0]).slice(0, 2).join("");
+  return <span className={`adm-avatar${small ? " adm-avatar-small" : ""}`} aria-hidden="true">{letters}</span>;
 }
-function ArrowIcon() {
-  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" /></svg>;
+
+function FilterSelect({ label, value, onChange, children }) {
+  return <label className="adm-field"><span>{label}</span><select value={value || ""} onChange={event => onChange(event.target.value || null)}>{children}</select></label>;
 }
-function Notice({ children, error = false }) {
-  return <div className={`admin-notice${error ? " admin-notice--error" : ""}`} role={error ? "alert" : "status"}>{children}</div>;
-}
-function LoginScreen({ session, error, onRetry, onSignIn, onSignOut, loading, signingIn }) {
-  const unavailable = session?.configured === false;
-  return <main className="admin-page admin-login">
-    <a className="admin-brand" href="/">LetsAimIt<span>Team register</span></a>
-    <section className="admin-login-card" aria-labelledby="admin-login-title">
-      <span className="admin-eyebrow">For the team</span>
-      <h1 id="admin-login-title">One shared register.</h1>
-      <p>Keep track of enquiries, follow up together, and see the latest updates in one place.</p>
-      {loading ? <Notice>Checking your session…</Notice> : unavailable ? <Notice>The team register is being set up. Please check with the site owner.</Notice> : <>
-        {error && <Notice error>{error}</Notice>}
-        <button className="admin-button admin-button--primary" type="button" disabled={signingIn} onClick={onSignIn}>{signingIn ? "Opening Google…" : "Sign in with Google"} <ArrowIcon /></button>
-        <p className="admin-login-help">Use a Gmail account invited by the team.</p>
-        {session?.signedIn && <button className="admin-text-button" type="button" onClick={onSignOut}>Sign out of this account</button>}
+
+function Register({ rows, filtered, pagination, filters, setFilter, resetFilters, onOpen, onExport, canExport, assignees, datePreset, onDatePreset }) {
+  const activeFilters = [filters.status, filters.community, filters.sport, filters.assignee, filters.onlyUnassigned, datePreset !== "all"].filter(Boolean).length;
+  const hasFilters = Boolean(filters.query || filters.formType || activeFilters);
+  const unique = key => [...new Set(rows.map(row => row[key]).filter(Boolean))];
+  return <section className="adm-register" aria-label="Saved request register">
+    <div className="adm-register-top">
+      <details className="adm-filters">
+        <summary className="adm-button adm-button-white"><AdminIcon name="filter" />Filters {activeFilters > 0 && <span className="adm-count">{activeFilters}</span>}</summary>
+        <div className="adm-filter-panel">
+          <div className="adm-filter-heading"><strong>Filter requests</strong><button className="adm-text-button" type="button" onClick={resetFilters}>Reset</button></div>
+          <div className="adm-filter-grid">
+            <FilterSelect label="Period" value={datePreset} onChange={onDatePreset}><option value="today">Today</option><option value="last7">Last 7 days</option><option value="all">All dates</option></FilterSelect>
+            <FilterSelect label="Status" value={filters.status} onChange={value => setFilter("status", value)}><option value="">All statuses</option>{STATUS_OPTIONS.map(item => <option key={item.value} value={item.value}>{item.label}</option>)}</FilterSelect>
+            <FilterSelect label="Community" value={filters.community} onChange={value => setFilter("community", value)}><option value="">All communities</option>{unique("community").map(value => <option key={value}>{value}</option>)}</FilterSelect>
+            <FilterSelect label="Sport" value={filters.sport} onChange={value => setFilter("sport", value)}><option value="">All sports</option>{[...new Set([...unique("sport"), "Not sure"])].map(value => <option key={value}>{value}</option>)}</FilterSelect>
+            <FilterSelect label="Assigned to" value={filters.assignee} onChange={value => setFilter("assignee", value)}><option value="">Anyone</option>{assignees.map(value => <option key={value}>{value}</option>)}</FilterSelect>
+            <FilterSelect label="Sort" value={filters.sort.direction} onChange={value => setFilter("sort", { field: "submittedAt", direction: value })}><option value="desc">Newest first</option><option value="asc">Oldest first</option></FilterSelect>
+          </div>
+          <label className="adm-check-label"><input type="checkbox" checked={filters.onlyUnassigned} onChange={event => setFilter("onlyUnassigned", event.target.checked)} />Unassigned only</label>
+          <p className="adm-filter-note">India time (IST)</p>
+        </div>
+      </details>
+      <button className="adm-button adm-button-dark" type="button" onClick={onExport} disabled={!canExport || !filtered.length}><AdminIcon name="download" />Export CSV</button>
+    </div>
+    <div className="adm-register-subhead">
+      <div className="adm-type-tabs" role="group" aria-label="Request type">{[[null, "All"], ["trial", "Trial"], ["enrol", "Enrolment"]].map(([value, label]) => <button type="button" key={label} aria-pressed={filters.formType === value} onClick={() => setFilter("formType", value)}>{label}</button>)}</div>
+      <p aria-live="polite">{filtered.length} of {rows.length} requests{hasFilters && <button type="button" className="adm-text-button" onClick={resetFilters}>Clear filters</button>}</p>
+    </div>
+    <div className="adm-card adm-register-card">
+      {filtered.length === 0 ? <div className="adm-empty"><span className="adm-empty-icon"><AdminIcon name="search" /></span><h2>No matches</h2><p>Try another search.</p><button className="adm-button adm-button-dark" type="button" onClick={resetFilters}>Clear filters</button></div> : <>
+        <div className="adm-table-wrap"><table className="adm-table">
+          <caption className="adm-sr-only">Saved requests. Select a parent to open their details.</caption>
+          <thead><tr><th scope="col">Parent</th><th scope="col">Programme</th><th scope="col">Status</th><th scope="col">Assigned</th><th scope="col">Received</th><th scope="col"><span className="adm-sr-only">Details</span></th></tr></thead>
+          <tbody>{pagination.rows.map(row => <tr key={row.id}>
+            <td><button className="adm-parent-button" type="button" onClick={() => onOpen(row.id)}><strong>{row.parentName}</strong><span>{FORM_LABELS[row.formType]} · {formatAge(row.age)}</span></button></td>
+            <td><strong className="adm-cell-title">{row.sport}</strong><span className="adm-cell-sub">{row.community}</span></td>
+            <td><StatusBadge status={row.status} /></td>
+            <td><span className={`adm-assignee${row.assignee ? "" : " adm-unassigned"}`}>{row.assignee || "Unassigned"}</span></td>
+            <td><span className="adm-cell-title adm-nowrap">{formatIST(row.submittedAt, "time")}</span><span className="adm-cell-sub">{formatIST(row.submittedAt, "date")} · IST</span></td>
+            <td><button className="adm-icon-button" type="button" aria-label={`View ${row.parentName} details`} onClick={() => onOpen(row.id)}><AdminIcon name="arrow" /></button></td>
+          </tr>)}</tbody>
+        </table></div>
+        <div className="adm-request-cards">{pagination.rows.map(row => <article key={row.id} className="adm-request-card">
+          <div className="adm-request-card-top"><strong>{row.parentName}</strong><StatusBadge status={row.status} /></div>
+          <p>{FORM_LABELS[row.formType]} · {formatAge(row.age)} · {row.sport}</p><p>{row.community}</p>
+          <div className="adm-request-card-bottom"><span>{row.assignee || "Unassigned"}<span>{formatIST(row.submittedAt)} IST</span></span><button className="adm-text-button" type="button" onClick={() => onOpen(row.id)} aria-label={`View ${row.parentName} details`}>View <AdminIcon name="arrow" /></button></div>
+        </article>)}</div>
+        <div className="adm-pagination"><span>{filtered.length} saved {filtered.length === 1 ? "request" : "requests"}</span><div><label><span className="adm-sr-only">Rows per page</span><select value={filters.pageSize} onChange={event => setFilter("pageSize", Number(event.target.value))}><option value="10">10 per page</option><option value="25">25 per page</option><option value="50">50 per page</option></select></label><button className="adm-icon-button" type="button" aria-label="Previous page" disabled={pagination.page <= 1} onClick={() => setFilter("page", pagination.page - 1)}><AdminIcon name="arrow" style={{ transform: "rotate(180deg)" }} /></button><span>{pagination.page} / {pagination.totalPages || 1}</span><button className="adm-icon-button" type="button" aria-label="Next page" disabled={!pagination.hasNextPage} onClick={() => setFilter("page", pagination.page + 1)}><AdminIcon name="arrow" /></button></div></div>
       </>}
-      {!loading && !unavailable && <button className="admin-text-button admin-check-access" type="button" onClick={onRetry}>Check access again</button>}
-    </section>
-    <p className="admin-private-note">This register is private. Please use it only for programme follow-up.</p>
-  </main>;
+    </div>
+    <p className="adm-register-note"><AdminIcon name="download" />Filtered saved requests.</p>
+  </section>;
 }
-function AccessDialog({ members, loading, error, email, onEmail, onAdd, onRemove, onClose, currentEmail, busy }) {
-  const dialog = useRef(null);
-  useEffect(() => { dialog.current?.showModal(); return () => dialog.current?.close(); }, []);
-  return <dialog className="admin-access-dialog" ref={dialog} aria-labelledby="admin-access-title" onCancel={(event) => { event.preventDefault(); onClose(); }}>
-    <div className="admin-access-head"><div><span className="admin-eyebrow">Private team access</span><h2 id="admin-access-title">Admin access</h2></div><button className="admin-text-button" type="button" onClick={onClose} aria-label="Close admin access">Close</button></div>
-    <p>Invited Gmail accounts can view enquiries, edit follow-up details, and manage admin access.</p>
-    {error && <Notice error>{error}</Notice>}
-    <form className="admin-access-form" onSubmit={onAdd}>
-      <label>Gmail address<input type="email" required value={email} onChange={(event) => onEmail(event.target.value)} placeholder="name@gmail.com" autoComplete="off" maxLength={254} autoFocus /></label>
-      <button className="admin-button admin-button--primary" type="submit" disabled={Boolean(busy)}>{busy === "add" ? "Adding…" : "Add admin"}</button>
-    </form>
-    {loading ? <Notice>Loading admin access…</Notice> : <ul className="admin-member-list">{members.map((member) => <li key={member.email}><div><strong>{member.email}</strong><span>{member.is_owner ? "Owner" : "Admin"}{member.email === currentEmail ? " · You" : ""}</span></div>{member.is_owner ? <span className="admin-owner-label">Owner access</span> : <button className="admin-text-button" type="button" disabled={Boolean(busy)} onClick={() => onRemove(member.email)}>{busy === member.email ? "Removing…" : member.email === currentEmail ? "Remove my access" : "Remove"}</button>}</li>)}</ul>}
-    <p className="admin-access-help">The owner keeps access. Removing an admin blocks new data requests; an open register checks access every 5 seconds.</p>
-  </dialog>;
+
+function Team({ members, user }) {
+  return <section className="adm-card adm-team-card" aria-labelledby="adm-team-heading">
+    <div className="adm-card-heading"><div><h2 id="adm-team-heading">Team access</h2><p>{members.length} approved accounts</p></div></div>
+    <div className="adm-team-list">{members.map(member => <div className="adm-team-row" key={member.email}>
+      <Avatar name={member.email === user.email ? user.displayName : member.email.split("@")[0].replaceAll(".", " ")} />
+      <div className="adm-team-person"><strong>{member.email}</strong><span>{member.email === user.email ? "You" : "Approved account"}</span></div>
+      <span className="adm-role-badge">{member.role === "owner" ? "Owner" : "Admin"}</span>
+    </div>)}</div>
+    <div className="adm-team-note"><AdminIcon name="shield" /><p>Only approved accounts can open this register. Access is managed by the site owner.</p></div>
+  </section>;
+}
+
+function AuthorizedAdmin({ auth }) {
+  const { rows, members, loading, error, liveState, lastSynced, refresh, save } = useAdminRegister(auth);
+  const [filters, setFilters] = React.useState(defaultFilters);
+  const [datePreset, setDatePreset] = React.useState("all");
+  const [referenceIso, setReferenceIso] = React.useState(() => new Date().toISOString());
+  const [view, setView] = React.useState("overview");
+  const [selectedDetailId, setSelectedDetailId] = React.useState(null);
+  const [selectedSnapshot, setSelectedSnapshot] = React.useState(null);
+  const [editsById, setEditsById] = React.useState({});
+  const [toast, setToast] = React.useState("");
+  const [exporting, setExporting] = React.useState(false);
+  const hasLoaded = lastSynced !== null;
+  const headingRef = React.useRef(null);
+  const alive = React.useRef(true);
+  const filtered = React.useMemo(() => filterRows(rows, filters), [rows, filters]);
+  const pagination = React.useMemo(() => paginateRows(filtered, filters.page, filters.pageSize), [filtered, filters.page, filters.pageSize]);
+  const overviewRows = React.useMemo(() => filterRows(rows, { period: filters.period }), [rows, filters.period]);
+  const summary = React.useMemo(() => deriveSummary(overviewRows), [overviewRows]);
+  const selectedRow = rows.find(row => row.id === selectedDetailId) || selectedSnapshot;
+  const assignees = React.useMemo(() => [...new Set([...members.map(member => member.email), ...rows.map(row => row.assignee).filter(Boolean)])], [rows, members]);
+  const hasDraft = Object.values(editsById).some(edit => ["dirty", "saving", "error"].includes(edit.state));
+  const uiAuth = React.useMemo(() => ({ user: auth.user, permissions: { readRegister: true, editFollowUp: true, exportCsv: true, manageAdmins: false } }), [auth.user]);
+
+  React.useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
+  React.useEffect(() => {
+    if (!toast) return;
+    const timer = window.setTimeout(() => setToast(""), 4500);
+    return () => window.clearTimeout(timer);
+  }, [toast]);
+  React.useEffect(() => {
+    const timer = window.setInterval(() => setReferenceIso(new Date().toISOString()), 60000);
+    return () => window.clearInterval(timer);
+  }, []);
+  // Today/last-seven-day windows follow IST midnight while the register stays open.
+  React.useEffect(() => {
+    const next = periodForPreset(datePreset, referenceIso);
+    setFilters(previous => previous.period.startInclusiveUtc === next.startInclusiveUtc && previous.period.endExclusiveUtc === next.endExclusiveUtc
+      ? previous : { ...previous, period: next, page: 1 });
+  }, [datePreset, referenceIso]);
+  React.useEffect(() => {
+    if (!hasDraft) return;
+    const warn = event => { event.preventDefault(); event.returnValue = ""; };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [hasDraft]);
+
+  function changeView(next) {
+    setView(next);
+    window.requestAnimationFrame(() => { headingRef.current?.focus({ preventScroll: true }); window.scrollTo({ top: 0, behavior: "instant" }); });
+  }
+  function setFilter(key, value) { setFilters(previous => ({ ...previous, [key]: value, page: key === "page" ? value : 1 })); }
+  function setPeriod(preset) {
+    const now = new Date().toISOString();
+    setReferenceIso(now); setDatePreset(preset);
+    setFilters(previous => ({ ...previous, period: periodForPreset(preset, now), page: 1 }));
+  }
+  function resetFilters() {
+    setDatePreset("all"); setFilters(defaultFilters());
+  }
+  function viewRegister(overrides = {}) {
+    setFilters(previous => ({ ...defaultFilters(), period: previous.period, ...overrides }));
+    changeView("register");
+  }
+  function searchRequests(query) {
+    if (view !== "register") {
+      setFilters(previous => ({ ...defaultFilters(), period: previous.period, query }));
+      setView("register");
+    } else setFilter("query", query);
+  }
+  function openRequest(id) {
+    const row = rows.find(item => item.id === id);
+    if (row) { setSelectedSnapshot(row); setSelectedDetailId(id); }
+  }
+  function closeRequest() { setSelectedDetailId(null); setSelectedSnapshot(null); }
+  async function saveFollowUp(id, patch, expectedRevision) {
+    const result = await save(id, patch, expectedRevision);
+    if (alive.current && result.ok) setToast("Changes saved. The team can see your update.");
+    return result;
+  }
+  async function exportCsv(exportFilters) {
+    if (!hasLoaded) return;
+    setExporting(true);
+    try {
+      if (!await auth.checkAccess() || !alive.current) return;
+      // Export saved values from the full loaded collection, never drawer drafts or the current page only.
+      const result = buildRegisterCsv(rows, exportFilters, { referenceIso: new Date().toISOString() });
+      if (!await auth.checkAccess() || !alive.current) return;
+      const url = URL.createObjectURL(new Blob([result.text], { type: "text/csv;charset=utf-8;" }));
+      const link = document.createElement("a"); link.href = url; link.download = result.filename; document.body.appendChild(link); link.click(); link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setToast(`${result.rowCount} saved ${result.rowCount === 1 ? "request" : "requests"} exported.`);
+    } catch { if (alive.current) setToast("Could not export. Please check your connection and retry."); }
+    finally { if (alive.current) setExporting(false); }
+  }
+  const onDraftChange = React.useCallback((id, draft) => setEditsById(previous => ({ ...previous, [id]: draft })), []);
+  const title = view === "overview" ? "Dashboard" : view === "register" ? "Register" : "Team";
+  const periodLabel = datePreset === "today" ? "Today" : datePreset === "last7" ? "Last 7 days" : "All dates";
+
+  return <div className="adm-app">
+    <aside className="adm-sidebar">
+      <a className="adm-brand" href="/" aria-label="LetsAimIt home"><img {...mediaProps("logo.png", "110px")} alt="LetsAimIt" /></a>
+      <p className="adm-sidebar-label">MENU</p>
+      <nav className="adm-nav" aria-label="Admin navigation">{VIEWS.map(item => <button key={item.id} type="button" aria-current={view === item.id ? "page" : undefined} onClick={() => changeView(item.id)}><AdminIcon name={item.icon} /><span>{item.label}</span>{item.id === "register" && hasLoaded && <span className="adm-nav-count">{rows.length}</span>}</button>)}</nav>
+      <div className="adm-utilities"><p className="adm-sidebar-label">GENERAL</p><a href="/"><AdminIcon name="external" />Website</a><button type="button" onClick={refresh}><AdminIcon name="reset" />Refresh register</button><button type="button" onClick={auth.signOut}><AdminIcon name="exit" />Sign out</button></div>
+    </aside>
+    <div className="adm-workspace">
+      <header className="adm-topbar">
+        <label className="adm-search adm-global-search"><AdminIcon name="search" /><span className="adm-sr-only">Search requests</span><input type="search" placeholder="Search requests" value={filters.query} onChange={event => searchRequests(event.target.value)} /></label>
+        <div className="adm-topbar-right"><span className="adm-live-state" role="status">{!hasLoaded ? "Not synced" : liveState === "live" ? "Live" : liveState === "paused" ? "Paused" : liveState === "reconnecting" ? "Reconnecting" : "Connecting"}</span><div className="adm-user"><Avatar name={auth.user.displayName || auth.user.email} small /><span><strong>{auth.user.displayName || auth.user.email}</strong><span>{auth.user.email}</span></span></div><details className="adm-mobile-tools"><summary aria-label="Workspace actions"><AdminIcon name="more" /></summary><div className="adm-tools-popup"><a href="/"><AdminIcon name="external" />Website</a><button type="button" onClick={refresh}><AdminIcon name="reset" />Refresh register</button><button type="button" onClick={auth.signOut}><AdminIcon name="exit" />Sign out</button></div></details></div>
+      </header>
+      <div className="adm-content">
+        <div className="adm-page-heading"><div><h1 ref={headingRef} tabIndex={-1}>{title}</h1><p className="adm-date">{formatIST(referenceIso, "date")} · IST{hasDraft && <span>Unsaved changes</span>}</p></div><div className="adm-page-actions">{view !== "team" && <FilterSelect label="Period" value={datePreset} onChange={setPeriod}><option value="all">All dates</option><option value="today">Today</option><option value="last7">Last 7 days</option></FilterSelect>}{view === "overview" && hasLoaded && <button className="adm-button adm-button-outline" type="button" onClick={() => exportCsv({ period: filters.period })} disabled={!hasLoaded || exporting || loading}>Export CSV</button>}</div></div>
+        {error && <div className="adm-notice adm-notice-error" role="alert"><p>{error}{hasLoaded && ` Showing the last saved snapshot from ${formatIST(lastSynced)} IST.`}</p><button className="adm-text-button" type="button" onClick={refresh}>Retry</button></div>}
+        {auth.error && <div className="adm-notice" role="status">{auth.error}</div>}
+        {!hasLoaded ? <div className="adm-card adm-empty" role="status"><h2>{loading ? "Loading saved requests…" : "Register not loaded"}</h2>{!loading && <p>Saved requests and team details will appear when the connection is restored.</p>}</div> : view === "overview" ? <AdminOverview rows={overviewRows} summary={summary} members={members} auth={uiAuth} onOpen={openRequest} onViewRegister={viewRegister} onTeam={() => changeView("team")} Icon={AdminIcon} Avatar={Avatar} StatusBadge={StatusBadge} /> : view === "register" ? <Register rows={rows} filtered={filtered} pagination={pagination} filters={filters} setFilter={setFilter} resetFilters={resetFilters} onOpen={openRequest} onExport={() => exportCsv(filters)} canExport={!exporting} assignees={assignees} datePreset={datePreset} onDatePreset={setPeriod} /> : <Team members={members} user={auth.user} />}
+        <footer className="adm-footer">{hasLoaded ? <><span>Counts include all saved requests, including any test submissions.</span><span>{periodLabel} · Synced {formatIST(lastSynced, "time")} IST</span></> : <><span>Waiting for the saved register.</span><span>Asia/Kolkata</span></>}</footer>
+      </div>
+    </div>
+    <RequestDetail row={selectedRow} open={Boolean(selectedRow)} onClose={closeRequest} onSave={saveFollowUp} assignees={assignees} canEdit onDraftChange={onDraftChange} />
+    {toast && <div className="adm-toast" role="status"><AdminIcon name="check" /><span>{toast}</span><button type="button" className="adm-icon-button" aria-label="Dismiss message" onClick={() => setToast("")}><AdminIcon name="close" /></button></div>}
+  </div>;
 }
 
 export function AdminPage() {
-  const client = useMemo(() => getSupabaseClient(), []);
-  const [session, setSession] = useState(null);
-  const [sessionLoading, setSessionLoading] = useState(true);
-  const [sessionError, setSessionError] = useState("");
-  const [signingIn, setSigningIn] = useState(false);
-  const [rows, setRows] = useState([]);
-  const [drafts, setDrafts] = useState({});
-  const [saving, setSaving] = useState({});
-  const [query, setQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [typeFilter, setTypeFilter] = useState("all");
-  const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
-  const [loadingRows, setLoadingRows] = useState(false);
-  const [lastSynced, setLastSynced] = useState(null);
-  const [liveState, setLiveState] = useState("connecting");
-  const [accessOpen, setAccessOpen] = useState(false);
-  const [members, setMembers] = useState([]);
-  const [membersLoading, setMembersLoading] = useState(false);
-  const [memberEmail, setMemberEmail] = useState("");
-  const [memberError, setMemberError] = useState("");
-  const [memberBusy, setMemberBusy] = useState("");
-  const mounted = useRef(false);
-  const fetching = useRef(false);
-  const accessEpoch = useRef(0);
-  const signingOut = useRef(false);
-  const gridRef = useRef(null);
-  const rowsRef = useRef(rows);
-  const draftsRef = useRef(drafts);
-  const sessionRef = useRef(session);
-  rowsRef.current = rows;
-  draftsRef.current = drafts;
-  sessionRef.current = session;
-  const authenticated = session?.authenticated === true;
-  const canEdit = authenticated;
-  const dirtyCount = Object.keys(drafts).length;
-
-  const clearAccess = useCallback((message = "", signedIn = false) => {
-    accessEpoch.current += 1;
-    const next = { authenticated: false, signedIn, configured: Boolean(client) };
-    sessionRef.current = next;
-    rowsRef.current = []; draftsRef.current = {};
-    if (!mounted.current) return;
-    setSession(next); setRows([]); setDrafts({}); setSaving({}); setMembers([]); setAccessOpen(false); setLastSynced(null); setSessionError(message);
-  }, [client]);
-
-  const verifyAccess = useCallback(async () => {
-    if (signingOut.current) return null;
-    if (!client) { clearAccess(); return null; }
-    const epoch = accessEpoch.current;
-    const { data, error: authError } = await client.auth.getUser();
-    if (epoch !== accessEpoch.current || !mounted.current) return null;
-    if (authError) {
-      if (isPermissionError(authError) || (authError.status >= 400 && authError.status < 500 && authError.status !== 429) || authError.name === "AuthSessionMissingError") { clearAccess(); return null; }
-      throw new Error("Your access could not be checked. Please try again.");
-    }
-    if (!data.user) { clearAccess(); return null; }
-    const { data: allowed, error: accessError } = await client.rpc("is_admin");
-    if (epoch !== accessEpoch.current || !mounted.current) return null;
-    if (accessError) {
-      if (isPermissionError(accessError)) { clearAccess("This account does not have access to the register.", true); return null; }
-      throw new Error("Your access could not be checked. Please try again.");
-    }
-    if (allowed !== true) { clearAccess("This Gmail account has not been invited, or its access has been removed.", true); return null; }
-    const next = { authenticated: true, user: { id: data.user.id, email: data.user.email, role: "admin" } };
-    sessionRef.current = next; setSession(next); setSessionError("");
-    return data.user;
-  }, [client, clearAccess]);
-
-  const checkSession = useCallback(async () => {
-    setSessionLoading(true); setSessionError("");
-    try { await verifyAccess(); }
-    catch (cause) { if (mounted.current) setSessionError(cause.message); }
-    finally { if (mounted.current) setSessionLoading(false); }
-  }, [verifyAccess]);
-
-  const signIn = async () => {
-    if (!client) return;
-    signingOut.current = false;
-    setSigningIn(true); setSessionError("");
-    try {
-      const { error: authError } = await client.auth.signInWithOAuth({ provider: "google", options: { redirectTo: `${window.location.origin}/admin/`, queryParams: { prompt: "select_account" } } });
-      if (authError) throw authError;
-    } catch { setSessionError("Google sign-in could not be opened. Please try again."); setSigningIn(false); }
-  };
-  const signOut = async () => {
-    signingOut.current = true;
-    clearAccess();
-    try {
-      const result = client && await client.auth.signOut({ scope: "local" });
-      if (result?.error && mounted.current) setSessionError("The register is closed on this page. Sign-out could not be completed; please try signing in again.");
-    } catch { if (mounted.current) setSessionError("The register is closed on this page. Please check your connection before signing in again."); }
-  };
-
-  const refreshRows = useCallback(async ({ manual = false } = {}) => {
-    if (fetching.current || !sessionRef.current?.authenticated || !client) return;
-    fetching.current = true;
-    if (manual) setLoadingRows(true);
-    try {
-      if (!await verifyAccess()) return;
-      const epoch = accessEpoch.current;
-      const loaded = [];
-      let offset = 0;
-      let batch;
-      do {
-        const { data, error: readError } = await client.from("registrations").select(SAFE_COLUMNS).order("created", { ascending: false }).order("id", { ascending: false }).range(offset, offset + 499);
-        if (readError) throw readError;
-        if (!Array.isArray(data)) throw new Error("invalid-response");
-        batch = data; loaded.push(...data.map(normalizeRegistration)); offset += 500;
-      } while (batch.length === 500);
-      if (epoch !== accessEpoch.current || !mounted.current) return;
-      if (!await verifyAccess() || epoch !== accessEpoch.current || !mounted.current) return;
-      const unique = [...new Map(loaded.map((row) => [row.id, row])).values()];
-      setRows((current) => {
-        const merged = mergeSavedRegistrations(current, unique);
-        return current.length === merged.length && current.every((row, index) => row.id === merged[index].id && row.revision === merged[index].revision) ? current : merged;
-      });
-      setLastSynced(new Date()); setError("");
-    } catch (cause) {
-      if (!mounted.current) return;
-      if (isPermissionError(cause)) clearAccess("Your access has ended. Please sign in with an invited account.", true);
-      else setError("The register could not be refreshed. Your drafts are safe. Please try again.");
-    } finally { fetching.current = false; if (mounted.current) setLoadingRows(false); }
-  }, [client, verifyAccess, clearAccess]);
-
-  const loadMembers = useCallback(async ({ quiet = false } = {}) => {
-    if (!client) return;
-    if (!quiet) { setMembersLoading(true); setMemberError(""); }
-    try {
-      if (!await verifyAccess()) return;
-      const epoch = accessEpoch.current;
-      const { data, error: readError } = await client.from("allowed_admins").select("email,is_owner,created_at,created_by").order("email");
-      if (readError) throw readError;
-      if (mounted.current && epoch === accessEpoch.current) setMembers(data || []);
-    } catch (cause) {
-      if (isPermissionError(cause)) clearAccess("Your access has ended.", true);
-      else if (mounted.current) setMemberError("Admin access could not be loaded. Please try again.");
-    } finally { if (mounted.current) setMembersLoading(false); }
-  }, [client, verifyAccess, clearAccess]);
-
-  const addMember = async (event) => {
-    event.preventDefault();
-    const email = memberEmail.trim().toLowerCase();
-    if (!/^[^\s@]+@gmail\.com$/.test(email)) { setMemberError("Please enter a Gmail address, such as name@gmail.com."); return; }
-    setMemberBusy("add"); setMemberError("");
-    try {
-      if (!await verifyAccess()) return;
-      const epoch = accessEpoch.current;
-      const { error: writeError } = await client.from("allowed_admins").insert({ email });
-      if (writeError) throw writeError;
-      if (mounted.current && epoch === accessEpoch.current) { setMemberEmail(""); await loadMembers(); }
-    } catch (cause) {
-      if (isPermissionError(cause)) clearAccess("Your access has ended.", true);
-      else if (mounted.current) setMemberError(cause.code === "23505" ? "This Gmail account already has access." : "The admin could not be added. Please try again.");
-    } finally { if (mounted.current) setMemberBusy(""); }
-  };
-  const removeMember = async (email) => {
-    setMemberBusy(email); setMemberError("");
-    try {
-      if (!await verifyAccess()) return;
-      const epoch = accessEpoch.current;
-      const { data, error: writeError } = await client.from("allowed_admins").delete().eq("email", email).select("email");
-      if (writeError) throw writeError;
-      if (epoch !== accessEpoch.current || !mounted.current) return;
-      if (!data?.length) throw new Error("no-change");
-      if (email === sessionRef.current?.user?.email) { clearAccess("Your admin access has been removed.", true); return; }
-      await loadMembers();
-    } catch (cause) {
-      if (isPermissionError(cause)) {
-        try { if (await verifyAccess()) setMemberError("This admin cannot be removed. Owner access is kept."); }
-        catch { if (mounted.current) setMemberError("Your access could not be checked. Please try again."); }
-      }
-      else if (mounted.current) setMemberError("The admin could not be removed. Owner access is kept; please try again for other accounts.");
-    } finally { if (mounted.current) setMemberBusy(""); }
-  };
-
-  useEffect(() => {
-    mounted.current = true;
-    checkSession();
-    const subscription = client?.auth.onAuthStateChange((event, authSession) => {
-      if (event === "SIGNED_OUT" || !authSession?.user) { clearAccess(); setSessionLoading(false); return; }
-      if (sessionRef.current?.user?.id && sessionRef.current.user.id !== authSession.user.id) clearAccess();
-      // Keep asynchronous Supabase calls outside the auth callback's lock.
-      window.setTimeout(() => {
-        if (!mounted.current) return;
-        if (sessionRef.current?.authenticated) verifyAccess().catch(() => { if (mounted.current) setError("Your access could not be checked. Please try again."); });
-        else checkSession();
-      }, 0);
-    }).data.subscription;
-    return () => { mounted.current = false; accessEpoch.current += 1; subscription?.unsubscribe(); };
-  }, [client, checkSession, clearAccess, verifyAccess]);
-
-  useEffect(() => {
-    const previousTitle = document.title;
-    document.title = "Team register — LetsAimIt";
-    const oldRobots = document.querySelector('meta[name="robots"]');
-    const previousRobots = oldRobots?.getAttribute("content");
-    const meta = oldRobots || document.createElement("meta");
-    if (!oldRobots) { meta.name = "robots"; document.head.appendChild(meta); }
-    meta.content = "noindex, nofollow, noarchive";
-    return () => { document.title = previousTitle; if (oldRobots) { if (previousRobots == null) meta.removeAttribute("content"); else meta.content = previousRobots; } else meta.remove(); };
-  }, []);
-
-  useEffect(() => {
-    if (!authenticated || !client) return undefined;
-    let channel;
-    let ended = false;
-    let fallback;
-    const close = () => { if (channel) { client.removeChannel(channel).catch(() => {}); channel = null; } window.clearInterval(fallback); fallback = null; };
-    const update = () => {
-      if (ended || document.visibilityState === "hidden") return;
-      // Membership checks continue even if a row refresh is still in flight.
-      verifyAccess().then((user) => { if (user && !ended) { refreshRows(); if (accessOpen) loadMembers({ quiet: true }); } }).catch(() => { if (!ended && mounted.current) setError("Your access could not be checked. Please try again."); });
-    };
-    const open = () => {
-      if (ended || document.visibilityState === "hidden") return;
-      close(); refreshRows({ manual: true }); setLiveState("connecting");
-      channel = client.channel(`letsaimit-admin-${session.user.id}`)
-        .on("postgres_changes", { event: "*", schema: "public", table: "registrations" }, update)
-        .subscribe((status) => { if (!ended) setLiveState(status === "SUBSCRIBED" ? "live" : ["CHANNEL_ERROR", "TIMED_OUT", "CLOSED"].includes(status) ? "reconnecting" : "connecting"); });
-      fallback = window.setInterval(update, 5000);
-    };
-    const visible = () => { if (document.visibilityState === "hidden") close(); else open(); };
-    open(); document.addEventListener("visibilitychange", visible); window.addEventListener("focus", update);
-    return () => { ended = true; close(); document.removeEventListener("visibilitychange", visible); window.removeEventListener("focus", update); };
-  }, [authenticated, client, session?.user?.id, refreshRows, accessOpen, loadMembers, verifyAccess]);
-
-  useEffect(() => {
-    if (!dirtyCount) return undefined;
-    const warn = (event) => { event.preventDefault(); event.returnValue = ""; };
-    window.addEventListener("beforeunload", warn);
-    return () => window.removeEventListener("beforeunload", warn);
-  }, [dirtyCount]);
-
-  const updateDraft = useCallback((id, field, value) => {
-    if (!EDITABLE.has(field) || !sessionRef.current?.authenticated || sessionRef.current.user?.role === "viewer") return;
-    setNotice("");
-    const current = draftsRef.current;
-    const source = rowsRef.current.find((row) => row.id === id);
-    if (!source) return;
-    const existing = current[id];
-    const changes = { ...existing?.changes, [field]: value };
-    const baseValues = existing?.baseValues || { status: source.status || "new", notes: source.notes || "", assignee: source.assignee || "" };
-    for (const key of Object.keys(changes)) if (String(changes[key]) === String(baseValues[key])) delete changes[key];
-    const next = { ...current };
-    if (!Object.keys(changes).length) delete next[id];
-    else next[id] = { ...existing, revision: existing?.revision ?? source.revision, baseValues, changes };
-    // A Save click may stop an active cell editor before React's next render.
-    draftsRef.current = next;
-    setDrafts(next);
-  }, []);
-
-  const saveRow = useCallback(async (id) => {
-    gridRef.current?.api?.stopEditing();
-    const draft = draftsRef.current[id];
-    if (!draft || draft.conflict || !sessionRef.current?.authenticated || !client) return;
-    setSaving((current) => ({ ...current, [id]: true })); setNotice(""); setError("");
-    try {
-      if (!await verifyAccess()) return;
-      const epoch = accessEpoch.current;
-      const changes = Object.fromEntries(Object.entries(draft.changes).filter(([key]) => EDITABLE.has(key)));
-      const { data, error: writeError } = await client.from("registrations").update(changes).eq("id", id).eq("revision", draft.revision).select(SAFE_COLUMNS);
-      if (writeError) throw writeError;
-      if (!mounted.current || epoch !== accessEpoch.current) return;
-      if (!data?.length) {
-        if (!await verifyAccess()) return;
-        setDrafts((current) => ({ ...current, [id]: { ...current[id], conflict: true } }));
-        setError("Someone else updated this row. Your draft is safe. Review the latest values before saving again.");
-        refreshRows(); return;
-      }
-      setRows((current) => current.map((row) => row.id === id ? normalizeRegistration(data[0]) : row));
-      setDrafts((current) => { const next = { ...current }; delete next[id]; draftsRef.current = next; return next; });
-      setNotice("Row saved. The team can see your update."); refreshRows();
-    } catch (cause) {
-      if (!mounted.current) return;
-      if (isPermissionError(cause)) clearAccess("Your access has ended.", true);
-      else setError("This row could not be saved. Your draft is safe. Please try again.");
-    } finally { if (mounted.current) setSaving((current) => { const next = { ...current }; delete next[id]; return next; }); }
-  }, [client, verifyAccess, refreshRows, clearAccess]);
-
-  const discardDraft = useCallback((id) => {
-    setDrafts((current) => { const next = { ...current }; delete next[id]; return next; });
-    setNotice("Draft discarded. The latest saved row is shown.");
-  }, []);
-  const rebaseDraft = useCallback((id) => {
-    const latest = rowsRef.current.find((row) => row.id === id);
-    if (!latest || latest.revision === draftsRef.current[id]?.revision) return;
-    setDrafts((current) => current[id] ? { ...current, [id]: { ...current[id], revision: latest.revision, conflict: false, serverRow: undefined, baseValues: { status: latest.status || "new", notes: latest.notes || "", assignee: latest.assignee || "" } } } : current);
-    setNotice("Draft kept against the latest row. Review it, then save.");
-  }, []);
-
-  const formTypes = useMemo(() => [...new Set(rows.map((row) => row.formType).filter(Boolean))].sort(), [rows]);
-  const dataRows = useMemo(() => rows.map((row) => ({
-    ...row, ...drafts[row.id]?.changes,
-    __dirty: Boolean(drafts[row.id]), __conflict: Boolean(drafts[row.id]?.conflict), __saving: Boolean(saving[row.id]),
-  })).filter((row) => (statusFilter === "all" || row.status === statusFilter) && (typeFilter === "all" || row.formType === typeFilter)), [rows, drafts, saving, statusFilter, typeFilter]);
-
-  const columns = useMemo(() => {
-    const readOnly = (field, headerName, width = 150, extra = {}) => ({ field, headerName, width, editable: false, valueFormatter: ({ value }) => readValue(value), ...extra });
-    const definitions = [
-      readOnly("savedAt", "Received", 175, { sort: "desc", valueFormatter: ({ value }) => formatDate(value) }),
-      readOnly("formType", "Form", 125),
-      { field: "status", headerName: "Status", width: 145, editable: ({ data }) => canEdit && !data.__saving && !data.__conflict, cellEditor: "agSelectCellEditor", cellEditorParams: { values: STATUSES }, valueFormatter: ({ value }) => label(value), cellClass: "admin-workflow-cell" },
-      readOnly("parentName", "Parent / contact", 175), readOnly("childName", "Child", 155),
-      readOnly("phone", "Phone", 155), readOnly("email", "Email", 215),
-      readOnly("age", "Age", 90), readOnly("community", "Community", 190), readOnly("sport", "Sport", 135),
-      readOnly("address", "Address", 260), readOnly("note", "Submitted note", 280),
-      { field: "assignee", headerName: "Assigned to", width: 185, editable: ({ data }) => canEdit && !data.__saving && !data.__conflict, cellClass: "admin-workflow-cell", cellEditorParams: { maxLength: 254 } },
-      { field: "notes", headerName: "Follow-up notes", width: 320, editable: ({ data }) => canEdit && !data.__saving && !data.__conflict, cellClass: "admin-workflow-cell", cellEditor: "agLargeTextCellEditor", cellEditorPopup: true, cellEditorParams: { maxLength: 2000, rows: 7, cols: 45 } },
-    ];
-    definitions.push(
-      readOnly("guardianConsent", "Guardian consent", 165),
-      readOnly("termsAccepted", "Terms accepted", 155),
-      readOnly("consentVersion", "Consent version", 160),
-      readOnly("updated", "Last updated", 175, { valueFormatter: ({ value }) => formatDate(value) }),
-      readOnly("updated_by", "Updated by", 215),
-      readOnly("phoneCountry", "Phone country", 135),
-    );
-    definitions.push(readOnly("submissionId", "Submission ID", 255));
-    definitions.push({
-      headerName: "Row changes", colId: "actions", pinned: "right", width: canEdit ? 160 : 100, sortable: false, filter: false,
-      cellRenderer: ({ data }) => !canEdit ? <span className="admin-readonly">Read only</span> : data.__conflict ? <span className="admin-conflict-label">Review conflict</span> : <div className="admin-row-actions">
-        <button className="admin-row-save" disabled={!data.__dirty || data.__saving} onClick={() => saveRow(data.id)}>{data.__saving ? "Saving…" : data.__dirty ? "Save" : "Saved"}</button>
-        {data.__dirty && !data.__saving && <button className="admin-row-discard" aria-label={`Discard changes for row ${data.submissionId}`} onClick={() => discardDraft(data.id)}>Undo</button>}
-      </div>,
-    });
-    return definitions;
-  }, [canEdit, saveRow, discardDraft]);
-
-  const exportCsv = () => {
-    if (!gridRef.current?.api || !lastSynced) return;
-    const originals = new Map(rows.map((row) => [String(row.id), row]));
-    gridRef.current.api.exportDataAsCsv({
-      fileName: "letsaimit-register.csv",
-      columnKeys: columns.filter((column) => column.field).map((column) => column.field),
-      processCellCallback: (params) => safeCsvValue(originals.get(String(params.node?.data?.id))?.[params.column.getColDef().field]),
-    });
-  };
-  const conflicts = Object.entries(drafts).filter(([, draft]) => draft.conflict);
-  if (sessionLoading || !authenticated) return <LoginScreen session={session} loading={sessionLoading} signingIn={signingIn} error={sessionError} onRetry={checkSession} onSignIn={signIn} onSignOut={signOut} />;
-  return <main className="admin-page">
-    {accessOpen && <AccessDialog members={members} loading={membersLoading} error={memberError} email={memberEmail} onEmail={setMemberEmail} onAdd={addMember} onRemove={removeMember} onClose={() => setAccessOpen(false)} currentEmail={session.user?.email} busy={memberBusy} />}
-    <header className="admin-topbar">
-      <a className="admin-brand" href="/">LetsAimIt<span>Team register</span></a>
-      <div className="admin-account"><span>{session.user?.email || "Team member"}<small>{session.user?.role || "admin"}</small></span><button className="admin-text-button" type="button" onClick={() => { setAccessOpen(true); loadMembers(); }}>Admin access</button><button className="admin-text-button" type="button" onClick={signOut}>Sign out</button></div>
-    </header>
-    <section className="admin-heading" aria-labelledby="admin-title">
-      <div><span className="admin-eyebrow">A little more organised</span><h1 id="admin-title">Enquiries, together.</h1><p>One shared view for your team. Personal details and consent records stay read-only.</p></div>
-      <div className="admin-sync" role="status"><span className={`admin-live-dot${liveState === "live" ? " is-live" : ""}`} />{liveState === "live" ? "Live updates" : liveState === "reconnecting" ? "Reconnecting · refreshing every 5 seconds" : "Connecting · refreshing every 5 seconds"}<small>{lastSynced ? `Last checked ${lastSynced.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}` : "Loading the register…"}</small></div>
-    </section>
-    {error && <Notice error>{error}</Notice>}
-    {notice && <Notice>{notice}</Notice>}
-    {dirtyCount > 0 && <Notice>{dirtyCount} {dirtyCount === 1 ? "row has" : "rows have"} unsaved changes. Live updates will keep your drafts.</Notice>}
-    {conflicts.map(([id, draft]) => {
-      const latest = rows.find((row) => row.id === id) || draft.serverRow;
-      return <section className="admin-conflict" aria-label="Review conflicting row" key={id}>
-        <h2>Review an updated row</h2><p>Your draft for <strong>{latest?.parentName || id}</strong> has been kept. Another team member saved a newer version.</p>
-        <div className="admin-compare"><div><h3>Latest saved</h3><dl>{Object.keys(draft.changes || {}).map((field) => <React.Fragment key={field}><dt>{field === "assignee" ? "Assigned to" : field}</dt><dd>{readValue(latest?.[field])}</dd></React.Fragment>)}</dl></div><div><h3>Your draft</h3><dl>{Object.entries(draft.changes || {}).map(([field, value]) => <React.Fragment key={field}><dt>{field === "assignee" ? "Assigned to" : field}</dt><dd>{readValue(value)}</dd></React.Fragment>)}</dl></div></div>
-        <div className="admin-conflict-actions"><button className="admin-button admin-button--primary" disabled={!latest || latest.revision === draft.revision} onClick={() => rebaseDraft(id)}>{latest && latest.revision !== draft.revision ? "Keep my draft for review" : "Loading latest version…"}</button><button className="admin-button" onClick={() => discardDraft(id)}>Use latest saved row</button></div>
-      </section>;
-    })}
-    <section className="admin-register" aria-label="Registration register">
-      <div className="admin-toolbar">
-        <label className="admin-search">Search the register<input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Name, community, phone…" autoComplete="off" /></label>
-        <label>Status<select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}><option value="all">All statuses</option>{STATUSES.map((status) => <option value={status} key={status}>{label(status)}</option>)}</select></label>
-        <label>Form<select value={typeFilter} onChange={(event) => setTypeFilter(event.target.value)}><option value="all">All forms</option>{formTypes.map((type) => <option key={type} value={type}>{type}</option>)}</select></label>
-        <button className="admin-button" type="button" disabled={loadingRows} onClick={() => refreshRows({ manual: true })}>{loadingRows ? "Refreshing…" : "Refresh"}</button>
-        <button className="admin-button admin-export" type="button" disabled={!lastSynced || loadingRows} onClick={exportCsv}>Export saved view CSV <ArrowIcon /></button>
-      </div>
-      <div className="admin-register-info"><span>{rows.length} saved {rows.length === 1 ? "enquiry" : "enquiries"}</span><span>{canEdit ? "Double-click Status, Assigned to or Follow-up notes to edit. Save each row when ready." : "You have view-only access."}</span></div>
-      <div className="admin-grid" aria-label="Enquiries table">
-        <AgGridReact ref={gridRef} modules={MODULES} theme={gridTheme} rowData={dataRows} columnDefs={columns}
-          getRowId={({ data }) => String(data.id)} quickFilterText={query}
-          defaultColDef={{ sortable: true, resizable: true, filter: "agTextColumnFilter", minWidth: 85 }}
-          readOnlyEdit onCellEditRequest={({ data, colDef, newValue }) => updateDraft(data.id, colDef.field, newValue)}
-          rowClassRules={{ "admin-row-dirty": ({ data }) => data?.__dirty, "admin-row-conflict": ({ data }) => data?.__conflict }}
-          rowHeight={50} headerHeight={46} animateRows={false} pagination paginationPageSize={25} paginationPageSizeSelector={[25, 50, 100]}
-          suppressExcelExport stopEditingWhenCellsLoseFocus
-          overlayNoRowsTemplate="<span>No enquiries match this view.</span>"
-        />
-      </div>
-    </section>
-    <p className="admin-footer-note">Saved updates are shared with everyone who has register access. Exports use saved values for the current filtered view. CSV files contain personal details; share them only with authorised team members.</p>
-  </main>;
+  const auth = useAdminAuth();
+  // Unmounting destroys private rows and drafts immediately on sign-out/revocation.
+  if (auth.phase !== "authorized" || !auth.user) return <SignIn />;
+  return <AuthorizedAdmin key={auth.user.id} auth={auth} />;
 }
 
 export default AdminPage;

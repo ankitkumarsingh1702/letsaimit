@@ -10,7 +10,8 @@ export const PAGE_META = {
   terms: { path: "/terms/", title: "Programme terms", description: "Terms for LetsAimIt football, basketball and fitness activities. Read enrolment, participation and payment conditions before joining." },
   refunds: { path: "/refunds/", title: "Cancellations & refunds", description: "LetsAimIt payment, withdrawal and cancellation terms. Paid enrolment is non-refundable for personal absence or withdrawal, subject to statutory rights." },
   notfound: { path: "/404/", title: "Page not found", description: "This page is not available. Explore LetsAimIt programmes, community sport and school consultancy." },
-  admin: { path: "/admin/", title: "Registration register", description: "Sign in to the private LetsAimIt registration register." },
+  admin: { path: "/admin/", title: "Team dashboard", description: "Sign in to the private LetsAimIt team dashboard and registration register." },
+  signin: { path: "/sign-in/", title: "Sign in", description: "Sign in with your approved Google account to open the LetsAimIt team dashboard." },
 };
 export const PAGE_TITLES = Object.fromEntries(Object.entries(PAGE_META).map(([key, value]) => [key, value.title]));
 export function pageFromPath(pathname = "/") {
@@ -37,7 +38,7 @@ export function syncPageMeta(page) {
     'meta[property="og:url"]': SITE_ORIGIN + meta.path,
     'meta[name="twitter:title"]': title,
     'meta[name="twitter:description"]': meta.description,
-    'meta[name="robots"]': page === "notfound" || page === "admin" ? "noindex, follow" : "index, follow, max-image-preview:large",
+    'meta[name="robots"]': ["notfound", "admin", "signin"].includes(page) ? "noindex, follow" : "index, follow, max-image-preview:large",
   };
   for (const [selector, value] of Object.entries(values)) document.querySelector(selector)?.setAttribute("content", value);
   document.querySelector('link[rel="canonical"]')?.setAttribute("href", SITE_ORIGIN + meta.path);

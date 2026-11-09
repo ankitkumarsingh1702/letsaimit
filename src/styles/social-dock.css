@@ -1,34 +1,33 @@
-/* A small, scroll-revealed disclosure; the page and header never shift. */
+/* Direct desktop access, a tap-to-open phone layout, and no page reflow. */
 .social-dock {
   position: fixed;
   z-index: 50;
   top: calc(var(--header) + 16px);
-  right: max(24px, env(safe-area-inset-right));
+  right: max(24px, calc(env(safe-area-inset-right) + 12px));
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 10px;
+  gap: 8px;
+  max-width: calc(100vw - 24px);
   pointer-events: none;
   font-family: var(--font-body);
   font-size: var(--type-nav);
   line-height: var(--line-nav);
+  animation: social-rail-enter 180ms cubic-bezier(.2, .8, .2, 1) both;
 }
 .social-dock[hidden],
-.social-panel[hidden] {
-  display: none;
-}
+.social-panel[hidden],
+body:has(dialog[open]) .social-dock { display: none; }
 .social-trigger,
-.social-panel {
-  pointer-events: auto;
-}
+.social-panel { pointer-events: auto; }
 .social-trigger {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
   min-height: 48px;
-  padding: 11px 15px;
-  border: 1px solid #ffffffc7;
+  padding: 11px 14px;
+  border: 1px solid #ffffffbd;
   border-radius: 999px;
   background: var(--green);
   color: #fff;
@@ -38,10 +37,11 @@
   font-weight: 600;
   line-height: var(--line-nav);
   letter-spacing: 0;
-  animation: social-appear 180ms ease-out both;
-  transition: background-color 180ms ease, color 180ms ease, box-shadow 180ms ease;
+  cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease;
 }
 .social-trigger .social-connect-icon {
+  display: none;
   width: 20px;
   height: 20px;
   color: var(--lime);
@@ -49,36 +49,27 @@
 .social-trigger .social-chevron {
   width: 14px;
   height: 14px;
-  transition: transform 180ms ease;
+  transition: transform 160ms ease;
 }
 .social-dock[data-expanded="true"] .social-trigger {
   background: var(--lime);
   color: var(--green);
   border-color: var(--lime);
 }
-.social-dock[data-expanded="true"] .social-connect-icon {
-  color: var(--green);
-}
-.social-dock[data-expanded="true"] .social-chevron {
-  transform: rotate(180deg);
-}
+.social-dock[data-expanded="true"] .social-connect-icon { color: var(--green); }
+.social-dock[data-expanded="true"] .social-chevron { transform: rotate(180deg); }
+/* A narrow capsule stays pinned; labels unfold into the page gutter. */
 .social-panel {
-  width: 264px;
-  max-width: calc(100vw - 32px);
-  max-height: calc(100vh - var(--header) - 100px);
-  max-height: calc(100dvh - var(--header) - 100px - env(safe-area-inset-bottom));
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  padding: 12px;
-  border: 1px solid var(--line);
-  border-radius: 22px;
-  background: #fff;
-  color: var(--green);
-  box-shadow: 0 12px 40px #143e3524;
-  transform-origin: top right;
-  animation: social-appear 180ms ease-out both;
+  width: 64px;
+  padding: 7px;
+  border: 1px solid #ffffffbf;
+  border-radius: 25px;
+  background: var(--green);
+  color: #fff;
+  box-shadow: 0 10px 30px #143e3529;
 }
 .social-panel .social-panel-title {
+  display: none;
   margin: 3px 10px 8px;
   color: var(--muted);
   font-size: var(--type-nav);
@@ -86,108 +77,191 @@
   line-height: var(--line-nav);
 }
 .social-panel ul {
+  display: grid;
+  gap: 5px;
   list-style: none;
   padding: 0;
   margin: 0;
 }
-.social-panel li {
-  margin: 0;
-  animation: social-appear 160ms ease-out both;
-  animation-delay: calc(var(--social-order) * 25ms);
-}
-.social-panel li + li {
-  margin-top: 3px;
-}
+.social-panel li { position: relative; margin: 0; }
 .social-panel .social-link {
+  position: relative;
   display: grid;
-  grid-template-columns: 36px minmax(0, 1fr) 16px;
-  align-items: center;
-  gap: 12px;
-  min-height: 56px;
-  padding: 9px 10px;
-  border-radius: 14px;
+  place-items: center;
+  width: 48px;
+  min-height: 48px;
+  border-radius: 17px;
+  color: inherit;
   font-family: var(--font-body);
   font-size: var(--type-nav);
   font-weight: 600;
   line-height: var(--line-nav);
   letter-spacing: 0;
-  transition: background-color 160ms ease;
+  transition: background-color 140ms ease, color 140ms ease;
 }
 .social-link-icon {
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 11px;
-  background: var(--soft);
-  transition: background-color 160ms ease;
+  width: 48px;
+  height: 48px;
+  border: 1px solid #ffffff1c;
+  border-radius: 17px;
+  background: #ffffff09;
+  transition: background-color 140ms ease, color 140ms ease;
 }
-.social-link-icon svg {
-  width: 21px;
-  height: 21px;
+.social-link[data-social="whatsapp"] .social-link-icon {
+  background: var(--lime);
+  color: var(--green);
+  border-color: transparent;
 }
-.social-link-icon .social-solid {
-  fill: currentColor;
-  stroke: none;
-}
+.social-link-icon svg { width: 23px; height: 23px; }
+.social-link-icon .social-solid { fill: currentColor; stroke: none; }
 .social-link-copy {
+  position: absolute;
+  right: calc(100% + 17px);
+  top: 50%;
   display: flex;
   flex-direction: column;
+  min-width: 116px;
+  padding: 11px 15px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+  color: var(--green);
+  box-shadow: 0 6px 22px #143e3521;
+  text-align: left;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translate(4px, -50%);
+  transition: opacity 140ms ease, transform 140ms ease, visibility 140ms ease;
+}
+/* This transparent bridge makes a revealed label hoverable across the gap. */
+.social-link-copy::after {
+  content: "";
+  position: absolute;
+  left: 100%;
+  top: 0;
+  width: 18px;
+  height: 100%;
 }
 .social-link-detail {
   font-weight: 400;
   color: var(--muted);
-  white-space: nowrap;
+  font-size: var(--type-nav);
+  line-height: var(--line-nav);
+  font-variant-numeric: tabular-nums;
 }
 .social-panel .social-link-arrow {
+  display: none;
   width: 16px;
   height: 16px;
   color: var(--muted);
 }
+.social-dock[data-expanded="false"]:not([data-hints-suppressed="true"]) .social-link:focus-visible .social-link-copy {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translate(0, -50%);
+}
 .social-dock .social-trigger:focus-visible {
   outline: 3px solid var(--lime);
   outline-offset: 3px;
-  box-shadow: 0 0 0 7px var(--green);
+  box-shadow: 0 0 0 6px var(--green);
 }
-.social-panel .social-link:focus-visible {
-  outline: 2px solid var(--green);
+.social-panel .social-link:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+/* Connect reveals the full list on every device. */
+.social-dock[data-expanded="true"] .social-panel {
+  width: 264px;
+  max-width: calc(100vw - 32px - env(safe-area-inset-right));
+  max-height: calc(100vh - var(--header) - 100px);
+  max-height: calc(100dvh - var(--header) - 100px - env(safe-area-inset-bottom));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 12px;
+  border-color: var(--line);
+  border-radius: 23px;
+  background: #fff;
+  color: var(--green);
+  animation: social-panel-enter 160ms ease-out both;
+}
+.social-dock[data-expanded="true"] .social-panel-title { display: block; }
+.social-dock[data-expanded="true"] .social-panel ul { gap: 4px; }
+.social-dock[data-expanded="true"] .social-link {
+  grid-template-columns: 40px minmax(0, 1fr) 16px;
+  gap: 10px;
+  justify-items: stretch;
+  width: 100%;
+  min-height: 58px;
+  padding: 8px;
+  border-radius: 15px;
+}
+.social-dock[data-expanded="true"] .social-link-icon {
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 13px;
+  background: var(--soft);
+  color: var(--green);
+}
+.social-dock[data-expanded="true"] .social-link[data-social="whatsapp"] { background: #eef9dd; }
+.social-dock[data-expanded="true"] .social-link[data-social="whatsapp"] .social-link-icon { background: var(--lime); }
+.social-dock[data-expanded="true"] .social-link-copy {
+  position: static;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: none;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  transition: none;
+}
+.social-dock[data-expanded="true"] .social-link-copy::after { display: none; }
+.social-dock[data-expanded="true"] .social-link-arrow { display: block; }
+.social-dock[data-expanded="true"] .social-link:focus-visible {
+  outline-color: var(--green);
   outline-offset: -2px;
   background: var(--sage);
 }
+.social-dock[data-expanded="true"] .social-link:focus-visible .social-link-detail {
+  color: var(--green);
+}
+.social-dock[data-compact="true"] {
+  top: calc(var(--header) + 12px);
+  right: max(16px, calc(env(safe-area-inset-right) + 12px));
+}
+.social-dock[data-compact="true"] .social-connect-icon { display: block; }
 @media (hover: hover) {
-  .social-trigger:hover {
-    background: #205449;
-    box-shadow: 0 6px 22px #143e3538;
+  .social-trigger:hover { background: #205449; }
+  .social-dock[data-expanded="true"] .social-trigger:hover { background: #b5ec57; }
+  .social-dock[data-expanded="false"]:not([data-hints-suppressed="true"]) .social-link:hover .social-link-copy {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translate(0, -50%);
   }
-  .social-dock[data-expanded="true"] .social-trigger:hover {
-    background: #b5ec57;
-  }
-  .social-link:hover {
-    background: var(--soft);
-  }
-  .social-link:hover .social-link-icon {
-    background: var(--lime);
-  }
+  .social-dock[data-expanded="true"] .social-link:hover .social-link-copy { transform: none; }
+  .social-link:hover .social-link-icon { background: var(--lime); color: var(--green); }
+  .social-dock[data-expanded="true"] .social-link:hover { background: var(--soft); }
 }
-@media (max-width: 700px) {
-  .social-dock {
-    top: calc(var(--header) + 12px);
-    right: max(16px, env(safe-area-inset-right));
-  }
-  .social-trigger {
-    gap: 8px;
-    padding-inline: 13px;
-  }
+@keyframes social-rail-enter {
+  from { opacity: 0; transform: translateX(8px); }
+  to { opacity: 1; transform: translateX(0); }
 }
-@keyframes social-appear {
-  from { opacity: 0; transform: translateY(-5px); }
+@keyframes social-panel-enter {
+  from { opacity: 0; transform: translateY(-6px); }
   to { opacity: 1; transform: translateY(0); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .social-dock *,
-  .social-dock[data-expanded="true"] .social-chevron {
-    animation: none;
-    transition: none;
-    transform: none;
-  }
+  .social-dock,
+  .social-dock * { animation: none !important; transition: none !important; }
+  .social-dock .social-link-copy { transform: translate(0, -50%); }
+  .social-dock[data-expanded="true"] .social-link-copy { transform: none; }
 }

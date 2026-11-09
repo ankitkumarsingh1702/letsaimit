@@ -10,6 +10,8 @@ import { syncPageMeta } from "./lib/routes.js";
 import { Privacy, Terms, Refunds } from "./pages/Legal.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import Admin from "./pages/Admin.jsx";
+import SignIn from "./pages/SignIn.jsx";
+import { AdminAuthProvider } from "./context/AdminAuth.jsx";
 import AnalyticsConsent from "./components/AnalyticsConsent.jsx";
 import { SiteActionsProvider } from "./context/SiteActions.jsx";
 import { Header } from "./components/Header.jsx";
@@ -27,6 +29,7 @@ var pages = {
   terms: Terms,
   refunds: Refunds,
   admin: Admin,
+  signin: SignIn,
   notfound: NotFound,
 };
 var formKinds = new Set(["trial", "society", "enroll"]);
@@ -129,20 +132,22 @@ function App({ initialPage = "home" } = {}) {
     });
   }
   return (
+    <AdminAuthProvider>
     <SiteActionsProvider value={actions}>
-      <Header page={page} onSkipToContent={skipToContent} />
+      {page !== "admin" && <Header page={page} onSkipToContent={skipToContent} />}
       <main id="main" ref={mainRef} tabIndex={-1}>
         <Page />
       </main>
-      <Footer />
+      {page !== "admin" && <><Footer />
       <ContactDialog
         kind={formKind}
         onClose={closeForm}
         onSwitchKind={switchFormKind}
       />
       <MediaDialog certificate={certificate} onClose={closeCertificate} />
-      <AnalyticsConsent />
+      <AnalyticsConsent /></>}
     </SiteActionsProvider>
+    </AdminAuthProvider>
   );
 }
 export { pages, formKinds, App };

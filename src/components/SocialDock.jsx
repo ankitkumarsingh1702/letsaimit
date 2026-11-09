@@ -59,8 +59,27 @@ export default function SocialDock({ page, suspended = false }) {
   const [pastFirstScreen, setPastFirstScreen] = React.useState(false);
   const [expanded, setExpanded] = React.useState(false);
   const [hasFocus, setHasFocus] = React.useState(false);
+  const [compact, setCompact] = React.useState(true);
+  const [hintsSuppressed, setHintsSuppressed] = React.useState(false);
+  const [hoveredLink, setHoveredLink] = React.useState(null);
   const dockRef = React.useRef(null);
   const triggerRef = React.useRef(null);
+  const panelRef = React.useRef(null);
+
+  // Use a disclosure on phones, touch devices and short landscape screens.
+  React.useEffect(() => {
+    const query = window.matchMedia("(max-width: 900px), (max-height: 520px), (hover: none)");
+    function updateLayout() {
+      const linkHasFocus = panelRef.current?.contains(document.activeElement);
+      setCompact(query.matches);
+      // A resize must not hide the link a keyboard visitor is using.
+      setExpanded(Boolean(query.matches && linkHasFocus));
+      setHintsSuppressed(false);
+    }
+    updateLayout();
+    query.addEventListener("change", updateLayout);
+    return () => query.removeEventListener("change", updateLayout);
+  }, []);
 
   // Keep the initial HTML deterministic for prerendering. The dock appears
   // after one viewport of scrolling, without measuring or moving page content.
@@ -86,26 +105,46 @@ export default function SocialDock({ page, suspended = false }) {
   React.useEffect(() => {
     setExpanded(false);
     setHasFocus(false);
+    setHintsSuppressed(false);
+    setHoveredLink(null);
   }, [page, suspended]);
+
+  // A hover hint must also dismiss when focus is elsewhere on the page.
+  React.useEffect(() => {
+    if (!hoveredLink || expanded || compact || suspended || hintsSuppressed) return;
+    function dismissHint(event) {
+      if (event.key === "Escape" && !document.querySelector("dialog[open]")) {
+        setHintsSuppressed(true);
+      }
+    }
+    document.addEventListener("keydown", dismissHint);
+    return () => document.removeEventListener("keydown", dismissHint);
+  }, [hoveredLink, expanded, compact, suspended, hintsSuppressed]);
 
   React.useEffect(() => {
     if (!expanded) return;
     function closeOutside(event) {
-      if (!dockRef.current?.contains(event.target)) setExpanded(false);
+      if (dockRef.current?.contains(event.target)) return;
+      if (compact && panelRef.current?.contains(document.activeElement)) {
+        triggerRef.current?.focus({ preventScroll: true });
+      }
+      setExpanded(false);
     }
-    function closeOnEscape(event) {
-      if (event.key !== "Escape") return;
-      event.preventDefault();
+    document.addEventListener("pointerdown", closeOutside);
+    return () => {
+      document.removeEventListener("pointerdown", closeOutside);
+    };
+  }, [expanded, compact]);
+
+  function handleKeyDown(event) {
+    if (event.key !== "Escape") return;
+    event.preventDefault();
+    setHintsSuppressed(true);
+    if (expanded) {
       setExpanded(false);
       triggerRef.current?.focus({ preventScroll: true });
     }
-    document.addEventListener("pointerdown", closeOutside);
-    document.addEventListener("keydown", closeOnEscape);
-    return () => {
-      document.removeEventListener("pointerdown", closeOutside);
-      document.removeEventListener("keydown", closeOnEscape);
-    };
-  }, [expanded]);
+  }
 
   function handleBlur(event) {
     if (dockRef.current?.contains(event.relatedTarget)) return;
@@ -114,7 +153,8 @@ export default function SocialDock({ page, suspended = false }) {
   }
   function followLink() {
     setExpanded(false);
-    triggerRef.current?.focus({ preventScroll: true });
+    setHintsSuppressed(true);
+    if (compact) triggerRef.current?.focus({ preventScroll: true });
   }
 
   return (
@@ -122,9 +162,12 @@ export default function SocialDock({ page, suspended = false }) {
       ref={dockRef}
       className="social-dock"
       data-expanded={expanded}
+      data-compact={compact}
+      data-hints-suppressed={hintsSuppressed}
       hidden={suspended || !(pastFirstScreen || expanded || hasFocus)}
       onFocusCapture={() => setHasFocus(true)}
       onBlurCapture={handleBlur}
+      onKeyDown={handleKeyDown}
     >
       <button
         ref={triggerRef}
@@ -132,7 +175,11 @@ export default function SocialDock({ page, suspended = false }) {
         type="button"
         aria-expanded={expanded}
         aria-controls="social-links"
-        onClick={() => setExpanded((current) => !current)}
+        aria-label={expanded ? "Connect — close social links" : "Connect — show social links"}
+        onClick={() => {
+          setExpanded((current) => !current);
+          setHintsSuppressed(false);
+        }}
       >
         <svg className="social-connect-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
           <path d="m8.7 10.5 6.6-4M8.7 13.5l6.6 4" />
@@ -140,23 +187,30 @@ export default function SocialDock({ page, suspended = false }) {
           <circle cx="18" cy="5" r="3" />
           <circle cx="18" cy="19" r="3" />
         </svg>
-        <span>Socials</span>
+        <span>Connect</span>
         <svg className="social-chevron" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
           <path d="m4 6 4 4 4-4" />
         </svg>
       </button>
-      <nav className="social-panel" id="social-links" aria-label="Social and contact links" hidden={!expanded}>
+      <nav ref={panelRef} className="social-panel" id="social-links" aria-label="Social and contact links" hidden={compact && !expanded}>
         <p className="social-panel-title">Let’s connect.</p>
         <ul>
-          {SOCIAL_LINKS.map((link, index) => (
-            <li key={link.id} style={{ "--social-order": index }}>
+          {SOCIAL_LINKS.map((link) => (
+            <li key={link.id}>
               <a
                 className="social-link"
+                data-social={link.id}
                 href={link.href}
                 aria-label={link.accessibleLabel}
                 target={link.id === "call" ? undefined : "_blank"}
                 rel={link.id === "call" ? undefined : "noopener noreferrer"}
                 onClick={followLink}
+                onFocus={() => setHintsSuppressed(false)}
+                onPointerEnter={() => {
+                  setHintsSuppressed(false);
+                  setHoveredLink(link.id);
+                }}
+                onPointerLeave={() => setHoveredLink(null)}
               >
                 <span className="social-link-icon"><SocialIcon kind={link.id} /></span>
                 <span className="social-link-copy">

@@ -8,8 +8,8 @@
     "source": "Current published site assets, copied without re-encoding.",
     "public_url": "https://letsaimit-review.one92843.chatgpt.site/"
   },
-  "file_count": 54,
-  "total_bytes": 19573506,
+  "file_count": 59,
+  "total_bytes": 19695925,
   "notes": [
     "Paths are relative to the exported project root. Generated application JavaScript and CSS are not part of this media manifest.",
     "Includes 39 images, one local MP4, five WOFF2 fonts, and nine license/provenance files. All files match the published snapshot byte for byte.",
@@ -18,7 +18,8 @@
     "The football video is locally bundled stock footage, not a recording of LetsAimIt participants. See public/assets/MEDIA-CREDITS.md.",
     "Coaching photographs retain their original context. The testimonial image is a coaching-context photo, not a parent portrait.",
     "External contact, registration, social, policy and credit links require internet when followed. Images, fonts and video do not use external hotlinks.",
-    "Source notes and font licenses are preserved. See EVENT-ASSETS.json, STORIES-SOURCES.json and FOOTER-ART-DIRECTION-2026-11-04.md for later additions."
+    "Source notes and font licenses are preserved. See EVENT-ASSETS.json, STORIES-SOURCES.json and FOOTER-ART-DIRECTION-2026-11-04.md for later additions.",
+    "The 9 November 2026 updated ZIP adds the sign-in ribbon, Google brand mark and self-hosted Google Sans button font with notices; these additions are verified against the supplied ZIP."
   ],
   "files": [
     {
@@ -344,6 +345,36 @@
       "kind": "image",
       "bytes": 76480,
       "sha256": "1d1287271aa72880eceae92745732772a36becc139766d4962183e4bcc01f6a2"
+    },
+    {
+      "path": "public/assets/google-g.png",
+      "kind": "image",
+      "bytes": 33661,
+      "sha256": "d1ce9c2af0b10a7333abc99bc706f9a6a199e5b65bf3e3009624f076b8638e6a"
+    },
+    {
+      "path": "public/assets/signin-ribbon.svg",
+      "kind": "image",
+      "bytes": 66721,
+      "sha256": "024a7a24a324cb515534861688231aa6228b7dc5e7f31880b20983b10dca84a7"
+    },
+    {
+      "path": "public/assets/fonts/google-sans-medium.woff",
+      "kind": "font",
+      "bytes": 17272,
+      "sha256": "b1e19e692032613e35df2797bbfb8246c1ec98432b230982da017b65da24ed69"
+    },
+    {
+      "path": "public/assets/fonts/GoogleSans-NOTICE.txt",
+      "kind": "license-or-source-record",
+      "bytes": 277,
+      "sha256": "4927ac6e3a777c5d27637fcd93caf99a0ac4e6b8900efb79d2ea5216b56ad1fe"
+    },
+    {
+      "path": "public/assets/fonts/GoogleSans-OFL.txt",
+      "kind": "license-or-source-record",
+      "bytes": 4488,
+      "sha256": "2b75ef20f13d83a7514aee452c4782c20cdc9ff2dee17600f44d37a06d4fb958"
     }
   ]
 }

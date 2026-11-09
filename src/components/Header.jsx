@@ -1,6 +1,7 @@
 import { mediaProps } from "../lib/media.js";
 import * as React from "react";
 import { useSiteActions } from "../context/SiteActions.jsx";
+import { useAdminAuth } from "../context/AdminAuth.jsx";
 import { scrollToNextEvent } from "../features/events/EventsPage.js";
 import { scrollToSchoolEnquiry } from "../features/schools/SchoolsPage.js";
 import { asset } from "../lib/assets.js";
@@ -32,12 +33,18 @@ var navigation = [
     href: "/events/",
     label: "Events",
   },
+  {
+    page: "signin",
+    href: "/sign-in/",
+    label: "Sign in",
+  },
 ];
 function Header({ page, onSkipToContent }) {
   let [menuOpen, setMenuOpen] = React.useState(false);
   let headerRef = React.useRef(null);
   let menuToggleRef = React.useRef(null);
   let { openForm } = useSiteActions();
+  let { phase } = useAdminAuth();
   let actionKind =
     page === "events"
       ? "event"
@@ -92,15 +99,17 @@ function Header({ page, onSkipToContent }) {
     }
   }
   function renderNavLink(item) {
+    const isAdminLink = item.page === "signin" && phase === "authorized";
+    const targetPage = isAdminLink ? "admin" : item.page;
     return (
       <a
-        href={item.href}
-        data-route={item.page}
-        aria-current={page === item.page ? "page" : void 0}
+        href={isAdminLink ? "/admin/" : item.href}
+        data-route={targetPage}
+        aria-current={page === targetPage ? "page" : void 0}
         onClick={closeMenu}
         key={item.page}
       >
-        {item.label}
+        {isAdminLink ? "Dashboard" : item.label}
       </a>
     );
   }
