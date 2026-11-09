@@ -9,6 +9,7 @@ import { useHashRoute } from "./hooks/useHashRoute.js";
 import { syncPageMeta } from "./lib/routes.js";
 import { Privacy, Terms, Refunds } from "./pages/Legal.jsx";
 import NotFound from "./pages/NotFound.jsx";
+import Admin from "./pages/Admin.jsx";
 import AnalyticsConsent from "./components/AnalyticsConsent.jsx";
 import { SiteActionsProvider } from "./context/SiteActions.jsx";
 import { Header } from "./components/Header.jsx";
@@ -25,6 +26,7 @@ var pages = {
   privacy: Privacy,
   terms: Terms,
   refunds: Refunds,
+  admin: Admin,
   notfound: NotFound,
 };
 var formKinds = new Set(["trial", "society", "enroll"]);

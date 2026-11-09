@@ -55,7 +55,7 @@ export function prepareMessage(mode, draft) {
     `Child’s age: ${draft.age === "other" ? "Under 5 or over 14 — please advise" : clean("age") + " years"}`,
     `Community: ${clean("community")}`, `Sport: ${clean("sport")}`,
     "Please confirm a suitable group and session time.",
-    "Parent/guardian and contact consent: agreed. Privacy version: 2026-11-05.",
+    "Parent/guardian and contact consent: agreed. Privacy version: 2026-11-09.",
     ...(mode === "enroll" ? ["Programme terms and cancellation policy accepted: 2026-11-05."] : []),
   ].join("\n");
 }

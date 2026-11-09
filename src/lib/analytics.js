@@ -1,8 +1,8 @@
 const ALLOWED_EVENTS = new Set(["free_trial_click", "enrol_click", "whatsapp_click", "call_click", "lead_saved", "society_enquiry_click", "school_enquiry_click"]);
 const ALLOWED_PAGES = new Set(["home", "programme", "coach", "societies", "schools", "events", "privacy", "terms", "refunds", "notfound"]);
-const GA_ID = import.meta.env.VITE_GA4_ID || "";
+const GA_ID = import.meta.env?.VITE_GA4_ID || "";
 let analyticsReady = false;
-export const analyticsConfigured = /^G-[A-Z0-9]+$/.test(GA_ID) && import.meta.env.VITE_GA4_MANUAL_EVENTS_ONLY_CONFIRMED === "true";
+export const analyticsConfigured = /^G-[A-Z0-9]+$/.test(GA_ID) && import.meta.env?.VITE_GA4_MANUAL_EVENTS_ONLY_CONFIRMED === "true";
 export function startAnalytics() {
   if (!analyticsConfigured || analyticsReady || navigator.globalPrivacyControl) return;
   analyticsReady = true;
