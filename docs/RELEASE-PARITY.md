@@ -23,14 +23,14 @@ production clients. A common public identity does not imply one shared client
 ID. Production setup may be prepared alongside UAT within the authorized scope;
 this does not itself activate a website production release.
 
-## Baseline recorded on 9 November 2026
+## Target state recorded on 9 November 2026
 
 | Item | UAT | Website production |
 | --- | --- | --- |
 | Git target | `uat` | `main` |
 | Website | `https://uat.letsaimit.com` | `https://letsaimit.com` |
-| Recorded source baseline | `46d63f2a6019785502277c08d55587df5b29bc7f` | `372be17da151f45d42c54b42b36d2d50ef51758a` |
-| Source relationship | Updated admin/native-registration feature set is present | Carrying that UAT feature set remains pending explicit production promotion |
+| Recorded source | UAT head `5947201c3870505bc433f05c1d607f5047b87d65`, a documentation-only descendant of application release `4e62f70fcb5c10ad80aa7ce62cccccaf3c24dc66` | Unchanged baseline `372be17da151f45d42c54b42b36d2d50ef51758a` |
+| Source relationship | Branding/profile application changes were released to UAT | Carrying that UAT feature set remains pending explicit production promotion |
 | Backend target | Supabase project `nlgfcmywgwibvmbsgkox` | A separate Supabase target is the planned production configuration, not a live or verified backend; production readiness is unknown |
 | Google sign-in | Existing Supabase Google provider and live UAT login flow | Separate internal Google project/client with common LetsAimIt branding is the planned policy-compliant configuration; provider, callback and redirect setup still need verification |
 | Registration/admin features | Native parent forms and durable receipts, private dashboard, saved follow-up edits, CSV, controlled Gmail invitations and realtime refresh | Live parity for these features is not established by the recorded production source |
@@ -38,30 +38,34 @@ this does not itself activate a website production release.
 | Admin memberships | Four initial approved memberships were verified; current admins may invite additional validated Gmail accounts | Production owner/membership setup has not been verified; do not copy UAT memberships as an implicit grant |
 | Vercel environment inventory | All five configured website entries were scoped to Preview / branch `uat` on 9 November 2026 | No production Supabase configuration was present; separate production target setup remains pending |
 | Public branding update | Saved Google app name `LetsAimIt`, existing favicon-180 logo and production homepage/privacy/terms URLs | Common branding/template is established; production provider setup and live verification remain pending |
-| Brand review / custom auth domain | Branding verification stopped on homepage Search Console ownership; no DNS record changed for this step | Approval and custom auth-domain setup are not established; no automatic approval or free domain setup is promised |
+| Brand review / custom auth domain | Search Console ownership is verified after the approved TXT addition; brand-verification retry waits until after 10 November 2026, 20:05 IST | Brand approval and custom auth-domain setup are not established; no automatic approval or free domain setup is promised |
 | Test data | Labelled UAT test submissions may exist and are included in saved-request counts | Do not copy UAT rows; do not create production test submissions without a deliberate authorized test plan |
 | Website engagement metrics | Not tracked; the UI must not invent durations | No tracking or duration claim established |
 
-The recorded commits are baseline references, not a claim that the current
-working branch is deployed. Refresh this ledger from actual release evidence
-before reporting completion.
-
-The current working branch is `codex/google-brand-profile`, based on
-`46d63f2a6019785502277c08d55587df5b29bc7f`. Its final release SHA and deployment
-remain pending. The four migrations verified on UAT are:
+Application release `4e62f70fcb5c10ad80aa7ce62cccccaf3c24dc66` and its
+documentation-only UAT descendant `5947201c3870505bc433f05c1d607f5047b87d65`
+are recorded separately from production's unchanged baseline. The latest
+verified UAT deployment is listed below. The four migrations verified on UAT are:
 
 1. `20261109080830_registration_register.sql`
 2. `20261109083344_registration_function_privileges.sql`
 3. `20261109121642_lock_admin_membership_to_operator.sql`
 4. `20261109123953_restore_controlled_admin_invitations.sql`
 
-The Google **Verify branding** attempt found only the homepage ownership issue:
+The initial Google **Verify branding** attempt found only the homepage ownership issue:
 `letsaimit.com` was not registered to the Google Search Console owner. The
 displayed next step was to verify that ownership, then wait 24 hours before
-retrying. No DNS record has been changed for this step. Google audience
-**In production** is a publishing setting and does not mean the brand passed
-verification. Saved name/logo/policy settings and completed Google verification
-are separate evidence.
+retrying. The approved TXT record was then saved in GoDaddy, whose UI showed
+**Success** and 19 records. The requested Google TXT value was confirmed on
+authoritative `ns27`/`ns28` and public resolvers `8.8.8.8`/`1.1.1.1`.
+
+Around **9 November 2026, 20:01 IST (14:31 UTC)**, Search Console showed
+**Ownership verified** with method **Domain name provider** and instructed that
+the DNS record be kept. The conservative branding retry time is **10 November
+2026 after 20:05 IST (14:35 UTC)**, allowing Google's previously stated 24-hour
+wait. Brand verification has not yet been retried or passed; no Google app-brand
+publication was completed. Google audience **In production** remains a separate
+publishing setting, not evidence of verified branding.
 
 ## Build configuration guard
 
@@ -114,8 +118,9 @@ side effect of a website release.
 | Tested application source | `4e62f70fcb5c10ad80aa7ce62cccccaf3c24dc66` |
 | Automated checks for that source | 123 tests passed, including seven release-guard tests; optimized build and 59-asset verification passed locally; Vercel UAT build passed its configuration guard |
 | Target database and applied migration versions | UAT `nlgfcmywgwibvmbsgkox`: all four ordered migrations applied 9 November 2026; production target/migrations pending |
-| Deployed source SHA and deployment URL/ID | `4e62f70fcb5c10ad80aa7ce62cccccaf3c24dc66`, deployment `dpl_HWrQt2jMhBSaTXrqtGXbavbJisMy` READY and aliased to `https://uat.letsaimit.com` |
-| Google public-name / homepage / policy verification | LetsAimIt name, favicon-180 logo and production homepage/privacy/terms saved; Google brand verification awaits Search Console ownership and the stated 24-hour wait before retry |
+| Deployed source SHA and deployment URL/ID | Documentation-only UAT head `5947201c3870505bc433f05c1d607f5047b87d65`, containing application source `4e62f70fcb5c10ad80aa7ce62cccccaf3c24dc66`; deployment `dpl_BXkARvtkNzdUUNMuqDAj9gRxCdFd` READY and aliased to `https://uat.letsaimit.com` |
+| Google public-name / homepage / policy verification | LetsAimIt name, favicon-180 logo and production homepage/privacy/terms saved; Search Console ownership verified; Google branding retry remains pending until after 10 November 2026, 20:05 IST |
+| Approved DNS change | Google ownership TXT saved and verified; A `216.198.79.1`, `www`/`uat` CNAMEs and MX records remained unchanged |
 | Live verification for this change | Reloaded the authenticated UAT dashboard: Google name/email/photo displayed, four saved test requests and Live status present. HTTPS sign-in HTML has production privacy/terms links. Registration saving, saved edits, anonymous-read denial and four-row CSV were verified on the preceding UAT release; they were not re-exercised by this presentation-only change |
 | Website production | `main` remains `372be17da151f45d42c54b42b36d2d50ef51758a`; homepage response SHA-256 remains `6f32fc0cc051d17e1817e189f7a442bfe17b5e93a41e1a0bfeba0efb4aa5dc87` |
 | Production promotion source SHA | Pending explicit **merge and deploy to prod** and production readiness |

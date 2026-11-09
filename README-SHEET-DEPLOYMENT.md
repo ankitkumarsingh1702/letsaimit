@@ -121,11 +121,25 @@ and database configuration described here remain UAT-only.
 Google branding was saved on 9 November 2026 with public app name **LetsAimIt**,
 the existing `public/assets/favicon-180.png` logo, homepage
 `https://letsaimit.com`, privacy URL `https://letsaimit.com/privacy/` and terms
-URL `https://letsaimit.com/terms/`. The **Verify branding** attempt failed only
+URL `https://letsaimit.com/terms/`. The initial **Verify branding** attempt failed only
 on homepage ownership: `letsaimit.com` was not registered to the Google Search
 Console owner. Google's displayed next step was to verify ownership and wait
-24 hours before retrying. **No DNS record has been changed for this step.**
-Brand verification is therefore incomplete even though the settings are saved.
+24 hours before retrying.
+
+The approved Google ownership TXT record was subsequently saved in GoDaddy.
+The UI showed **Success** and 19 records; the requested TXT value was confirmed
+on authoritative nameservers `ns27`/`ns28` and public resolvers `8.8.8.8` and
+`1.1.1.1`. Around **9 November 2026, 20:01 IST (14:31 UTC)**, Search Console
+confirmed **Ownership verified**, using **Domain name provider**. Keep that TXT
+record, as instructed by Search Console. The existing A record `216.198.79.1`,
+`www`/`uat` CNAMEs and MX records were unchanged; production's homepage response
+hash was also unchanged.
+
+Allowing the stated 24-hour wait, the conservative branding retry time is
+**10 November 2026 after 20:05 IST (14:35 UTC)**. Google brand verification has
+**not** been retried or passed, and no Google app-brand publication has been
+completed. Domain ownership verification and saved branding settings do not
+establish brand approval.
 
 Keep the single public name and production policy URLs across environments.
 Internal resource names may identify their target. Follow Google's
@@ -319,10 +333,15 @@ to belong to the selected project. The guard does not verify applied migrations,
 database grants, OAuth or a live journey. Other feature Preview builds are not
 certified release-ready by passing this guard.
 
-The current `codex/google-brand-profile` working tree, based on `46d63f2`, passed
-**123 automated tests**, including seven release-guard tests, on 9 November 2026.
-The final release SHA and its deployment/live verification remain pending.
-Track those separately in [docs/RELEASE-PARITY.md](docs/RELEASE-PARITY.md).
+Application source `4e62f70fcb5c10ad80aa7ce62cccccaf3c24dc66` was released to UAT
+after **123 automated tests**, including seven release-guard tests, passed on
+9 November 2026. The recorded UAT head
+`5947201c3870505bc433f05c1d607f5047b87d65` is a documentation-only descendant
+with the same application code. Its deployment
+`dpl_BXkARvtkNzdUUNMuqDAj9gRxCdFd` reached **READY** and is aliased to
+`https://uat.letsaimit.com`. Production remains on its recorded baseline.
+See [docs/RELEASE-PARITY.md](docs/RELEASE-PARITY.md) for the separate source,
+deployment, Google verification and production-readiness evidence.
 
 ### Observed live UAT checks — 9 November 2026
 
