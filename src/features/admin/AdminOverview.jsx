@@ -66,7 +66,7 @@ function TeamCard({ members, auth, onTeam, Avatar }) {
   return <section className="adm-dash-card adm-dash-team" aria-labelledby="adm-dash-team-title">
     <div className="adm-dash-card-heading"><h2 id="adm-dash-team-title" className="adm-dash-title">Team</h2><button type="button" className="adm-dash-small-button" onClick={onTeam}>View</button></div>
     <div className="adm-dash-team-list">{members.map(member => <div className="adm-dash-team-row" key={member.email}>
-      <Avatar name={memberName(member, auth)} small />
+      <Avatar name={memberName(member, auth)} src={member.email === auth.user.email ? auth.user.avatarUrl : null} small />
       <div className="adm-dash-team-person"><strong>{memberName(member, auth)}</strong><span>{member.email}</span></div>
       <span className="adm-dash-member-role">{member.role === "owner" ? "Owner" : "Admin"}</span>
     </div>)}</div>

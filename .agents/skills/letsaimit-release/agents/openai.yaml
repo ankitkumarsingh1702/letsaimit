@@ -1,0 +1,4 @@
+interface:
+  display_name: "LetsAimIt Release"
+  short_description: "Keep LetsAimIt releases aligned across environments"
+  default_prompt: "Use $letsaimit-release to merge and deploy the verified LetsAimIt changes to UAT."

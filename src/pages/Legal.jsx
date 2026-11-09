@@ -113,10 +113,16 @@ function Privacy() {
       <PolicySection title="Forms and messages">
         <p>
           Trial requests and child registrations are completed inside LetsAimIt
-          and saved to a private hosted register. The website shows confirmation
-          only after it receives a saved receipt. Invited staff use Google to
-          verify their identity when signing in to the register; Google sign-in
-          does not store parent registration responses in Google Forms or Sheets.
+          and saved to a private register hosted by Supabase. The website shows
+          confirmation only after it receives a saved receipt.
+        </p>
+        <p>
+          Invited staff sign in with Google. We receive their Google account ID
+          and, where available, their name, email address and profile photo. We
+          use these details to identify invited staff and display the signed-in
+          account. This sign-in does not give us access to Gmail messages or
+          mailboxes. Parent registration responses stay in the private Supabase
+          register; they are not stored in Google Forms or Sheets by this sign-in.
         </p>
         <p>
           WhatsApp is an optional next step after a saved parent request. School

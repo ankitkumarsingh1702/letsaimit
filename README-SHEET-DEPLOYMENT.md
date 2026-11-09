@@ -23,6 +23,11 @@ Use `.env.local` locally and Vercel's **Preview / uat branch** variables for UAT
 Rebuild after changing a `VITE_` value. These names match `.env.example`;
 placeholders are not credentials.
 
+The website project's Vercel environment inventory was checked on 9 November
+2026: all five configured entries were scoped to **Preview / branch `uat`**.
+There was no production Supabase configuration. A separate production backend
+is still pending; this setup has not rolled these features out to production.
+
 | Variable | UAT value or purpose |
 | --- | --- |
 | `VITE_SITE_ORIGIN` | `https://uat.letsaimit.com`; the Vercel build also selects it on `uat`. |
@@ -55,12 +60,13 @@ established migration workflow:
 The second migration makes `is_admin` an authenticated, security-invoker wrapper
 and removes application-role access to the optional dashboard RLS helper.
 Apply complete files, including functions, triggers, grants and policies;
-copying only table definitions is insufficient. The first two migrations were applied
-to the live UAT project on 9 November 2026. The third is a forward change that
+copying only table definitions is insufficient. **All four ordered migrations
+were applied to live UAT on 9 November 2026.** The third is a forward change that
 accepts normalized company-domain Google email addresses and removes the earlier
 broad membership-write rules. The following migration restores validated Gmail
-invitations and protected revocation for current Google admins. Apply both forward
-changes before configuring the initial approved team.
+invitations and protected revocation for current Google admins. This live UAT
+application of the migrations does not establish their application to a future
+production backend.
 
 The initial owner is a **separate privileged operator step**, not a public signup
 or an email embedded in the schema migration. Open
@@ -109,7 +115,23 @@ its client secret directly into provider settings. The client uses basic
 identity/email/profile access, without Gmail mailbox access.
 
 Google OAuth publishing was confirmed as **In production**. This is the OAuth
-application's audience status; the website and database remain UAT-only.
+application's audience status, **not Google brand verification**; the website
+and database configuration described here remain UAT-only.
+
+Google branding was saved on 9 November 2026 with public app name **LetsAimIt**,
+the existing `public/assets/favicon-180.png` logo, homepage
+`https://letsaimit.com`, privacy URL `https://letsaimit.com/privacy/` and terms
+URL `https://letsaimit.com/terms/`. The **Verify branding** attempt failed only
+on homepage ownership: `letsaimit.com` was not registered to the Google Search
+Console owner. Google's displayed next step was to verify ownership and wait
+24 hours before retrying. **No DNS record has been changed for this step.**
+Brand verification is therefore incomplete even though the settings are saved.
+
+Keep the single public name and production policy URLs across environments.
+Internal resource names may identify their target. Follow Google's
+[environment separation policy](https://developers.google.com/identity/verification/authentication-policy-compliance#use-separate-projects-for-testing-and-production)
+when preparing production's internal Google project/client; common branding
+does not require one client ID shared between test and production.
 The configuration steps below document that setup for future reproduction.
 
 1. Configure Google's OAuth consent screen and create an OAuth **Web application**
@@ -129,9 +151,10 @@ The configuration steps below document that setup for future reproduction.
    from Google's Supabase callback URL.
 5. After operator configuration, test the actual Google round trip from `/sign-in/`.
    The button uses the existing Supabase Google provider and the same stored OAuth
-   client configuration; no client secret is added to React. Confirm the **Team**
-   view contains exactly the four approved identities, including the company Google
-   account. An unlisted Google account must remain denied. **Request access** opens
+   client configuration; no client secret is added to React. The four initial
+   approved memberships, including the company Google account, were verified
+   on live UAT on 9 November 2026. Confirm they remain present; later valid Gmail
+   invitations can increase the team size. An unlisted Google account must remain denied. **Request access** opens
    an email draft to the existing public programme contact; it does not send a
    message, save a request or grant membership automatically.
 
@@ -139,7 +162,8 @@ The four initial exact addresses are operator configuration, not public source. 
 the access synchronization in the ignored `supabase/configure-admin-access.sql.local`
 file. Apply it only to the named UAT project after the required browser access-change
 confirmation. It preserves the current owner, adds the approved three other
-accounts and returns the membership list. It does not remove later valid invitations.
+accounts and returns the membership list. That initial configuration has been
+applied and its four memberships verified on UAT. It does not remove later valid invitations.
 The Team screen allows current admins to invite additional Gmail accounts and revoke
 non-owner access. Input is trimmed and lowercased; malformed/non-Gmail addresses and
 duplicates receive clear errors, while the database remains the final authority.
@@ -283,6 +307,22 @@ npm --prefix deployment/uat-health run build
 Merge the verified change into `uat` and wait for its Vercel Preview build.
 Do not merge to `main` or reuse the UAT database for production during this setup.
 Confirm the deployed frontend uses the intended public project URL/key.
+
+The Vercel build also runs `scripts/check-release.mjs` against
+[`deployment/release-targets.json`](deployment/release-targets.json). Its UAT
+entry records `nlgfcmywgwibvmbsgkox`; the production project reference is `null`
+until a separate backend is configured. Release builds check branch, site origin,
+backend URL and public-key configuration, rejecting missing configuration and
+private-key formats. Production release configuration currently fails closed.
+Modern publishable keys are checked only for presence/type offline, not proven
+to belong to the selected project. The guard does not verify applied migrations,
+database grants, OAuth or a live journey. Other feature Preview builds are not
+certified release-ready by passing this guard.
+
+The current `codex/google-brand-profile` working tree, based on `46d63f2`, passed
+**123 automated tests**, including seven release-guard tests, on 9 November 2026.
+The final release SHA and its deployment/live verification remain pending.
+Track those separately in [docs/RELEASE-PARITY.md](docs/RELEASE-PARITY.md).
 
 ### Observed live UAT checks — 9 November 2026
 

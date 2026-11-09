@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { accessRequestHref, createAuthorizationGate, createSingleFlight, googleSignInOptions, readAdminSession, readGuardedAdminSession } from "../src/lib/adminAuth.js";
+import { accessRequestHref, createAuthorizationGate, createSingleFlight, googleSignInOptions, readAdminSession, readGuardedAdminSession, googleProfilePresentation, googleAvatarUrl, profileInitials } from "../src/lib/adminAuth.js";
 
 function clientFor({ user = null, authError = null, listed = true, owner = false, rpcError = null, membership = true } = {}) {
   const calls = [];
@@ -37,6 +37,52 @@ test("Google Workspace identity uses verified user plus live membership; editabl
   assert.equal(result.user.email, "staff@company.test");
   assert.deepEqual(client.calls, ["getUser", "is_admin", "allowed_admins", "is_owner", ["email", "staff@company.test"]]);
   assert.equal((await readAdminSession(clientFor({ user: googleUser, owner: true }))).user.role, "owner");
+});
+
+test("the current Google profile supplies presentation while verified auth email and database role remain authoritative", async () => {
+  const user = { ...googleUser,
+    identities: [
+      { provider: "email", identity_data: { full_name: "Wrong provider", picture: "https://lh3.googleusercontent.com/wrong" } },
+      { provider: "google", identity_data: { full_name: "  Google   Name  ", picture: "https://lh3.googleusercontent.com/a/profile=s96-c", email: "different@example.com", role: "owner" } },
+    ],
+    user_metadata: { full_name: "Editable name", email: "attacker@example.com", avatar_url: "https://lh3.googleusercontent.com/old", role: "owner" },
+  };
+  const result = await readAdminSession(clientFor({ user }));
+  assert.equal(result.user.displayName, "Google Name");
+  assert.equal(result.user.avatarUrl, "https://lh3.googleusercontent.com/a/profile=s96-c");
+  assert.equal(result.user.email, "staff@company.test");
+  assert.equal(result.user.role, "admin");
+  assert.equal((await readAdminSession(clientFor({ user, listed: false }))).phase, "denied");
+});
+
+test("legacy profile aliases and missing or malformed fields have harmless presentation fallbacks", () => {
+  const profile = googleProfilePresentation({ user_metadata: { name: "Legacy Name", picture: "https://lh5.googleusercontent.com/photo.jpg" } }, "primary@example.com");
+  assert.deepEqual(profile, { displayName: "Legacy Name", avatarUrl: "https://lh5.googleusercontent.com/photo.jpg" });
+  assert.deepEqual(googleProfilePresentation({ identities: "invalid", user_metadata: { full_name: {}, name: [], avatar_url: {} } }, "primary@example.com"), { displayName: "primary@example.com", avatarUrl: null });
+  assert.deepEqual(googleProfilePresentation(null, "primary@example.com"), { displayName: "primary@example.com", avatarUrl: null });
+  const fallback = googleProfilePresentation({ identities: [{ provider: "google", identity_data: { full_name: 123, name: "Valid name", avatar_url: "javascript:alert(1)" } }], user_metadata: { avatar_url: "https://lh3.googleusercontent.com/photo" } }, "primary@example.com");
+  assert.equal(fallback.displayName, "Valid name");
+  assert.equal(fallback.avatarUrl, "https://lh3.googleusercontent.com/photo");
+});
+
+test("profile image URLs allow only HTTPS Google photo hosts and reject arbitrary requests", () => {
+  assert.equal(googleAvatarUrl(" https://lh3.googleusercontent.com/a/photo=s96-c "), "https://lh3.googleusercontent.com/a/photo=s96-c");
+  for (const value of [null, {}, "", "http://lh3.googleusercontent.com/photo", "https://tracker.example.com/photo", "https://googleusercontent.com.evil.test/photo", "https://evilgoogleusercontent.com/photo", "https://lh3.googleusercontent.com@evil.test/photo", "https://user:secret@lh3.googleusercontent.com/photo", "https://lh3.googleusercontent.com:444/photo", "javascript:alert(1)", "data:image/svg+xml,bad", "//lh3.googleusercontent.com/photo", "https://lh3.googleusercontent.com/photo\n", "https://lh3.googleusercontent.com/" + "a".repeat(2048)]) {
+    assert.equal(googleAvatarUrl(value), null, String(value));
+  }
+});
+
+test("initials and malformed profile values cannot break rendering or promote access", async () => {
+  assert.equal(profileInitials("  Ankit   Kumar Singh "), "AK");
+  assert.equal(profileInitials("नाम सिंह"), "नस");
+  assert.equal(profileInitials(null), "?");
+  assert.equal(profileInitials({ full_name: "unsafe object" }), "?");
+  const forged = { ...googleUser, app_metadata: { provider: "email" }, identities: [{ provider: "google", identity_data: { name: "Owner", role: "owner", is_admin: true } }] };
+  const client = clientFor({ user: forged, listed: true, owner: true });
+  const result = await readAdminSession(client);
+  assert.equal(result.phase, "denied");
+  assert.equal(result.user.role, null);
+  assert.deepEqual(client.calls, ["getUser"]);
 });
 
 test("Google sign-in alone does not grant private access or read membership", async () => {

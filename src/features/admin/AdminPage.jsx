@@ -1,4 +1,5 @@
 import * as React from "react";
+import ProfileAvatar from "../../components/ProfileAvatar.jsx";
 import { mediaProps } from "../../lib/media.js";
 import { useAdminAuth } from "../../context/AdminAuth.jsx";
 import SignIn from "../../pages/SignIn.jsx";
@@ -41,9 +42,8 @@ function StatusBadge({ status }) {
   return <span className={`adm-status adm-status-${status}`}><span aria-hidden="true" />{STATUS_OPTIONS.find(item => item.value === status)?.label || status}</span>;
 }
 
-function Avatar({ name, small = false }) {
-  const letters = name.split(/\s+/).filter(Boolean).map(word => word[0]).slice(0, 2).join("");
-  return <span className={`adm-avatar${small ? " adm-avatar-small" : ""}`} aria-hidden="true">{letters}</span>;
+function Avatar({ name, src = null, small = false }) {
+  return <ProfileAvatar name={name} src={src} className={`adm-avatar${small ? " adm-avatar-small" : ""}`} />;
 }
 
 function FilterSelect({ label, value, onChange, children }) {
@@ -169,7 +169,7 @@ function Team({ members, user, onInvite, onRemove }) {
     </form>
     {notice && <p className="adm-team-notice" role="status">{notice}</p>}
     <div className="adm-team-list">{members.map(member => <div className="adm-team-row" key={member.email}>
-      <Avatar name={member.email === user.email ? user.displayName : member.email.split("@")[0].replaceAll(".", " ")} />
+      <Avatar name={member.email === user.email ? user.displayName : member.email.split("@")[0].replaceAll(".", " ")} src={member.email === user.email ? user.avatarUrl : null} />
       <div className="adm-team-person"><strong>{member.email}</strong><span>{member.email === user.email ? "You" : "Approved account"}</span><span>Added {formatIST(member.addedAt)} IST{member.addedBy ? ` by ${member.addedBy}` : ""}</span></div>
       <span className="adm-role-badge">{member.role === "owner" ? "Owner" : "Admin"}</span>
       <button type="button" className="adm-text-button adm-danger-text" disabled={Boolean(busy) || member.role === "owner" || members.length <= 1} aria-label={member.role === "owner" ? `Owner access protected for ${member.email}` : `Remove admin access for ${member.email}`} onClick={() => { setRemoveError(""); setRemoving(member); }}>{member.role === "owner" ? "Owner protected" : member.email === user.email ? "Remove my access" : "Remove"}</button>
@@ -287,7 +287,7 @@ function AuthorizedAdmin({ auth }) {
     <div className="adm-workspace">
       <header className="adm-topbar">
         <label className="adm-search adm-global-search"><AdminIcon name="search" /><span className="adm-sr-only">Search requests</span><input type="search" placeholder="Search requests" value={filters.query} onChange={event => searchRequests(event.target.value)} /></label>
-        <div className="adm-topbar-right"><span className="adm-live-state" role="status">{!hasLoaded ? "Not synced" : liveState === "live" ? "Live" : liveState === "paused" ? "Paused" : liveState === "reconnecting" ? "Reconnecting" : "Connecting"}</span><div className="adm-user"><Avatar name={auth.user.displayName || auth.user.email} small /><span><strong>{auth.user.displayName || auth.user.email}</strong><span>{auth.user.email}</span></span></div><details className="adm-mobile-tools"><summary aria-label="Workspace actions"><AdminIcon name="more" /></summary><div className="adm-tools-popup"><a href="/"><AdminIcon name="external" />Website</a><button type="button" onClick={refresh}><AdminIcon name="reset" />Refresh register</button><button type="button" onClick={auth.signOut}><AdminIcon name="exit" />Sign out</button></div></details></div>
+        <div className="adm-topbar-right"><span className="adm-live-state" role="status">{!hasLoaded ? "Not synced" : liveState === "live" ? "Live" : liveState === "paused" ? "Paused" : liveState === "reconnecting" ? "Reconnecting" : "Connecting"}</span><div className="adm-user"><Avatar name={auth.user.displayName || auth.user.email} src={auth.user.avatarUrl} small /><span><strong>{auth.user.displayName || auth.user.email}</strong><span>{auth.user.email}</span></span></div><details className="adm-mobile-tools"><summary aria-label="Workspace actions"><AdminIcon name="more" /></summary><div className="adm-tools-popup"><a href="/"><AdminIcon name="external" />Website</a><button type="button" onClick={refresh}><AdminIcon name="reset" />Refresh register</button><button type="button" onClick={auth.signOut}><AdminIcon name="exit" />Sign out</button></div></details></div>
       </header>
       <div className="adm-content">
         <div className="adm-page-heading"><div><h1 ref={headingRef} tabIndex={-1}>{title}</h1><p className="adm-date">{formatIST(referenceIso, "date")} · IST{hasDraft && <span>Unsaved changes</span>}</p></div><div className="adm-page-actions">{view !== "team" && <FilterSelect label="Period" value={datePreset} onChange={setPeriod}><option value="all">All dates</option><option value="today">Today</option><option value="last7">Last 7 days</option></FilterSelect>}{view === "overview" && hasLoaded && <button className="adm-button adm-button-outline" type="button" onClick={() => exportCsv({ period: filters.period })} disabled={!hasLoaded || exporting || loading}>Export CSV</button>}</div></div>

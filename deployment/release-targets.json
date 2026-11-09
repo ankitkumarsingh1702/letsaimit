@@ -1,0 +1,12 @@
+{
+  "uat": {
+    "branch": "uat",
+    "origin": "https://uat.letsaimit.com",
+    "supabaseProjectRef": "nlgfcmywgwibvmbsgkox"
+  },
+  "production": {
+    "branch": "main",
+    "origin": "https://letsaimit.com",
+    "supabaseProjectRef": null
+  }
+}

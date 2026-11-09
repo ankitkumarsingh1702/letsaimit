@@ -1,4 +1,5 @@
-export const SITE_ORIGIN = (import.meta.env.VITE_SITE_ORIGIN || "https://letsaimit-review.one92843.chatgpt.site").replace(/\/$/, "");
+import { PUBLIC_BRAND } from "./publicBrand.js";
+export const SITE_ORIGIN = (import.meta.env.VITE_SITE_ORIGIN || PUBLIC_BRAND.origin).replace(/\/$/, "");
 export const PAGE_META = {
   home: { path: "/", title: "Sport, close to home", description: "Football and basketball for ages 5–14. Build fitness, confidence and friendships at Nambiar Ellegenza and Nambiar Bellezea, Bengaluru. First session free." },
   programme: { path: "/programme/", title: "Football & basketball training", description: "Ages 5–14. Two sessions a week, 45–60 minutes each. Football and basketball at Nambiar Ellegenza and Nambiar Bellezea. Try your first session free." },

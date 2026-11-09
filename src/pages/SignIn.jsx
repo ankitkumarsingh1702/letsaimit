@@ -1,7 +1,9 @@
 import React from "react";
+import ProfileAvatar from "../components/ProfileAvatar.jsx";
 import { asset } from "../lib/assets.js";
 import { useAdminAuth } from "../context/AdminAuth.jsx";
 import { accessRequestHref } from "../lib/adminAuth.js";
+import { PUBLIC_BRAND } from "../lib/publicBrand.js";
 import "../styles/sign-in.css";
 
 export default function SignIn() {
@@ -26,7 +28,7 @@ export default function SignIn() {
             <div className="signin-role-icon"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="5" y="5" width="8" height="8" rx="2" /><rect x="19" y="5" width="8" height="8" rx="2" /><rect x="5" y="19" width="8" height="8" rx="2" /><rect x="19" y="19" width="8" height="8" rx="2" /></svg></div>
             <h1 id="signin-heading">{denied ? "Admin access required." : authorized ? "You’re signed in." : "Sign in."}</h1>
             <p className="signin-description">{denied ? "You don’t have admin access. Request access from the LetsAimIt team." : authorized ? "Your team dashboard is ready." : "Sign in with your approved Google account to open the team dashboard."}</p>
-            {user?.email && <p className="signin-account">{user.email}</p>}
+            {user?.email && <div className="signin-profile"><ProfileAvatar name={user.displayName || user.email} src={user.avatarUrl} /><div className="signin-profile-details"><strong>{user.displayName || user.email}</strong><span>{user.email}</span></div></div>}
             {authorized ? <a className="signin-google" href="/admin/">Open dashboard</a> : denied ? <>
               <a className="signin-google" href={accessRequestHref(user?.email)}>Request access</a>
               <p className="signin-access-help">Opens an email draft to LetsAimIt. Access is reviewed by the team.</p>
@@ -39,7 +41,7 @@ export default function SignIn() {
             {(denied || phase === "error") && <button className="signin-text-button" type="button" onClick={retry}>Check access again</button>}
             {user && <button className="signin-text-button" type="button" onClick={() => { void signOut(); }}>Sign out</button>}
             {signOutRetryable && <button className="signin-text-button" type="button" onClick={() => { void signOut(); }}>Retry sign-out</button>}
-            <div className="signin-legal" aria-label="Policies"><a href="/privacy/">Privacy</a><span aria-hidden="true">·</span><a href="/terms/">Terms</a></div>
+            <div className="signin-legal" aria-label="Policies"><a href={PUBLIC_BRAND.privacyUrl}>Privacy</a><span aria-hidden="true">·</span><a href={PUBLIC_BRAND.termsUrl}>Terms</a></div>
           </div>
         </div>
       </div>

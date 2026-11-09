@@ -2,6 +2,6 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "vite",
   "installCommand": "npm ci",
-  "buildCommand": "if [ \"$VERCEL_GIT_COMMIT_REF\" = uat ]; then export VITE_SITE_ORIGIN=https://uat.letsaimit.com; fi; npm run build",
+  "buildCommand": "if [ \"$VERCEL_GIT_COMMIT_REF\" = uat ]; then export VITE_SITE_ORIGIN=https://uat.letsaimit.com; fi; node scripts/check-release.mjs && npm run build",
   "outputDirectory": "dist"
 }

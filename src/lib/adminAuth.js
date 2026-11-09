@@ -1,3 +1,33 @@
+function profileText(value) {
+  if (typeof value !== "string" || /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]/u.test(value)) return "";
+  return Array.from(value.trim().replace(/\s+/gu, " ")).slice(0, 200).join("");
+}
+
+/** Google documents googleusercontent.com profile pictures; other sources use initials. */
+export function googleAvatarUrl(value) {
+  if (typeof value !== "string" || value.length > 2048 || /[\u0000-\u001F\u007F-\u009F]/u.test(value)) return null;
+  try {
+    const url = new URL(value.trim());
+    if (url.protocol !== "https:" || !url.hostname.endsWith(".googleusercontent.com") || url.username || url.password || url.port) return null;
+    return url.href;
+  } catch { return null; }
+}
+
+export function profileInitials(name) {
+  const words = profileText(name).split(/\s+/u).filter(Boolean);
+  return words.slice(0, 2).map(word => Array.from(word)[0]).join("").toLocaleUpperCase("en-IN") || "?";
+}
+
+/** Only presentation comes from Google/profile metadata. Email and access use the verified auth record. */
+export function googleProfilePresentation(identity, email) {
+  const identities = Array.isArray(identity?.identities) ? identity.identities : [];
+  const google = identities.find(entry => entry?.provider === "google")?.identity_data;
+  const fallback = identity?.user_metadata;
+  const displayName = [google?.full_name, google?.name, fallback?.full_name, fallback?.name, email].map(profileText).find(Boolean) || "Google account";
+  const avatarUrl = [google?.avatar_url, google?.picture, fallback?.avatar_url, fallback?.picture].map(googleAvatarUrl).find(Boolean) || null;
+  return { displayName, avatarUrl };
+}
+
 /** Google verifies identity; the current database allowlist grants access. */
 export async function readAdminSession(client) {
   if (!client) return { phase: "not_configured", user: null, error: "Team sign-in is not configured. Please contact LetsAimIt." };
@@ -8,8 +38,7 @@ export async function readAdminSession(client) {
   const email = String(identity.email || "").trim().toLowerCase();
   const user = {
     id: identity.id, email,
-    displayName: identity.user_metadata?.full_name || identity.user_metadata?.name || email,
-    avatarUrl: identity.user_metadata?.avatar_url || null,
+    ...googleProfilePresentation(identity, email),
     role: null,
   };
   // User-editable metadata is presentation only, never an authorization source.

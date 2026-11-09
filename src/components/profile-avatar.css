@@ -1,0 +1,7 @@
+.profile-avatar { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; width: 40px; height: 40px; border-radius: 50%; overflow: hidden; background: #e7eddf; color: var(--green, #143e35); font: 600 12px/1 var(--font-body, sans-serif); }
+.profile-avatar > img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
+.signin-profile { display: flex; align-items: center; gap: 12px; margin: -12px 0 24px; text-align: left; }
+.signin-profile > .profile-avatar { width: 44px; height: 44px; }
+.signin-profile-details { display: grid; min-width: 0; gap: 3px; color: var(--green, #143e35); font-size: 13px; overflow-wrap: anywhere; }
+.signin-profile-details > strong { font-weight: 600; }
+.signin-profile-details > span { color: var(--muted, #60736c); font-size: 12px; }
