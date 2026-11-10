@@ -431,3 +431,20 @@ verified function bodies.
 This stages the production inventory; it does not establish live production
 parity. No real child attendance, manual feedback, approval, invoice, payment
 or account deletion was fabricated for verification.
+
+Application source `625c27c744d841e738f1be9a0979ebfff174aa50` merged to `uat`.
+Vercel `dpl_EFbpDMcyGMViTK3bkr8aY8Xac79b` is READY with the verified
+`uat.letsaimit.com` alias. Both parent/coaching HTTPS documents returned 200,
+the new titles and noindex. The actual owner's signed-in Chrome loaded nine
+saved requests and two approved enrolments, then the coaching roster, blank
+weekly-feedback editor and coach-access controls. The same identity's parent
+Tracker correctly returned no owned children, zero recorded marks and no
+feedback, without errors. No live write was performed. At 390px the navigation,
+filters and first three attendance columns fit; the empty-state message was
+centered outside the visible scroller, so the following CSS-only correction
+left-aligns it on narrow screens. The corrected build passes. Documentation and
+this narrow layout correction may produce subsequent UAT deployment descendants.
+
+Remote `main` remains `372be17da151f45d42c54b42b36d2d50ef51758a` and the production
+HTTPS homepage is still 200 / 39,957 bytes with SHA-256
+`6f32fc0cc051d17e1817e189f7a442bfe17b5e93a41e1a0bfeba0efb4aa5dc87`.

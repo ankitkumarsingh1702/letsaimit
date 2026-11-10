@@ -43,6 +43,7 @@
 .parent-tracker-note { margin: 8px 0 20px; color: #68746d; font-size: 10px; line-height: 1.5; }
 .parent-tracker-empty { padding: 35px 16px; border: 1px solid #e2e7e3; border-radius: 6px; color: #68746d; text-align: center; font-size: 12px; }
 .parent-tracker-table .parent-tracker-empty-cell { height: 90px; text-align: center; color: #68746d; }
+@media (max-width: 800px) { .parent-tracker-table .parent-tracker-empty-cell { text-align: left; } }
 .parent-feedback-dialog { position: fixed; inset: 0 0 0 auto; width: min(440px,calc(100vw - 20px)); height: 100dvh; max-height: 100dvh; margin: 0; padding: 0 22px 24px; border: 0; border-left: 1px solid #dce4de; background: #fff; color: #34473c; box-shadow: -8px 0 32px #143e3514; overflow-y: auto; }
 .parent-feedback-dialog::backdrop { background: #152d2438; }
 .parent-feedback-dialog-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 65px; border-bottom: 1px solid #e2e7e3; }
