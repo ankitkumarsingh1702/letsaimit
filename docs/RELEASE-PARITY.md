@@ -4,8 +4,8 @@ This ledger records evidence, not permission to deploy. It is project-local.
 The default **merge and deploy** target is UAT. Production work requires the
 explicit **merge and deploy to prod** instruction.
 
-Latest tested application source: `bcbe3cca78d5d00fcb3372f6999a68c8abc14ac4`
-(same-account auth refresh protection, clear unsent enrolment instructions,
+Latest tested application source: `9afce3278596f6c06c35938253340ad8811cd335`
+(automatic close/reset after a confirmed parent save, same-account auth refresh protection, clear unsent enrolment instructions,
 saved-row refresh, visible parent requests and actual approved-enrolment counts;
 retains the quoted coaching-fee flow).
 UAT deployment evidence is recorded below. Manual live-payment testing is
@@ -340,3 +340,16 @@ email, checked those controls and submitted through the actual Chrome form.
 The new enrolment remains pending review until an authorized admin explicitly
 approves a custom fee. A saved request and delivered admin email are not an
 invoice or captured payment.
+
+## 10 November 2026 — close and clear completed parent forms
+
+| Boundary | Evidence / change |
+| --- | --- |
+| Source / target | `9afce3278596f6c06c35938253340ad8811cd335`; routine fix within the existing UAT-only release scope. No backend, OAuth, email worker, secret or payment change |
+| Finding | Successful parent saves previously set an inline success state without closing the dialog or resetting React Hook Form. Both parent forms remained mounted, so retained trial answers could repopulate a completed enrolment |
+| Completion | A validated receipt, freshly verified matching Google actor and current active form generation complete the form. Both parent forms, stored drafts, consent, validation/error state and submission references clear; the dialog closes and focus returns through its existing opener handling. A compact ten-second confirmation outside the dialog links to My requests and is hidden/removed on account change |
+| Retry / stale response | Failed or unconfirmed saves keep answers and the safe retry submission ID. Google handoff remains an unsent draft. A delayed receipt can notify authorized readers but cannot clear/close a newly opened or edited form |
+| Automated checks | 306 tests passed; optimized/prerendered build passed; all 59 published assets verified. Regression covers confirmed/duplicate receipts, closed/superseded form generations, missing/wrong Google actors and invalid receipt data |
+| Real-component browser check | An isolated local Vite harness ran the actual ContactDialog, ParentRegistration and confirmation components in React StrictMode with example identity and mocked RPC responses. Successful enrolment and trial retry automatically closed; reopening both modes showed blank fields and unchecked consent. The retry reused its submission ID. A delayed earlier save left a newly edited enrolment open with its new answer intact. No external Google consent, real submission, email, invoice or payment was created by this harness |
+| Parity | The deterministic backend inventory remains unchanged and staged for both targets. Production backend setup remains pending; this frontend source is ready to carry with the tested UAT feature set on explicit production promotion |
+| Deployment | Pending verification of this source on the UAT alias; recorded below once READY. Production remains gated |
