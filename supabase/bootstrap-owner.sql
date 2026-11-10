@@ -1,4 +1,4 @@
--- Operator-only step, after the schema migration, in this UAT project's SQL editor.
+-- Operator-only step, after the schema migrations, in the selected verified target's SQL editor.
 -- Replace the placeholder locally with the exact owner Gmail. Do not commit it.
 -- Do not run through the browser client or change RLS/grants to make this work.
 do $bootstrap_owner$

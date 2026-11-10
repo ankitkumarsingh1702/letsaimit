@@ -1,4 +1,4 @@
-# UAT registration and the private team register
+# Registration and the private team register
 
 The existing React/Vite website stays on Vercel. Parents submit trial requests
 and child registrations inside the site. Supabase stores records in Postgres
@@ -13,7 +13,7 @@ before final submission, private parent tracking, admin review and queued email
 alerts. See the latest release ledger for live delivery and login evidence;
 the older checks below remain a dated record.
 
-This setup is **UAT only**:
+The recorded UAT deployment uses:
 
 - Website: `https://uat.letsaimit.com`
 - Supabase project reference: `nlgfcmywgwibvmbsgkox`
@@ -22,6 +22,9 @@ This setup is **UAT only**:
 
 Keep production credentials, data and releases separate. The former PocketBase,
 OAuth2-Proxy, Caddy, Docker and VPS instructions no longer apply.
+This guide carries the same backend source to both targets. Production backend
+preparation is separate from a production website deployment; current applied
+configuration and verification belong in [the parity ledger](docs/RELEASE-PARITY.md).
 
 ## Environment variables
 
@@ -31,8 +34,9 @@ placeholders are not credentials.
 
 The website project's Vercel environment inventory was checked on 9 November
 2026: all five configured entries were scoped to **Preview / branch `uat`**.
-There was no production Supabase configuration. A separate production backend
-is still pending; this setup has not rolled these features out to production.
+There was no production Supabase configuration in that dated inventory. Check
+the ledger and target manifest for current readiness; this guide does not
+establish that production has been configured or these features deployed there.
 
 | Variable | UAT value or purpose |
 | --- | --- |
@@ -53,6 +57,20 @@ Supabase key identifies the project; grants, row-level security and validation
 provide authorization. The newer publishable-key variable takes precedence
 over the legacy anon-key variable.
 
+For authorized production preparation, save the following on the **website
+project's Production environment only**, using its separate Supabase project:
+
+- `VITE_SITE_ORIGIN=https://letsaimit.com`
+- `VITE_SUPABASE_URL=https://<production-project-ref>.supabase.co`
+- `VITE_SUPABASE_PUBLISHABLE_KEY` from that production project; leave the legacy
+  anon-key fallback blank when using it.
+
+Keep Preview / branch `uat` values unchanged. These saved values apply to a
+future build, not the already deployed site. Backend preparation does not
+authorize a redeploy, promotion, alias change or merge to `main`. Do not retarget
+the dedicated UAT health project to production. Never put Google, SMTP, worker
+or Razorpay secrets in these public browser settings.
+
 ## Database and separate owner bootstrap
 
 Use the same ordered migration set for each configured target. Run
@@ -71,27 +89,34 @@ On an existing target, compare applied versions first; do not replay its schema:
 7. `supabase/migrations/20261110065359_custom_coaching_fees.sql` — forward-only
    quoted fees at approval, next-month fee history, grouped reminder slots and
    month-end summaries. It preserves existing invoice amounts and legacy saved
-   agreements. Applied transactionally to UAT on 10 November 2026. Apply only
-   this new file to an existing six-migration target;
-   apply all seven in order to a newly configured target. Deployment evidence
-   belongs in the release ledger.
+   agreements. Applied transactionally to UAT on 10 November 2026.
+8. `supabase/migrations/20261110190347_account_deletion.sql` — whole-account
+   deletion with retained private billing history, ownership isolation and
+   recovery. Applied transactionally to UAT on 11 November 2026; see
+   [README-ACCOUNT-DELETION.md](README-ACCOUNT-DELETION.md).
+
+Apply all eight complete files in order to a new, empty target. For an existing
+target, verify what is applied and apply only the missing forward migrations;
+an existing seven-migration target needs only file 8. Record actual target
+versions and checks in the release ledger. Never copy UAT submissions, Auth
+users or private billing rows into production.
 
 The second migration makes `is_admin` an authenticated, security-invoker wrapper
 and removes application-role access to the optional dashboard RLS helper.
 Apply complete files, including functions, triggers, grants and policies;
 copying only table definitions is insufficient. **The first four migrations
-were applied to live UAT on 9 November 2026; the fifth, sixth and seventh on 10 November.** The third is a forward change that
+were applied to live UAT on 9 November 2026; the fifth through seventh on
+10 November and the eighth on 11 November.** The third is a forward change that
 accepts normalized company-domain Google email addresses and removes the earlier
 broad membership-write rules. The following migration restores validated Gmail
 invitations and protected revocation for current Google admins. This live UAT
-application of the migrations does not establish their application to a future
-production backend.
+application of the migrations does not establish their application to production.
 
-These seven files were applied through the privileged SQL editor or an explicit
-transaction using the scoped deployment credential. The CLI history table is
-absent. An official `migration repair --status applied` attempt could
+These eight UAT files were applied through the privileged SQL editor or an
+explicit transaction using the scoped deployment credential. UAT's CLI history
+table is absent. An official `migration repair --status applied` attempt could
 not connect because this network lacks IPv6. Do not rerun the existing schema
-files as a workaround. Reconcile the seven verified versions with CLI history
+files as a workaround. Reconcile the eight verified versions with CLI history
 using an approved working database connection before a future automated schema
 push; the manual application evidence is retained in the release ledger.
 
@@ -138,6 +163,38 @@ addresses may repeat for siblings.
 One Google identity can be a parent and an approved admin simultaneously.
 Coach permissions are independent and are not implemented by this release.
 
+## Backend function artifact set
+
+The current source has **eight migrations and four Edge Functions**:
+
+- `admin-notifications` — queued request alerts and activity digests.
+- `billing-worker` — invoice, reminder and billing recovery work.
+- `razorpay-webhook` — signed provider events and verified payment updates.
+- `delete-account` — confirmed self-deletion and deletion recovery.
+
+Deploy their shared modules and committed dependency metadata from the same
+tested source. `npm run parity:plan` inventories these artifacts and their
+fingerprints. Its source plan does not prove a function was deployed or a
+migration applied. The functions disable gateway JWT checking because each
+handler enforces its own Google identity, worker bearer or webhook signature
+boundary; do not expose privileged work through a public browser key.
+
+Configure backend secrets in the selected Supabase project from
+[`supabase/functions/.env.example`](supabase/functions/.env.example), including
+the exact target's `ADMIN_DASHBOARD_ORIGIN`. Configure that target's worker URL
+and bearer in Vault before its scheduler. Runtime-provided Supabase secrets
+remain server-only. See [notifications](README-NOTIFICATIONS.md),
+[billing](README-BILLING.md) and [account deletion](README-ACCOUNT-DELETION.md)
+for their distinct authorization, activation and recovery checks.
+
+For production backend-only staging, verify schema/grants/RLS, separately
+bootstrap approved access, deploy the same function set and prepare the
+production provider/URL configuration. Keep email dispatch and financial
+activation separate from schema provisioning; do not create test submissions,
+send mail or create charges merely to mark setup complete. Record configured,
+verified and still-pending steps separately. A working backend does not switch
+the website to it.
+
 ## Google sign-in configuration
 
 **Google OAuth and the live owner's admin login were verified on 9 November
@@ -147,8 +204,8 @@ its client secret directly into provider settings. The client uses basic
 identity/email/profile access, without Gmail mailbox access.
 
 Google OAuth publishing was confirmed as **In production**. This is the OAuth
-application's audience status, **not Google brand verification**; the website
-and database configuration described here remain UAT-only.
+application's audience status, **not Google brand verification**. This dated
+verification establishes the UAT login only, not production provider readiness.
 
 Google branding was saved on 9 November 2026 with public app name **LetsAimIt**,
 the existing `public/assets/favicon-180.png` logo, homepage
@@ -180,29 +237,37 @@ when preparing production's internal Google project/client; common branding
 does not require one client ID shared between test and production.
 The configuration steps below document that setup for future reproduction.
 
-1. Configure Google's OAuth consent screen and create an OAuth **Web application**
-   client. Add intended staff as test users if Google's Testing mode requires it.
-2. Add `https://uat.letsaimit.com` as an authorized JavaScript origin. Add the
-   project's Supabase callback as an authorized redirect URI:
+1. Configure the target's Google OAuth consent screen and **Web application**
+   client. Use separate testing/production Cloud projects with the same public
+   name **LetsAimIt** and the canonical branding links above. Add intended test
+   users only where Google's Testing audience requires them.
+2. Configure the selected target's exact origin and Supabase callback:
 
-   ```text
-   https://nlgfcmywgwibvmbsgkox.supabase.co/auth/v1/callback
-   ```
+   | Target | Authorized JavaScript origin | Authorized redirect URI |
+   | --- | --- | --- |
+   | UAT | `https://uat.letsaimit.com` | `https://nlgfcmywgwibvmbsgkox.supabase.co/auth/v1/callback` |
+   | Production | `https://letsaimit.com` | `https://<production-project-ref>.supabase.co/auth/v1/callback` |
+
+   Replace the production placeholder with the actual project reference.
+   Keep UAT and localhost endpoints out of the production Google client.
 
 3. In Supabase Authentication provider settings, enable Google and enter the
    client ID and secret. Keep the secret in provider configuration, not React
    or Git.
-4. In Supabase Authentication URL Configuration, set the UAT Site URL and allow
-   `https://uat.letsaimit.com/admin/` as the application redirect. This differs
-   from Google's Supabase callback URL.
-5. After operator configuration, test the actual Google round trip from `/sign-in/`.
+4. In Supabase Authentication URL Configuration, set the target's origin as its
+   Site URL and allow its exact `/admin/` application redirect: UAT uses
+   `https://uat.letsaimit.com/admin/`; production uses
+   `https://letsaimit.com/admin/`. This differs from Google's Supabase callback.
+5. On the authorized deployed website, test the actual Google round trip from `/sign-in/`.
    The button uses the existing Supabase Google provider and the same stored OAuth
    client configuration; no client secret is added to React. The four initial
    approved memberships, including the company Google account, were verified
    on live UAT on 9 November 2026. Confirm they remain present; later valid Gmail
    invitations can increase the team size. An unlisted Google account must remain denied. **Request access** opens
    an email draft to the existing public programme contact; it does not send a
-   message, save a request or grant membership automatically.
+   message, save a request or grant membership automatically. Production
+   backend-only preparation leaves the website round trip pending its explicit
+   application promotion; saved credentials alone do not verify it.
 
 The four initial exact addresses are operator configuration, not public source. Prepare
 the access synchronization in the ignored `supabase/configure-admin-access.sql.local`
@@ -369,14 +434,20 @@ a public website asset or evidence of a synced production backend.
 
 The configuration guard runs `scripts/check-release.mjs` against
 [`deployment/release-targets.json`](deployment/release-targets.json). Its UAT
-entry records `nlgfcmywgwibvmbsgkox`; the production project reference is `null`
-until a separate backend is configured. Release builds check branch, site origin,
+entry records `nlgfcmywgwibvmbsgkox`; its production entry must name the actual
+separate backend when configured, and stays `null` until then. Release builds check branch, site origin,
 backend URL and public-key configuration, rejecting missing configuration and
-private-key formats. Production release configuration currently fails closed.
+private-key formats. Missing or mismatched production configuration fails closed.
 Modern publishable keys are checked only for presence/type offline, not proven
 to belong to the selected project. The guard does not verify applied migrations,
 database grants, OAuth or a live journey. Other feature Preview builds are not
 certified release-ready by passing this guard.
+
+Production backend/environment staging does not run this website release.
+**Merge and deploy** still targets UAT. Only **merge and deploy to prod**
+authorizes carrying the tested source and complete backend/configuration set to
+the production website. Rebuild with production values; never alias a UAT
+bundle containing its inlined backend configuration to `letsaimit.com`.
 
 Application source `4e62f70fcb5c10ad80aa7ce62cccccaf3c24dc66` was released to UAT
 after **123 automated tests**, including seven release-guard tests, passed on
