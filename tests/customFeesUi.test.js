@@ -119,7 +119,7 @@ test("actual compact components expose exact payment links, not an aggregate amo
     const trial = renderToStaticMarkup(React.createElement(ReviewDecision, { row: { ...pending, formType: "trial" }, initialDecision: "accepted", canReview: true, onReview: async () => {} }));
     assert.doesNotMatch(trial, /Monthly fee|value="6000"/);
     const policy = renderToStaticMarkup(React.createElement(QuotedBillingPolicy, { lateFeePaise: 10000 }));
-    assert.match(policy, /Fee quoted after approval/); assert.match(policy, /1st/); assert.match(policy, /5th/); assert.match(policy, /₹100\/day/); assert.match(policy, /No automatic debit/); assert.doesNotMatch(policy, /Team payment|Regular price|₹600(?:\s|<)/);
+    assert.match(policy, /Fee confirmed on approval/); assert.match(policy, /First payment due then/); assert.match(policy, /pay 1–5 in advance/); assert.match(policy, /₹100\/day/); assert.match(policy, /No automatic debit/); assert.doesNotMatch(policy, /Team payment|Regular price|₹600(?:\s|<)/);
     const upcoming = renderToStaticMarkup(React.createElement(UpcomingMonth, { upcoming: { month: "2026-12-01", children: [{ registrationId, childName: "Test child", parentName: "Test parent", monthlyFeePaise: 600000 }], totalPaise: 600000, oldPendingPaise: 620000, oldPendingCount: 3 } }));
     assert.match(upcoming, /Next month total/); assert.match(upcoming, /Older unpaid invoices/); assert.match(upcoming, /₹6,000/); assert.match(upcoming, /₹6,200/);
   } finally { await vite.close(); }

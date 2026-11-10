@@ -12,7 +12,7 @@ import { fetchBillingTerms, formatMoney } from "../billing/billingData.js";
 import "./registration.css";
 
 export function QuotedBillingPolicy({ lateFeePaise }) {
-  return <><h4>Monthly coaching</h4><p>Fee quoted after approval. Pay securely on Razorpay.</p><p>Billed on the 1st. Due by the 5th. {formatMoney(lateFeePaise)}/day after due. No automatic debit.</p></>;
+  return <><h4>Monthly coaching</h4><p>Fee confirmed on approval. First payment due then.</p><p>Next months: pay 1–5 in advance. {formatMoney(lateFeePaise)}/day after due. No automatic debit.</p></>;
 }
 
 const ParentRegistration = forwardRef(function ParentRegistration({ mode, active, onSwitchKind, Arrow }, ref) {
@@ -212,7 +212,7 @@ const ParentRegistration = forwardRef(function ParentRegistration({ mode, active
       </div>
       <div className="fm-form-footer">
         {restored && <p className="fm-handoff-note" role="status">Your answers are back. Please review them and confirm consent again before sending.</p>}
-        {auth.user?.isGoogle ? <p className="fm-handoff-note">Submitting as {auth.user.email}. <a href="/parent/">My requests</a></p> : <p className="fm-handoff-note">Continue with Google before sending. We will keep these answers in this tab for 30 minutes.</p>}
+        {auth.user?.isGoogle ? <p className="fm-handoff-note">Submitting as {auth.user.email}. <a href="/parent/">My requests</a></p> : <p className="fm-handoff-note">Answers stay in this tab for 30 minutes.</p>}
         <div className="fm-full sk-consent"><label className="fm-consent" htmlFor={fieldId("consent")}>
           <input id={fieldId("consent")} type="checkbox" {...register("consent")} required aria-invalid={errors.consent ? true : undefined} aria-describedby={`${fieldId("consent")}-error`} />
           <span>I am the parent or guardian. I agree to use of these details for this enquiry and a reply from LetsAimIt. <a href="/privacy/" target="_blank" rel="noopener noreferrer">Privacy policy</a></span>
@@ -230,7 +230,6 @@ const ParentRegistration = forwardRef(function ParentRegistration({ mode, active
           <input type="hidden" {...register("billingTermsVersion")} />
         </div>}
         {status !== "saved" && <>
-          <p className="fm-handoff-note">Your details are saved before we show confirmation.</p>
           <button className="fm-primary" type="submit" disabled={["verifying", "saving", "signing_in"].includes(status) || ["checking", "signing_in", "signing_out"].includes(auth.phase) || isEnrol && !billingTerms}>
             <span>{status === "verifying" ? "Checking Google…" : status === "saving" ? "Saving…" : status === "signing_in" ? "Opening Google…" : !auth.user?.isGoogle ? "Continue with Google" : saveError ? "Retry save" : isEnrol ? "Send registration" : "Request a free trial"}</span><Arrow />
           </button>
