@@ -4,9 +4,10 @@ This ledger records evidence, not permission to deploy. It is project-local.
 The default **merge and deploy** target is UAT. Production work requires the
 explicit **merge and deploy to prod** instruction.
 
-Latest tested application source: `62775bd9f8c0f2eb07a4ff0bbb00a08065430079`
-(clear unsent enrolment instructions, saved-row refresh, visible parent requests,
-and actual approved-enrolment counts; retains the quoted coaching-fee flow).
+Latest tested application source: `bcbe3cca78d5d00fcb3372f6999a68c8abc14ac4`
+(same-account auth refresh protection, clear unsent enrolment instructions,
+saved-row refresh, visible parent requests and actual approved-enrolment counts;
+retains the quoted coaching-fee flow).
 UAT deployment evidence is recorded below. Manual live-payment testing is
 reserved for the user.
 Earlier tables remain a dated record.
@@ -317,3 +318,24 @@ The parent's own consent and final send remain the live save boundary. New
 admin alerts, quoted approval and the user's manual payment can be checked only
 after that request is actually saved. Do not describe the empty-queue health
 checks or mocked contract tests as completing that live journey.
+
+## 10 November 2026 — authorized enrolment and same-account refresh
+
+The user gave specific action-time confirmation to submit the prepared test
+enrolment, using the submitting parent's contact email and the displayed privacy,
+programme/cancellation and monthly-billing terms. The agent entered that contact
+email, checked those controls and submitted through the actual Chrome form.
+
+| Boundary | Evidence / change |
+| --- | --- |
+| Live request save | One custom-quote enrolment committed at 14:36:02 IST. Read-only checks confirmed it has a parent owner and the owner/contact match. Total saved requests increased from seven to eight. No direct database insert or fabricated ownership/consent was used |
+| Live notifications | Four new per-admin outbox jobs were SMTP accepted on attempt one by 14:36:13 IST. An approved staff mailbox visibly contained the new enrolment alert; that inbox also contained the earlier trial and four-hour summary. Other recipients' placement is not inferred from SMTP acceptance |
+| Live admin read | A currently approved admin's reloaded dashboard showed eight saved requests, three enrolment requests, the new request as its latest row, and zero approved enrolments. Follow-up status remains independent of approval |
+| Parent UI mismatch | Before reload, the long-open parent page retained the signed-in identity but showed a same-account sign-in error for owned-request/billing reads. Its post-submit state did not establish a displayed receipt even though the server save succeeded. Do not describe this as an unsaved request or send it again to force a second alert |
+| Source fix | `bcbe3cca78d5d00fcb3372f6999a68c8abc14ac4`: the provider previously invalidated every in-flight check on any SDK auth event. It now advances its epoch only at identity boundaries. Same-subject refresh/sign-in events still recheck Google and current database membership. Sign-out, missing session, explicit sign-in, account switches including A→B→A, and unmount invalidate earlier results. No local-session trust shortcut, auth timeout workaround, schema or secret change |
+| Automated checks | 305 tests and the production build passed. New regressions exercise the production guarded-read helper and parent ownership reads with mocked same-user refresh events, stale account replies, sign-out, non-Google identities and revoked admin membership. Independent source review found no substantive defect. These tests do not substitute for a mounted browser callback lifecycle |
+| Parity / production | The backend migration/function inventory is unchanged. This source fix is staged identically for later promotion. Website production, DNS, OAuth and production backend remain unchanged; actual payment testing stays with the user |
+
+The new enrolment remains pending review until an authorized admin explicitly
+approves a custom fee. A saved request and delivered admin email are not an
+invoice or captured payment.

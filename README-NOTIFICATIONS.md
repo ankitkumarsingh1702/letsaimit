@@ -158,6 +158,11 @@ status** tracks contact work and does not create an invoice. Parent request
 errors stay visible, and the saved-row lists refresh after focus/save events
 through their existing authorized reads.
 
+Same-user Google token/session refreshes are not account changes. The auth
+provider preserves in-flight remotely verified reads across those events while
+still rechecking membership. Sign-out, a missing session or an actual subject
+switch invalidates earlier results, including an A→B→A switch-back.
+
 Source changes, local database tests, Deno checking, hosted migrations, SMTP
 acceptance, inbox receipt and website deployment are separate evidence. Update
 `docs/RELEASE-PARITY.md` with what was actually completed before describing this
