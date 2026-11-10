@@ -1,0 +1,4 @@
+interface:
+  display_name: "LetsAimIt UAT–Production Parity"
+  short_description: "Share branding and stage the same backend across release targets"
+  default_prompt: "Use $uat-prod-parity-workflow to prepare both LetsAimIt environments and update the verified readiness ledger."

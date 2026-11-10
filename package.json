@@ -9,6 +9,8 @@
     "build": "vite build && node scripts/prerender.mjs && node scripts/prune-deployment.mjs",
     "preview": "vite preview --host 0.0.0.0",
     "verify:assets": "node scripts/verify-assets.mjs",
+    "parity:plan": "node scripts/backend-parity.mjs",
+    "release:build": "node scripts/check-release.mjs && node scripts/backend-parity.mjs > /tmp/letsaimit-backend-parity.json && npm test && npm run build",
     "test": "node --test"
   },
   "engines": {

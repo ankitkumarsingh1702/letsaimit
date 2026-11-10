@@ -85,7 +85,14 @@ test("the Vercel guard exits closed without echoing credentials and leaves the l
   assert.match(preview.stdout, /NOT_RELEASE_READY/);
   const vercel = JSON.parse(readFileSync(new URL("../vercel.json", import.meta.url), "utf8"));
   const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
-  assert.match(vercel.buildCommand, /node scripts\/check-release\.mjs && npm run build$/);
+  assert.match(vercel.buildCommand, /npm run release:build$/);
   assert.match(vercel.buildCommand, /export VITE_SITE_ORIGIN=https:\/\/uat\.letsaimit\.com/);
   assert.doesNotMatch(pkg.scripts.build, /check-release/);
+  // The actual pipeline must stop before tests/build when target credentials are unsafe.
+  const pipeline = spawnSync("npm", ["run", "--silent", "release:build"], {
+    env: { ...process.env, ...uatEnv, VITE_SUPABASE_PUBLISHABLE_KEY: "sb_secret_pipeline_must_not_echo" }, encoding: "utf8",
+  });
+  assert.equal(pipeline.status, 1);
+  assert.match(pipeline.stderr, /release-config:PUBLIC_KEY_INVALID/);
+  assert.doesNotMatch(pipeline.stdout + pipeline.stderr, /sb_secret_pipeline_must_not_echo|node --test|vite build|TAP version/);
 });

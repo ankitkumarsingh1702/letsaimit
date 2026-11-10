@@ -10,6 +10,10 @@ Keep this workflow inside the LetsAimIt repository. Read the root
 [release parity ledger](../../../docs/RELEASE-PARITY.md) before selecting a
 release target. They hold the public identity, known target state and source
 references; update the ledger as verification changes those facts.
+Use [uat-prod-parity-workflow](../uat-prod-parity-workflow/SKILL.md) while
+preparing shared branding, migrations and both targets' configuration. Run
+`npm run parity:plan` before a release; retain its distinction between staged
+source parity and independently verified live configuration.
 
 ## Select the authorized target
 

@@ -25,6 +25,13 @@ agreements here; do not install them into global Codex settings or skills.
 
 ## Release routing and parity
 
+For OAuth, backend, environment, billing and parity work, use the project-local
+[uat-prod-parity-workflow](.agents/skills/uat-prod-parity-workflow/SKILL.md).
+Stage the same source and configuration requirements for both targets during
+each change, and keep actual live evidence in the parity ledger. Use
+`npm run parity:plan` for the deterministic source inventory; it never applies
+database changes, copies secrets or declares live parity by itself.
+
 For release work, use the repository skill at
 [.agents/skills/letsaimit-release/SKILL.md](.agents/skills/letsaimit-release/SKILL.md)
 and the current evidence in [docs/RELEASE-PARITY.md](docs/RELEASE-PARITY.md).

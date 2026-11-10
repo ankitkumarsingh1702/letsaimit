@@ -55,8 +55,9 @@ over the legacy anon-key variable.
 
 ## Database and separate owner bootstrap
 
-Apply these migrations in order using the UAT project's SQL editor or its
-established migration workflow:
+Use the same ordered migration set for each configured target. Run
+`npm run parity:plan` to inventory the current files and both target settings.
+On an existing target, compare applied versions first; do not replay its schema:
 
 1. `supabase/migrations/20261109080830_registration_register.sql`
 2. `supabase/migrations/20261109083344_registration_function_privileges.sql`
@@ -64,22 +65,26 @@ established migration workflow:
 4. `supabase/migrations/20261109123953_restore_controlled_admin_invitations.sql`
 5. `supabase/migrations/20261109204510_parent_review_notifications.sql` — applied
    to UAT on 10 November 2026 with the matching frontend and notification worker.
+6. `supabase/migrations/20261109225158_monthly_billing_invoices.sql` — applied
+   transactionally to UAT on 10 November 2026. Billing starts disabled; see
+   [README-BILLING.md](README-BILLING.md) for activation and consented pricing.
 
 The second migration makes `is_admin` an authenticated, security-invoker wrapper
 and removes application-role access to the optional dashboard RLS helper.
 Apply complete files, including functions, triggers, grants and policies;
-copying only table definitions is insufficient. **All four ordered migrations
-were applied to live UAT on 9 November 2026.** The third is a forward change that
+copying only table definitions is insufficient. **The first four migrations
+were applied to live UAT on 9 November 2026; the fifth and sixth on 10 November.** The third is a forward change that
 accepts normalized company-domain Google email addresses and removes the earlier
 broad membership-write rules. The following migration restores validated Gmail
 invitations and protected revocation for current Google admins. This live UAT
 application of the migrations does not establish their application to a future
 production backend.
 
-These five files were applied manually through the SQL editor. The CLI history
-table is absent. An official `migration repair --status applied` attempt could
+These six files were applied through the privileged SQL editor or an explicit
+transaction using the scoped deployment credential. The CLI history table is
+absent. An official `migration repair --status applied` attempt could
 not connect because this network lacks IPv6. Do not rerun the existing schema
-files as a workaround. Reconcile the five verified versions with CLI history
+files as a workaround. Reconcile the six verified versions with CLI history
 using an approved working database connection before a future automated schema
 push; the manual application evidence is retained in the release ledger.
 
@@ -328,6 +333,13 @@ PY
 
 ## Build, UAT release and verification
 
+`npm run --silent parity:plan -- --target all` derives a deterministic inventory
+of the same SQL, function modules, dependency metadata and secret names for both
+targets. Use `--target uat` or `--target production` to inspect one target. This
+read-only planner neither reads secret values nor applies migrations. A missing
+production reference stays pending; it never defaults to UAT. Actual applied
+backend and user-journey evidence remains in the release ledger.
+
 After the migration, owner bootstrap and UAT configuration:
 
 ```sh
@@ -342,7 +354,13 @@ Merge the verified change into `uat` and wait for its Vercel Preview build.
 Do not merge to `main` or reuse the UAT database for production during this setup.
 Confirm the deployed frontend uses the intended public project URL/key.
 
-The Vercel build also runs `scripts/check-release.mjs` against
+The Vercel build runs `npm run release:build`: target configuration guard,
+both-target backend inventory, the complete automated suite, then the optimized
+frontend build. The inventory is written to `/tmp/letsaimit-backend-parity.json`
+on the build runner and contains hashes and configuration names only. It is not
+a public website asset or evidence of a synced production backend.
+
+The configuration guard runs `scripts/check-release.mjs` against
 [`deployment/release-targets.json`](deployment/release-targets.json). Its UAT
 entry records `nlgfcmywgwibvmbsgkox`; the production project reference is `null`
 until a separate backend is configured. Release builds check branch, site origin,
