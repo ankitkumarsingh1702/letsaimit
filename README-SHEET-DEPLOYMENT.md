@@ -71,7 +71,8 @@ On an existing target, compare applied versions first; do not replay its schema:
 7. `supabase/migrations/20261110065359_custom_coaching_fees.sql` — forward-only
    quoted fees at approval, next-month fee history, grouped reminder slots and
    month-end summaries. It preserves existing invoice amounts and legacy saved
-   agreements. Apply only this new file to an existing six-migration target;
+   agreements. Applied transactionally to UAT on 10 November 2026. Apply only
+   this new file to an existing six-migration target;
    apply all seven in order to a newly configured target. Deployment evidence
    belongs in the release ledger.
 
@@ -79,18 +80,18 @@ The second migration makes `is_admin` an authenticated, security-invoker wrapper
 and removes application-role access to the optional dashboard RLS helper.
 Apply complete files, including functions, triggers, grants and policies;
 copying only table definitions is insufficient. **The first four migrations
-were applied to live UAT on 9 November 2026; the fifth and sixth on 10 November.** The third is a forward change that
+were applied to live UAT on 9 November 2026; the fifth, sixth and seventh on 10 November.** The third is a forward change that
 accepts normalized company-domain Google email addresses and removes the earlier
 broad membership-write rules. The following migration restores validated Gmail
 invitations and protected revocation for current Google admins. This live UAT
 application of the migrations does not establish their application to a future
 production backend.
 
-These six files were applied through the privileged SQL editor or an explicit
+These seven files were applied through the privileged SQL editor or an explicit
 transaction using the scoped deployment credential. The CLI history table is
 absent. An official `migration repair --status applied` attempt could
 not connect because this network lacks IPv6. Do not rerun the existing schema
-files as a workaround. Reconcile the six verified versions with CLI history
+files as a workaround. Reconcile the seven verified versions with CLI history
 using an approved working database connection before a future automated schema
 push; the manual application evidence is retained in the release ledger.
 

@@ -4,10 +4,10 @@ This ledger records evidence, not permission to deploy. It is project-local.
 The default **merge and deploy** target is UAT. Production work requires the
 explicit **merge and deploy to prod** instruction.
 
-Latest UAT application release: `0ced92e5343008fb941d14cb82119c6aed26fed6`
-(monthly billing implementation; live ₹1 team billing was enabled on 10 November
-after credential, webhook and backend checks. A completed payer checkout remains
-unverified). See the dated activation evidence below.
+Latest UAT application source: `9f099ac7798d2adb1a045d9efbf3498e1d3a4f14`
+(admin-quoted coaching fees, next-month price changes, four parent reminder slots
+and month-end summaries). Manual live-payment testing is reserved for the user.
+See the dated custom-fee release evidence below.
 Earlier tables remain a dated record.
 
 Latest verified UAT workflow source: `f22e83265d612da094234699a4834f7248b2ef67`
@@ -266,3 +266,35 @@ The first real ₹1 checkout must be completed by its payer. Verify provider-cap
 100 paise against the saved invoice/ledger and silent parent/admin updates before
 recording end-to-end payment success. Never replace that check with a redirect,
 synthetic webhook or privileged database edit.
+
+## UAT release evidence — 10 November 2026, admin-quoted coaching fees
+
+This forward release replaces the public fixed team-price offer for new
+enrolments. Existing saved agreements and issued invoices remain unchanged.
+The user explicitly reserved manual live-payment testing for themselves.
+
+| Evidence | Record |
+| --- | --- |
+| Authorized target / source | UAT only. Implementation `a0d0d664ea34ab24cfd71118189852d5007126eb`; final first-fee timing/copy clarification `9f099ac7798d2adb1a045d9efbf3498e1d3a4f14`. Fast-forwarded from `codex/custom-coaching-fees` into `uat` |
+| Approval | An admin enters a monthly fee, default suggestion ₹6,000; validated ₹1–₹1,00,000 with up to two decimals. The saved approval must acknowledge that exact quote. Free trials cannot carry a fee |
+| Parent agreement | New quoted enrolments require `billingPricingMode=custom_quote`, explicit policy consent and the current server version. Old fixed-price or missing consent cannot be reinterpreted to authorize an arbitrary fee; old receipts and legacy account prices remain valid under their saved terms |
+| Invoice schedule | Initial invoice due on approval. Later calendar coaching months are invoiced on the 1st and due by the end of the 5th IST. ₹100 per overdue day follows the new agreed policy; issued native invoices remain immutable, with separate late-fee invoices |
+| Fee changes | Admin-only revision-checked edits take effect next calendar month. Dated history preserves earlier cycle prices during scheduler catch-up. The parent notice and invoice show the saved amount before payment; SMTP delivery does not gate invoice creation. Superseded notices are suppressed, while a reversion corrects an earlier delivered notice |
+| Reminders | One grouped job per verified parent/date/current slot: 09:00, 12:00, 15:00, 18:00 IST across all children/months/late-fee invoices. Missed slots are not replayed. Pending invoices reconcile in bounded chunks; more than 20 invoices make progress before one complete-total email. Stopping future billing stops new cycles/fees, while existing payable debt still receives reminders |
+| Month-end summary | At 18:00 IST on the last calendar day, one immutable next-month snapshot is queued per current admin/month. Upcoming children/fees/total and older unpaid totals remain separate. Membership is checked again before sending; the dashboard retains the latest editable forecast |
+| UI / copy | Compact single-line parent child/month rows, itemized native invoice links, admin fee controls and next-month summary. Open fee/review drafts retain their original revision through silent refresh and require explicit review after a conflict. Parent forms disclose first-payment timing, monthly advance dates, late fees and no automatic debit without a public test-price stack |
+| Automated verification | 293 tests passed, including 68 SQL tests and meaningful provider/queue/email/UI/release tests. Final optimized/prerendered build passed; 59 assets (19,695,831 bytes) verified. Both billing entrypoints passed Deno 2.9.6 checks; project-local skill validator and diff checks passed |
+| Local browser verification | The actual components ran in an isolated, clearly labelled example-data harness with a fake RPC client: one child/month showed ₹3,000 + ₹200 = ₹3,200 with exact separate payment links; a next-month edit changed the forecast to ₹6,500 while the current ₹3,000 invoice stayed unchanged; ₹0 was blocked and ₹1 approval produced 100 paise in the mock callback. No real request, email, provider invoice or payment was created by this harness |
+| Applied backend | Only new migration `20261110065359_custom_coaching_fees.sql` applied to UAT in one guarded transaction, followed by schema reload. All seven source migrations are now applied; the existing manual CLI-history limitation remains. Seventeen new/replaced live function bodies match source; all nine private billing tables have RLS and no anonymous/authenticated direct table grants |
+| Function / endpoint checks | Updated `billing-worker` deployed with existing backend secrets and narrow bearer protection. Unsigned worker POST returned 401; authorized empty-queue POST returned 200 with all counters zero. Public terms returned 200 with custom-quote mode and default 600000 paise. Anonymous invoice reads, fee edits and approval RPCs returned 401/42501 |
+| Application deployment | Vercel `dpl_CTtBp6Hu74ABPsTQe9FYG46q1UBk`, READY, source `9f099ac7798d2adb1a045d9efbf3498e1d3a4f14`, verified alias `https://uat.letsaimit.com`. Documentation-only descendants may redeploy the same application source |
+| Live public form | Fresh deployed parent page opened enrolment and loaded Fee confirmed on approval / First payment due then, monthly 1–5 advance timing, ₹100/day after due, no automatic debit and an unchecked quoted-fee consent control. The fixed Team payment / Regular price stack and duplicate save instruction were absent. No consent, Google sign-in, parent submission or approval was performed during this live check |
+| Financial state | Billing accounts=0, invoices=0, jobs=0, ledger=0 after migration and verification. No submitted parent data, review, account price or financial record was fabricated for live testing |
+| Production parity preparation | Same seven migrations, three function inventories and configuration names staged in both deterministic source plans; shared backend digest `a55b8ab5220610aa475e5e5ff7bb539c0802d3e6fc89e890964196e0119f3c25`. Production reference remains unset/pending; matching source does not claim live infrastructure parity |
+| Website production | No production deployment, DNS, backend, OAuth or billing configuration change. Remote `main` remains `372be17da151f45d42c54b42b36d2d50ef51758a`; HTTPS homepage SHA-256 remains `6f32fc0cc051d17e1817e189f7a442bfe17b5e93a41e1a0bfeba0efb4aa5dc87` |
+
+Actual Razorpay payment, billing-email inbox placement, future scheduled reminder
+delivery and the next month-end email remain separate live evidence. Mocked
+provider/SMTP tests, simulated schedule boundaries and local UI checks do not
+establish those real deliveries. A new parent enrolment with current consent is
+required for the user's manual payment test; existing free trials stay free.
