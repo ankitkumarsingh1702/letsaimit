@@ -445,6 +445,15 @@ centered outside the visible scroller, so the following CSS-only correction
 left-aligns it on narrow screens. The corrected build passes. Documentation and
 this narrow layout correction may produce subsequent UAT deployment descendants.
 
+The mobile correction is live as source
+`04b97721688150fb1fd75a4971a6de7e3b714518`, Vercel
+`dpl_DxUGxAskCBaukD6VoTdf246kcXDM`, READY with the UAT alias. Reloading the
+actual signed-in parent at 390 × 844 verified the empty-state copy is fully
+visible, the first three attendance columns fit, and the workspace action menu
+exposes authorized destinations. Viewport overrides were reset. Neither live
+workspace logged browser warnings/errors; no coaching record was saved. Later
+documentation-only descendants carry the same verified runnable source.
+
 Remote `main` remains `372be17da151f45d42c54b42b36d2d50ef51758a` and the production
 HTTPS homepage is still 200 / 39,957 bytes with SHA-256
 `6f32fc0cc051d17e1817e189f7a442bfe17b5e93a41e1a0bfeba0efb4aa5dc87`.
