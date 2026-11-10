@@ -100,7 +100,8 @@ test("resumed instructions, visible requests and parent errors state the unfinis
     assert.match(copy, /Not sent yet/); assert.match(copy, /Confirm consent, then send/);
     const auth = { user: { id: google.id, email: google.email, isGoogle: true }, phase: "denied", client: null };
     const page = renderToStaticMarkup(React.createElement(SiteActionsProvider, { value: { openForm: () => {} } }, React.createElement(OwnRequests, { auth })));
-    assert.match(page, /<details class="parent-request-history" open=""/);
+    assert.match(page, /<section class="parent-request-history" aria-labelledby="parent-request-history-title"/);
+    assert.doesNotMatch(page, /<details class="parent-request-history"/, "saved requests stay visible without opening a disclosure");
     const error = renderToStaticMarkup(React.createElement(ParentRequestError, { error: "Connection lost. Try again.", loaded: true }));
     assert.match(error, /role="alert"/); assert.match(error, /Showing your previously loaded requests/);
     const pending = [{ formType: "enrol", reviewDecision: "pending" }, { formType: "trial", reviewDecision: "pending" }, { formType: "enrol", reviewDecision: "accepted" }];

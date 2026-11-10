@@ -14,8 +14,10 @@ export function validateAuthReturnTarget(value) {
   try { url = new URL(value, "https://letsaimit.com"); } catch { return null; }
   if (url.origin !== "https://letsaimit.com") return null;
   const entries = [...url.searchParams];
+  if (url.pathname === "/coach-dashboard/" && !entries.length) return "/coach-dashboard/";
   if (url.pathname === "/parent/") {
     if (!entries.length) return "/parent/";
+    if (entries.length === 1 && entries[0][0] === "view" && ["dashboard", "tracker", "account"].includes(entries[0][1])) return `/parent/?view=${entries[0][1]}`;
     if (entries.length !== 1 || entries[0][0] !== "resume" || !["trial", "enrol"].includes(entries[0][1])) return null;
     return `/parent/?resume=${entries[0][1]}`;
   }

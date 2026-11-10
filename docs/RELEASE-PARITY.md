@@ -391,3 +391,43 @@ UAT migrations/functions, while withholding production website deployment.
 | Data boundary | No UAT Auth users, registrations, invoices, jobs, ledger rows or secret values were copied. No actual submission, approval, mail, charge, refund or account deletion was performed |
 | Website production | No merge to main, deployment, alias or DNS change. Remote main remains `372be17da151f45d42c54b42b36d2d50ef51758a`; HTTPS homepage returned 200, 39,957 bytes, SHA-256 `6f32fc0cc051d17e1817e189f7a442bfe17b5e93a41e1a0bfeba0efb4aa5dc87` |
 | Status | **Prepared; production infrastructure not yet provisioned or verified.** The website remains gated behind an explicit production promotion |
+
+## 11 November 2026 — parent and coaching tracker
+
+| Boundary | Evidence / change |
+| --- | --- |
+| Product | Standalone parent Dashboard / Tracker / Account retains existing billing and requests. Tracker shows saved attendance and manual weekly feedback. The staff coaching workspace supports per-child and bulk Present / Absent / No session, revision-safe saves, manual feedback and admin-only coach assignments. A Google identity may hold all three capabilities; navigation never grants access |
+| Private data | Five new private RLS tables and scoped RPCs expose only current approved enrolments. Parents use current Auth UID ownership; coaches require current assignments. Missing attendance is not Absent; No session is excluded from the rate. Account deletion revokes tickets/assignments and scrubs coaching content without changing financial history |
+| Automatic updates | Visible workspaces reconcile every five seconds and on focus/save events. This is bounded polling, not a claimed WebSocket stream or sub-50ms delivery. Identity/access changes discard private snapshots; revision conflicts require explicit reload before saving |
+| Local verification | 395 automated tests passed before the final account-deletion concurrency review. Real nine-migration PostgreSQL-compatible fixtures exercise RPCs, role overlap, ownership, deletion, atomic conflict handling and email HTTP receipts. Actual React browser checks used eight clearly labelled example children with a local database and no cloud/SMTP writes: bulk save, individual overrides, weekly feedback, filtered parent rows and automatic cross-tab updates passed. Desktop/mobile controls and browser console were checked. Build and 59-asset verification passed |
+| Applied UAT foundation | Migration `20261110212805_coaching_tracker.sql`, SHA-256 `c7a519be35f73860e6a743c10a00d7e77a94437283be621eeac8b716df623e59`, applied as the sole new migration in a guarded transaction with PostgREST reload. Chrome SQL Editor read-only verification found all 24 function bodies matching source, all 12 public RPC privilege boundaries, seven stable read RPCs, five RLS-protected tables without direct client grants, the active minute scheduler and deletion trigger. Existing records remain 9 registrations / 3 invoices / 1 ledger row; all new coaching tables remain empty |
+| UAT function | `coaching-worker` deployed with its pinned dependency lock and an independent signing secret. Unauthorized scheduler POST returned 401, GET 405, AMP preflight 204 and an unknown ticket 403. Authorized scheduler returned the expected 503 `dynamic_email_not_enabled`; this is a disabled-feature guard, not evidence of email delivery |
+| Existing SMTP / Gmail boundary | Existing sender `ankitkumarsingh97593@gmail.com` and stored SMTP settings are unchanged, as requested. AMP templates validate for 8 and 100 children and the actual database → worker → mock SMTP → AMP POST path passes locally. Daily 21:00 IST emails are prepared for current approved admins, but both dispatch gates remain off pending actual Gmail sender approval. No attendance email has been sent and Gmail-native interaction is not recorded as live. Personal Gmail SMTP access and per-recipient developer allowlisting do not establish public sender approval |
+| Credential verification limit | The scoped deployment token worked for the migration, function and secrets, then subsequent read-only CLI calls returned 401. No token permissions were expanded. The successful Chrome SQL Editor checks above independently verify the applied foundation; no raw credentials were read from browser state |
+| Production boundary | Same migration/function/configuration source is staged for both targets. Production Supabase reference is still null; live backend parity remains pending provisioning. No production application, DNS, OAuth, SMTP or financial mutation is authorized by this UAT feature release |
+
+Final review found that authenticated tracker writes needed to serialize with
+the existing whole-account deletion boundary. Forward migration
+`20261110220027_coaching_tracker_write_identity_lock.sql` (SHA-256
+`a145c68731697c732526f2515e4256901d0e29897e942af3c9a98e773e9833ab`)
+replaces only the three authenticated write RPCs with the existing volatile Auth
+row-lock helper; stable read RPCs and permissions remain unchanged. A real
+database BEFORE-trigger regression rejects all three preceding implementations
+and accepts the forward fix. The final full suite passed **396 tests**; build
+and all 59 assets passed. Fresh-target checks also reject the old write bodies.
+
+The forward migration committed through the UAT SQL Editor with before/after
+function guards and a schema reload. A new read-only check found all 24 final
+function bodies, 12 RPC privilege boundaries and seven stable reads matching,
+with the same private-table protections, scheduler, deletion trigger and
+9 / 3 / 1 preserved record counts. Coaching rows remain empty and email dispatch
+disabled. The deterministic source plan now contains **10 migrations / five
+functions**, digest
+`780c178b501128f96d0773ec83cefc4d88f389787aca11873e04c5c401546ad3`.
+The applied forward SQL used source hash
+`5dfa36d455e7fc5775373cbbeb4f341354403e583fd0e7763c5b67671caceeac`;
+the committed file only normalizes its extra trailing blank line, with identical
+verified function bodies.
+This stages the production inventory; it does not establish live production
+parity. No real child attendance, manual feedback, approval, invoice, payment
+or account deletion was fabricated for verification.

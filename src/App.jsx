@@ -12,6 +12,7 @@ import NotFound from "./pages/NotFound.jsx";
 import Admin from "./pages/Admin.jsx";
 import SignIn from "./pages/SignIn.jsx";
 import ParentRequests from "./features/parent/ParentRequests.jsx";
+import StaffTracker from "./features/tracker/StaffTracker.jsx";
 import { AdminAuthProvider } from "./context/AdminAuth.jsx";
 import AnalyticsConsent from "./components/AnalyticsConsent.jsx";
 import { SiteActionsProvider } from "./context/SiteActions.jsx";
@@ -33,12 +34,14 @@ var pages = {
   admin: Admin,
   signin: SignIn,
   parent: ParentRequests,
+  coaching: StaffTracker,
   notfound: NotFound,
 };
 var formKinds = new Set(["trial", "society", "enroll"]);
 function App({ initialPage = "home" } = {}) {
   let page = useHashRoute(initialPage);
   let Page = pages[page];
+  const workspace = ["admin", "parent", "coaching"].includes(page);
   let mainRef = React.useRef(null);
   let formOpenerRef = React.useRef(null);
   let mediaOpenerRef = React.useRef(null);
@@ -141,11 +144,12 @@ function App({ initialPage = "home" } = {}) {
   return (
     <AdminAuthProvider>
     <SiteActionsProvider value={actions}>
-      {page !== "admin" && <Header page={page} onSkipToContent={skipToContent} />}
+      {!workspace && <Header page={page} onSkipToContent={skipToContent} />}
       <main id="main" ref={mainRef} tabIndex={-1}>
         <Page />
       </main>
-      {page !== "admin" && <><Footer />
+      {!workspace && <Footer />}
+      {page !== "admin" && <>
       <ContactDialog
         kind={formKind}
         onClose={closeForm}

@@ -103,6 +103,6 @@ export async function buildBackendParity({root=ROOT,target='all',targets}={}){
   const artifacts={brand:PUBLIC_BRAND,migrations,functions,dependencyMetadata,config:{path:'supabase/config.toml',sha256:digest(config)}};
   const backendArtifactDigest=digest(JSON.stringify(artifacts));
   return {schemaVersion:1,scope:'source-plan-only',backendArtifactDigest,...artifacts,
-    requiredBackendSecrets:{operatorProvided:['ADMIN_DASHBOARD_ORIGIN','NOTIFICATION_CRON_SECRET','RAZORPAY_KEY_ID','RAZORPAY_KEY_SECRET','RAZORPAY_WEBHOOK_SECRET','SMTP_FROM_EMAIL','SMTP_HOST','SMTP_PASSWORD','SMTP_PORT','SMTP_USER'],runtimeProvided:['SUPABASE_SERVICE_ROLE_KEY','SUPABASE_URL']},
+    requiredBackendSecrets:{operatorProvided:['ADMIN_DASHBOARD_ORIGIN','COACHING_DYNAMIC_EMAIL_READY','COACHING_EMAIL_SIGNING_SECRET','NOTIFICATION_CRON_SECRET','RAZORPAY_KEY_ID','RAZORPAY_KEY_SECRET','RAZORPAY_WEBHOOK_SECRET','SMTP_FROM_EMAIL','SMTP_HOST','SMTP_PASSWORD','SMTP_PORT','SMTP_USER'],runtimeProvided:['SUPABASE_SERVICE_ROLE_KEY','SUPABASE_URL']},
     targets:(target==='all'?TARGETS:[target]).map(name=>targetPlan(name,targets,backendArtifactDigest))};
 }

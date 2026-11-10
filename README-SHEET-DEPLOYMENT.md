@@ -94,10 +94,17 @@ On an existing target, compare applied versions first; do not replay its schema:
    deletion with retained private billing history, ownership isolation and
    recovery. Applied transactionally to UAT on 11 November 2026; see
    [README-ACCOUNT-DELETION.md](README-ACCOUNT-DELETION.md).
+9. `supabase/migrations/20261110212805_coaching_tracker.sql` — scoped coach
+   assignments, parent attendance and weekly feedback, plus recipient-bound
+   nightly admin attendance tickets. Email dispatch starts disabled; actual
+   target application and verification belong in the release ledger.
+10. `supabase/migrations/20261110220027_coaching_tracker_write_identity_lock.sql`
+    — serialize the three authenticated tracker writes with account deletion;
+    parent and staff reads retain their read-only transaction contract.
 
-Apply all eight complete files in order to a new, empty target. For an existing
+Apply all ten complete files in order to a new, empty target. For an existing
 target, verify what is applied and apply only the missing forward migrations;
-an existing seven-migration target needs only file 8. Record actual target
+an existing nine-migration target needs only file 10. Record actual target
 versions and checks in the release ledger. Never copy UAT submissions, Auth
 users or private billing rows into production.
 
@@ -112,7 +119,7 @@ broad membership-write rules. The following migration restores validated Gmail
 invitations and protected revocation for current Google admins. This live UAT
 application of the migrations does not establish their application to production.
 
-These eight UAT files were applied through the privileged SQL editor or an
+The first eight UAT files above were applied through the privileged SQL editor or an
 explicit transaction using the scoped deployment credential. UAT's CLI history
 table is absent. An official `migration repair --status applied` attempt could
 not connect because this network lacks IPv6. Do not rerun the existing schema
@@ -160,24 +167,30 @@ changed payload using that ID conflicts. Parent privacy consent is version
 `2026-11-09`; unchanged programme terms remain `2026-11-05`. Parent email
 addresses may repeat for siblings.
 
-One Google identity can be a parent and an approved admin simultaneously.
-Coach permissions are independent and are not implemented by this release.
+One Google identity can be a parent, an approved admin and an assigned coach
+simultaneously. Migration 9 adds coach permissions independently of the admin
+allowlist. A coach sees only their assigned live enrolments through scoped
+tracker RPCs, and access begins when the assignment start date arrives. Parents see only
+their own accepted enrolments, attendance and manual weekly feedback.
 
 ## Backend function artifact set
 
-The current source has **eight migrations and four Edge Functions**:
+The current source has **ten migrations and five Edge Functions**:
 
 - `admin-notifications` — queued request alerts and activity digests.
 - `billing-worker` — invoice, reminder and billing recovery work.
 - `razorpay-webhook` — signed provider events and verified payment updates.
 - `delete-account` — confirmed self-deletion and deletion recovery.
+- `coaching-worker` — nightly admin attendance email preparation and
+  token-validated, revision-checked in-email attendance reads/saves.
 
 Deploy their shared modules and committed dependency metadata from the same
 tested source. `npm run parity:plan` inventories these artifacts and their
 fingerprints. Its source plan does not prove a function was deployed or a
 migration applied. The functions disable gateway JWT checking because each
 handler enforces its own Google identity, worker bearer or webhook signature
-boundary; do not expose privileged work through a public browser key.
+boundary; the coaching email action uses a recipient-bound, expiring attendance
+capability. Do not expose privileged work through a public browser key.
 
 Configure backend secrets in the selected Supabase project from
 [`supabase/functions/.env.example`](supabase/functions/.env.example), including
@@ -186,6 +199,17 @@ and bearer in Vault before its scheduler. Runtime-provided Supabase secrets
 remain server-only. See [notifications](README-NOTIFICATIONS.md),
 [billing](README-BILLING.md) and [account deletion](README-ACCOUNT-DELETION.md)
 for their distinct authorization, activation and recovery checks.
+
+Coaching email uses this target's existing notification worker Vault URL/bearer
+to derive its `/coaching-worker` endpoint, plus a separate
+`COACHING_EMAIL_SIGNING_SECRET`. Keep `coaching_settings.email_enabled=false`
+and `COACHING_DYNAMIC_EMAIL_READY=false` during preparation. Enabling the
+feature requires the actual sender's Gmail dynamic-email approval and mail
+authentication; deploying the function alone does not establish those checks.
+The source schedules one attendance roster per current admin each day after
+21:00 IST, including unassigned accepted children. No missing mark is converted
+to absence. The current email batch limit is 100 children; larger rosters fail
+explicitly rather than silently omit children.
 
 For production backend-only staging, verify schema/grants/RLS, separately
 bootstrap approved access, deploy the same function set and prepare the

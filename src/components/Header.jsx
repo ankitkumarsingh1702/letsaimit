@@ -100,7 +100,7 @@ function Header({ page, onSkipToContent }) {
   }
   function renderNavLink(item) {
     if (item.page === "signin" && user?.isGoogle) return <React.Fragment key={item.page}>
-      <a href="/parent/" data-route="parent" aria-current={page === "parent" ? "page" : undefined} onClick={closeMenu}>My requests</a>
+      <a href="/parent/" data-route="parent" aria-current={page === "parent" ? "page" : undefined} onClick={closeMenu}>Parent dashboard</a>
       {phase === "authorized" && <a href="/admin/" data-route="admin" aria-current={page === "admin" ? "page" : undefined} onClick={closeMenu}>Dashboard</a>}
     </React.Fragment>;
     const isAdminLink = item.page === "signin" && phase === "authorized";

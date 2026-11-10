@@ -11,18 +11,24 @@ declare production_ref text:=current_setting('letsaimit.production_ref',true);
     'private.notification_settings','private.notification_digest_windows','private.notification_activity','private.admin_notification_outbox',
     'private.billing_settings','private.billing_accounts','private.billing_invoices','private.billing_ledger','private.billing_jobs',
     'private.billing_webhook_events','private.billing_approval_quotes','private.billing_price_changes','private.billing_month_summaries',
-    'private.account_deletions','private.account_deletion_registrations'];
+    'private.account_deletions','private.account_deletion_registrations',
+    'private.coaching_assignments','private.coaching_attendance','private.coaching_feedback','private.coaching_settings','private.coaching_email_tickets'];
   service_rpcs text[]:=array['public.enqueue_admin_notification_digests()','public.claim_admin_notification()',
     'public.prepare_admin_notification(uuid,uuid)','public.finish_admin_notification(uuid,uuid,text,text)',
     'public.enqueue_billing_work()','public.claim_billing_job()','public.prepare_billing_job(uuid,uuid)',
     'public.finish_billing_job(uuid,uuid,text,text)','public.save_billing_provider_snapshot(uuid,jsonb)',
     'public.ingest_billing_webhook(text,text,text,text,text)',
     'public.prepare_account_deletion(uuid,text,boolean)','public.claim_account_deletions(uuid,integer)',
-    'public.finish_account_deletion(uuid,uuid,boolean,text)','public.get_account_deletion_status(uuid)'];
+    'public.finish_account_deletion(uuid,uuid,boolean,text)','public.get_account_deletion_status(uuid)',
+    'public.enqueue_coaching_attendance()','public.claim_coaching_email()','public.prepare_coaching_email(uuid,uuid)',
+    'public.set_coaching_email_token(uuid,uuid,text)','public.finish_coaching_email(uuid,uuid,text,text)',
+    'public.read_coaching_email_attendance(uuid,text)','public.save_coaching_email_attendance(uuid,text,jsonb)'];
   authenticated_rpcs text[]:=array['public.is_admin()','public.submit_registration(jsonb)','public.list_my_registrations()',
     'public.review_registration(uuid,text,bigint)','public.review_registration(uuid,text,bigint,integer)',
     'public.set_monthly_coaching_fee(uuid,integer,bigint)','public.cancel_billing_account(uuid,bigint)',
-    'public.list_my_billing()','public.list_admin_billing()'];
+    'public.list_my_billing()','public.list_admin_billing()',
+    'public.list_my_tracker()','public.list_staff_tracker(date)','public.set_coaching_assignment(uuid,text,integer[],date,bigint)',
+    'public.save_coaching_attendance(date,jsonb)','public.save_coaching_feedback(uuid,date,text,text,bigint)'];
 begin
   if production_ref is null or production_ref!~'^[a-z0-9]{20}$'
     or uat_ref is null or uat_ref!~'^[a-z0-9]{20}$' or production_ref=uat_ref then
@@ -40,7 +46,7 @@ begin
       or has_any_column_privilege('authenticated',relation,'SELECT,INSERT,UPDATE,REFERENCES')) then
       raise exception 'FRESH_BACKEND_PRIVATE_GRANT: %',name;
     end if;
-    if name<>all(array['public.allowed_admins','private.notification_settings','private.billing_settings']) then
+    if name<>all(array['public.allowed_admins','private.notification_settings','private.billing_settings','private.coaching_settings']) then
       execute format('select count(*) from %s',relation) into n;
       if n<>0 then raise exception 'FRESH_BACKEND_APP_DATA_PRESENT: %',name;end if;
     end if;
@@ -49,7 +55,9 @@ begin
   if (select count(*) from private.notification_settings)<>1
     or (select dispatch_enabled from private.notification_settings where id) is distinct from false
     or (select count(*) from private.billing_settings)<>1
-    or (select enabled from private.billing_settings where id) is distinct from false then
+    or (select enabled from private.billing_settings where id) is distinct from false
+    or (select count(*) from private.coaching_settings)<>1
+    or (select email_enabled from private.coaching_settings where id) is distinct from false then
     raise exception 'FRESH_BACKEND_DISPATCH_MUST_STAY_DISABLED';
   end if;
   if has_any_column_privilege('anon','public.registrations','SELECT,INSERT,UPDATE')
@@ -82,14 +90,25 @@ begin
       or (p.proname<>'is_allowed_admin' and has_function_privilege('authenticated',p.oid,'EXECUTE')))) then
     raise exception 'FRESH_BACKEND_PRIVATE_FUNCTION_GRANT';
   end if;
-  foreach name in array array['private.require_google_user()','public.list_my_registrations()','public.list_my_billing()'] loop
+  foreach name in array array['private.require_google_user()','public.list_my_registrations()','public.list_my_billing()',
+    'public.list_my_tracker()','public.list_staff_tracker(date)','public.read_coaching_email_attendance(uuid,text)'] loop
     routine:=to_regprocedure(name);
     if routine is null or (select provolatile from pg_proc where oid=routine)<>'s' then raise exception 'FRESH_BACKEND_READ_RPC_VOLATILITY: %',name;end if;
+  end loop;
+  if (select provolatile from pg_proc where oid=to_regprocedure('private.lock_google_registration_user()')) is distinct from 'v' then
+    raise exception 'FRESH_BACKEND_WRITE_IDENTITY_LOCK_MISSING';
+  end if;
+  foreach name in array array['public.set_coaching_assignment(uuid,text,integer[],date,bigint)',
+    'public.save_coaching_attendance(date,jsonb)','public.save_coaching_feedback(uuid,date,text,text,bigint)'] loop
+    routine:=to_regprocedure(name);
+    if routine is null or (select position('private.lock_google_registration_user()' in prosrc) from pg_proc where oid=routine)=0 then
+      raise exception 'FRESH_BACKEND_WRITE_IDENTITY_LOCK_MISSING: %',name;
+    end if;
   end loop;
   if to_regclass('cron.job') is null or to_regclass('vault.decrypted_secrets') is null or to_regnamespace('net') is null then
     raise exception 'FRESH_BACKEND_SCHEDULER_EXTENSIONS_MISSING';
   end if;
-  foreach name in array array['notification','billing','account_deletion'] loop
+  foreach name in array array['notification','billing','account_deletion','coaching'] loop
     execute 'select count(*) from cron.job where active and schedule=$1 and command=$2' into n
       using '* * * * *','select private.wake_'||name||'_worker();';
     if n<>1 then raise exception 'FRESH_BACKEND_CRON_MISSING_OR_DUPLICATED: %',name;end if;
@@ -119,7 +138,10 @@ select ns.nspname as schema,p.proname,pg_get_function_identity_arguments(p.oid) 
       'review_registration','set_monthly_coaching_fee','cancel_billing_account','list_my_billing','list_admin_billing',
       'enqueue_admin_notification_digests','claim_admin_notification','prepare_admin_notification','finish_admin_notification',
       'enqueue_billing_work','claim_billing_job','prepare_billing_job','finish_billing_job','save_billing_provider_snapshot','ingest_billing_webhook',
-      'prepare_account_deletion','claim_account_deletions','finish_account_deletion','get_account_deletion_status'))
+      'prepare_account_deletion','claim_account_deletions','finish_account_deletion','get_account_deletion_status',
+      'list_my_tracker','list_staff_tracker','set_coaching_assignment','save_coaching_attendance','save_coaching_feedback',
+      'enqueue_coaching_attendance','claim_coaching_email','prepare_coaching_email','set_coaching_email_token','finish_coaching_email',
+      'read_coaching_email_attendance','save_coaching_email_attendance'))
   order by ns.nspname,p.proname,arguments;
 select ns.nspname as schema,c.relname,p.polname,p.polcmd,p.polroles,
   encode(sha256(convert_to(coalesce(pg_get_expr(p.polqual,p.polrelid),'')||'|'||coalesce(pg_get_expr(p.polwithcheck,p.polrelid),''),'UTF8')),'hex') as policy_sha256
