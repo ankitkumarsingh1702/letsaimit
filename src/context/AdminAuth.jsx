@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { getSupabaseClient } from "../lib/supabase.js";
-import { createAuthorizationGate, createSingleFlight, googleSignInOptions, readGuardedAdminSession, readGoogleUser, identityAfterAccessFailure, isConfirmedAccessDenial } from "../lib/adminAuth.js";
+import { createAuthorizationGate, createAuthIdentityEpoch, createSingleFlight, googleSignInOptions, readGuardedAdminSession, readGuardedGoogleUser, identityAfterAccessFailure, isConfirmedAccessDenial } from "../lib/adminAuth.js";
 import { storeAuthReturnTarget, clearAuthReturnTarget } from "../lib/authReturn.js";
 import { clearRegistrationDrafts } from "../features/registration/registrationDraft.js";
 
@@ -11,7 +11,7 @@ export function AdminAuthProvider({ children }) {
   const client = useMemo(() => typeof window === "undefined" ? null : getSupabaseClient(), []);
   const [auth, setAuth] = useState(initialState);
   const current = useRef(initialState);
-  const epoch = useRef(0);
+  const epoch = useRef(createAuthIdentityEpoch());
   const gate = useRef(createAuthorizationGate());
   const coalesce = useRef(createSingleFlight());
   const authTimers = useRef(new Set());
@@ -25,17 +25,17 @@ export function AdminAuthProvider({ children }) {
   }, []);
   const checkAccess = useCallback(() => {
     if (gate.current.isBlocked()) return Promise.resolve(false);
-    const requestEpoch = epoch.current;
+    const requestEpoch = epoch.current.ticket();
     return coalesce.current(requestEpoch, async () => {
     try {
       const next = await readGuardedAdminSession(client, gate.current);
       if (!next || gate.current.isBlocked()) return false;
-      if (!mounted.current || epoch.current !== requestEpoch) return false;
+      if (!mounted.current || !epoch.current.allows(requestEpoch)) return false;
       publish(next);
       return next.phase === "authorized";
     } catch (error) {
       if (gate.current.isBlocked()) return false;
-      if (!mounted.current || epoch.current !== requestEpoch) return false;
+      if (!mounted.current || !epoch.current.allows(requestEpoch)) return false;
       const verifiedUser = identityAfterAccessFailure(error, current.current.user);
       if (isConfirmedAccessDenial(error)) {
         publish({ phase: "denied", user: verifiedUser, error: "" });
@@ -53,7 +53,7 @@ export function AdminAuthProvider({ children }) {
     void checkAccess().catch(() => {});
     const listener = client?.auth.onAuthStateChange((_event, session) => {
       if (gate.current.isBlocked()) return;
-      ++epoch.current;
+      epoch.current.observe(session);
       if (!session) {
         publish({ phase: "signed_out", user: null, error: "" });
         return;
@@ -74,7 +74,7 @@ export function AdminAuthProvider({ children }) {
     document.addEventListener("visibilitychange", refresh);
     return () => {
       mounted.current = false;
-      ++epoch.current;
+      epoch.current.invalidate();
       listener?.data?.subscription?.unsubscribe();
       authTimers.current.forEach(timer => window.clearTimeout(timer));
       authTimers.current.clear();
@@ -87,7 +87,7 @@ export function AdminAuthProvider({ children }) {
   const signIn = useCallback(async (returnTarget = "/admin/") => {
     if (!client) throw new Error("Google sign-in is not configured. Please contact LetsAimIt.");
     gate.current.allowSignIn();
-    ++epoch.current;
+    epoch.current.invalidate();
     publish({ phase: "signing_in", user: null, error: "" });
     // Clear an earlier bound account first; then preserve only this new explicit return intent.
     storeAuthReturnTarget(returnTarget);
@@ -102,22 +102,23 @@ export function AdminAuthProvider({ children }) {
   const verifyGoogleUser = useCallback(async () => {
     if (!client || gate.current.isBlocked()) return null;
     const ticket = gate.current.ticket();
-    const requestEpoch = epoch.current;
+    const requestEpoch = epoch.current.ticket();
     try {
-      const user = await readGoogleUser(client);
-      if (!gate.current.allows(ticket) || epoch.current !== requestEpoch) return null;
+      const user = await readGuardedGoogleUser(client, gate.current, epoch.current);
+      if (!gate.current.allows(ticket) || !epoch.current.allows(requestEpoch)) return null;
       if (!user) publish({ phase: "denied", user: null, error: "Sign in with Google to continue." });
       else if (current.current.user?.id !== user.id) publish({ phase: "denied", user, error: "" });
       return user;
     } catch (error) {
-      if (gate.current.allows(ticket) && epoch.current === requestEpoch && isConfirmedAccessDenial(error)) publish({ phase: "denied", user: null, error: "Sign in with Google again to continue." });
+      if (gate.current.allows(ticket) && epoch.current.allows(requestEpoch) && isConfirmedAccessDenial(error)) publish({ phase: "denied", user: null, error: "Sign in with Google again to continue." });
       throw new Error(isConfirmedAccessDenial(error) ? "Sign in with Google again to continue." : "Your Google account could not be checked. Please retry.");
     }
   }, [client, publish]);
   const signOut = useCallback(async () => {
     gate.current.block();
     clearRegistrationDrafts(); clearAuthReturnTarget();
-    const signOutEpoch = ++epoch.current;
+    epoch.current.invalidate();
+    const signOutEpoch = epoch.current.ticket();
     authTimers.current.forEach(timer => window.clearTimeout(timer));
     authTimers.current.clear();
     // Clear private UI immediately, including when the network is unavailable.
@@ -125,9 +126,9 @@ export function AdminAuthProvider({ children }) {
     try {
       const result = await client?.auth.signOut({ scope: "local" });
       if (result?.error) throw result.error;
-      if (mounted.current && epoch.current === signOutEpoch) publish({ phase: "signed_out", user: null, error: "" });
+      if (mounted.current && epoch.current.allows(signOutEpoch)) publish({ phase: "signed_out", user: null, error: "" });
     } catch {
-      if (mounted.current && epoch.current === signOutEpoch) publish({ phase: "signed_out", user: null, signOutRetryable: true, error: "Sign-out could not finish. Retry before sharing this browser." });
+      if (mounted.current && epoch.current.allows(signOutEpoch)) publish({ phase: "signed_out", user: null, signOutRetryable: true, error: "Sign-out could not finish. Retry before sharing this browser." });
     }
   }, [client, publish]);
   const value = useMemo(() => ({ client, ...auth, signIn, signOut, checkAccess, verifyGoogleUser }), [client, auth, signIn, signOut, checkAccess, verifyGoogleUser]);

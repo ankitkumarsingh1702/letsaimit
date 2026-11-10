@@ -109,6 +109,33 @@ export async function readGuardedAdminSession(client, gate) {
   return gate.allows(ticket) ? session : null;
 }
 
+/** Token refresh is not an account change; only identity boundaries invalidate reads. */
+export function createAuthIdentityEpoch() {
+  let generation = 0;
+  let subject = null;
+  return {
+    observe(session) {
+      const next = typeof session?.user?.id === "string" && session.user.id ? session.user.id : null;
+      const changed = next === null || next !== subject;
+      subject = next;
+      if (changed) ++generation;
+      return changed;
+    },
+    invalidate() { subject = null; ++generation; },
+    ticket() { return generation; },
+    allows(ticket) { return ticket === generation; },
+  };
+}
+
+/** Verify remotely, then discard replies crossing sign-out or an account switch. */
+export async function readGuardedGoogleUser(client, gate, identityEpoch) {
+  if (gate.isBlocked()) return null;
+  const gateTicket = gate.ticket();
+  const identityTicket = identityEpoch.ticket();
+  const user = await readGoogleUser(client);
+  return gate.allows(gateTicket) && identityEpoch.allows(identityTicket) ? user : null;
+}
+
 /** Share overlapping checks for one auth generation; slow replies cannot starve. */
 export function createSingleFlight() {
   let flight = null;
