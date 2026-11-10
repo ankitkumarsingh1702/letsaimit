@@ -10,8 +10,8 @@ backend; do not point it at the UAT database to activate these features.
 Activated on UAT on 10 November 2026. Live verification covered a Google parent
 save, four SMTP-accepted admin alerts, the sender's inbox, saved review/parent
 tracking, sign-out cleanup, a fresh Google round trip and the 28-column CSV.
-Four-hour summaries are scheduled; a scheduled summary delivery was not forced
-or observed in that check. See `docs/RELEASE-PARITY.md` for source/deployment
+The sender's Gmail inbox also showed a scheduled four-hour summary during the
+later 10 November investigation. See `docs/RELEASE-PARITY.md` for source/deployment
 references and the separate migration-history administration limitation.
 
 ## Product contract
@@ -21,6 +21,8 @@ references and the separate migration-history administration limitation.
   callback and public LetsAimIt branding.
 - A same-tab draft lasts at most 30 minutes through OAuth. Returning restores
   answers for review, clears consent/terms, and never automatically submits.
+  The form states that it is not sent yet; the parent confirms consent and sends
+  the final registration. A Google login alone must not be counted as a request.
 - Google account ID owns a new request. Entered contact email does not establish
   ownership. Existing rows remain unclaimed; matching an email never transfers them.
 - `/parent/` reads only the current account's projected requests. It cannot read
@@ -146,6 +148,15 @@ in the next summary; it does not silently change the displayed window's counts.
 No new requests or review activity means no summary email.
 
 ## Verification record
+
+For a missing request or alert, check the committed registration first, then
+the per-admin outbox jobs, worker responses and recipient inbox. A filled draft
+or successful Google login is not a saved request. Do not create consent, change
+ownership by matching a contact email, or resend old alerts to make counts match.
+The admin **Approved** metric counts accepted enrolment reviews; **Follow-up
+status** tracks contact work and does not create an invoice. Parent request
+errors stay visible, and the saved-row lists refresh after focus/save events
+through their existing authorized reads.
 
 Source changes, local database tests, Deno checking, hosted migrations, SMTP
 acceptance, inbox receipt and website deployment are separate evidence. Update

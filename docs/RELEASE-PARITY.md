@@ -4,10 +4,11 @@ This ledger records evidence, not permission to deploy. It is project-local.
 The default **merge and deploy** target is UAT. Production work requires the
 explicit **merge and deploy to prod** instruction.
 
-Latest UAT application source: `9f099ac7798d2adb1a045d9efbf3498e1d3a4f14`
-(admin-quoted coaching fees, next-month price changes, four parent reminder slots
-and month-end summaries). Manual live-payment testing is reserved for the user.
-See the dated custom-fee release evidence below.
+Latest tested application source: `62775bd9f8c0f2eb07a4ff0bbb00a08065430079`
+(clear unsent enrolment instructions, saved-row refresh, visible parent requests,
+and actual approved-enrolment counts; retains the quoted coaching-fee flow).
+UAT deployment evidence is recorded below. Manual live-payment testing is
+reserved for the user.
 Earlier tables remain a dated record.
 
 Latest verified UAT workflow source: `f22e83265d612da094234699a4834f7248b2ef67`
@@ -298,3 +299,20 @@ delivery and the next month-end email remain separate live evidence. Mocked
 provider/SMTP tests, simulated schedule boundaries and local UI checks do not
 establish those real deliveries. A new parent enrolment with current consent is
 required for the user's manual payment test; existing free trials stay free.
+
+## 10 November 2026 — missing-request and notification investigation
+
+| Boundary | Evidence / change |
+| --- | --- |
+| Source | `62775bd9f8c0f2eb07a4ff0bbb00a08065430079`, built on the prior quoted-fee UAT release; no schema, runtime secret, worker or provider change |
+| Live save boundary | Read-only UAT queries found seven old requests, zero custom-quote requests, zero billing accounts/invoices/jobs, and zero requests owned by the reported parent account. Chrome showed that parent's filled, restored enrolment with unchecked consent and an available **Send registration** action. The request was still unsent; no ownership or consent was fabricated |
+| Live email boundary | Dispatch enabled, trigger enabled, recovery cron active each minute. The preceding hour had 60 successful cron runs and 120 HTTP 200 pg_net responses across the two workers. Four earlier new-request jobs and four digest jobs were SMTP accepted, no failures/pending jobs. Sender's Gmail inbox visibly contained the earlier trial alert (03:23 IST) and scheduled digest (05:30 IST). This proves those deliveries to that inbox, not a new enrolment or every recipient's inbox placement |
+| Live browser baseline | Owner admin's long-open tab lacked Billing; a browser reload loaded the current build, Billing and live saved data. Parent dashboard's empty rows agreed with the read-only database result. No payment, approval, parent consent or new submission was performed by the agent |
+| Product fixes | Resumed draft explicitly says **Not sent yet**; sign-in action describes the later send step. A durable receipt plus fresh same-account verification notifies list readers even after form closure, while stale success panels stay suppressed. Parent requests open by default and errors are visible. Admin **Approved** counts accepted enrolment reviews instead of the unrelated Confirmed follow-up status; existing follow-up values and CSV data remain intact. Save/focus events use existing coalesced authorized refresh |
+| Local checks | 299 tests passed; build and 59-asset verification passed; independent source review found no substantive defect. New tests compose actual draft/Auth-return/validation/transport helpers with mocked Auth/RPC and render real components through SSR. They do not mount a browser OAuth callback or establish live request/payment completion |
+| Parity / release boundary | Same deterministic backend digest `a55b8ab5220610aa475e5e5ff7bb539c0802d3e6fc89e890964196e0119f3c25`; all seven migrations unchanged and staged for both targets. Production backend reference remains pending. Production `main` and HTTPS homepage hash match the prior baseline; no production mutations |
+
+The parent's own consent and final send remain the live save boundary. New
+admin alerts, quoted approval and the user's manual payment can be checked only
+after that request is actually saved. Do not describe the empty-queue health
+checks or mocked contract tests as completing that live journey.
