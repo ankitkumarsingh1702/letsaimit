@@ -9,6 +9,9 @@ Latest UAT application release: `0ced92e5343008fb941d14cb82119c6aed26fed6`
 Razorpay credentials and webhook setup). See the 10 November evidence below.
 Earlier tables remain a dated record.
 
+Latest verified UAT workflow source: `f22e83265d612da094234699a4834f7248b2ef67`
+(project-local parity workflow and release checks; no additional product UI change).
+
 ## Public identity contract
 
 | Setting | Required value in both environments |
@@ -132,6 +135,23 @@ side effect of a website release.
 
 Repository skill and guidance changes alone do not establish a runtime fix,
 an applied migration, a deployed release or the user's live journey.
+
+## UAT/production workflow source — 10 November 2026
+
+| Evidence | Record |
+| --- | --- |
+| Shared source | `f22e83265d612da094234699a4834f7248b2ef67`; project-local `uat-prod-parity-workflow`, linked from AGENTS and the release skill |
+| Deterministic inventory | `npm run parity:plan` inventories six ordered migrations, three function entrypoints and their relative imports, function gateway settings, Deno config/lock metadata and required secret names; it does not read secret values or change cloud state |
+| Shared backend digest | `a292eff274c8b7e4ca4a8640aab7bc288c9a7a94fca209c1002839a0a6ef3665` for both target source plans |
+| Deployment pipeline | Vercel runs `release:build`: configuration guard → both-target source plan → tests → optimized/prerendered build |
+| Automated verification | 256 tests and the build passed locally, including 13 focused parity/release tests; the skill validator passed. Independent forward review covered default UAT release, an explicit production request with missing backend configuration, and shared branding under provider-specific OAuth requirements |
+| UAT deployment | Vercel `dpl_ARk1kS66R587HTuhUerjnP6WaTfv`, READY, source `f22e83265d612da094234699a4834f7248b2ef67`, aliases include `https://uat.letsaimit.com`; unauthenticated HTTPS homepage returned 200 |
+| Source plan versus runtime | Plan scope is `source-plan-only`; UAT source inventory is available. Applied-backend and live-journey fields remain `not_verified` in this offline plan and require separate dated evidence below |
+| Production preparation | Same migration/function artifact set staged; production backend reference remains unset (`BACKEND_NOT_CONFIGURED`). Production infrastructure parity is pending, not claimed from matching source hashes |
+| Website production | No production release or configuration change. Remote `main` remains `372be17da151f45d42c54b42b36d2d50ef51758a`; HTTPS homepage returned 200 with unchanged SHA-256 `6f32fc0cc051d17e1817e189f7a442bfe17b5e93a41e1a0bfeba0efb4aa5dc87` |
+
+The workflow release does not by itself enable billing, complete Google brand
+review or prove a parent payment. Those provider/runtime results remain separate.
 
 ## UAT release evidence — 10 November 2026, compact CRM
 
