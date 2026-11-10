@@ -18,6 +18,7 @@
 .parent-request-table tbody tr:last-child td { border-bottom: 0; }
 .parent-request-count { padding: 12px; text-align: left; color: var(--muted); }
 .parent-request-error { padding: 12px; border: 1px solid #cfb5ad; border-radius: 5px; color: #7c3e31; font-size: 14px; }
+.parent-request-pending { margin: 0 0 14px; padding: 7px 10px; border: 1px solid #e1e7e1; border-radius: 4px; color: #5f7165; background: #f8faf8; font-size: 11px; }
 .parent-request-note { margin-block: 20px; }
 .parent-request-history { margin-top: 24px; padding-top: 12px; border-top: 1px solid #e5e8e6; }
 .parent-request-history > summary { color: #5c6e61; font-size: 11px; cursor: pointer; }

@@ -158,7 +158,7 @@ export function deriveSummary(rows) {
   return {
     savedRequests: metric(rows.length),
     awaitingFollowUp: metric(byStatus.new),
-    confirmedEnrolmentRequests: metric(rows.filter((row) => row.formType === 'enrol' && row.status === 'confirmed').length),
+    approvedEnrolmentRequests: metric(rows.filter((row) => row.formType === 'enrol' && row.reviewDecision === 'accepted').length),
     trialRequests: metric(rows.filter((row) => row.formType === 'trial').length),
     enrolmentRequests: metric(rows.filter((row) => row.formType === 'enrol').length),
     byStatus,
@@ -225,7 +225,7 @@ export function buildRegisterCsv(allSavedRows, filters = {}, { referenceIso = ne
 }
 
 export function defaultFilters(referenceIso = new Date().toISOString()) {
-  return { query: '', period: periodForPreset('all', referenceIso), formType: null, status: null, community: null, sport: null, assignee: null, onlyUnassigned: false, page: 1, pageSize: 10, sort: { field: 'submittedAt', direction: 'desc' } };
+  return { query: '', period: periodForPreset('all', referenceIso), formType: null, status: null, reviewDecision: null, community: null, sport: null, assignee: null, onlyUnassigned: false, page: 1, pageSize: 10, sort: { field: 'submittedAt', direction: 'desc' } };
 }
 
 export function toAdminRequest(record) {

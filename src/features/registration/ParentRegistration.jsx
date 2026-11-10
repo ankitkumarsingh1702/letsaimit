@@ -15,6 +15,19 @@ export function QuotedBillingPolicy({ lateFeePaise }) {
   return <><h4>Monthly coaching</h4><p>Fee confirmed on approval. First payment due then.</p><p>Next months: pay 1–5 in advance. {formatMoney(lateFeePaise)}/day after due. No automatic debit.</p></>;
 }
 
+export function RegistrationResumeNotice() {
+  return <p className="fm-handoff-note" role="status">Not sent yet. Confirm consent, then send.</p>;
+}
+
+/** A committed save notifies readers even if its form closed; another account never does. */
+export function notifyVerifiedRegistrationSave({ receipt, submittedUserId, verifiedUser, target = typeof window === "undefined" ? null : window }) {
+  if (!target || !submittedUserId || verifiedUser?.isGoogle !== true || verifiedUser.id !== submittedUserId
+    || receipt?.ok !== true || typeof receipt.id !== "string" || !receipt.id || typeof receipt.duplicate !== "boolean"
+    || !Number.isFinite(Date.parse(receipt.savedAt))) return false;
+  target.dispatchEvent(new CustomEvent("letsaimit:registration-saved", { detail: { userId: submittedUserId, requestId: receipt.id } }));
+  return true;
+}
+
 const ParentRegistration = forwardRef(function ParentRegistration({ mode, active, onSwitchKind, Arrow }, ref) {
   const auth = useAdminAuth();
   const isEnrol = mode === "enroll";
@@ -140,11 +153,11 @@ const ParentRegistration = forwardRef(function ParentRegistration({ mode, active
       const receipt = await saveRegistration(isEnrol ? "enrol" : "trial", data, { agreed: true, guardian: true, terms: isEnrol }, id);
       const currentActor = await auth.verifyGoogleUser();
       if (!currentActor || currentActor.id !== actor.id) throw new Error("Your Google account changed. Check the account and submit again.");
+      notifyVerifiedRegistrationSave({ receipt, submittedUserId: actor.id, verifiedUser: currentActor });
       if (!canConfirmRegistrationReceipt({ submittedUserId: actor.id, verifiedUser: currentActor, generation, currentGeneration: requestGeneration.current, active: activeRef.current })) return;
       clearRegistrationDraft(mode); setRestored(false);
       setHandoffUrl(createWhatsAppUrl(mode, data));
       setStatus("saved");
-      window.dispatchEvent(new CustomEvent("letsaimit:registration-saved", { detail: { userId: actor.id, requestId: receipt.id } }));
     } catch (error) {
       if (!activeRef.current || requestGeneration.current !== generation) return;
       if (error.code === "billing_terms_changed") {
@@ -211,8 +224,8 @@ const ParentRegistration = forwardRef(function ParentRegistration({ mode, active
         {isEnrol && input("note", "Note for the coach", { full: true, multiline: true, optional: true, maxLength: 500 })}
       </div>
       <div className="fm-form-footer">
-        {restored && <p className="fm-handoff-note" role="status">Your answers are back. Please review them and confirm consent again before sending.</p>}
-        {auth.user?.isGoogle ? <p className="fm-handoff-note">Submitting as {auth.user.email}. <a href="/parent/">My requests</a></p> : <p className="fm-handoff-note">Answers stay in this tab for 30 minutes.</p>}
+        {restored && <RegistrationResumeNotice />}
+        {auth.user?.isGoogle ? <p className="fm-handoff-note">Submitting as {auth.user.email}. <a href="/parent/">My requests</a></p> : <p className="fm-handoff-note">Google sign-in first. Then confirm consent and send. Answers stay in this tab for 30 minutes.</p>}
         <div className="fm-full sk-consent"><label className="fm-consent" htmlFor={fieldId("consent")}>
           <input id={fieldId("consent")} type="checkbox" {...register("consent")} required aria-invalid={errors.consent ? true : undefined} aria-describedby={`${fieldId("consent")}-error`} />
           <span>I am the parent or guardian. I agree to use of these details for this enquiry and a reply from LetsAimIt. <a href="/privacy/" target="_blank" rel="noopener noreferrer">Privacy policy</a></span>
@@ -231,7 +244,7 @@ const ParentRegistration = forwardRef(function ParentRegistration({ mode, active
         </div>}
         {status !== "saved" && <>
           <button className="fm-primary" type="submit" disabled={["verifying", "saving", "signing_in"].includes(status) || ["checking", "signing_in", "signing_out"].includes(auth.phase) || isEnrol && !billingTerms}>
-            <span>{status === "verifying" ? "Checking Google…" : status === "saving" ? "Saving…" : status === "signing_in" ? "Opening Google…" : !auth.user?.isGoogle ? "Continue with Google" : saveError ? "Retry save" : isEnrol ? "Send registration" : "Request a free trial"}</span><Arrow />
+            <span>{status === "verifying" ? "Checking Google…" : status === "saving" ? "Saving…" : status === "signing_in" ? "Opening Google…" : !auth.user?.isGoogle ? "Sign in, then send" : saveError ? "Retry save" : isEnrol ? "Send registration" : "Request a free trial"}</span><Arrow />
           </button>
         </>}
         {saveError && <div className="fm-save-error" role="alert"><p>{saveError}</p><p>Your answers are still here. Please retry to confirm the save.</p></div>}

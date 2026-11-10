@@ -14,7 +14,7 @@ function Metric({ label, value, note, actionLabel, onClick, Icon }) {
 
 function RequestStatus({ summary, onViewRegister }) {
   return <section className="adm-dash-section" aria-labelledby="adm-dash-status-title">
-    <div className="adm-dash-section-heading"><h2 id="adm-dash-status-title">Request status</h2></div>
+    <div className="adm-dash-section-heading"><h2 id="adm-dash-status-title">Follow-up status</h2></div>
     <table className="adm-dash-table adm-dash-summary-table">
       <caption className="adm-sr-only">Saved requests by current follow-up status.</caption>
       <thead><tr><th scope="col">Status</th><th scope="col" className="adm-dash-number">Requests</th></tr></thead>
@@ -91,7 +91,7 @@ function LatestRequests({ rows, onOpen, onViewRegister, StatusBadge }) {
     {latest.length ? <div className="adm-dash-table-scroll" tabIndex={0} role="region" aria-label="Latest saved requests">
       <table className="adm-dash-table adm-dash-latest-table">
         <caption className="adm-sr-only">The three most recently received saved requests. Select a parent to open their details.</caption>
-        <thead><tr><th scope="col">Parent</th><th scope="col">Type</th><th scope="col">Sport</th><th scope="col">Community</th><th scope="col">Status</th><th scope="col">Received · IST</th></tr></thead>
+        <thead><tr><th scope="col">Parent</th><th scope="col">Type</th><th scope="col">Sport</th><th scope="col">Community</th><th scope="col">Follow-up status</th><th scope="col">Received · IST</th></tr></thead>
         <tbody>{latest.map(row => <tr key={row.id}>
           <td><button type="button" className="adm-dash-link" onClick={() => onOpen(row.id)} aria-label={`Open ${row.parentName}`}>{row.parentName}</button></td>
           <td>{FORM_LABELS[row.formType]}</td>
@@ -119,7 +119,7 @@ export default function AdminOverview({ rows, summary, members, auth, onOpen, on
     <div className="adm-dash-metrics" role="group" aria-label="Saved request summary">
       <Metric label="Requests" value={summary.savedRequests.value} note="Saved" actionLabel="Open register" Icon={Icon} onClick={() => onViewRegister({})} />
       <Metric label="Trials" value={summary.trialRequests.value} note="Requests" actionLabel="View trial requests" Icon={Icon} onClick={() => onViewRegister({ formType: "trial" })} />
-      <Metric label="Confirmed" value={summary.confirmedEnrolmentRequests.value} note="Enrolment requests" actionLabel="View confirmed enrolment requests" Icon={Icon} onClick={() => onViewRegister({ formType: "enrol", status: "confirmed" })} />
+      <Metric label="Approved" value={summary.approvedEnrolmentRequests.value} note="Enrolment requests" actionLabel="View approved enrolment requests" Icon={Icon} onClick={() => onViewRegister({ formType: "enrol", reviewDecision: "accepted" })} />
       <Metric label="Follow-up" value={summary.awaitingFollowUp.value} note="New requests" actionLabel="View new requests" Icon={Icon} onClick={() => onViewRegister({ status: "new" })} />
     </div>
     <NextFollowUp row={next} onOpen={onOpen} Icon={Icon} />

@@ -10,7 +10,16 @@ import "./parent-requests.css";
 const formatDate = value => value && Number.isFinite(Date.parse(value)) ? new Intl.DateTimeFormat("en-IN", { timeZone: "Asia/Kolkata", dateStyle: "medium", timeStyle: "short" }).format(new Date(value)) : "—";
 const decisionLabels = { pending: "Pending review", accepted: "Accepted", declined: "Declined" };
 
-function OwnRequests({ auth }) {
+export function PendingEnrolmentNotice({ loaded, rows }) {
+  const pending = loaded ? rows.filter(row => row.formType === "enrol" && row.reviewDecision === "pending").length : 0;
+  return pending ? <p className="parent-request-pending" role="status">Awaiting approval · {pending} {pending === 1 ? "enrolment" : "enrolments"}</p> : null;
+}
+
+export function ParentRequestError({ error, loaded }) {
+  return error ? <p className="parent-request-error" role="alert">{error}{loaded ? " Showing your previously loaded requests." : ""}</p> : null;
+}
+
+export function OwnRequests({ auth }) {
   const { openForm } = useSiteActions();
   const [rows, setRows] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
@@ -67,9 +76,10 @@ function OwnRequests({ auth }) {
   return <section className="parent-requests wrap" aria-labelledby="parent-requests-title">
     <header className="parent-requests-heading"><h1 id="parent-requests-title">Parent dashboard</h1><div className="parent-request-actions"><button type="button" className="btn" onClick={event => openForm("enroll", event.currentTarget)}>Enrol a child</button><button type="button" className="btn" onClick={() => { void auth.signOut(); }}>Sign out</button></div></header>
     <div className="parent-request-account"><ProfileAvatar name={auth.user.displayName || auth.user.email} src={auth.user.avatarUrl} /><strong>{auth.user.displayName || auth.user.email}</strong><span className="parent-account-email">{auth.user.email}</span>{auth.phase === "authorized" && <a href="/admin/">Admin dashboard</a>}</div>
+    <ParentRequestError error={error} loaded={loaded} />
+    <PendingEnrolmentNotice loaded={loaded} rows={rows} />
     <BillingPanel key={auth.user.id} auth={auth} />
-    <details className="parent-request-history"><summary>Requests{loaded ? ` · ${rows.length}${rows.some(row => row.reviewDecision === "pending") ? ` · ${rows.filter(row => row.reviewDecision === "pending").length} pending` : ""}` : ""}</summary>
-    {error && <p className="parent-request-error" role="alert">{error}{loaded ? " Showing your previously loaded requests." : ""}</p>}
+    <details className="parent-request-history" open><summary>Requests{loaded ? ` · ${rows.length}${rows.some(row => row.reviewDecision === "pending") ? ` · ${rows.filter(row => row.reviewDecision === "pending").length} pending` : ""}` : ""}</summary>
     {!loaded ? <p role="status">{loading ? "Loading your saved requests…" : "Your request list is not loaded. Please retry."}</p> : rows.length ? <div className="parent-request-scroll" tabIndex={0} role="region" aria-label="Your submitted requests"><table className="parent-request-table"><caption className="parent-request-count">{rows.length} saved {rows.length === 1 ? "request" : "requests"}</caption><thead><tr><th scope="col">Type</th><th scope="col">Child</th><th scope="col">Sport</th><th scope="col">Community</th><th scope="col">Submitted · IST</th><th scope="col">Review</th><th scope="col">Reviewed · IST</th></tr></thead><tbody>{rows.map(row => <tr key={row.id}><td>{row.formType === "enrol" ? "Enrolment" : "Trial"}</td><td>{row.childName || "—"}</td><td>{row.sport}</td><td>{row.community}</td><td>{formatDate(row.submittedAt)}</td><td>{decisionLabels[row.reviewDecision]}</td><td>{formatDate(row.reviewedAt)}</td></tr>)}</tbody></table></div> : <p role="status">No requests have been sent with this Google account yet.</p>}
     <div className="parent-request-actions"><button type="button" className="btn" onClick={load} disabled={loading}>{loading ? "Loading…" : "Refresh requests"}</button><button type="button" className="btn" onClick={event => openForm("trial", event.currentTarget)}>Free trial</button></div>
     </details>

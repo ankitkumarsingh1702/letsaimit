@@ -10,6 +10,17 @@ export async function settleMembershipFailure({ selfRemovalIssued, checkAccess, 
   try { await checkAccess(); } catch { /* Keep the original mutation failure visible. */ }
 }
 
+/** Local events invalidate the saved register only; their payload never becomes row data. */
+export function subscribeAdminRefreshEvents(refresh, eventTarget = window) {
+  const invalidate = () => { void refresh(); };
+  eventTarget.addEventListener("focus", invalidate);
+  eventTarget.addEventListener("letsaimit:registration-saved", invalidate);
+  return () => {
+    eventTarget.removeEventListener("focus", invalidate);
+    eventTarget.removeEventListener("letsaimit:registration-saved", invalidate);
+  };
+}
+
 /** Private data has the same lifetime as the currently authorised account. */
 export function useAdminRegister({ client, user, checkAccess, signOut }) {
   const [rows, setRows] = useState([]);
@@ -80,11 +91,13 @@ export function useAdminRegister({ client, user, checkAccess, signOut }) {
       timer = window.setInterval(refresh, 5000);
     };
     open();
+    const stopRefreshEvents = subscribeAdminRefreshEvents(refresh);
     document.addEventListener("visibilitychange", open);
     return () => {
       alive.current = false;
       queued.current = false;
       close();
+      stopRefreshEvents();
       document.removeEventListener("visibilitychange", open);
     };
   }, [client, user.id, refresh]);

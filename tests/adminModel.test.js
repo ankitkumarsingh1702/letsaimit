@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { toAdminRequest, followUpPatch, filterRows, paginateRows, deriveSummary, periodForPreset, defaultFilters, buildRegisterCsv, formatAge, validateAdminInvite, toAdminMember } from "../src/features/admin/admin-model.js";
 import { fetchSavedRequests, saveRequestFollowUp, mergeSavedRequests, SAFE_COLUMNS, MEMBER_COLUMNS, inviteAdminMembership, removeAdminMembership } from "../src/features/admin/adminTransport.js";
-import { settleMembershipFailure } from "../src/features/admin/useAdminRegister.js";
+import { settleMembershipFailure, subscribeAdminRefreshEvents } from "../src/features/admin/useAdminRegister.js";
 
 function record(id = "row-1", revision = 1) {
   return { id, submission_id: `submission-${id}`, full_name: "Parent, नाम", email: "parent@example.com", phone: "+919876543210", metadata: {
@@ -62,14 +62,44 @@ test("IST windows are runtime-based and use a half-open next-midnight boundary",
 
 test("summaries count the supplied saved population and keep engagement explicitly untracked", () => {
   const rows = [toAdminRequest(record("trial")), toAdminRequest(record("enrol"))];
-  rows[0].formType = "trial"; rows[1].status = "confirmed";
+  rows[0].formType = "trial"; rows[1].status = "confirmed"; rows[1].reviewDecision = "accepted";
   const summary = deriveSummary(rows);
   assert.equal(summary.savedRequests.value, 2);
   assert.equal(summary.trialRequests.value, 1);
-  assert.equal(summary.confirmedEnrolmentRequests.value, 1);
+  assert.equal(summary.approvedEnrolmentRequests.value, 1);
   assert.equal(summary.websiteEngagement.averageActiveSessionSeconds.value, null);
   assert.equal(summary.websiteEngagement.averageActiveSessionSeconds.availability, "not_tracked");
   assert.equal(deriveSummary([]).savedRequests.value, 0);
+});
+
+test("approved enrolments use the saved review decision, independently of follow-up status", () => {
+  const rows = [
+    { ...toAdminRequest(record("confirmed-pending")), status: "confirmed", reviewDecision: "pending" },
+    { ...toAdminRequest(record("new-approved")), status: "new", reviewDecision: "accepted" },
+    { ...toAdminRequest(record("closed-approved")), status: "closed", reviewDecision: "accepted" },
+    { ...toAdminRequest(record("trial-approved")), formType: "trial", status: "confirmed", reviewDecision: "accepted" },
+    { ...toAdminRequest(record("confirmed-declined")), status: "confirmed", reviewDecision: "declined" },
+  ];
+  const summary = deriveSummary(rows);
+  assert.equal(summary.approvedEnrolmentRequests.value, 2);
+  assert.equal(summary.byStatus.confirmed, 3, "follow-up counts retain the existing stored meaning");
+  assert.deepEqual(filterRows(rows, { formType: "enrol", reviewDecision: "accepted" }).map(row => row.id).sort(), ["closed-approved", "new-approved"]);
+  const csv = buildRegisterCsv(rows, { status: "confirmed", reviewDecision: "pending" });
+  assert.equal(csv.rowCount, 1); assert.match(csv.text, /"status"/); assert.match(csv.text, /"confirmed"/); assert.match(csv.text, /"pending"/);
+});
+
+test("focus and registration saves invalidate the guarded refresh without trusting event row payloads", () => {
+  const target = new EventTarget();
+  const calls = [];
+  const stop = subscribeAdminRefreshEvents((...args) => calls.push(args), target);
+  target.dispatchEvent(new Event("focus"));
+  const saved = new Event("letsaimit:registration-saved");
+  Object.defineProperty(saved, "detail", { value: { rows: [{ id: "untrusted-row" }], userId: "different-parent" } });
+  target.dispatchEvent(saved);
+  assert.deepEqual(calls, [[], []], "events request a fresh authorized read; no payload is merged into private data");
+  stop();
+  target.dispatchEvent(new Event("focus")); target.dispatchEvent(saved);
+  assert.equal(calls.length, 2, "listeners are removed when the authorized register unmounts");
 });
 
 test("search, structured filters and pagination preserve the same matching saved set", () => {

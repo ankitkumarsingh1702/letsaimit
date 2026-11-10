@@ -420,7 +420,7 @@ export default function RequestDetail({
                 <fieldset disabled={!canEdit || saving || reviewBusy}>
                   <div className="adm-detail-fields">
                     <label htmlFor={`${prefix}-status`}>
-                      Status
+                      Follow-up status
                       <select
                         id={`${prefix}-status`}
                         value={currentEdit.values.status}
@@ -496,7 +496,7 @@ export default function RequestDetail({
                 {error && <p className="adm-detail-error" role="alert">{error}</p>}
                 {conflictLatest && <section className="adm-detail-conflict" aria-label="Review another team edit">
                   <p><strong>Latest saved</strong> · {displayTime(conflictLatest.updatedAt)}</p>
-                  <dl><dt>Status</dt><dd>{conflictLatest.status}</dd><dt>Assigned to</dt><dd>{conflictLatest.assignee || "Unassigned"}</dd><dt>Team note</dt><dd>{conflictLatest.adminNotes || "No note"}</dd></dl>
+                  <dl><dt>Follow-up status</dt><dd>{conflictLatest.status}</dd><dt>Assigned to</dt><dd>{conflictLatest.assignee || "Unassigned"}</dd><dt>Team note</dt><dd>{conflictLatest.adminNotes || "No note"}</dd></dl>
                   <p>Your fields above still hold your draft. Review both before saving.</p>
                   <div className="adm-detail-footer-actions">
                     <button type="button" className="adm-detail-button adm-detail-button--quiet" onClick={() => { setEdit(draftOf(conflictLatest)); setConflictLatest(null); setError(""); }}>Use latest saved</button>
