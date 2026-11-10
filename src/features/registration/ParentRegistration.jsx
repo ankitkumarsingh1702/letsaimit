@@ -11,6 +11,10 @@ import { storeRegistrationDraft, consumeRegistrationDraft, clearRegistrationDraf
 import { fetchBillingTerms, formatMoney } from "../billing/billingData.js";
 import "./registration.css";
 
+export function QuotedBillingPolicy({ lateFeePaise }) {
+  return <><h4>Monthly coaching</h4><p>Fee quoted after approval. Pay securely on Razorpay.</p><p>Billed on the 1st. Due by the 5th. {formatMoney(lateFeePaise)}/day after due. No automatic debit.</p></>;
+}
+
 const ParentRegistration = forwardRef(function ParentRegistration({ mode, active, onSwitchKind, Arrow }, ref) {
   const auth = useAdminAuth();
   const isEnrol = mode === "enroll";
@@ -114,7 +118,7 @@ const ParentRegistration = forwardRef(function ParentRegistration({ mode, active
       if (isEnrol && billingTerms.enabled && (values.billingConsent !== true || values.billingTermsVersion !== billingTerms.version)) {
         throw Object.assign(new Error("Please review the monthly payment details and agree before sending."), { field: "billingConsent" });
       }
-      const data = { ...parseRegistration(mode, values), ...(isEnrol ? { billingConsent: billingTerms.enabled && values.billingConsent === true, billingTermsVersion: billingTerms.version } : {}) };
+      const data = { ...parseRegistration(mode, values), ...(isEnrol ? { billingConsent: billingTerms.enabled && values.billingConsent === true, billingTermsVersion: billingTerms.version, billingPricingMode: "custom_quote" } : {}) };
       const actor = await auth.verifyGoogleUser();
       if (!activeRef.current || requestGeneration.current !== generation) return;
       if (!actor) {
@@ -219,11 +223,8 @@ const ParentRegistration = forwardRef(function ParentRegistration({ mode, active
         </label>{errorMessage("terms")}</div>}
         {isEnrol && <div className="registration-billing" aria-label="Monthly payment details">
           {!billingTerms ? <div className="registration-billing-loading"><p role={billingError ? "alert" : "status"}>{billingError || "Loading payment details…"}</p>{billingError && <button type="button" className="fm-text-button" onClick={() => setBillingRetry(value => value + 1)}>Retry payment details</button>}</div> : !billingTerms.enabled ? <p className="fm-handoff-note">Payment setup pending. No payment now.</p> : <>
-            <h4>{billingTerms.teamTesting ? "Team payment" : "Monthly programme"} · {formatMoney(billingTerms.chargeAmountPaise)}/month</h4>
-            {billingTerms.teamTesting && <p>Regular price: {formatMoney(billingTerms.regularAmountPaise)}/month. This enrolment uses {formatMoney(billingTerms.chargeAmountPaise)}.</p>}
-            <p>First payment: within four days of approval. Later invoices: 1st of each month, due by the 5th.</p>
-            <p>{billingTerms.teamTesting ? `${formatMoney(billingTerms.lateFeePaise)}/day late fee is a preview. It will not be charged during team testing.` : billingTerms.lateFeesEnabled ? `${formatMoney(billingTerms.lateFeePaise)}/day after each due date while unpaid.` : "Late fees are not enabled."} No automatic debit.</p>
-            <label className="fm-consent" htmlFor={fieldId("billingConsent")}><input id={fieldId("billingConsent")} type="checkbox" {...register("billingConsent")} required aria-invalid={errors.billingConsent ? true : undefined} aria-describedby={`${fieldId("billingConsent")}-error`} /><span>I agree to monthly invoices of {formatMoney(billingTerms.chargeAmountPaise)}. I will pay securely on Razorpay after approval.</span></label>
+            <QuotedBillingPolicy lateFeePaise={billingTerms.lateFeePaise} />
+            <label className="fm-consent" htmlFor={fieldId("billingConsent")}><input id={fieldId("billingConsent")} type="checkbox" {...register("billingConsent")} required aria-invalid={errors.billingConsent ? true : undefined} aria-describedby={`${fieldId("billingConsent")}-error`} /><span>I agree to monthly billing at the quoted fee, payment dates and late fees.</span></label>
             {errorMessage("billingConsent")}
           </>}
           <input type="hidden" {...register("billingTermsVersion")} />

@@ -54,11 +54,13 @@ export function mergeSavedRequests(current, incoming) {
   });
 }
 
-export async function saveRequestReview(client, id, decision, expectedRevision) {
-  const { data, error } = await client.rpc("review_registration", reviewArguments(id, decision, expectedRevision));
+export async function saveRequestReview(client, id, decision, expectedRevision, monthlyAmountPaise = null) {
+  const { data, error } = await client.rpc("review_registration", reviewArguments(id, decision, expectedRevision, monthlyAmountPaise));
+  if (error?.code === "PT412") return { ok: false, code: "consent_required", error: "New consent needed. Ask the parent to send a new enrolment." };
   if (error && !["PT409", "P0002"].includes(error.code)) throw error;
   const record = Array.isArray(data) ? data[0] : data;
   if (!error && record?.id === id && record.review_decision === decision && Number(record.revision) >= expectedRevision && Number.isFinite(Date.parse(record.reviewed_at))) {
+    if (monthlyAmountPaise !== null && record.approved_monthly_amount_paise !== monthlyAmountPaise) throw new Error("The approved fee could not be confirmed. Refresh the request.");
     return { ok: true, row: toAdminRequest(record) };
   }
   if (error) {

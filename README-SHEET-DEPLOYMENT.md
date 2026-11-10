@@ -68,6 +68,12 @@ On an existing target, compare applied versions first; do not replay its schema:
 6. `supabase/migrations/20261109225158_monthly_billing_invoices.sql` — applied
    transactionally to UAT on 10 November 2026. Billing starts disabled; see
    [README-BILLING.md](README-BILLING.md) for activation and consented pricing.
+7. `supabase/migrations/20261110065359_custom_coaching_fees.sql` — forward-only
+   quoted fees at approval, next-month fee history, grouped reminder slots and
+   month-end summaries. It preserves existing invoice amounts and legacy saved
+   agreements. Apply only this new file to an existing six-migration target;
+   apply all seven in order to a newly configured target. Deployment evidence
+   belongs in the release ledger.
 
 The second migration makes `is_admin` an authenticated, security-invoker wrapper
 and removes application-role access to the optional dashboard RLS helper.

@@ -219,16 +219,20 @@ function Terms() {
           is confirmed after payment and our confirmation.
         </p>
         <p>
-          Monthly invoices are issued on the 1st and are due by the 5th. Your
-          first invoice is due four days after approval. You pay each invoice
-          through Razorpay; this does not authorise an automatic debit. The form
-          shows the actual monthly amount before you agree. A ₹1 team payment
-          does not become a ₹600 payment without new consent.
+          We confirm your monthly fee on approval. Your first invoice is due
+          then. Later invoices cover that month's coaching in advance: issued
+          on the 1st, due by the 5th. You pay each invoice through Razorpay;
+          there is no automatic debit.
         </p>
         <p>
-          Where enabled in your agreed payment details, a ₹100 late fee applies
-          for each overdue day after the due date. Late fees appear separately.
-          They are previews only during ₹1 team testing. Free trials have no fee.
+          A ₹100 late fee applies for each overdue day under your agreed payment
+          terms. Late fees appear separately. We send up to four daily reminders
+          while payment is pending. Free trials have no fee.
+        </p>
+        <p>
+          Fee changes apply from the next month. We email the new amount before
+          payment is due. Existing invoices keep their original amounts;
+          previously agreed fixed fees remain under their saved terms.
         </p>
         <p>
           Once paid enrolment is confirmed, fees are non-refundable for personal

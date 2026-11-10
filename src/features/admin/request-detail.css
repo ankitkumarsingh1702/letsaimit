@@ -94,3 +94,8 @@ body.adm-detail-open { overflow: hidden; }
   .adm-detail-footer { max-height: none; overflow: visible; }
 }
 @media (prefers-reduced-motion: reduce) { .adm-drawer[open] { animation: none; } .adm-detail-more summary svg { transition: none; } }
+.adm-review-fee { display: grid; gap: 5px; max-width: 220px; margin-bottom: 5px; color: #68746d; font-size: 11px; }
+.adm-review-fee > div { display: flex; align-items: center; gap: 7px; padding: 0 9px; border: 1px solid #dce3de; border-radius: 5px; background: #fff; }
+.adm-review-fee input { width: 100%; min-width: 0; min-height: 34px; padding: 6px 0; border: 0; color: #34473b; background: transparent; font: 500 13px/20px var(--font-body); }
+.adm-review-fee > div:focus-within { outline: 2px solid #537b68; outline-offset: 2px; }
+.adm-review-fee input:focus-visible { outline: none; }

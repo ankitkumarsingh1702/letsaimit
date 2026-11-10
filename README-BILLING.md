@@ -2,8 +2,9 @@
 
 The existing React, Google sign-in, Supabase and SMTP setup is retained. A parent
 sends an enrolment request and separately agrees to the displayed payment terms.
-An admin accepts it. The backend creates a Razorpay hosted invoice and emails its
-payment link to the saved parent address. A free trial never creates a bill.
+An admin accepts it with a monthly fee. The backend creates a Razorpay hosted
+invoice and emails the approval and payment link to the parent. A free trial
+never creates a bill.
 
 Parents pay each hosted invoice themselves. This is monthly invoicing, not an
 automatic debit mandate. A return from Razorpay does not prove payment. The
@@ -12,38 +13,56 @@ payment before recording money received.
 
 ## Price and schedule
 
-- Regular monthly price: **₹600**. The current team checkout is **₹1**, using
-  live Razorpay keys when configured. It is labelled before consent and payment.
-- First invoice: on approval, due four days later. Following calendar months:
-  invoice on the 1st, due by the end of the 5th, in India Standard Time.
-- One unpaid reminder per local day, from invoice creation through the due date.
-  A recovered scheduler sends the current reminder, not every missed reminder.
-- **₹100 per overdue day** is the accepted regular late-fee policy. Issued
-  invoices cannot change amounts; these charges are separate invoices. During
-  the ₹1 team run they are previews only and never create a real ₹100 bill.
-- Each account keeps its consented price and fee policy. Changing global pricing
-  cannot silently upgrade an existing ₹1 account to ₹600.
+- Admins enter each child's monthly fee at approval. **₹6,000** is the admin
+  input's starting suggestion, not a public fixed plan. ₹1 is valid for the
+  user's manual payment test. Amounts are ₹1–₹1,00,000, with up to two decimals.
+- First invoice: due on approval. Following calendar months: invoice on the 1st,
+  due by the end of the 5th, in India Standard Time.
+- Admin fee changes take effect from the **next calendar month**. The fee-change
+  email and next invoice show the saved amount before payment. Existing invoices never change.
+  If no change is saved, the current fee continues.
+- Unpaid reminders have four daily slots: **09:00, 12:00, 15:00 and 18:00 IST**.
+  Each parent receives one grouped reminder per slot across their children and
+  unpaid invoices. Recovery sends the current slot only, not missed reminders.
+  Paid invoices are removed from reminders after provider reconciliation.
+- **₹100 per overdue day** applies under the new quoted-fee agreement. Issued
+  invoices cannot change amounts; late fees are separate invoices. A normal
+  calendar invoice accrues these charges from the 6th while unpaid.
+- Existing fixed-price agreements and legacy team accounts retain their saved
+  amounts and fee policy. They are not silently converted to quoted pricing.
 - Stopping monthly billing stops future cycles. Existing issued invoices remain
   payable. This does not initiate a refund or cancel an existing provider invoice.
+
+## Month-end review
+
+At **18:00 IST on the last calendar day**, current admins receive one summary of
+the following month's active children, planned fees and expected total. Earlier
+unpaid invoices appear as a separate outstanding balance. The Billing screen
+shows the same upcoming-month list and allows next-month fee changes. The email
+is a dated snapshot; the dashboard shows the latest saved plan.
 
 ## Saved data and interfaces
 
 All monetary values are integer paise; currency is INR. The database owns prices,
 dates, parent ownership, queue recipients, invoice identities and account states.
-There is no browser API for choosing arbitrary charge amounts.
+Only current admins can choose fee amounts through the validated approval and
+next-month fee-change RPCs. Parent form payloads cannot select charge amounts.
 
 | Interface | Access | Result |
 | --- | --- | --- |
-| `get_billing_terms()` | Public | Pricing and versioned consent terms only |
-| `submit_registration(payload)` | Verified Google parent | Existing durable registration receipt; enrolment requires current billing consent when billing is enabled |
+| `get_billing_terms()` | Public | Versioned quoted-fee policy and admin input defaults only |
+| `submit_registration(payload)` | Verified Google parent | Durable registration receipt; new quoted enrolments require the current policy version and explicit quoted-fee consent |
+| `review_registration(p_id,p_decision,p_expected_revision,p_monthly_amount_paise)` | Current approved admin | Audited Accept/Decline; a new paid enrolment requires a valid admin quote |
+| `set_monthly_coaching_fee(p_registration_id,p_amount_paise,p_expected_revision)` | Current approved admin | Audited, revision-checked fee change effective next month |
 | `list_my_billing()` | Verified Google parent | That user's invoice history and billing accounts |
 | `list_admin_billing()` | Current approved admin | Saved invoices, accounts and aggregate totals |
 | `cancel_billing_account(p_registration_id,p_expected_revision)` | Current approved admin | Audited stop of future billing, guarded by revision |
 | `billing-worker` | Backend bearer only | Bounded create/reconcile/email jobs; request bodies choose no bills or recipients |
 | `razorpay-webhook` | Valid Razorpay raw-body HMAC | Durable event receipt before acknowledgement |
 
-The dashboard has compact single-line rows, status/search filters, invoice links,
-details and saved-row CSV. Global totals are independent of row filters. They
+The parent and admin dashboards use compact single-line rows, status/search
+filters, payment/invoice links and saved-row CSV. The parent sees child, month,
+fee, due date, late fee, total and status. Global totals are independent of filters. They
 show gross captured payments, processed refunds and outstanding balances. Net
 received is captured minus refunds; this is not a claim about bank settlements,
 provider fees or tax accounting. Invoice lists return the latest 1,000 records
@@ -94,10 +113,10 @@ The worker URL belongs in the Vault entry `letsaimit_billing_worker_url`.
 The existing Vault worker secret is reused by the minute scheduler. Enable
 `private.billing_settings.enabled` only after a read-only live-credential check,
 the active provider webhook configuration, signature/deduplication intake checks
-and the selected ₹1 team policy are verified. Distinguish a locally signed smoke
+and the current quoted-fee policy are verified. Distinguish a locally signed smoke
 event from actual Razorpay delivery: the first captured-payment event is verified
-after the payer completes checkout. The settings check prevents real late fees
-in team mode.
+after the payer completes checkout. Preserve legacy account policy instead of
+upgrading old prices or enabling their previously disabled fees.
 
 ## Financial reliability
 
@@ -117,6 +136,12 @@ in team mode.
   recheck the durable job. Retry/lease state survives worker errors. SMTP has an
   unavoidable at-least-once ambiguity if delivery succeeds but acknowledgement
   is lost; stable message IDs help mailbox deduplication.
+- Grouped reminders reconcile pending invoices in bounded chunks across retries
+  before sending a complete outstanding total. A large parent group must make
+  progress rather than permanently defer or send a partial total.
+- Fee edits check the account revision and retain who changed what and when.
+  A superseded fee notice is not sent as the current fee. Month-end emails check
+  current admin membership before sending and are deduplicated per recipient/month.
 - A browser sign-in does not grant admin access. Existing current-membership
   checks and account ownership remain separate capabilities.
 
@@ -133,6 +158,7 @@ See the provider's [issued-invoice restrictions](https://razorpay.com/docs/api/p
 
 Source, automated tests, applied migrations, deployed functions and actual live
 payments are recorded separately in [docs/RELEASE-PARITY.md](docs/RELEASE-PARITY.md).
-A successful build is not evidence of a live charge. A ₹1 team payment should be
-completed by its payer in Razorpay Checkout; no test should mark a bill paid by
-editing the database or trusting a browser redirect.
+A successful build is not evidence of a live charge. The user completes manual
+payment testing through Razorpay Checkout, with an admin-selected ₹1 quote if
+desired. Automated verification uses mocked provider/SMTP calls and local SQL;
+no test should mark a live bill paid by editing the database or trusting a redirect.

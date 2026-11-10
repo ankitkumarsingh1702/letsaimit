@@ -65,13 +65,14 @@ function OwnRequests({ auth }) {
     openForm(resume === "enrol" ? "enroll" : "trial");
   }, [openForm]);
   return <section className="parent-requests wrap" aria-labelledby="parent-requests-title">
-    <header className="parent-requests-heading"><div><h1 id="parent-requests-title">My requests</h1><p>Check the review status of the requests you sent with this Google account.</p></div><div className="parent-request-actions"><button type="button" className="btn" onClick={load} disabled={loading}>{loading ? "Loading…" : "Refresh"}</button><button type="button" className="btn" onClick={() => { void auth.signOut(); }}>Sign out</button></div></header>
-    <div className="parent-request-account"><ProfileAvatar name={auth.user.displayName || auth.user.email} src={auth.user.avatarUrl} /><span><strong>{auth.user.displayName || auth.user.email}</strong><span>{auth.user.email}</span></span>{auth.phase === "authorized" && <a href="/admin/">Open team dashboard</a>}</div>
+    <header className="parent-requests-heading"><h1 id="parent-requests-title">Parent dashboard</h1><div className="parent-request-actions"><button type="button" className="btn" onClick={event => openForm("enroll", event.currentTarget)}>Enrol a child</button><button type="button" className="btn" onClick={() => { void auth.signOut(); }}>Sign out</button></div></header>
+    <div className="parent-request-account"><ProfileAvatar name={auth.user.displayName || auth.user.email} src={auth.user.avatarUrl} /><strong>{auth.user.displayName || auth.user.email}</strong><span className="parent-account-email">{auth.user.email}</span>{auth.phase === "authorized" && <a href="/admin/">Admin dashboard</a>}</div>
+    <BillingPanel key={auth.user.id} auth={auth} />
+    <details className="parent-request-history"><summary>Requests{loaded ? ` · ${rows.length}${rows.some(row => row.reviewDecision === "pending") ? ` · ${rows.filter(row => row.reviewDecision === "pending").length} pending` : ""}` : ""}</summary>
     {error && <p className="parent-request-error" role="alert">{error}{loaded ? " Showing your previously loaded requests." : ""}</p>}
     {!loaded ? <p role="status">{loading ? "Loading your saved requests…" : "Your request list is not loaded. Please retry."}</p> : rows.length ? <div className="parent-request-scroll" tabIndex={0} role="region" aria-label="Your submitted requests"><table className="parent-request-table"><caption className="parent-request-count">{rows.length} saved {rows.length === 1 ? "request" : "requests"}</caption><thead><tr><th scope="col">Type</th><th scope="col">Child</th><th scope="col">Sport</th><th scope="col">Community</th><th scope="col">Submitted · IST</th><th scope="col">Review</th><th scope="col">Reviewed · IST</th></tr></thead><tbody>{rows.map(row => <tr key={row.id}><td>{row.formType === "enrol" ? "Enrolment" : "Trial"}</td><td>{row.childName || "—"}</td><td>{row.sport}</td><td>{row.community}</td><td>{formatDate(row.submittedAt)}</td><td>{decisionLabels[row.reviewDecision]}</td><td>{formatDate(row.reviewedAt)}</td></tr>)}</tbody></table></div> : <p role="status">No requests have been sent with this Google account yet.</p>}
-    <p className="parent-request-note">The team will contact you about the next step after reviewing your request.</p>
-    <div className="parent-request-actions"><button type="button" className="btn btn-lime" onClick={event => openForm("trial", event.currentTarget)}>Request a free trial</button><button type="button" className="btn" onClick={event => openForm("enroll", event.currentTarget)}>Enrol your child</button></div>
-    <BillingPanel key={auth.user.id} auth={auth} />
+    <div className="parent-request-actions"><button type="button" className="btn" onClick={load} disabled={loading}>{loading ? "Loading…" : "Refresh requests"}</button><button type="button" className="btn" onClick={event => openForm("trial", event.currentTarget)}>Free trial</button></div>
+    </details>
   </section>;
 }
 

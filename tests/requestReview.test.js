@@ -30,7 +30,7 @@ test("email GET parameters are only validated navigation intent, never review RP
 });
 
 test("review arguments allow only an explicit terminal decision and saved positive revision", () => {
-  assert.deepEqual(reviewArguments(id, "accepted", 2), { p_id: id, p_decision: "accepted", p_expected_revision: 2 });
+  assert.deepEqual(reviewArguments(id, "accepted", 2), { p_id: id, p_decision: "accepted", p_expected_revision: 2, p_monthly_amount_paise: null });
   for (const args of [[id, "pending", 2], [id, "accepted", 0], [id, "accepted", 1.1], ["not-an-id", "accepted", 2]]) assert.throws(() => reviewArguments(...args));
 });
 

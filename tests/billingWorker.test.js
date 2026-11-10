@@ -4,6 +4,7 @@ import { createBillingWorker } from '../supabase/functions/_shared/billing-worke
 
 const secret='synthetic-billing-worker-at-least-32-characters';
 const bill={id:'02b6cb99-91ee-43ee-9789-c0e8ddf0233c',receipt:'LAI02b6cb9991ee43ee9789c0e8ddf0233c',currency:'INR',amount_paise:100,base_amount_paise:100,late_fee_paise:0,parent_name:'Synthetic Parent',parent_email:'parent@example.test',child_name:'Synthetic Child',period_start:'2026-11-01',due_date:'2026-11-14',payment_url:'https://rzp.io/i/synthetic',invoice_url:'https://rzp.io/i/synthetic'};
+const reminderWork=(changes={})=>({kind:'send_reminder',recipient_email:'parent@example.test',parent_name:bill.parent_name,invoices:[{...bill,paid_paise:0,provider_invoice_id:'inv_synthetic'}],invoice_count:1,total_paise:100,invoices_truncated:false,preflight_invoices:[{...bill,paid_paise:0,provider_invoice_id:'inv_synthetic'}],preflight_remaining:1,...changes});
 const call=(auth=`Bearer ${secret}`,method='POST')=>new Request('https://project.supabase.co/functions/v1/billing-worker',{method,headers:auth?{authorization:auth}:undefined});
 function fixture({kind='create_invoice',invoice=bill,prepare,provider={},send,save=true,overrides={}}={}) {
   const calls=[],sent=[];let claimed=false;
@@ -34,8 +35,47 @@ test('lost database save after successful creation is also ambiguous',async()=>{
 });
 
 test('payment reconciliation and current job preparation occur before an unpaid reminder',async()=>{
-  let prepares=0;const f=fixture({kind:'send_reminder',invoice:{...bill,provider_invoice_id:'inv_synthetic'},prepare:()=>++prepares===1?{kind:'send_reminder',invoice:{...bill,provider_invoice_id:'inv_synthetic'},team_testing:true}:null});
+  let prepares=0;const f=fixture({prepare:()=>++prepares===1?reminderWork():null});
   const r=await f.handler(call());assert.equal((await r.json()).skipped,1);assert.equal(f.sent.length,0);assert.equal(f.calls.filter(x=>x[0]==='prepare_billing_job').length,2);assert.equal(f.calls.some(x=>x[0]==='reconcile'),true);
+});
+
+test('one reminder uses the verified parent recipient and a rechecked group total across children',async()=>{
+  let prepares=0;
+  const children=[{...bill,id:'first',child_name:'One',parent_email:'contact-one@example.test',provider_invoice_id:'inv_one',paid_paise:0},{...bill,id:'second',child_name:'Two',parent_email:'contact-two@example.test',provider_invoice_id:'inv_two',paid_paise:0}];
+  const f=fixture({prepare:()=>reminderWork({recipient_email:'verified-parent@example.test',invoices:children,total_paise:200,invoice_count:2,preflight_invoices:++prepares===1?children:[],preflight_remaining:prepares===1?2:0})});
+  const result=await f.handler(call());assert.equal((await result.json()).sent,1);assert.equal(f.sent.length,1);assert.equal(f.sent[0].recipientEmail,'verified-parent@example.test');assert.match(f.sent[0].text,/Total pending: ₹2/);assert.equal(f.calls.filter(x=>x[0]==='reconcile').length,2);
+  assert.equal(f.calls.some(x=>x[0]==='create'),false);
+});
+
+test('a superseded reminder slot or fully paid group sends nothing after preparation cancels it',async()=>{
+  let prepares=0;const f=fixture({prepare:()=>++prepares===1?reminderWork():null});
+  await f.handler(call());assert.equal(f.sent.length,0);assert.equal(f.calls.some(x=>x[0]==='finish_billing_job'),false);
+});
+
+test('large parent groups make durable reconciliation progress and eventually send one complete reminder',async()=>{
+  const invoices=Array.from({length:25},(_,index)=>({...bill,id:`invoice-${index}`,paid_paise:0,provider_invoice_id:`inv_${index}`}));
+  const checked=new Set(),sent=[],finishes=[];let claimAvailable=false,reconciles=0;
+  const handler=createBillingWorker({secret,dashboardOrigin:'https://uat.letsaimit.com',provider:{reconcileInvoice:async invoice=>{reconciles+=1;return {id:invoice.id};}},sendEmail:async message=>{sent.push(message);return {accepted:true};},rpc:async(name,args)=>{
+    if(name==='enqueue_billing_work'){claimAvailable=true;return 0;}
+    if(name==='claim_billing_job'){if(!claimAvailable)return null;claimAvailable=false;return {id:'large-group',leaseToken:'lease'};}
+    if(name==='prepare_billing_job'){const stale=invoices.filter(invoice=>!checked.has(invoice.id));return reminderWork({invoices,invoice_count:25,total_paise:2500,preflight_invoices:stale.slice(0,20),preflight_remaining:stale.length});}
+    if(name==='save_billing_provider_snapshot'){checked.add(args.p_invoice_id);return true;}
+    if(name==='finish_billing_job'){finishes.push(args);return true;}
+    throw new Error('unexpected RPC');
+  }});
+  const first=await handler(call());assert.equal((await first.json()).sent,0);assert.equal(checked.size,20);assert.equal(finishes[0].p_outcome,'retry');
+  const second=await handler(call());assert.equal((await second.json()).sent,1);assert.equal(checked.size,25);assert.equal(reconciles,25);assert.equal(sent.length,1);assert.match(sent[0].text,/Total pending: ₹25/);assert.match(sent[0].text,/Unpaid bills: 25/);assert.equal(finishes[1].p_outcome,'done');
+});
+
+test('fee changes and admin month summaries reuse durable email jobs without touching Razorpay',async()=>{
+  for(const work of [
+    {kind:'send_fee_change',invoice:{...bill,amount_paise:450000,effective_month:'2026-12-01'}},
+    {kind:'send_month_summary',recipient_email:'approved-admin@example.test',summary:{month:'2026-12-01',children:[{child_name:'Child',parent_name:'Parent',monthly_fee_paise:100}],total_paise:100,old_pending_count:1,old_pending_paise:600000}},
+  ]) {
+    const f=fixture({prepare:()=>work});const result=await f.handler(call());assert.equal((await result.json()).sent,1);assert.equal(f.calls.some(x=>['create','reconcile','find'].includes(x[0])),false);
+    assert.equal(f.sent[0].recipientEmail,work.kind==='send_month_summary'?'approved-admin@example.test':bill.parent_email);
+  }
+  const revoked=fixture({prepare:()=>null});await revoked.handler(call());assert.equal(revoked.sent.length,0);
 });
 
 test('ownership or cancellation change at prepare prevents provider calls and emails',async()=>{

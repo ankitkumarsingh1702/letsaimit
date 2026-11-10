@@ -42,10 +42,13 @@ available; otherwise retain one deterministic migration/configuration set for
 both and record the exact pending prerequisite. Never replace a missing
 production reference with the UAT project or copy UAT records and secrets.
 
-The user explicitly selected live Razorpay keys for the disclosed ₹1 UAT team
-flow. Preserve this configured choice; do not silently substitute sandbox keys,
-charge ₹600, enforce real ₹100 late fees in team mode, or upgrade an account's
-accepted price. Production payment activation remains a separate target setting.
+Use the current coaching-fee contract in [README-BILLING.md](../../../README-BILLING.md):
+admins quote the initial monthly fee and may change future fees from next month.
+₹1 is a valid admin-selected amount for the user's live-provider test; it is not
+a fixed public plan. Preserve previously saved agreements and invoice amounts.
+The user completes actual payments; verify provider behavior with mocks and
+read-only checks during releases. Production payment activation remains a
+separate target setting.
 
 ## Keep the maintenance record current
 

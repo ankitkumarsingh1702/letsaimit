@@ -1,3 +1,5 @@
+import { validMonthlyFeePaise } from "../billing/fee-model.js";
+
 export const REVIEW_OPTIONS = [
   { value: "pending", label: "Pending review" },
   { value: "accepted", label: "Accepted" },
@@ -14,9 +16,19 @@ export function readReviewIntent(search = "") {
   return { id, decision: intent === "accept" ? "accepted" : intent === "decline" ? "declined" : null };
 }
 
-export function reviewArguments(id, decision, revision) {
+export function reviewArguments(id, decision, revision, monthlyAmountPaise = null) {
   if (!UUID.test(id || "") || !["accepted", "declined"].includes(decision) || !Number.isSafeInteger(revision) || revision < 1) {
     throw new TypeError("Refresh the saved request before reviewing it.");
   }
-  return { p_id: id, p_decision: decision, p_expected_revision: revision };
+  if (monthlyAmountPaise !== null && (decision !== "accepted" || !validMonthlyFeePaise(monthlyAmountPaise))) throw new TypeError("Enter a valid monthly fee.");
+  return { p_id: id, p_decision: decision, p_expected_revision: revision, p_monthly_amount_paise: monthlyAmountPaise };
+}
+
+export function captureReviewDraft(row, decision) {
+  reviewArguments(row.id, decision, row.revision);
+  return Object.freeze({ id: row.id, decision, expectedRevision: row.revision });
+}
+
+export function reviewDraftChanged(draft, row) {
+  return Boolean(draft && (draft.id !== row.id || draft.expectedRevision !== row.revision || row.reviewDecision !== "pending"));
 }

@@ -12,18 +12,18 @@ const row = {
   late_fee_paise: 0, paid_paise: 0, refunded_paise: 0, payment_url: "https://rzp.io/i/example", invoice_url: "https://rzp.io/i/example", kind: "monthly",
 };
 const snapshot = {
-  invoices: [row], accounts: [{ id: "account-1", registration_id: row.registration_id, status: "active", revision: 1 }],
+  invoices: [row], accounts: [{ id: "account-1", registration_id: row.registration_id, status: "active", revision: 1, monthly_amount_paise: 100, next_month_amount_paise: 100, next_effective_month: "2026-12-01", pricing_model: "legacy" }],
   settings: { regular_amount_paise: 60000, charge_amount_paise: 100, team_testing: true, due_day: 5, late_fee_policy: "disabled", late_fee_paise: 10000 },
   summary: { captured_paise: 0, refunded_paise: 0, outstanding_paise: 100, paid_count: 0, pending_count: 1, overdue_count: 0 },
 };
 const user = { id: "parent-1", isGoogle: true };
-const terms = { enabled: true, team_testing: true, charge_amount_paise: 100, regular_amount_paise: 60000, late_fee_paise: 10000, late_fee_policy: "daily", late_fees_enabled: false, due_day: 5, version: `billing-2026-11-10-${"a".repeat(64)}` };
+const terms = { enabled: true, pricing_model: "custom_quote", default_amount_paise: 600000, late_fee_paise: 10000, late_fee_policy: "daily", late_fees_enabled: true, due_day: 5, version: `billing-2026-11-10-${"a".repeat(64)}` };
 
-test("the enrolment price and consent version come from public server terms, never a client price", async () => {
+test("the enrolment quote policy and consent version come from public server terms", async () => {
   let called = "";
   const saved = await fetchBillingTerms({ rpc: async name => { called = name; return { data: terms }; } });
-  assert.equal(called, "get_billing_terms"); assert.equal(saved.chargeAmountPaise, 100); assert.equal(saved.regularAmountPaise, 60000); assert.equal(saved.lateFeesEnabled, false); assert.equal(saved.version, terms.version);
-  for (const change of [{ charge_amount_paise: -1 }, { version: "client-chosen" }, { due_day: 6 }, { late_fees_enabled: "false" }]) assert.throws(() => publicBillingTerms({ ...terms, ...change }), /could not load/);
+  assert.equal(called, "get_billing_terms"); assert.equal(saved.pricingModel, "custom_quote"); assert.equal(saved.defaultAmountPaise, 600000); assert.equal(saved.lateFeesEnabled, true); assert.equal(saved.version, terms.version);
+  for (const change of [{ default_amount_paise: -1 }, { version: "client-chosen" }, { due_day: 6 }, { late_fees_enabled: "false" }, { pricing_model: "legacy" }]) assert.throws(() => publicBillingTerms({ ...terms, ...change }), /could not load/);
   await assert.rejects(fetchBillingTerms({ rpc: async () => ({ error: { code: "offline" } }) }), /could not load/);
 });
 
@@ -116,8 +116,8 @@ test("review copy distinguishes free trials from paid enrolments", async () => {
     const { default: ReviewDecision } = await vite.ssrLoadModule("/src/features/admin/ReviewDecision.jsx");
     const props = { row: { id: "review-1", formType: "trial", reviewDecision: "pending", parentName: "Test parent" }, canReview: true, onReview: async () => {} };
     const trial = renderToStaticMarkup(React.createElement(ReviewDecision, props));
-    assert.match(trial, /No payment is requested/); assert.doesNotMatch(trial, /current payment consent/);
+    assert.match(trial, /Free trial\. No fee/); assert.doesNotMatch(trial, /Monthly fee/);
     const enrol = renderToStaticMarkup(React.createElement(ReviewDecision, { ...props, row: { ...props.row, formType: "enrol" } }));
-    assert.match(enrol, /only with current payment consent/); assert.match(enrol, /Razorpay/);
+    assert.match(enrol, /New consent needed/); assert.match(enrol, /disabled=""[^>]*>Accept/);
   } finally { await vite.close(); }
 });

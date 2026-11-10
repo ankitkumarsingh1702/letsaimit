@@ -1,6 +1,6 @@
 import { timingSafeEqual } from "node:crypto";
 import { isSingleMailbox } from "./notification-worker.js";
-import { buildBillingEmail } from "./billing-email.js";
+import { buildBillingEmail, buildBillingReminderEmail } from "./billing-email.js";
 
 const response = (status, body) => Response.json(body, { status, headers: { "Cache-Control": "no-store" } });
 function authorized(value, secret) {
@@ -35,6 +35,38 @@ export function createBillingWorker({ secret, rpc, provider, sendEmail, dashboar
           let work = await rpc("prepare_billing_job", lease);
           if (!work) { counts.skipped += 1; continue; }
           const save = async (invoice, snapshot) => rpc("save_billing_provider_snapshot", { p_invoice_id: invoice.id, p_snapshot: snapshot });
+          const deliver=async(recipientEmail,message)=>{
+            stage="email";
+            if(!isSingleMailbox(recipientEmail)) throw Object.assign(new Error("invalid_recipient"),{code:"invalid_bill"});
+            const result=await sendEmail({...message,recipientEmail,messageId:`<billing-${job.id}@letsaimit.com>`});
+            if(result?.accepted!==true) throw new Error("transport_failure");
+            counts.sent+=1;
+          };
+          if(work.kind==="send_fee_change"||work.kind==="send_month_summary") {
+            await deliver(work.kind==="send_fee_change"?work.invoice?.parent_email:work.recipient_email,buildBillingEmail({kind:work.kind,invoice:work.invoice,summary:work.summary,dashboardOrigin}));
+            if(await finish("done")) counts.completed+=1;
+            continue;
+          }
+          if(work.kind==="send_reminder") {
+            if(!Array.isArray(work.preflight_invoices)||work.preflight_invoices.length>20||!Number.isSafeInteger(work.preflight_remaining)||work.preflight_remaining<0) throw Object.assign(new Error("invalid_group"),{code:"invalid_bill"});
+            stage="reconcile";
+            let outOfTime=false;
+            for(const invoice of work.preflight_invoices) {
+              // Preserve progress through large groups without holding a lease past its deadline.
+              if(clock()>deadline-25000) {outOfTime=true;break;}
+              if(!invoice?.provider_invoice_id) throw Object.assign(new Error("invoice_missing"),{code:"invalid_provider_snapshot"});
+              const snapshot=await provider.reconcileInvoice(invoice);
+              if(!await save(invoice,snapshot)) throw Object.assign(new Error("snapshot_rejected"),{code:"invalid_provider_snapshot"});
+            }
+            work=await rpc("prepare_billing_job",lease);
+            if(!work) {counts.skipped+=1;continue;}
+            if(outOfTime||!Number.isSafeInteger(work.preflight_remaining)||work.preflight_remaining>0) {
+              await finish("retry","provider_unavailable");counts.deferred+=1;continue;
+            }
+            await deliver(work.recipient_email,buildBillingReminderEmail({reminder:work,dashboardOrigin}));
+            if(await finish("done")) counts.completed+=1;
+            continue;
+          }
           // Recheck the provider before emailing an unpaid bill or issuing a late-fee bill.
           // The second preparation rechecks current ownership, account state and captured payment.
           if (work.invoice.base_invoice_id && !work.invoice.base_provider_invoice_id) {
@@ -47,7 +79,7 @@ export function createBillingWorker({ secret, rpc, provider, sendEmail, dashboar
             if (!await save(base, snapshot)) throw Object.assign(new Error("snapshot_rejected"), { code: "invalid_provider_snapshot" });
             work = await rpc("prepare_billing_job", lease);
             if (!work) { counts.skipped += 1; continue; }
-          } else if (["send_invoice", "send_reminder"].includes(work.kind) && work.invoice.provider_invoice_id) {
+          } else if (work.kind==="send_invoice" && work.invoice.provider_invoice_id) {
             stage = "reconcile";
             const snapshot = await provider.reconcileInvoice(work.invoice);
             if (!await save(work.invoice, snapshot)) throw Object.assign(new Error("snapshot_rejected"), { code: "invalid_provider_snapshot" });
@@ -67,13 +99,9 @@ export function createBillingWorker({ secret, rpc, provider, sendEmail, dashboar
             // A missing result is not permission to create another real collectible invoice.
             if (!snapshot) { await finish("retry", "invoice_missing"); counts.deferred += 1; continue; }
             if (!await save(work.invoice, snapshot)) throw Object.assign(new Error("snapshot_rejected"), { code: "invalid_provider_snapshot" });
-          } else if (["send_invoice", "send_reminder", "send_receipt", "send_refund"].includes(work.kind)) {
-            stage = "email";
-            if (!isSingleMailbox(work.invoice.parent_email)) throw Object.assign(new Error("invalid_recipient"), { code: "invalid_bill" });
+          } else if (["send_invoice", "send_receipt", "send_refund"].includes(work.kind)) {
             const message = buildBillingEmail({ kind: work.kind, invoice: work.invoice, dashboardOrigin, teamTesting: work.team_testing });
-            const result = await sendEmail({ ...message, recipientEmail: work.invoice.parent_email, messageId: `<billing-${job.id}@letsaimit.com>` });
-            if (result?.accepted !== true) throw new Error("transport_failure");
-            counts.sent += 1;
+            await deliver(work.invoice.parent_email,message);
           } else throw Object.assign(new Error("invalid_job"), { code: "invalid_bill" });
           if (await finish("done")) counts.completed += 1;
         } catch (error) {

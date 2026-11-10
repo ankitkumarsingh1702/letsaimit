@@ -5,7 +5,9 @@ import { readdir, readFile } from 'node:fs/promises';
 import { PGlite } from '@electric-sql/pglite';
 
 const directory=new URL('../supabase/migrations/',import.meta.url);
-const names=(await readdir(directory)).filter(n=>n.endsWith('.sql')).sort();
+// Preserve the original fixed-price/legacy contract as an upgrade regression.
+// The custom-quote suite exercises the complete current migration chain.
+const names=(await readdir(directory)).filter(n=>n.endsWith('.sql')&&n.slice(0,14)<='20261109225158').sort();
 const files=await Promise.all(names.map(n=>readFile(new URL(n,directory),'utf8')));
 const admin={id:randomUUID(),email:'owner@example.test'};
 const parent={id:randomUUID(),email:'parent@example.test'};

@@ -1,15 +1,16 @@
+import { validMonthlyFeePaise } from "./fee-model.js";
+
 const statuses = new Set(["creating", "processing", "pending", "paid", "overdue", "cancelled", "expired", "refunded", "partially_refunded", "failed"]);
 const text = value => typeof value === "string" ? value : "";
 const optionalDate = value => value && Number.isFinite(Date.parse(value)) ? value : null;
 const money = value => Number.isSafeInteger(value) && value >= 0;
 
 export function publicBillingTerms(value) {
-  if (!value || typeof value.enabled !== "boolean" || typeof value.team_testing !== "boolean"
-    || !money(value.charge_amount_paise) || !money(value.regular_amount_paise) || !money(value.late_fee_paise)
+  if (!value || typeof value.enabled !== "boolean" || value.pricing_model !== "custom_quote"
+    || !validMonthlyFeePaise(value.default_amount_paise) || !money(value.late_fee_paise)
     || value.due_day !== 5 || value.late_fee_policy !== "daily" || typeof value.late_fees_enabled !== "boolean"
     || !/^billing-\d{4}-\d{2}-\d{2}-[a-f0-9]{64}$/.test(value.version || "")) throw new Error("Payment details could not load. Please retry.");
-  return { enabled: value.enabled, teamTesting: value.team_testing, chargeAmountPaise: value.charge_amount_paise,
-    regularAmountPaise: value.regular_amount_paise, lateFeePaise: value.late_fee_paise,
+  return { enabled: value.enabled, pricingModel: value.pricing_model, defaultAmountPaise: value.default_amount_paise, lateFeePaise: value.late_fee_paise,
     lateFeesEnabled: value.late_fees_enabled, dueDay: value.due_day, version: value.version };
 }
 
@@ -53,8 +54,7 @@ export function billingInvoice(record) {
 }
 
 export function billingSnapshot(value, { admin = false } = {}) {
-  if (!value || !Array.isArray(value.invoices) || !value.settings || !money(value.settings.regular_amount_paise)
-    || !money(value.settings.charge_amount_paise) || typeof value.settings.team_testing !== "boolean") throw new Error("Billing could not load. Please retry.");
+  if (!value || !Array.isArray(value.invoices) || !value.settings) throw new Error("Billing could not load. Please retry.");
   const settings = value.settings;
   const summary = value.summary;
   if (admin && (!summary || !["captured_paise", "refunded_paise", "outstanding_paise", "paid_count", "pending_count", "overdue_count"].every(key => money(summary[key])))) {
@@ -63,13 +63,9 @@ export function billingSnapshot(value, { admin = false } = {}) {
   return {
     invoices: value.invoices.map(billingInvoice),
     hasMore: value.has_more === true,
-    accounts: (value.accounts || []).map(account => {
-      if (!text(account.id) || !text(account.registration_id) || !["active", "cancelled"].includes(account.status) || !Number.isSafeInteger(account.revision) || account.revision < 1) throw new Error("Monthly billing could not be confirmed.");
-      return { id: account.id, registrationId: account.registration_id, status: account.status, revision: account.revision,
-        parentName: text(account.parent_name), childName: text(account.child_name), createdAt: optionalDate(account.created_at), cancelledAt: optionalDate(account.cancelled_at) };
-    }),
-    settings: { regularAmountPaise: settings.regular_amount_paise, chargeAmountPaise: settings.charge_amount_paise,
-      enabled: settings.enabled === true, teamTesting: settings.team_testing, dueDay: settings.due_day === 5 ? 5 : null,
+    accounts: (value.accounts || []).map(billingAccount),
+    upcomingMonth: value.upcoming_month ? upcomingBillingMonth(value.upcoming_month) : null,
+    settings: { enabled: settings.enabled === true, dueDay: settings.due_day === 5 ? 5 : null,
       lateFeesEnabled: settings.late_fees_enabled === true,
       lateFeePaise: money(settings.late_fee_paise) ? settings.late_fee_paise : null,
       lateFeePolicy: ["disabled", "pending", "once", "daily"].includes(settings.late_fee_policy) ? settings.late_fee_policy : "disabled" },
@@ -77,6 +73,60 @@ export function billingSnapshot(value, { admin = false } = {}) {
       outstandingPaise: summary.outstanding_paise, paidCount: summary.paid_count,
       pendingCount: summary.pending_count, overdueCount: summary.overdue_count } : null,
   };
+}
+
+export function billingAccount(account) {
+  if (!text(account?.id) || !text(account.registration_id) || !["active", "cancelled"].includes(account.status) || !Number.isSafeInteger(account.revision) || account.revision < 1
+    || !validMonthlyFeePaise(account.monthly_amount_paise) || !validMonthlyFeePaise(account.next_month_amount_paise)
+    || !["custom_quote", "legacy"].includes(account.pricing_model) || !optionalDate(account.next_effective_month)) throw new Error("Monthly billing could not be confirmed.");
+  return { id: account.id, registrationId: account.registration_id, status: account.status, revision: account.revision,
+    parentName: text(account.parent_name), childName: text(account.child_name), createdAt: optionalDate(account.created_at), cancelledAt: optionalDate(account.cancelled_at),
+    monthlyAmountPaise: account.monthly_amount_paise, nextMonthAmountPaise: account.next_month_amount_paise,
+    nextEffectiveMonth: account.next_effective_month, pricingModel: account.pricing_model };
+}
+
+export function upcomingBillingMonth(value) {
+  if (!value || !optionalDate(value.month) || !Array.isArray(value.children) || !money(value.total_paise) || !money(value.old_pending_paise) || !money(value.old_pending_count)) throw new Error("Next month’s fees could not load.");
+  const rows = value.children.map(row => {
+    if (!text(row.registration_id) || !validMonthlyFeePaise(row.monthly_fee_paise)) throw new Error("Next month’s fees could not be confirmed.");
+    return { registrationId: row.registration_id, childName: text(row.child_name), parentName: text(row.parent_name), monthlyFeePaise: row.monthly_fee_paise };
+  });
+  if (rows.reduce((sum, row) => sum + row.monthlyFeePaise, 0) !== value.total_paise) throw new Error("Next month’s total could not be confirmed.");
+  return { month: value.month, children: rows, totalPaise: value.total_paise, oldPendingPaise: value.old_pending_paise, oldPendingCount: value.old_pending_count };
+}
+
+/** The parent asked for one child/month row; hosted invoices remain separate payment obligations. */
+export function groupParentInvoices(invoices) {
+  const groups = new Map();
+  for (const invoice of invoices) {
+    const cycle = invoice.periodStart.slice(0, 7);
+    const key = `${invoice.registrationId}:${cycle}`;
+    if (!groups.has(key)) groups.set(key, { id: key, registrationId: invoice.registrationId, childName: invoice.childName,
+      periodStart: invoice.periodStart, invoices: [], feesPaise: 0, lateFeePaise: 0, totalPaise: 0, paidPaise: 0, refundedPaise: 0, pendingPaise: 0 });
+    const group = groups.get(key);
+    group.invoices.push(invoice);
+    if (["cancelled", "expired"].includes(invoice.status)) continue;
+    group.feesPaise += invoice.baseAmountPaise;
+    group.lateFeePaise += invoice.lateFeePaise;
+    group.totalPaise += invoice.amountPaise;
+    group.paidPaise += invoice.paidPaise;
+    group.refundedPaise += invoice.refundedPaise;
+    group.pendingPaise += Math.max(0, invoice.amountPaise - invoice.paidPaise);
+  }
+  return [...groups.values()].map(group => {
+    const active = group.invoices.filter(invoice => !["cancelled", "expired"].includes(invoice.status));
+    const unpaid = active.filter(invoice => invoice.amountPaise > invoice.paidPaise);
+    const monthly = active.filter(invoice => invoice.kind === "monthly");
+    const candidates = monthly.length ? monthly : unpaid.length ? unpaid : active.length ? active : group.invoices;
+    const dueDate = candidates.map(invoice => invoice.dueDate).sort((a, b) => Date.parse(a) - Date.parse(b))[0];
+    let status = "pending";
+    if (!active.length) status = group.invoices.every(invoice => invoice.status === "cancelled") ? "cancelled" : "expired";
+    else if (group.pendingPaise > 0) status = unpaid.some(invoice => invoice.status === "overdue") ? "overdue" : unpaid.some(invoice => invoice.status === "failed") ? "failed" : unpaid.every(invoice => invoice.status === "creating") ? "creating" : "pending";
+    else if (group.paidPaise > 0 && group.refundedPaise >= group.paidPaise) status = "refunded";
+    else if (group.refundedPaise > 0) status = "partially_refunded";
+    else if (group.paidPaise > 0) status = "paid";
+    return { ...group, dueDate, status };
+  }).sort((a, b) => Date.parse(b.periodStart) - Date.parse(a.periodStart) || a.childName.localeCompare(b.childName));
 }
 
 export async function fetchBilling({ client, verifyGoogleUser, checkAccess, userId, admin = false }) {
@@ -104,6 +154,21 @@ export async function stopMonthlyBilling({ client, verifyGoogleUser, checkAccess
   await verify();
   const saved = Array.isArray(data) ? data[0] : data;
   if (saved?.registration_id !== account.registrationId || saved.status !== "cancelled" || !Number.isSafeInteger(saved.revision) || saved.revision <= account.revision) throw new Error("The change could not be confirmed. Refresh before trying again.");
+  return saved;
+}
+
+export async function setNextMonthlyFee({ client, verifyGoogleUser, checkAccess, userId, account, amountPaise }) {
+  if (!account?.registrationId || account.status !== "active" || account.pricingModel !== "custom_quote" || !Number.isSafeInteger(account.revision) || account.revision < 1 || !validMonthlyFeePaise(amountPaise)) throw new Error("Check the monthly fee and refresh billing.");
+  const verify = async () => {
+    const user = await verifyGoogleUser();
+    if (!user?.isGoogle || user.id !== userId || !await checkAccess()) throw new Error("Admin access is required.");
+  };
+  await verify();
+  const { data, error } = await client.rpc("set_monthly_coaching_fee", { p_registration_id: account.registrationId, p_amount_paise: amountPaise, p_expected_revision: account.revision });
+  if (error) throw new Error(error.code === "PT409" ? "Fee changed. Refresh and try again." : "Couldn’t save the fee. Try again.");
+  await verify();
+  const saved = billingAccount(Array.isArray(data) ? data[0] : data);
+  if (saved.registrationId !== account.registrationId || saved.nextMonthAmountPaise !== amountPaise || saved.revision <= account.revision || saved.monthlyAmountPaise !== account.monthlyAmountPaise) throw new Error("The saved fee could not be confirmed. Refresh billing.");
   return saved;
 }
 

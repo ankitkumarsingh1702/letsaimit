@@ -106,10 +106,10 @@ export function useAdminRegister({ client, user, checkAccess, signOut }) {
     }
   }, [client]);
 
-  const review = useCallback(async (id, decision, expectedRevision) => {
+  const review = useCallback(async (id, decision, expectedRevision, monthlyAmountPaise = null) => {
     try {
       if (!await authRef.current.checkAccess() || !alive.current) return { ok: false, error: "Admin access is required." };
-      const result = await saveRequestReview(client, id, decision, expectedRevision);
+      const result = await saveRequestReview(client, id, decision, expectedRevision, monthlyAmountPaise);
       if (!await authRef.current.checkAccess() || !alive.current) return { ok: false, error: "Your access changed. Please sign in again." };
       const row = result.ok ? result.row : result.latest;
       if (row) setRows(current => current.map(saved => saved.id === id && saved.revision <= row.revision ? row : saved));

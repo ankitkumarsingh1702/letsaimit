@@ -239,6 +239,7 @@ export function toAdminRequest(record) {
     email, phone, phoneCountry: meta.phoneCountry || '', age: meta.age || '',
     community: meta.community || '', sport: meta.sport || 'Not sure', address: meta.address || '', parentNote: meta.note || '',
     consent: { guardianConsent: meta.guardianConsent === true, termsAccepted: meta.termsAccepted === true, consentVersion: meta.consentVersion || '', termsVersion: meta.termsVersion || '' },
+    billing: { consentGiven: meta.billingConsent === true, pricingModel: meta.billingPricingMode === 'custom_quote' ? 'custom_quote' : 'legacy', termsVersion: meta.billingTermsVersion || '' },
     status: record.status || 'new', assignee: record.assignee || '', adminNotes: record.notes || '', revision: Number(record.revision),
     reviewDecision: ['accepted', 'declined'].includes(record.review_decision) ? record.review_decision : 'pending',
     reviewedAt: record.reviewed_at || null, reviewedBy: record.reviewed_by || '',

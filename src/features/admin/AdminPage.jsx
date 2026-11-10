@@ -295,8 +295,8 @@ export function AuthorizedAdmin({ auth }) {
     if (alive.current && result.ok) setToast("Changes saved. The team can see your update.");
     return result;
   }
-  async function reviewRequest(id, decision, expectedRevision) {
-    const result = await review(id, decision, expectedRevision);
+  async function reviewRequest(id, decision, expectedRevision, monthlyAmountPaise = null) {
+    const result = await review(id, decision, expectedRevision, monthlyAmountPaise);
     if (alive.current && result.ok) {
       setToast(decision === "accepted" ? result.row.formType === "enrol" ? "Enrolment accepted. Check Billing for invoices." : "Trial accepted. No payment needed." : "Request declined.");
       window.dispatchEvent(new Event("letsaimit:billing-changed"));

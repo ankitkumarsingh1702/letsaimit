@@ -1,7 +1,9 @@
 # Parent requests and admin notifications
 
-This is the first notification/review stage, using the existing React/Vite,
-Supabase and Google sign-in flow. Razorpay and a coach workspace are not included.
+This documents the request/review notifications in the existing React/Vite,
+Supabase and Google sign-in flow. The current coaching-fee and Razorpay flow is
+documented separately in [README-BILLING.md](README-BILLING.md). A coach workspace
+is not included.
 Website production requires its own explicit release authorization and configured
 backend; do not point it at the UAT database to activate these features.
 
@@ -32,10 +34,13 @@ references and the separate migration-history administration limitation.
 - Accept/Decline links carry navigation intent only. An approved admin signs in,
   reviews the request and explicitly confirms. The server saves an independent,
   audited decision with a revision check. Follow-up status remains separate.
-- Accepting does not charge, collect payment, create a subscription or send a
-  Razorpay link. A future payment implementation can use the accepted decision.
+- Accepting a free trial never creates a bill. Accepting a new paid enrolment
+  requires an admin-entered monthly fee and the parent's current quoted-fee
+  consent. The separate billing worker prepares and emails its Razorpay invoice;
+  an approval itself is not a captured payment.
 - The four-hour summary reports real saved requests and review decisions.
-  Abandoned forms, unpaid subscriptions, attendance and time spent are not tracked.
+  Abandoned forms, attendance and time spent are not tracked. Pending payments
+  and month-end fee summaries belong to the separate billing contract.
 
 Parent trial/enrolment requests are covered. Existing society/school enquiry
 integrations are preserved and are not silently routed into this parent queue.
