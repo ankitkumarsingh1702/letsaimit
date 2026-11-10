@@ -5,8 +5,9 @@ The default **merge and deploy** target is UAT. Production work requires the
 explicit **merge and deploy to prod** instruction.
 
 Latest UAT application release: `0ced92e5343008fb941d14cb82119c6aed26fed6`
-(monthly billing implementation; live payment activation is paused pending
-Razorpay credentials and webhook setup). See the 10 November evidence below.
+(monthly billing implementation; live ₹1 team billing was enabled on 10 November
+after credential, webhook and backend checks. A completed payer checkout remains
+unverified). See the dated activation evidence below.
 Earlier tables remain a dated record.
 
 Latest verified UAT workflow source: `f22e83265d612da094234699a4834f7248b2ef67`
@@ -241,3 +242,27 @@ remove those limitations. A future production promotion must carry this code and
 its ordered migration, use its own configured backend, and verify the chosen
 price, credentials and webhook without copying UAT records or silently upgrading
 consented ₹1 accounts. See [README-BILLING.md](../README-BILLING.md).
+
+## UAT activation evidence — 10 November 2026, live ₹1 team setup
+
+This section supersedes the disabled/provider-pending state in the preceding
+monthly-billing release record. It does not claim a completed payer checkout.
+
+| Evidence | Record |
+| --- | --- |
+| Authorized target / key creation | User explicitly approved generating the live Razorpay API credential for the ₹1 team flow, completed the provider SMS verification and supplied the generated credential. The correct Ankit Chrome profile showed successful generation. Values were saved privately outside Git and provisioned only in UAT backend secrets |
+| Credential verification | Actual authenticated `GET /v1/invoices?count=1` returned 200 and an empty collection; no invoice was created by this probe |
+| Provider webhook | Own-merchant webhook `TyLwQ3O4AxrnAY` created and independently fetched via the official SDK-backed `/v1/webhooks` resource. Exact UAT function URL, active=true, secret_exists=true and all nine required invoice/payment/refund events were verified. This merchant endpoint uses an event-name/boolean map, as in Razorpay's official WooCommerce integration |
+| Backend readiness | Authenticated billing-worker POST returned 200 with zero processed/sent jobs after key provisioning and again after activation. Existing SMTP and protected worker credentials were reused; the active minute scheduler, its expected wake command and three recent succeeded runs were verified |
+| Signature and retry checks | Invalid HMAC returned 401. A new locally signed synthetic event returned 200 twice, with exactly one stored matching event and no financial rows. This proves deployed signature/intake/deduplication behavior; it is not an actual Razorpay-delivered payment event |
+| Activation | One explicit UAT settings transaction enabled billing with team_testing=true, charge_amount_paise=100, regular_amount_paise=60000, daily fee policy and late_fees_enabled=false. Empty account/invoice preconditions were checked under the settings lock. Existing requests, reviews and consents were not changed or backfilled |
+| Public/private boundary | Anonymous public pricing RPC returned 200 with enabled=true, ₹1 team amount and real fees disabled. Anonymous own/admin invoice-list RPCs returned 401/42501 |
+| Financial state at activation | Accounts=0, invoices=0, jobs=0, ledger=0. No charge, refund or automatic-debit mandate was created. A new Google-owned enrolment with current explicit billing consent and admin acceptance is required to produce the first invoice |
+| Live public form | A fresh in-app browser opened the deployed enrolment form and loaded Team payment ₹1/month, the regular ₹600 reference, approval/due-date terms, preview-only late fees, No automatic debit, an unchecked monthly billing-consent control and Continue with Google. No form was submitted or agreement accepted |
+| Live journey limit | Native Chrome navigation to the authenticated Billing route stalled without rendered page content, and the connected-tab inventory timed out. A completed parent submission, admin approval, hosted invoice, billing email, captured payment and actual provider webhook delivery remain unverified for this activation |
+| Production | No production site deployment, DNS, backend or billing activation was performed. The corresponding artifact/configuration requirements remain staged, with the separate production backend still pending |
+
+The first real ₹1 checkout must be completed by its payer. Verify provider-captured
+100 paise against the saved invoice/ledger and silent parent/admin updates before
+recording end-to-end payment success. Never replace that check with a redirect,
+synthetic webhook or privileged database edit.

@@ -92,9 +92,12 @@ the backend setting. Alerts go to the confirmed operator email.
 
 The worker URL belongs in the Vault entry `letsaimit_billing_worker_url`.
 The existing Vault worker secret is reused by the minute scheduler. Enable
-`private.billing_settings.enabled` only after live credentials, signed webhook
-delivery and the selected ₹1 team policy are verified. The settings check
-prevents real late fees in team mode.
+`private.billing_settings.enabled` only after a read-only live-credential check,
+the active provider webhook configuration, signature/deduplication intake checks
+and the selected ₹1 team policy are verified. Distinguish a locally signed smoke
+event from actual Razorpay delivery: the first captured-payment event is verified
+after the payer completes checkout. The settings check prevents real late fees
+in team mode.
 
 ## Financial reliability
 
