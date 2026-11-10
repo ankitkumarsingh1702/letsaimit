@@ -11,3 +11,7 @@ verify_jwt = false
 [functions.razorpay-webhook]
 # Razorpay HMAC authenticates the raw body; Supabase session JWTs do not apply.
 verify_jwt = false
+
+[functions.delete-account]
+# Public requests verify the live Google user; persisted recovery uses the existing worker bearer.
+verify_jwt = false

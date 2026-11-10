@@ -59,7 +59,8 @@ function baseSnapshot(entity, bill) {
   const orderId = id(entity.order_id, "order", true);
   if (bill.provider_order_id && orderId !== bill.provider_order_id) invalid();
   const paid = money(entity.amount_paid ?? 0), due = money(entity.amount_due ?? (amount - paid));
-  if (paid > amount || due > amount || (entity.status !== "draft" && paid + due !== amount)) invalid();
+  // A cancelled/expired invoice may have no collectible balance. Its original amount remains immutable.
+  if (paid > amount || due > amount || (["issued", "partially_paid", "paid"].includes(entity.status) && paid + due !== amount)) invalid();
   const paymentId = id(entity.payment_id, "pay", true);
   const url = entity.short_url ? safeRazorpayUrl(entity.short_url) : null;
   if (["issued", "partially_paid", "paid"].includes(entity.status) && (!orderId || !url)) invalid();
@@ -161,6 +162,27 @@ export function createRazorpayClient({ keyId, keySecret, fetch: fetcher = global
     return canonical(await call(`invoices/${encodeURIComponent(invoiceId)}`), bill);
   }
 
+  /** Close a known unpaid invoice, never its payment or refund history. Every retry starts with GET. */
+  async function cancelInvoice(bill) {
+    const before = await reconcileInvoice(bill);
+    const terminal = snapshot => snapshot.paid_paise > 0 || ["cancelled", "expired", "deleted"].includes(snapshot.provider_status);
+    if (terminal(before)) return before;
+    // A stale provider read is not authority to cancel money already recorded locally.
+    if ((Number.isSafeInteger(bill.paid_paise) && bill.paid_paise > before.paid_paise)
+      || !["draft", "issued"].includes(before.provider_status)) invalid();
+    const path = `invoices/${encodeURIComponent(before.provider_invoice_id)}/cancel`;
+    try {
+      const cancelled = await canonical(await call(path, { method: "POST" }), bill);
+      if (terminal(cancelled)) return cancelled;
+    } catch {
+      // A concurrent payment or a lost cancellation response must be resolved from the provider.
+      // No refund endpoint is involved and a rejected/ambiguous POST is never treated as success.
+    }
+    const after = await reconcileInvoice(bill);
+    if (terminal(after)) return after;
+    throw new BillingProviderError("provider_unavailable");
+  }
+
   async function findByReceipt(bill) {
     validateBill(bill);
     const created = bill.from ?? bill.created ?? bill.created_at;
@@ -183,7 +205,7 @@ export function createRazorpayClient({ keyId, keySecret, fetch: fetcher = global
     }
     throw new BillingProviderError("provider_scan_incomplete");
   }
-  return { createInvoice, reconcileInvoice, findByReceipt };
+  return { createInvoice, reconcileInvoice, findByReceipt, cancelInvoice };
 }
 
 const hex = bytes => Array.from(new Uint8Array(bytes), value => value.toString(16).padStart(2, "0")).join("");

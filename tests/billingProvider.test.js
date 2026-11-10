@@ -152,6 +152,59 @@ test("an exhausted scan is not a not-found result and duplicate receipts are nev
   const absent = clientFixture([{ items: [] }]); assert.equal(await absent.client.findByReceipt(bill), null);
 });
 
+test("account deletion cancellation verifies the immutable invoice before closing its hosted link", async () => {
+  const cancelled=invoice({status:"cancelled",amount_due:0,amount_paid:0,order_id:null,short_url:null});
+  const {client,calls}=clientFixture([invoice(),cancelled]);
+  const saved=await client.cancelInvoice({...bill,provider_invoice_id:cancelled.id,paid_paise:0});
+  assert.equal(saved.provider_status,"cancelled");assert.equal(saved.amount_paise,100);assert.equal(saved.paid_paise,0);
+  assert.deepEqual(calls.map(({url,options})=>[options.method,url]),[
+    ["GET",`https://api.razorpay.com/v1/invoices/${cancelled.id}`],
+    ["POST",`https://api.razorpay.com/v1/invoices/${cancelled.id}/cancel`],
+  ]);
+  assert.equal(calls[1].options.body,undefined,"cancellation never supplies another price or a refund request");
+});
+
+test("paid or terminal invoices are reconciled without a cancellation or refund POST", async () => {
+  const paid=invoice({status:"paid",amount_paid:100,amount_due:0,payment_id:payment().id,paid_at:1794240100});
+  const capture=clientFixture([paid,payment(),{items:[]}]);
+  const saved=await capture.client.cancelInvoice({...bill,provider_invoice_id:paid.id});
+  assert.equal(saved.captured,true);assert.equal(saved.paid_paise,100);assert.equal(saved.refunded_paise,0);
+  assert.ok(capture.calls.every(({options})=>options.method==="GET"));
+  for(const status of ["cancelled","expired","deleted"]) {
+    const terminal=clientFixture([invoice({status,amount_due:0,order_id:null,short_url:null})]);
+    assert.equal((await terminal.client.cancelInvoice({...bill,provider_invoice_id:paid.id})).provider_status,status);
+    assert.equal(terminal.calls.length,1);assert.equal(terminal.calls[0].options.method,"GET");
+  }
+});
+
+test("a payment racing cancellation is preserved as captured money without initiating a refund", async () => {
+  const paid=invoice({status:"paid",amount_paid:100,amount_due:0,payment_id:payment().id,paid_at:1794240100});
+  const {client,calls}=clientFixture([invoice(),json({error:{description:"already paid private detail"}},400),paid,payment(),{items:[]}]);
+  const saved=await client.cancelInvoice({...bill,provider_invoice_id:paid.id});
+  assert.equal(saved.paid_paise,100);assert.equal(saved.captured,true);assert.equal(saved.provider_status,"paid");
+  assert.equal(calls.filter(({options})=>options.method==="POST").length,1);
+  assert.ok(calls.filter(({url})=>url.includes("/refunds")).every(({options})=>options.method==="GET"));
+});
+
+test("lost cancellation acknowledgements recover by GET and retries do not repeat a completed cancellation", async () => {
+  const cancelled=invoice({status:"cancelled",amount_paid:null,amount_due:null,short_url:null,order_id:null});
+  const recovered=clientFixture([invoice(),new Error("private cancellation timeout"),cancelled]);
+  assert.equal((await recovered.client.cancelInvoice({...bill,provider_invoice_id:cancelled.id})).provider_status,"cancelled");
+  assert.equal(recovered.calls.filter(({options})=>options.method==="POST").length,1);
+  const pending=clientFixture([invoice(),json({error:{}},500),invoice(),cancelled]);
+  await assert.rejects(pending.client.cancelInvoice({...bill,provider_invoice_id:cancelled.id}),error=>error.code==="provider_unavailable"&&!error.message.includes("private"));
+  assert.equal((await pending.client.cancelInvoice({...bill,provider_invoice_id:cancelled.id})).provider_status,"cancelled");
+  assert.equal(pending.calls.filter(({options})=>options.method==="POST").length,1);
+});
+
+test("mismatched or stale preflight snapshots never authorize provider cancellation", async () => {
+  for(const [entity,changes]of [[invoice({receipt:"another-receipt"}),{}],[invoice(),{paid_paise:100}],[invoice({amount:200}),{}]]) {
+    const {client,calls}=clientFixture([entity]);
+    await assert.rejects(client.cancelInvoice({...bill,provider_invoice_id:invoice().id,...changes}),/invalid_provider_snapshot/);
+    assert.equal(calls.length,1);assert.equal(calls[0].options.method,"GET");
+  }
+});
+
 const webhookSecret = "synthetic-webhook-secret-long-enough";
 const event = overrides => ({ entity: "event", event: "invoice.paid", created_at: 1, payload: { invoice: { entity: invoice({ status: "paid", amount_paid: 100, amount_due: 0, payment_id: "pay_12345678901234" }) }, payment: { entity: payment() } }, ...overrides });
 function webhookRequest(value = event(), { signature, eventId = "event_synthetic_1", method = "POST", raw = JSON.stringify(value), headers = {} } = {}) {

@@ -8,7 +8,7 @@ const reminderWork=(changes={})=>({kind:'send_reminder',recipient_email:'parent@
 const call=(auth=`Bearer ${secret}`,method='POST')=>new Request('https://project.supabase.co/functions/v1/billing-worker',{method,headers:auth?{authorization:auth}:undefined});
 function fixture({kind='create_invoice',invoice=bill,prepare,provider={},send,save=true,overrides={}}={}) {
   const calls=[],sent=[];let claimed=false;
-  const client={createInvoice:async x=>{calls.push(['create',x]);return {id:'provider',amount_paise:100};},reconcileInvoice:async x=>{calls.push(['reconcile',x]);return {id:'provider'};},findByReceipt:async x=>{calls.push(['find',x]);return null;},...provider};
+  const client={createInvoice:async x=>{calls.push(['create',x]);return {id:'provider',amount_paise:100};},reconcileInvoice:async x=>{calls.push(['reconcile',x]);return {id:'provider'};},findByReceipt:async x=>{calls.push(['find',x]);return null;},cancelInvoice:async x=>{calls.push(['cancel',x]);return {provider_invoice_id:x.provider_invoice_id,provider_status:'cancelled',paid_paise:0};},...provider};
   const handler=createBillingWorker({secret,dashboardOrigin:'https://uat.letsaimit.com',provider:client,
     rpc:async(name,args)=>{calls.push([name,args]);if(name==='enqueue_billing_work')return 0;if(name==='claim_billing_job'){if(claimed)return null;claimed=true;return {id:'job1',leaseToken:'lease1',attempt:1};}if(name==='prepare_billing_job')return prepare?prepare(args):{kind,invoice,team_testing:true};if(name==='save_billing_provider_snapshot')return save;if(name==='finish_billing_job')return true;throw new Error('unexpected RPC');},
     sendEmail:async message=>{sent.push(message);return send?send(message):{accepted:true};},...overrides});
@@ -122,5 +122,44 @@ test('failure codes emitted by the worker stay inside the database contract',asy
   for(const scenario of [{provider:{createInvoice:async()=>{throw new Error('network');}}},{kind:'reconcile_invoice'},{kind:'send_invoice',send:()=>{throw new Error('smtp');}},{save:false},{kind:'unrecognized'}]) {
     const f=fixture(scenario);await f.handler(call());
     for(const [,args] of f.calls.filter(x=>x[0]==='finish_billing_job'))assert.equal(allowed.has(args.p_failure_code),true,args.p_failure_code);
+  }
+});
+
+test('deleted-account cancellation closes only the saved provider invoice, including a late-fee invoice',async()=>{
+  const invoice={...bill,kind:'late_fee',provider_invoice_id:'inv_synthetic',base_invoice_id:'older-monthly',base_provider_invoice_id:'inv_base'};
+  const f=fixture({kind:'cancel_invoice',invoice});const result=await f.handler(call());
+  assert.equal((await result.json()).completed,1);assert.equal(f.sent.length,0);
+  assert.equal(f.calls.filter(x=>x[0]==='cancel').length,1);assert.equal(f.calls.find(x=>x[0]==='cancel')[1].provider_invoice_id,'inv_synthetic');
+  assert.equal(f.calls.some(x=>['create','reconcile','find'].includes(x[0])),false,'cancelling a late-fee invoice does not require its base invoice to remain unpaid');
+  assert.ok(f.calls.findIndex(x=>x[0]==='save_billing_provider_snapshot')<f.calls.findIndex(x=>x[0]==='finish_billing_job'));
+});
+
+test('an ambiguous creation is recovered by receipt before cancellation, never recreated',async()=>{
+  let prepares=0;
+  const known={...bill,provider_invoice_id:'inv_recovered'};
+  const f=fixture({prepare:()=>({kind:'cancel_invoice',invoice:++prepares===1?bill:known}),provider:{findByReceipt:async()=>({provider_invoice_id:'inv_recovered',provider_status:'issued',paid_paise:0})}});
+  await f.handler(call());
+  assert.equal(f.calls.some(x=>x[0]==='create'),false);assert.equal(f.calls.find(x=>x[0]==='cancel')[1].provider_invoice_id,'inv_recovered');
+  assert.equal(f.calls.filter(x=>x[0]==='save_billing_provider_snapshot').length,2);assert.equal(f.sent.length,0);
+  const absent=fixture({kind:'cancel_invoice'});await absent.handler(call());
+  assert.equal(absent.calls.some(x=>['create','cancel'].includes(x[0])),false);
+  assert.equal(absent.calls.find(x=>x[0]==='finish_billing_job')[1].p_failure_code,'invoice_missing');
+});
+
+test('paid races and cancellation retries preserve accounting and send no deleted-parent emails',async()=>{
+  const paid={provider_invoice_id:'inv_synthetic',provider_status:'paid',paid_paise:100,captured:true,refunded_paise:0};
+  const f=fixture({kind:'cancel_invoice',invoice:{...bill,provider_invoice_id:'inv_synthetic'},provider:{cancelInvoice:async()=>paid}});
+  await f.handler(call());assert.deepEqual(f.calls.find(x=>x[0]==='save_billing_provider_snapshot')[1].p_snapshot,paid);assert.equal(f.sent.length,0);
+  const failed=fixture({kind:'cancel_invoice',invoice:{...bill,provider_invoice_id:'inv_synthetic'},provider:{cancelInvoice:async()=>{throw new Error('private network detail');}}});
+  const response=await failed.handler(call());assert.equal((await response.text()).includes('private'),false);
+  const finish=failed.calls.find(x=>x[0]==='finish_billing_job')[1];assert.equal(finish.p_outcome,'retry');assert.equal(finish.p_failure_code,'provider_unavailable');
+});
+
+test('a deletion observed just before a new invoice or customer message suppresses that side effect',async()=>{
+  for(const kind of ['create_invoice','send_receipt','send_refund','send_fee_change']) {
+    let prepares=0;
+    const f=fixture({prepare:()=>++prepares===1?{kind,invoice:{...bill,effective_month:'2026-12-01'}}:null});
+    const response=await f.handler(call());assert.equal((await response.json()).skipped,1,kind);
+    assert.equal(f.calls.some(x=>x[0]==='create'),false,kind);assert.equal(f.sent.length,0,kind);
   }
 });

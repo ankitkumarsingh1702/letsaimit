@@ -251,7 +251,7 @@ test('full migration chain protects parent ownership and admin decisions, with d
   await context.test('deleting an auth account detaches ownership without claiming or exposing that row elsewhere',async()=>{
     const before=await mine(parentB);assert.ok(before.length>0);
     await db.query('delete from auth.users where id=$1',[parentB.id]);
-    assert.equal((await mine(parentB)).length,0);
+    await assert.rejects(mine(parentB),{code:'42501'},'a deleted Auth subject cannot use its still-unexpired JWT');
     const detached=(await db.query('select parent_user_id from public.registrations where id=$1',[before[0].id])).rows[0];assert.equal(detached.parent_user_id,null);
   });
 });

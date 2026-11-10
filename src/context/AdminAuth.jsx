@@ -3,6 +3,7 @@ import { getSupabaseClient } from "../lib/supabase.js";
 import { createAuthorizationGate, createAuthIdentityEpoch, createSingleFlight, googleSignInOptions, readGuardedAdminSession, readGuardedGoogleUser, identityAfterAccessFailure, isConfirmedAccessDenial } from "../lib/adminAuth.js";
 import { storeAuthReturnTarget, clearAuthReturnTarget } from "../lib/authReturn.js";
 import { clearRegistrationDrafts } from "../features/registration/registrationDraft.js";
+import { requestAccountDeletion, AccountDeletionError } from "../features/account/accountDeletion.js";
 
 const AdminAuth = createContext(null);
 const initialState = { phase: "checking", user: null, error: "" };
@@ -16,6 +17,7 @@ export function AdminAuthProvider({ children }) {
   const coalesce = useRef(createSingleFlight());
   const authTimers = useRef(new Set());
   const mounted = useRef(false);
+  const deletionFlight = useRef(null);
   const publish = useCallback(next => {
     const previous = current.current.user;
     if (previous?.isGoogle && (!next.user?.isGoogle || previous.id !== next.user.id)) {
@@ -131,7 +133,27 @@ export function AdminAuthProvider({ children }) {
       if (mounted.current && epoch.current.allows(signOutEpoch)) publish({ phase: "signed_out", user: null, signOutRetryable: true, error: "Sign-out could not finish. Retry before sharing this browser." });
     }
   }, [client, publish]);
-  const value = useMemo(() => ({ client, ...auth, signIn, signOut, checkAccess, verifyGoogleUser }), [client, auth, signIn, signOut, checkAccess, verifyGoogleUser]);
+  const deleteAccount = useCallback(options => {
+    const expected = options?.expectedUserId;
+    if (gate.current.isBlocked() || !current.current.user?.isGoogle || current.current.user.id !== expected) return Promise.reject(new AccountDeletionError("identity_changed"));
+    if (deletionFlight.current) return deletionFlight.current.userId === expected ? deletionFlight.current.promise : Promise.reject(new AccountDeletionError("identity_changed"));
+    const identityTicket = epoch.current.ticket(), gateTicket = gate.current.ticket();
+    const work = (async () => {
+      const verified = await verifyGoogleUser();
+      if (!verified || verified.id !== expected || !gate.current.allows(gateTicket) || !epoch.current.allows(identityTicket)) throw new AccountDeletionError("identity_changed");
+      const receipt = await requestAccountDeletion(client, options);
+      // A delayed deletion receipt must not sign out an account opened in another tab meanwhile.
+      if (current.current.user?.id === expected && gate.current.allows(gateTicket) && epoch.current.allows(identityTicket)) {
+        await signOut();
+        if (mounted.current && gate.current.isBlocked() && !current.current.user) publish({ ...current.current, deletionStatus: receipt.status });
+      }
+      return receipt;
+    })();
+    const promise = work.finally(() => { if (deletionFlight.current?.promise === promise) deletionFlight.current = null; });
+    deletionFlight.current = { userId: expected, promise };
+    return promise;
+  }, [client, verifyGoogleUser, signOut, publish]);
+  const value = useMemo(() => ({ client, ...auth, signIn, signOut, deleteAccount, checkAccess, verifyGoogleUser }), [client, auth, signIn, signOut, deleteAccount, checkAccess, verifyGoogleUser]);
   return <AdminAuth.Provider value={value}>{children}</AdminAuth.Provider>;
 }
 

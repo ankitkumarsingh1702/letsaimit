@@ -42,7 +42,29 @@ export function createBillingWorker({ secret, rpc, provider, sendEmail, dashboar
             if(result?.accepted!==true) throw new Error("transport_failure");
             counts.sent+=1;
           };
+          if(work.kind==="cancel_invoice") {
+            // A deleted account can still have an in-flight/ambiguous provider creation to recover.
+            // Recover its original identity; deletion never authorizes another invoice creation.
+            if(!work.invoice.provider_invoice_id) {
+              stage="reconcile";
+              const recovered=await provider.findByReceipt(work.invoice);
+              if(!recovered) {await finish("retry","invoice_missing");counts.deferred+=1;continue;}
+              if(!await save(work.invoice,recovered)) throw Object.assign(new Error("snapshot_rejected"),{code:"invalid_provider_snapshot"});
+              work=await rpc("prepare_billing_job",lease);
+              if(!work) {counts.skipped+=1;continue;}
+              if(work.kind!=="cancel_invoice"||!work.invoice?.provider_invoice_id) throw Object.assign(new Error("invalid_cancel_job"),{code:"invalid_bill"});
+            }
+            stage="cancel";
+            const snapshot=await provider.cancelInvoice(work.invoice);
+            if(!await save(work.invoice,snapshot)) throw Object.assign(new Error("snapshot_rejected"),{code:"invalid_provider_snapshot"});
+            if(await finish("done")) counts.completed+=1;
+            continue;
+          }
           if(work.kind==="send_fee_change"||work.kind==="send_month_summary") {
+            const expectedKind=work.kind;
+            work=await rpc("prepare_billing_job",lease);
+            if(!work) {counts.skipped+=1;continue;}
+            if(work.kind!==expectedKind) throw Object.assign(new Error("invalid_job"),{code:"invalid_bill"});
             await deliver(work.kind==="send_fee_change"?work.invoice?.parent_email:work.recipient_email,buildBillingEmail({kind:work.kind,invoice:work.invoice,summary:work.summary,dashboardOrigin}));
             if(await finish("done")) counts.completed+=1;
             continue;
@@ -60,6 +82,7 @@ export function createBillingWorker({ secret, rpc, provider, sendEmail, dashboar
             }
             work=await rpc("prepare_billing_job",lease);
             if(!work) {counts.skipped+=1;continue;}
+            if(work.kind!=="send_reminder") throw Object.assign(new Error("invalid_job"),{code:"invalid_bill"});
             if(outOfTime||!Number.isSafeInteger(work.preflight_remaining)||work.preflight_remaining>0) {
               await finish("retry","provider_unavailable");counts.deferred+=1;continue;
             }
@@ -87,6 +110,9 @@ export function createBillingWorker({ secret, rpc, provider, sendEmail, dashboar
             if (!work) { counts.skipped += 1; continue; }
           }
           if (work.kind === "create_invoice") {
+            work=await rpc("prepare_billing_job",lease);
+            if(!work) {counts.skipped+=1;continue;}
+            if(work.kind!=="create_invoice") throw Object.assign(new Error("invalid_job"),{code:"invalid_bill"});
             stage = "create";
             const snapshot = await provider.createInvoice(work.invoice);
             stage = "save_created";
@@ -100,6 +126,10 @@ export function createBillingWorker({ secret, rpc, provider, sendEmail, dashboar
             if (!snapshot) { await finish("retry", "invoice_missing"); counts.deferred += 1; continue; }
             if (!await save(work.invoice, snapshot)) throw Object.assign(new Error("snapshot_rejected"), { code: "invalid_provider_snapshot" });
           } else if (["send_invoice", "send_receipt", "send_refund"].includes(work.kind)) {
+            const expectedKind=work.kind;
+            work=await rpc("prepare_billing_job",lease);
+            if(!work) {counts.skipped+=1;continue;}
+            if(work.kind!==expectedKind) throw Object.assign(new Error("invalid_job"),{code:"invalid_bill"});
             const message = buildBillingEmail({ kind: work.kind, invoice: work.invoice, dashboardOrigin, teamTesting: work.team_testing });
             await deliver(work.invoice.parent_email,message);
           } else throw Object.assign(new Error("invalid_job"), { code: "invalid_bill" });

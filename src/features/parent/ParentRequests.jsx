@@ -5,6 +5,7 @@ import SignIn from "../../pages/SignIn.jsx";
 import ProfileAvatar from "../../components/ProfileAvatar.jsx";
 import { fetchMyRegistrations } from "./parentRequests.js";
 import BillingPanel from "../billing/BillingPanel.jsx";
+import DeleteAccountPanel, { AccountDeletionNotice } from "../account/DeleteAccountPanel.jsx";
 import "./parent-requests.css";
 
 const formatDate = value => value && Number.isFinite(Date.parse(value)) ? new Intl.DateTimeFormat("en-IN", { timeZone: "Asia/Kolkata", dateStyle: "medium", timeStyle: "short" }).format(new Date(value)) : "—";
@@ -83,11 +84,12 @@ export function OwnRequests({ auth }) {
     {!loaded ? <p role="status">{loading ? "Loading your saved requests…" : "Your request list is not loaded. Please retry."}</p> : rows.length ? <div className="parent-request-scroll" tabIndex={0} role="region" aria-label="Your submitted requests"><table className="parent-request-table"><caption className="parent-request-count">{rows.length} saved {rows.length === 1 ? "request" : "requests"}</caption><thead><tr><th scope="col">Type</th><th scope="col">Child</th><th scope="col">Sport</th><th scope="col">Community</th><th scope="col">Submitted · IST</th><th scope="col">Review</th><th scope="col">Reviewed · IST</th></tr></thead><tbody>{rows.map(row => <tr key={row.id}><td>{row.formType === "enrol" ? "Enrolment" : "Trial"}</td><td>{row.childName || "—"}</td><td>{row.sport}</td><td>{row.community}</td><td>{formatDate(row.submittedAt)}</td><td>{decisionLabels[row.reviewDecision]}</td><td>{formatDate(row.reviewedAt)}</td></tr>)}</tbody></table></div> : <p role="status">No requests have been sent with this Google account yet.</p>}
     <div className="parent-request-actions"><button type="button" className="btn" onClick={load} disabled={loading}>{loading ? "Loading…" : "Refresh requests"}</button><button type="button" className="btn" onClick={event => openForm("trial", event.currentTarget)}>Free trial</button></div>
     </details>
+    <DeleteAccountPanel auth={auth} />
   </section>;
 }
 
 export default function ParentRequests() {
   const auth = useAdminAuth();
-  if (!auth.user?.isGoogle || ["checking", "signing_in", "signing_out"].includes(auth.phase)) return <SignIn mode="parent" />;
+  if (!auth.user?.isGoogle || ["checking", "signing_in", "signing_out"].includes(auth.phase)) return <>{!auth.user && <AccountDeletionNotice status={auth.deletionStatus} />}<SignIn mode="parent" /></>;
   return <OwnRequests key={auth.user.id} auth={auth} />;
 }

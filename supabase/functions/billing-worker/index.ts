@@ -12,6 +12,7 @@ async function rpc(name: string, body: Record<string, unknown>) {
   return result.json();
 }
 async function sendEmail(message: { recipientEmail: string; subject: string; html: string; text: string; messageId: string }) {
+  validateMailConfiguration(config);
   const transport = nodemailer.createTransport({ host: config.smtpHost, port: 465, secure: true, auth: { user: config.smtpUser, pass: config.smtpPassword }, connectionTimeout: 8000, greetingTimeout: 8000, socketTimeout: 12000, tls: { minVersion: "TLSv1.2", rejectUnauthorized: true }, disableFileAccess: true, disableUrlAccess: true, logger: false, debug: false });
   let timer: ReturnType<typeof setTimeout> | undefined;
   try {
@@ -26,9 +27,10 @@ const provider = {
   createInvoice: (invoice: Record<string, unknown>) => getProvider().createInvoice(invoice),
   reconcileInvoice: (invoice: Record<string, unknown>) => getProvider().reconcileInvoice(invoice),
   findByReceipt: (invoice: Record<string, unknown>) => getProvider().findByReceipt(invoice),
+  cancelInvoice: (invoice: Record<string, unknown>) => getProvider().cancelInvoice(invoice),
 };
 Deno.serve(createBillingWorker({ secret: env("NOTIFICATION_CRON_SECRET"), dashboardOrigin: config.dashboardOrigin, rpc, provider, sendEmail, assertReady: () => {
-  validateMailConfiguration(config);
+  // Accounting/cancellation recovery must not depend on SMTP being available.
   if (!/^https:\/\/[a-z0-9]+\.supabase\.co$/.test(supabaseUrl) || !serviceKey || !/^rzp_live_[a-zA-Z0-9]+$/.test(env("RAZORPAY_KEY_ID")) || !env("RAZORPAY_KEY_SECRET")) throw new Error("configuration_error");
   getProvider();
 } }));
