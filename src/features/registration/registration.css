@@ -15,3 +15,22 @@
 .registration-billing .fm-consent { margin-top: 12px; }
 .registration-billing .fm-consent > span { font-size: 11px; }
 .registration-billing .fm-error { font-size: 11px; }
+.registration-notice {
+  position: fixed;
+  z-index: 1100;
+  right: 20px;
+  bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  max-width: calc(100vw - 40px);
+  padding: 14px 18px;
+  border: 1px solid #dce3dc;
+  border-radius: 12px;
+  background: #fff;
+  color: var(--forest, #153e35);
+  box-shadow: 0 4px 20px #153e3514;
+  font-size: 14px;
+}
+.registration-notice a { color: inherit; text-decoration: underline; white-space: nowrap; }
+.registration-notice button { border: 0; background: transparent; color: inherit; font-size: 22px; cursor: pointer; padding: 2px 6px; }

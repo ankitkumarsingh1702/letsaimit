@@ -163,6 +163,15 @@ provider preserves in-flight remotely verified reads across those events while
 still rechecking membership. Sign-out, a missing session or an actual subject
 switch invalidates earlier results, including an A→B→A switch-back.
 
+After a current, same-parent submission receives a validated saved receipt, the
+parent modal closes automatically. Both mounted parent forms and their stored
+OAuth drafts are cleared, including consent, validation and retry references;
+trial carry-over cannot refill a completed enrolment. A short, account-bound
+confirmation outside the modal links to **My requests**. Failed/unconfirmed
+saves retain answers for retry. A delayed receipt can refresh saved-row readers
+but cannot close or clear a newly opened or edited form. Google sign-in alone
+does not submit the form or display a saved confirmation.
+
 Source changes, local database tests, Deno checking, hosted migrations, SMTP
 acceptance, inbox receipt and website deployment are separate evidence. Update
 `docs/RELEASE-PARITY.md` with what was actually completed before describing this

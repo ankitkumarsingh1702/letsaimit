@@ -19,6 +19,7 @@ import { Header } from "./components/Header.jsx";
 import { Footer } from "./components/Footer.jsx";
 import { ContactDialog } from "./components/ContactDialog.jsx";
 import { MediaDialog } from "./components/MediaDialog.jsx";
+import RegistrationNotice from "./features/registration/RegistrationNotice.jsx";
 var pages = {
   home: Home,
   programme: Programme,
@@ -43,9 +44,11 @@ function App({ initialPage = "home" } = {}) {
   let mediaOpenerRef = React.useRef(null);
   let [formKind, setFormKind] = React.useState(null);
   let [certificate, setCertificate] = React.useState(null);
+  let [registrationNotice, setRegistrationNotice] = React.useState(null);
   let openForm = React.useCallback((kind, openerElement) => {
     if (formKinds.has(kind)) {
       formOpenerRef.current = openerElement ?? document.activeElement;
+      setRegistrationNotice(null);
       setFormKind(kind);
     }
   }, []);
@@ -61,6 +64,7 @@ function App({ initialPage = "home" } = {}) {
     }
   }, []);
   let closeForm = React.useCallback(() => setFormKind(null), []);
+  let dismissRegistrationNotice = React.useCallback(() => setRegistrationNotice(null), []);
   let closeCertificate = React.useCallback(() => setCertificate(null), []);
   let switchFormKind = React.useCallback((kind) => {
     if (formKinds.has(kind)) {
@@ -79,6 +83,7 @@ function App({ initialPage = "home" } = {}) {
     mediaOpenerRef.current = null;
     setFormKind(null);
     setCertificate(null);
+    setRegistrationNotice(null);
     syncPageMeta(page);
     document.body.dataset.page = page;
     window.scrollTo({
@@ -145,7 +150,9 @@ function App({ initialPage = "home" } = {}) {
         kind={formKind}
         onClose={closeForm}
         onSwitchKind={switchFormKind}
+        onRegistrationSaved={setRegistrationNotice}
       />
+      <RegistrationNotice notice={registrationNotice} onDismiss={dismissRegistrationNotice} />
       <MediaDialog certificate={certificate} onClose={closeCertificate} />
       <AnalyticsConsent /></>}
     </SiteActionsProvider>

@@ -109,3 +109,26 @@ test("resumed instructions, visible requests and parent errors state the unfinis
     assert.equal(renderToStaticMarkup(React.createElement(PendingEnrolmentNotice, { loaded: true, rows: pending.slice(1) })), "");
   } finally { await vite.close(); }
 });
+
+test("a receipt-backed current submission completes once; invalid, closed and superseded forms never close or clear", async () => {
+  const { vite, registration } = await modules();
+  try {
+    for (const duplicate of [false, true]) {
+      const target = new EventTarget(); const steps = [];
+      target.addEventListener("letsaimit:registration-saved", () => steps.push("refresh"));
+      const current = { receipt: { ...receipt, duplicate }, submittedUserId: google.id, verifiedUser: { id: google.id, isGoogle: true }, generation: 3, currentGeneration: 3, active: true, target,
+        onComplete: () => steps.push("reset-and-close") };
+      assert.equal(registration.completeVerifiedRegistrationSave(current), true);
+      assert.deepEqual(steps, ["refresh", "reset-and-close"], "a confirmed retry also finishes the saved form without a second send");
+      for (const boundary of [
+        { active: false }, { currentGeneration: 4 },
+        { verifiedUser: null }, { verifiedUser: { id: "other-parent", isGoogle: true } },
+        { receipt: null }, { receipt: { ...receipt, ok: false } }, { receipt: { ...receipt, savedAt: "invalid" } },
+      ]) {
+        steps.length = 0;
+        assert.equal(registration.completeVerifiedRegistrationSave({ ...current, ...boundary }), false);
+        assert.equal(steps.includes("reset-and-close"), false, "a stale or unconfirmed reply cannot destroy a current draft");
+      }
+    }
+  } finally { await vite.close(); }
+});

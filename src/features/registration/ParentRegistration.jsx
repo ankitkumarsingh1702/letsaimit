@@ -1,13 +1,12 @@
 import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
-import { createWhatsAppUrl } from "../../lib/formLogic.js";
 import { newSubmissionId, saveRegistration } from "../../lib/leadCapture.js";
 import { parseRegistration, REGISTRATION_AGES, REGISTRATION_COMMUNITIES, REGISTRATION_SPORTS } from "../../lib/registrationSchema.js";
 import { carryTrialToEnrol, createRegistrationDraft, nationalPhoneLimit, sanitizePhoneInput } from "./registrationDraft.js";
 import { firstInvalidRegistrationField, parentRegistrationResolver } from "./registrationResolver.js";
 import CountryCombobox from "./CountryCombobox.jsx";
 import { useAdminAuth } from "../../context/AdminAuth.jsx";
-import { storeRegistrationDraft, consumeRegistrationDraft, clearRegistrationDraft, clearRegistrationDrafts, shouldClearBoundRegistration, canConfirmRegistrationReceipt } from "./registrationDraft.js";
+import { storeRegistrationDraft, consumeRegistrationDraft, clearRegistrationDrafts, shouldClearBoundRegistration, canConfirmRegistrationReceipt } from "./registrationDraft.js";
 import { fetchBillingTerms, formatMoney } from "../billing/billingData.js";
 import "./registration.css";
 
@@ -28,7 +27,15 @@ export function notifyVerifiedRegistrationSave({ receipt, submittedUserId, verif
   return true;
 }
 
-const ParentRegistration = forwardRef(function ParentRegistration({ mode, active, onSwitchKind, Arrow }, ref) {
+/** Notify list readers for a committed save; finish only the current parent's form. */
+export function completeVerifiedRegistrationSave({ receipt, submittedUserId, verifiedUser, generation, currentGeneration, active, onComplete, target = typeof window === "undefined" ? null : window }) {
+  if (!notifyVerifiedRegistrationSave({ receipt, submittedUserId, verifiedUser, target })) return false;
+  if (!canConfirmRegistrationReceipt({ submittedUserId, verifiedUser, generation, currentGeneration, active })) return false;
+  onComplete();
+  return true;
+}
+
+const ParentRegistration = forwardRef(function ParentRegistration({ mode, active, onSwitchKind, onSaved, Arrow }, ref) {
   const auth = useAdminAuth();
   const isEnrol = mode === "enroll";
   const [billingTerms, setBillingTerms] = useState(null);
@@ -42,7 +49,6 @@ const ParentRegistration = forwardRef(function ParentRegistration({ mode, active
   const community = useWatch({ control, name: "community" });
   const [status, setStatus] = useState("idle");
   const [saveError, setSaveError] = useState("");
-  const [handoffUrl, setHandoffUrl] = useState("");
   const [restored, setRestored] = useState(false);
   const submissionId = useRef(null);
   const submissionUserId = useRef(null);
@@ -68,7 +74,7 @@ const ParentRegistration = forwardRef(function ParentRegistration({ mode, active
       const kept = consumeRegistrationDraft(mode);
       if (kept) { reset(kept); setRestored(true); submissionId.current = null; submissionUserId.current = null; }
       setStatus(pending.current ? "saving" : "idle");
-      setSaveError(""); setHandoffUrl("");
+      setSaveError("");
     }
     return () => { activeRef.current = false; requestGeneration.current += 1; };
   }, [active]);
@@ -79,16 +85,22 @@ const ParentRegistration = forwardRef(function ParentRegistration({ mode, active
     boundAccount.current = googleUserId;
     requestGeneration.current += 1;
     submissionId.current = null; submissionUserId.current = null;
-    setStatus("idle"); setSaveError(""); setHandoffUrl("");
+    setStatus("idle"); setSaveError("");
     setValue("consent", false); setValue("terms", false); setValue("billingConsent", false);
   }, [googleUserId, reset, setValue]);
   useImperativeHandle(ref, () => ({
     getValues,
+    clear: () => {
+      requestGeneration.current += 1;
+      reset(createRegistrationDraft());
+      submissionId.current = null; submissionUserId.current = null;
+      setRestored(false); setStatus("idle"); setSaveError("");
+    },
     carryTrial: trial => {
       const existing = getValues();
       const seeded = carryTrialToEnrol(trial, existing);
       if (JSON.stringify(seeded) !== JSON.stringify(existing)) {
-        reset(seeded); submissionId.current = null; setStatus("idle"); setHandoffUrl(""); setSaveError("");
+        reset(seeded); submissionId.current = null; setStatus("idle"); setSaveError("");
       }
     },
   }), [getValues, reset]);
@@ -96,7 +108,7 @@ const ParentRegistration = forwardRef(function ParentRegistration({ mode, active
   function markEdited() {
     requestGeneration.current += 1;
     submissionId.current = null;
-    setStatus("idle"); setSaveError(""); setHandoffUrl("");
+    setStatus("idle"); setSaveError("");
   }
   const fieldId = name => `fm-${mode}-${name}`;
   function errorMessage(name) {
@@ -153,11 +165,15 @@ const ParentRegistration = forwardRef(function ParentRegistration({ mode, active
       const receipt = await saveRegistration(isEnrol ? "enrol" : "trial", data, { agreed: true, guardian: true, terms: isEnrol }, id);
       const currentActor = await auth.verifyGoogleUser();
       if (!currentActor || currentActor.id !== actor.id) throw new Error("Your Google account changed. Check the account and submit again.");
-      notifyVerifiedRegistrationSave({ receipt, submittedUserId: actor.id, verifiedUser: currentActor });
-      if (!canConfirmRegistrationReceipt({ submittedUserId: actor.id, verifiedUser: currentActor, generation, currentGeneration: requestGeneration.current, active: activeRef.current })) return;
-      clearRegistrationDraft(mode); setRestored(false);
-      setHandoffUrl(createWhatsAppUrl(mode, data));
-      setStatus("saved");
+      completeVerifiedRegistrationSave({ receipt, submittedUserId: actor.id, verifiedUser: currentActor, generation, currentGeneration: requestGeneration.current, active: activeRef.current,
+        onComplete: () => {
+          clearRegistrationDrafts();
+          reset(createRegistrationDraft());
+          submissionId.current = null; submissionUserId.current = null;
+          setRestored(false); setSaveError(""); setStatus("idle");
+          onSaved(mode, actor.id);
+        },
+      });
     } catch (error) {
       if (!activeRef.current || requestGeneration.current !== generation) return;
       if (error.code === "billing_terms_changed") {
@@ -242,17 +258,10 @@ const ParentRegistration = forwardRef(function ParentRegistration({ mode, active
           </>}
           <input type="hidden" {...register("billingTermsVersion")} />
         </div>}
-        {status !== "saved" && <>
           <button className="fm-primary" type="submit" disabled={["verifying", "saving", "signing_in"].includes(status) || ["checking", "signing_in", "signing_out"].includes(auth.phase) || isEnrol && !billingTerms}>
             <span>{status === "verifying" ? "Checking Google…" : status === "saving" ? "Saving…" : status === "signing_in" ? "Opening Google…" : !auth.user?.isGoogle ? "Sign in, then send" : saveError ? "Retry save" : isEnrol ? "Send registration" : "Request a free trial"}</span><Arrow />
           </button>
-        </>}
         {saveError && <div className="fm-save-error" role="alert"><p>{saveError}</p><p>Your answers are still here. Please retry to confirm the save.</p></div>}
-        {status === "saved" && <div className="fm-success registration-result" role="status">
-          <h4>{isEnrol ? "Registration received." : "Trial request received."}</h4>
-          <p>Your details are saved. The coach will confirm the next step.</p>
-          <a href={handoffUrl} target="_blank" rel="noopener noreferrer">Chat in WhatsApp (optional)</a>
-        </div>}
         <button className="fm-text-button" type="button" onClick={() => onSwitchKind(isEnrol ? "trial" : "enroll")}>
           {isEnrol ? "Try a session first" : "Ready to join? Enrol your child"}<Arrow />
         </button>

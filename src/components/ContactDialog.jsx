@@ -191,7 +191,7 @@ function HandoffResult({ url }) {
     </div>
   );
 }
-function ContactDialog({ kind, onClose, onSwitchKind }) {
+function ContactDialog({ kind, onClose, onSwitchKind, onRegistrationSaved }) {
   const dialogRef = React.useRef(null);
   const parentForms = React.useRef({});
   const headingRef = React.useRef(null);
@@ -235,6 +235,14 @@ function ContactDialog({ kind, onClose, onSwitchKind }) {
       parentForms.current.enroll.carryTrial(parentForms.current.trial.getValues());
     }
   }, [kind]);
+
+  function completeParentRegistration(savedMode, userId) {
+    // Both forms stay mounted; clear trial carry-over as well as the saved form.
+    parentForms.current.trial?.clear();
+    parentForms.current.enroll?.clear();
+    onClose();
+    onRegistrationSaved?.({ mode: savedMode, userId });
+  }
 
   function handleChange(name, value) {
     setDrafts(previous => ({ ...previous, [mode]: { ...previous[mode], [name]: value } }));
@@ -313,8 +321,8 @@ function ContactDialog({ kind, onClose, onSwitchKind }) {
           <h3 ref={headingRef} className="fm-main-heading" tabIndex={-1}>{mode === "society" ? societyStep === 1 ? "Your society" : "Your contact details" : mode === "enroll" ? "Join the programme." : "Your first session. Free."}</h3>
           <p className="fm-intro">{mode === "society" ? "Make room for play." : mode === "enroll" ? "Register with a parent or guardian." : "Choose a sport. We’ll confirm a time."}</p>
         </div>
-        <ParentRegistration ref={form => { parentForms.current.trial = form; }} mode="trial" active={kind === "trial"} onSwitchKind={onSwitchKind} Arrow={FormArrow} />
-        <ParentRegistration ref={form => { parentForms.current.enroll = form; }} mode="enroll" active={kind === "enroll"} onSwitchKind={onSwitchKind} Arrow={FormArrow} />
+        <ParentRegistration ref={form => { parentForms.current.trial = form; }} mode="trial" active={kind === "trial"} onSwitchKind={onSwitchKind} onSaved={completeParentRegistration} Arrow={FormArrow} />
+        <ParentRegistration ref={form => { parentForms.current.enroll = form; }} mode="enroll" active={kind === "enroll"} onSwitchKind={onSwitchKind} onSaved={completeParentRegistration} Arrow={FormArrow} />
         {!isParent &&<form className="fm-form" data-form-mode={mode} noValidate onSubmit={handleSubmit}>
           <fieldset className="fm-fieldset" disabled={status === "saving"}>
             <div className="fm-fields">
