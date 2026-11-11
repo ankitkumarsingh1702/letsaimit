@@ -124,7 +124,10 @@ test('account deletion archives ownership, blocks stale credentials and preserve
     assert.equal(jobs.some(j=>j.invoice_id===neverSent.id&&j.kind==='cancel_invoice'),false);
     assert.equal((await invoiceFor(unissued.id)).status,'cancelled');
     assert.ok(jobs.filter(j=>j.kind.startsWith('send_')).every(j=>j.state==='cancelled'));
-    await db.query("select private.enqueue_billing_work_at(now()+interval '2 months')");
+    // Check future cycles before any local reminder window opens.
+    await db.query(`select private.enqueue_billing_work_at(
+      ((now() at time zone 'Asia/Kolkata' + interval '2 months')::date + time '06:00') at time zone 'Asia/Kolkata'
+    )`);
     assert.equal((await db.query('select count(*)::int n from private.billing_invoices i join private.billing_accounts a on a.id=i.account_id where a.parent_user_id=$1',[parent.id])).rows[0].n,bills.length);
     const account=accounts[0];
     await assert.rejects(db.query("insert into private.billing_invoices(account_id,period_start,due_date,base_amount_paise) values($1,date_trunc('month',now())::date+interval '4 months',now(),100)",[account.id]),{code:'42501'});

@@ -5,7 +5,7 @@ import {readFile,readdir} from 'node:fs/promises';
 import {PGlite} from '@electric-sql/pglite';
 import {createCoachingWorkerHandler,createCoachingEmailActionHandler} from '../supabase/functions/_shared/coaching-worker.js';
 
-test('real coaching SQL → queued SMTP alternatives → Gmail POST → parent tracker, including conflict refresh and lost acknowledgements',async t=>{
+test('admin send → real coaching SQL → SMTP alternatives → Gmail POST → parent tracker, including conflict refresh and lost acknowledgements',async t=>{
   const db=new PGlite();t.after(()=>db.close());
   await db.exec(`create role anon nologin;create role authenticated nologin;create role service_role nologin;
     create schema auth;create table auth.users(id uuid primary key,email text);
@@ -31,8 +31,9 @@ test('real coaching SQL → queued SMTP alternatives → Gmail POST → parent t
   }
   const {today}=(await db.query("select (now() at time zone 'Asia/Kolkata')::date::text today")).rows[0];
   await db.exec('update private.coaching_settings set email_enabled=true');
-  assert.equal((await db.query('select private.enqueue_coaching_attendance_at($1) n',[`${today}T21:00:00+05:30`])).rows[0].n,4);
-  await db.exec('update private.coaching_email_tickets set next_attempt_at=now()');
+  const queued={sessionDate:today,emailEnabled:true,queued:4,pending:4,sent:0,failed:0};
+  assert.deepEqual(await authenticated(admins[0],'send_coaching_attendance_now'),queued);
+  assert.equal((await db.query('select private.enqueue_coaching_attendance_at($1) n',[`${today}T21:00:00+05:30`])).rows[0].n,0);
   const allowed=new Set(['enqueue_coaching_attendance','claim_coaching_email','prepare_coaching_email','set_coaching_email_token','finish_coaching_email','read_coaching_email_attendance','save_coaching_email_attendance']);
   const rpc=async(name,args)=>{
     assert.ok(allowed.has(name));const entries=Object.entries(args);
@@ -43,6 +44,7 @@ test('real coaching SQL → queued SMTP alternatives → Gmail POST → parent t
   const worker=createCoachingWorkerHandler({secret,signingSecret,senderEmail,actionUrl:endpoint,dynamicEmailReady:true,rpc,sendEmail:async message=>{sent.push(message);return {accepted:true};}});
   const response=await worker(new Request(endpoint.replace('/attendance',''),{method:'POST',headers:{Authorization:`Bearer ${secret}`}}));
   assert.equal(response.status,200);assert.equal((await response.json()).sent,4);assert.equal(sent.length,4);assert.deepEqual(new Set(sent.map(m=>m.recipientEmail)),new Set(admins.map(a=>a.email)));
+  assert.deepEqual(await authenticated(admins[0],'get_coaching_attendance_email_status'),{...queued,queued:0,pending:0,sent:4});
   for(const message of sent){assert.equal([...message.amp.matchAll(/name="status_/g)].length,8);assert.match(message.amp,/Not marked/);assert.doesNotMatch(message.amp,/integration\.parent|12025550123|Razorpay/);assert.doesNotMatch(message.text+message.html,/name="token"/);}
   const hidden=(mail,name)=>mail.amp.match(new RegExp(`name="${name}" value="([^"]+)"`))[1];
   const initial=mail=>{

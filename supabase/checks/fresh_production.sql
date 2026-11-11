@@ -28,7 +28,8 @@ declare production_ref text:=current_setting('letsaimit.production_ref',true);
     'public.set_monthly_coaching_fee(uuid,integer,bigint)','public.cancel_billing_account(uuid,bigint)',
     'public.list_my_billing()','public.list_admin_billing()',
     'public.list_my_tracker()','public.list_staff_tracker(date)','public.set_coaching_assignment(uuid,text,integer[],date,bigint)',
-    'public.save_coaching_attendance(date,jsonb)','public.save_coaching_feedback(uuid,date,text,text,bigint)'];
+    'public.save_coaching_attendance(date,jsonb)','public.save_coaching_feedback(uuid,date,text,text,bigint)',
+    'public.get_coaching_attendance_email_status()','public.send_coaching_attendance_now()'];
 begin
   if production_ref is null or production_ref!~'^[a-z0-9]{20}$'
     or uat_ref is null or uat_ref!~'^[a-z0-9]{20}$' or production_ref=uat_ref then
@@ -91,7 +92,8 @@ begin
     raise exception 'FRESH_BACKEND_PRIVATE_FUNCTION_GRANT';
   end if;
   foreach name in array array['private.require_google_user()','public.list_my_registrations()','public.list_my_billing()',
-    'public.list_my_tracker()','public.list_staff_tracker(date)','public.read_coaching_email_attendance(uuid,text)'] loop
+    'public.list_my_tracker()','public.list_staff_tracker(date)','public.read_coaching_email_attendance(uuid,text)',
+    'public.get_coaching_attendance_email_status()'] loop
     routine:=to_regprocedure(name);
     if routine is null or (select provolatile from pg_proc where oid=routine)<>'s' then raise exception 'FRESH_BACKEND_READ_RPC_VOLATILITY: %',name;end if;
   end loop;
@@ -99,7 +101,8 @@ begin
     raise exception 'FRESH_BACKEND_WRITE_IDENTITY_LOCK_MISSING';
   end if;
   foreach name in array array['public.set_coaching_assignment(uuid,text,integer[],date,bigint)',
-    'public.save_coaching_attendance(date,jsonb)','public.save_coaching_feedback(uuid,date,text,text,bigint)'] loop
+    'public.save_coaching_attendance(date,jsonb)','public.save_coaching_feedback(uuid,date,text,text,bigint)',
+    'public.send_coaching_attendance_now()'] loop
     routine:=to_regprocedure(name);
     if routine is null or (select position('private.lock_google_registration_user()' in prosrc) from pg_proc where oid=routine)=0 then
       raise exception 'FRESH_BACKEND_WRITE_IDENTITY_LOCK_MISSING: %',name;
@@ -141,7 +144,7 @@ select ns.nspname as schema,p.proname,pg_get_function_identity_arguments(p.oid) 
       'prepare_account_deletion','claim_account_deletions','finish_account_deletion','get_account_deletion_status',
       'list_my_tracker','list_staff_tracker','set_coaching_assignment','save_coaching_attendance','save_coaching_feedback',
       'enqueue_coaching_attendance','claim_coaching_email','prepare_coaching_email','set_coaching_email_token','finish_coaching_email',
-      'read_coaching_email_attendance','save_coaching_email_attendance'))
+      'read_coaching_email_attendance','save_coaching_email_attendance','get_coaching_attendance_email_status','send_coaching_attendance_now'))
   order by ns.nspname,p.proname,arguments;
 select ns.nspname as schema,c.relname,p.polname,p.polcmd,p.polroles,
   encode(sha256(convert_to(coalesce(pg_get_expr(p.polqual,p.polrelid),'')||'|'||coalesce(pg_get_expr(p.polwithcheck,p.polrelid),''),'UTF8')),'hex') as policy_sha256

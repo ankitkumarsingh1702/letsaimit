@@ -23,5 +23,8 @@
 .coaching-editor textarea { resize: vertical; min-height: 70px; }
 .coaching-error, .coaching-notice { padding: 10px 12px; border: 1px solid #e4dada; border-radius: 5px; font-size: 12px; color: #8b4141; background: #fff9f9; }
 .coaching-notice { border-color: #dce7dc; color: #3c654e; background: #f6faf6; }
-.coaching-email-status { margin-top: 24px; font-size: 11px; color: #6c7c72; }
+.coaching-email-card { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-top: 18px; padding: 13px 14px; }
+.coaching-email-card h2 { font: 600 13px/1.4 var(--font-body); color: #294438; }
+.coaching-email-card p { margin: 4px 0 0; font-size: 11px; color: #6c7c72; }
+.coaching-email-card .coaching-email-error { color: #8b4141; }
 @media (max-width: 760px) { .coaching-app { display: block; }.coaching-app .adm-sidebar { display: block; position: static; width: 100%; min-height: 0; height: auto; padding: 12px 14px; border-right: 0; border-bottom: 1px solid #e1e7e2; }.coaching-app .adm-brand { display: none; }.coaching-app .adm-sidebar-label { display: none; }.coaching-app .adm-nav { display: flex; overflow-x: auto; gap: 4px; }.coaching-app .adm-nav button { width: auto; flex: 0 0 auto; min-height: 36px; padding: 8px 12px; white-space: nowrap; }.coaching-app .adm-utilities { display: flex; flex-wrap: wrap; position: static; padding: 10px 0 0; gap: 10px; }.coaching-app .adm-utilities a, .coaching-app .adm-utilities button { width: auto; padding: 3px 5px; font-size: 11px; min-height: 30px; }.coaching-app .adm-workspace { margin-left: 0; }.coaching-app .adm-topbar { flex-wrap: wrap; gap: 12px; padding: 14px; }.coaching-app .adm-content { padding: 20px 14px; }.coaching-toolbar { align-items: stretch; }.coaching-app .adm-page-heading { align-items: start; }.coaching-editor { padding: 14px; } }

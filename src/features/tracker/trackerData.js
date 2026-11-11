@@ -137,4 +137,19 @@ export async function saveCoachAssignment(options) {
   return { registrationId, coachEmail: data.coachEmail, weekdays: [...data.weekdays], startsOn: data.startsOn, assignmentRevision: data.assignmentRevision };
 }
 
+export async function coachingEmailStatus(options, { send = false } = {}) {
+  const { client } = options;
+  await verifyActor(options);
+  const { data, error } = await client.rpc(send ? 'send_coaching_attendance_now' : 'get_coaching_attendance_email_status');
+  const fallback = send ? 'Send was not confirmed. Check today’s email status before retrying.' : 'Email status is unavailable.';
+  if (error) throw rpcError(error, fallback);
+  await verifyActor(options);
+  if (!validTrackerDate(data?.sessionDate) || typeof data.emailEnabled !== 'boolean' ||
+      !['queued', 'pending', 'sent', 'failed'].every(key => Number.isSafeInteger(data[key]) && data[key] >= 0) ||
+      data.queued > data.pending || (!send && data.queued !== 0) ||
+      (!data.emailEnabled && (data.pending || data.sent || data.failed))) throw problem(fallback);
+  const { sessionDate, emailEnabled, queued, pending, sent, failed } = data;
+  return { sessionDate, emailEnabled, queued, pending, sent, failed };
+}
+
 export const ATTENDANCE_LABELS = { present: 'Present', absent: 'Absent', no_session: 'No session', unmarked: 'Not marked' };

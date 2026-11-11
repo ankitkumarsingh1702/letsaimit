@@ -115,6 +115,58 @@ test('coaching tracker preserves parent ownership, scoped coach writes and Gmail
     assert.deepEqual((await staff(other,'list_my_tracker')).feedback,[]);
     await as('authenticated',coach,async()=>{await db.exec('begin read only');try{assert.equal((await rpc('list_staff_tracker',[today])).feedback.length,1);}finally{await db.exec('rollback');}});
   });
+  await t.test('admin send wakes the existing worker once and shares the 9 PM delivery tickets',async()=>{
+    const send = user => staff(user, 'send_coaching_attendance_now');
+    const status = user => staff(user, 'get_coaching_attendance_email_status');
+    const disabled = {sessionDate: today, emailEnabled: false, queued: 0, pending: 0, sent: 0, failed: 0};
+
+    await as('anon', null, () => assert.rejects(rpc('send_coaching_attendance_now'), {code:'42501'}));
+    await assert.rejects(send(coach), {code:'42501'});
+    await assert.rejects(status(parent), {code:'42501'});
+    assert.deepEqual(await send(owner), disabled);
+    assert.deepEqual(await status(owner), disabled);
+    assert.equal((await db.query('select count(*)::int n from private.coaching_email_tickets')).rows[0].n, 0);
+
+    await db.exec('begin');
+    try {
+      await db.exec(`create schema net;
+        create schema vault;
+        create table vault.decrypted_secrets(name text, decrypted_secret text);
+        insert into vault.decrypted_secrets values
+          ('letsaimit_notification_worker_url', 'https://example.supabase.co/functions/v1/admin-notifications'),
+          ('letsaimit_notification_worker_secret', repeat('x', 32));
+        create table private.test_coaching_wake(id bigint generated always as identity, url text);
+        create function net.http_post(url text, headers jsonb, body jsonb, timeout_milliseconds integer)
+        returns bigint language sql as $$insert into private.test_coaching_wake(url) values ($1) returning id$$;
+        update private.coaching_settings set email_enabled=true;`);
+
+      const queued = {sessionDate: today, emailEnabled: true, queued: 4, pending: 4, sent: 0, failed: 0};
+      assert.deepEqual(await send(owner), queued);
+      assert.deepEqual(await send(admins[1]), {...queued, queued:0});
+      assert.equal((await db.query('select private.enqueue_coaching_attendance_at($1) n', [today+'T21:00:00+05:30'])).rows[0].n, 0);
+      assert.deepEqual((await db.query('select url from private.test_coaching_wake')).rows, [
+        {url:'https://example.supabase.co/functions/v1/coaching-worker'},
+      ]);
+
+      const first = await service('claim_coaching_email');
+      assert.equal(await service('finish_coaching_email', [first.id, first.leaseToken, 'sent', '']), true);
+      const second = await service('claim_coaching_email');
+      await db.query('update private.coaching_email_tickets set attempts=5 where id=$1', [second.id]);
+      assert.equal(await service('finish_coaching_email', [second.id, second.leaseToken, 'retry', 'transport_failure']), true);
+      const delivered = {...queued, queued:0, pending:2, sent:1, failed:1};
+      assert.deepEqual(await status(owner), delivered);
+      assert.deepEqual(await send(owner), delivered);
+      assert.equal((await db.query('select count(*)::int n from private.test_coaching_wake')).rows[0].n, 1);
+    } finally {
+      await db.exec('rollback');
+    }
+
+    await as('authenticated', owner, async()=>{
+      await db.exec('begin read only');
+      try { assert.deepEqual(await rpc('get_coaching_attendance_email_status'), disabled); }
+      finally { await db.exec('rollback'); }
+    });
+  });
   await t.test('nightly queue is off by default, starts at 21 IST, includes unassigned children and deduplicates all current admins',async()=>{
     assert.equal((await db.query('select private.enqueue_coaching_attendance_at($1) n',[today+'T21:00:00+05:30'])).rows[0].n,0);
     await db.exec('update private.coaching_settings set email_enabled=true');

@@ -326,8 +326,8 @@ export function AuthorizedAdmin({ auth }) {
     <aside className="adm-sidebar">
       <a className="adm-brand" href="/" aria-label="LetsAimIt home"><img {...mediaProps("logo.png", "110px")} alt="LetsAimIt" /></a>
       <p className="adm-sidebar-label">MENU</p>
-      <nav className="adm-nav" aria-label="Admin navigation">{VIEWS.map(item => <button key={item.id} type="button" aria-current={view === item.id ? "page" : undefined} onClick={() => changeView(item.id)}><AdminIcon name={item.icon} /><span>{item.label}</span>{item.id === "register" && hasLoaded && <span className="adm-nav-count">{rows.length}</span>}</button>)}</nav>
-      <div className="adm-utilities"><p className="adm-sidebar-label">GENERAL</p><a href="/coach-dashboard/"><AdminIcon name="register" />Coaching tracker</a><a href="/parent/"><AdminIcon name="team" />Parent dashboard</a><a href="/"><AdminIcon name="external" />Website</a><button type="button" onClick={refresh}><AdminIcon name="reset" />Refresh register</button><button type="button" onClick={auth.signOut}><AdminIcon name="exit" />Sign out</button></div>
+      <nav className="adm-nav" aria-label="Admin navigation">{VIEWS.map(item => <button key={item.id} type="button" aria-current={view === item.id ? "page" : undefined} onClick={() => changeView(item.id)}><AdminIcon name={item.icon} /><span>{item.label}</span>{item.id === "register" && hasLoaded && <span className="adm-nav-count">{rows.length}</span>}</button>)}<a href="/coach-dashboard/"><AdminIcon name="register" />Attendance</a></nav>
+      <div className="adm-utilities"><p className="adm-sidebar-label">GENERAL</p><a href="/parent/"><AdminIcon name="team" />Parent dashboard</a><a href="/"><AdminIcon name="external" />Website</a><button type="button" onClick={refresh}><AdminIcon name="reset" />Refresh register</button><button type="button" onClick={auth.signOut}><AdminIcon name="exit" />Sign out</button></div>
     </aside>
     <div className="adm-workspace">
       <header className="adm-topbar">

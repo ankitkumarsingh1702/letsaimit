@@ -25,8 +25,8 @@ or empty its tables to satisfy a check.
    `public` with explicit grants and RLS. The migrations conditionally enable
    Net/Cron but do not install Vault. Verify actual extension availability.
 4. Apply all complete migration files in the exact order from the parity plan.
-   The current set has ten files, ending in
-   `20261110220027_coaching_tracker_write_identity_lock.sql`. Do not add a seed, Auth users, test
+   The current set has eleven files, ending in
+   `20261111045000_coaching_attendance_send_now.sql`. Do not add a seed, Auth users, test
    registrations, old reviews or financial records. Using a working authorized
    CLI connection records real migration history:
 
@@ -81,8 +81,8 @@ OAuth brand LetsAimIt and canonical production homepage/privacy/terms. Do not
 copy testing endpoints into a production OAuth client. The SQL function hashes
 must be compared with the matching source baseline before claiming equivalence.
 
-The coaching function also needs a separately provisioned
-`COACHING_EMAIL_SIGNING_SECRET`. Keep `COACHING_DYNAMIC_EMAIL_READY=false` until
+The coaching function also needs a separately provisioned domain SMTP sender and
+`COACHING_EMAIL_SIGNING_SECRET`; see [coaching email configuration](../README-COACHING.md#backend-configuration-and-activation). Keep `COACHING_DYNAMIC_EMAIL_READY=false` until
 the actual sender's Gmail dynamic-email approval and authentication requirements
 are met. Neither that provider approval nor real in-Gmail attendance interaction
 is established by a successful SQL check or function deployment.

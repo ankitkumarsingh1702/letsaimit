@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { trackerSnapshot, fetchTracker, saveAttendance, saveWeeklyFeedback, saveCoachAssignment, validTrackerDate, todayIST } from '../src/features/tracker/trackerData.js';
+import { trackerSnapshot, fetchTracker, saveAttendance, saveWeeklyFeedback, saveCoachAssignment, validTrackerDate, todayIST, coachingEmailStatus } from '../src/features/tracker/trackerData.js';
 
 const child = { registrationId: '10000000-0000-4000-8000-000000000001', childName: 'Child', sport: 'Football', community: 'Community', privateEmail: 'do-not-return@example.com' };
 const actor = { id: 'actor-a', isGoogle: true }, verify = async () => actor;
@@ -8,6 +8,24 @@ const attendance = { id: '20000000-0000-4000-8000-000000000001', registrationId:
 const feedback = { id: '30000000-0000-4000-8000-000000000001', registrationId: child.registrationId, weekStart: '2026-11-09', summary: 'Steady balance.', nextStep: 'Practise short passes.', coachName: 'Coach', publishedAt: '2026-11-10T16:00:00Z', revision: 1 };
 const snapshot = () => ({ children: [child], attendance: [attendance], feedback: [feedback], range: { from: '2025-11-11', to: '2026-11-10', feedbackFrom: '2025-11-17' } });
 const options = client => ({ client, userId: actor.id, verifyGoogleUser: verify, checkAccess: async () => true });
+
+test('manual email dispatch takes no client roster or recipients and distinguishes queue from send', async () => {
+  const calls = [];
+  const value = { sessionDate: '2026-11-11', emailEnabled: true, queued: 4, pending: 4, sent: 0, failed: 0 };
+  const config = options({ rpc(...args) { calls.push(args); return { data: { ...value, recipientEmail: 'private@example.test' } }; } });
+  assert.deepEqual(await coachingEmailStatus(config, { send: true }), value);
+  assert.deepEqual(calls, [['send_coaching_attendance_now']]);
+  await assert.rejects(coachingEmailStatus(config), /Email status is unavailable/);
+});
+
+test('email send rejects changed identity and malformed or denied receipts', async () => {
+  let calls = 0;
+  const client = { rpc() { ++calls; return { data: { sessionDate: '2026-11-11', emailEnabled: false, queued: 2, pending: 0, sent: 0, failed: 0 } }; } };
+  await assert.rejects(coachingEmailStatus({ ...options(client), verifyGoogleUser: async () => ({ ...actor, id: 'other' }) }, { send: true }), { code: 'identity_changed' });
+  assert.equal(calls, 0);
+  await assert.rejects(coachingEmailStatus(options(client), { send: true }), /Send was not confirmed/);
+  await assert.rejects(coachingEmailStatus(options({ rpc: () => ({ error: { code: '42501' } }) }), { send: true }), { code: 'access_denied' });
+});
 
 test('tracker view model retains explicit No session and excludes private fields and unrelated ownership', () => {
   const value = trackerSnapshot(snapshot());

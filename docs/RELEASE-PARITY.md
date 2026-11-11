@@ -457,3 +457,13 @@ documentation-only descendants carry the same verified runnable source.
 Remote `main` remains `372be17da151f45d42c54b42b36d2d50ef51758a` and the production
 HTTPS homepage is still 200 / 39,957 bytes with SHA-256
 `6f32fc0cc051d17e1817e189f7a442bfe17b5e93a41e1a0bfeba0efb4aa5dc87`.
+
+## 11 November 2026 — manual attendance dispatch and domain sender
+
+| Boundary | Evidence |
+| --- | --- |
+| Admin flow | Admin navigation opens **Attendance**. The page shows **Send attendance email** and the 9 PM IST daily schedule. The action queues the current IST day's sheet for current approved admins; it does not accept client-supplied roster, addresses or dates. Queued, transport-accepted and terminal failures are distinct. The approval pause is visible and the button disabled while dispatch is off |
+| Source | Forward migration `20261111045000_coaching_attendance_send_now.sql`, SHA-256 `8ea6b50b1348b5ef0ad312779c11273ae6ba375abd63f68146935990b7015ea6`. Same recipient/date key deduplicates repeat clicks and scheduled sends. Private tables, actor checks, existing minute cron and both activation gates are retained. Source plan: 11 migrations / five functions, digest `533b5210a502f5ca259fa78a1eaa9a47e5af08a31a991676f960f5d49b4664be` |
+| Verification | 402 tests passed, including manual enqueue → existing worker → simulated SMTP → real local attendance RPC, no duplicate at 9 PM, access denial and delivery aggregates. Build, frozen coaching function type check and 59 assets passed. In the local browser with example data, the first click showed one queued and zero sent; a second click added no job |
+| Provider | Google requires a website at the sender's owned domain, authenticated mail, a compliant example message and a per-sender review. The existing personal Gmail does not meet the domain requirement and cannot send AMP to itself. A dedicated domain SMTP configuration is staged; the same Gmail remains for registration and billing. No sender registration was submitted and no mail was sent to Google or admins |
+| Live backend | Apply the new guarded forward migration, verify grant/body hashes and counts, and deploy the revised coaching worker to the UAT project before activation. Dispatch gates remain off pending an authenticated `@letsaimit.com` sender and Google's approval. Production provisioning and website promotion are outside this release |

@@ -60,6 +60,14 @@ currently approved admin, including the owner. The roster includes approved
 enrolments even without an assigned coach. There is no old-day email catch-up.
 Roster capacity is 100; larger rosters fail explicitly rather than dropping rows.
 
+An admin can open **Attendance → Send attendance email** to queue today's
+sheet immediately. `send_coaching_attendance_now()` takes no recipient, roster
+or date from the browser. It checks the current Google actor and admin access,
+then wakes the same worker after commit. The daily recipient/date key prevents
+duplicates at 9 PM or on repeated clicks. `get_coaching_attendance_email_status()`
+returns only today's aggregate counts to admins. A queued job is not sent;
+sent means the mail transport accepted it, not that Gmail rendered AMP.
+
 The AMP email provides individual Present/Absent/No session choices, local
 **Mark all present** / **No session** controls and an explicit **Save**. **Load
 latest** reads current values inside Gmail after a multi-admin conflict. All
@@ -75,15 +83,22 @@ Raw ticket credentials travel only in POST bodies, never action URLs or logs.
 
 ## Backend configuration and activation
 
-Use the existing approved SMTP account and server-only SMTP settings. Do not
-copy an app password into React, Git or a public example. New operator values:
+Coaching uses its own authenticated `@letsaimit.com` sender. The existing
+registration and billing SMTP settings are unchanged. Server-only values:
 
+- `COACHING_FROM_EMAIL`: the exact sender reviewed by Google, distinct from all
+  recipient addresses.
+- `COACHING_SMTP_HOST`, `COACHING_SMTP_PORT`, `COACHING_SMTP_USER`,
+  `COACHING_SMTP_PASSWORD`: credentials for the selected SMTP provider. Use
+  certificate-verified TLS on port 465 or required STARTTLS on port 587. If the
+  mailbox provider requires OAuth, use its supported relay or implement the
+  provider's scoped OAuth transport; do not disable tenant security settings.
 - `COACHING_EMAIL_SIGNING_SECRET`: independent random secret of at least 32
   characters per target. Keep stable while issued tickets are valid.
 - `COACHING_DYNAMIC_EMAIL_READY=false`: explicit AMP sender-readiness gate.
 
-The function reuses the target's `NOTIFICATION_CRON_SECRET`, Supabase runtime
-credentials and approved SMTP configuration. `private.wake_coaching_worker()`
+The function reuses the target's `NOTIFICATION_CRON_SECRET` and Supabase runtime
+credentials. `private.wake_coaching_worker()`
 derives its target URL from the existing notification-worker Vault URL. Cron job
 `letsaimit-coaching-attendance` runs every minute; both the database's
 `email_enabled` flag and the function's readiness gate must be enabled for
@@ -91,10 +106,10 @@ delivery. Keep them off while sender approval is pending. Preparation does not
 send emails, create coaching marks or change billing.
 
 Gmail-native controls require Google's per-sender approval and authenticated
-mail. Gmail's registration requirements include an owned sender-domain website;
-the currently configured personal Gmail SMTP identity is not evidence of this
-approval. Gmail developer allowlisting is a recipient-specific test mechanism,
-not a public rollout. Gmail tests require different sender/recipient addresses.
+mail. LetsAimIt cannot satisfy the owned sender-domain website requirement with
+its personal Gmail address. Gmail also requires different From and To addresses
+for AMP delivery. Developer allowlisting is a recipient-specific test mechanism,
+not a public rollout.
 Do not silently substitute a sender, spoof an address, enable dispatch or claim
 all four admins can interact until the actual provider setup is verified.
 
@@ -102,6 +117,17 @@ Sources: [Gmail sender registration](https://developers.google.com/workspace/gma
 [security](https://developers.google.com/workspace/gmail/ampemail/security-requirements),
 [testing](https://developers.google.com/workspace/gmail/ampemail/testing-dynamic-email),
 [AMP email CORS](https://amp.dev/documentation/guides-and-tutorials/email/learn/cors-in-email).
+
+For the [Google registration form](https://forms.gle/fDqLE1gh4wMB6BeQ6), use
+**LetsAimIt**, `https://letsaimit.com`, `https://letsaimit.com/privacy/`, and the
+actual authenticated domain sender. Use case: “Approved LetsAimIt staff receive
+their daily coaching roster and record Present, Absent or No session from Gmail.
+Responses apply only to that date and approved roster.” Google requires a
+production-quality AMP message from that sender before submission. Use a
+separate non-sensitive verification roster and capability that cannot access
+actual children or grant the reviewer staff access. Verify SPF, aligned DKIM,
+DMARC and From/To separation from a delivered message; wait for approval before
+activating dispatch. A provider submission and approval are separate evidence.
 
 The same migration, function, configuration names and tests are staged for both
 targets. Record actual cloud checks in `docs/RELEASE-PARITY.md`; source parity

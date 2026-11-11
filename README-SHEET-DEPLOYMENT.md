@@ -101,10 +101,12 @@ On an existing target, compare applied versions first; do not replay its schema:
 10. `supabase/migrations/20261110220027_coaching_tracker_write_identity_lock.sql`
     — serialize the three authenticated tracker writes with account deletion;
     parent and staff reads retain their read-only transaction contract.
+11. `supabase/migrations/20261111045000_coaching_attendance_send_now.sql`
+    — admin-only manual attendance dispatch and daily delivery status.
 
-Apply all ten complete files in order to a new, empty target. For an existing
+Apply all eleven complete files in order to a new, empty target. For an existing
 target, verify what is applied and apply only the missing forward migrations;
-an existing nine-migration target needs only file 10. Record actual target
+an existing ten-migration target needs only file 11. Record actual target
 versions and checks in the release ledger. Never copy UAT submissions, Auth
 users or private billing rows into production.
 
@@ -175,7 +177,7 @@ their own accepted enrolments, attendance and manual weekly feedback.
 
 ## Backend function artifact set
 
-The current source has **ten migrations and five Edge Functions**:
+The current source has **eleven migrations and five Edge Functions**:
 
 - `admin-notifications` — queued request alerts and activity digests.
 - `billing-worker` — invoice, reminder and billing recovery work.
@@ -201,8 +203,9 @@ remain server-only. See [notifications](README-NOTIFICATIONS.md),
 for their distinct authorization, activation and recovery checks.
 
 Coaching email uses this target's existing notification worker Vault URL/bearer
-to derive its `/coaching-worker` endpoint, plus a separate
-`COACHING_EMAIL_SIGNING_SECRET`. Keep `coaching_settings.email_enabled=false`
+to derive its `/coaching-worker` endpoint, plus a separate domain SMTP sender
+and `COACHING_EMAIL_SIGNING_SECRET`. See [coaching email configuration](README-COACHING.md#backend-configuration-and-activation).
+Keep `coaching_settings.email_enabled=false`
 and `COACHING_DYNAMIC_EMAIL_READY=false` during preparation. Enabling the
 feature requires the actual sender's Gmail dynamic-email approval and mail
 authentication; deploying the function alone does not establish those checks.

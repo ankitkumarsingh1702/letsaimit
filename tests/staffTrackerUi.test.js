@@ -26,8 +26,15 @@ test("assigned non-admin coach sees scoped attendance controls and can also open
   assert.match(html, /Attendance for Sample child/);
   assert.match(html, /<option value="unmarked" selected="">Not marked<\/option>/);
   assert.match(html, /Not marked is not counted as absent/);
-  assert.doesNotMatch(html, />Coach access<|href="\/admin\/"/);
+  assert.doesNotMatch(html, />Coach access<|href="\/admin\/"|Send attendance email/);
   assert.doesNotMatch(html, /Gmail[^<]*ready|Email[^<]*sent|Attendance saved/);
+}));
+
+test('admin email action explains the schedule and stays disabled without sender setup', () => withStaffUi({ isAdmin: true, emailEnabled: false, children: [child], attendance: [], feedback: [] }, async ({ CoachingWorkspace }) => {
+  const html = renderToStaticMarkup(React.createElement(CoachingWorkspace, { auth: { ...auth, phase: 'authorized' } }));
+  assert.match(html, /Daily at 9 PM IST/);
+  assert.match(html, /Email paused until Gmail sender setup is complete/);
+  assert.match(html, /<button[^>]* disabled=""[^>]*>Send attendance email<\/button>/);
 }));
 
 test("unloaded coaching state never claims attendance is saved or emails are enabled", () => withStaffUi(null, async ({ CoachingWorkspace }) => {
