@@ -17,10 +17,11 @@ Latest verified UAT workflow source: `f22e83265d612da094234699a4834f7248b2ef67`
 
 ## 13 November 2026 — Email automation configuration
 
-[`deployment/email-automations.json`](../deployment/email-automations.json)
-lists the sender settings, workers, schedules and attendance gates in one
-place. The parity command includes it as configuration inventory. Supabase
-continues to own live credentials, job scheduling and dispatch settings.
+[`deployment/automations.json`](../deployment/automations.json) lists the
+sender settings, workers, schedules and attendance gates in one place. It also
+maps account deletion, the UAT database health check, Razorpay event handling
+and society/school enquiries. The parity command includes it as configuration
+inventory. Each provider continues to own live credentials and job settings.
 
 The 13 November UAT rollback restored the retained Gmail SMTP settings for
 registration alerts, four-hour activity reports and billing. The notification
