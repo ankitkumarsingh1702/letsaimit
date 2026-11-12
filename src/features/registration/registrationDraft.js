@@ -1,6 +1,5 @@
 import { AsYouType, getCountries, getCountryCallingCode, Metadata, parsePhoneNumberFromString } from "libphonenumber-js/max";
 
-export const SHARED_PARENT_FIELDS = Object.freeze(["parentName", "email", "phone", "phoneCountry", "age", "community", "otherCommunity", "sport"]);
 export function createRegistrationDraft() {
   return { childName: "", parentName: "", phone: "", phoneCountry: "IN", age: "", community: "", otherCommunity: "", sport: "", email: "", address: "", note: "", consent: false, terms: false, billingConsent: false, billingTermsVersion: "" };
 }
@@ -30,16 +29,30 @@ export function storeRegistrationDraft(mode, values, storage = draftStorage(), n
   catch { return false; }
 }
 
-export function consumeRegistrationDraft(mode, storage = draftStorage(), now = Date.now()) {
+function getRegistrationDraft(mode, storage, now, consume) {
   const key = draftKey(mode);
   if (!key) return null;
   try {
-    const raw = storage?.getItem(key); storage?.removeItem(key);
+    const raw = storage?.getItem(key);
+    if (consume) storage?.removeItem(key);
     if (!raw || !Number.isFinite(now)) return null;
     const entry = JSON.parse(raw);
-    if (!entry || !Number.isFinite(entry.savedAt) || entry.expiresAt !== entry.savedAt + DRAFT_AGE_MS || now < entry.savedAt || now >= entry.expiresAt) return null;
-    return boundedDraft(entry.values);
-  } catch { return null; }
+    const validTime = entry && Number.isFinite(entry.savedAt) && entry.expiresAt === entry.savedAt + DRAFT_AGE_MS && now >= entry.savedAt && now < entry.expiresAt;
+    const draft = validTime ? boundedDraft(entry.values) : null;
+    if (!draft && !consume) clearRegistrationDraft(mode, storage);
+    return draft;
+  } catch {
+    if (!consume) clearRegistrationDraft(mode, storage);
+    return null;
+  }
+}
+
+export function readRegistrationDraft(mode, storage = draftStorage(), now = Date.now()) {
+  return getRegistrationDraft(mode, storage, now, false);
+}
+
+export function consumeRegistrationDraft(mode, storage = draftStorage(), now = Date.now()) {
+  return getRegistrationDraft(mode, storage, now, true);
 }
 
 export function clearRegistrationDraft(mode, storage = draftStorage()) {
@@ -56,18 +69,6 @@ export function shouldClearBoundRegistration(previousUserId, nextGoogleUserId) {
 export function canConfirmRegistrationReceipt({ submittedUserId, verifiedUser, generation, currentGeneration, active }) {
   return active === true && Boolean(submittedUserId) && verifiedUser?.isGoogle === true &&
     verifiedUser.id === submittedUserId && generation === currentGeneration;
-}
-
-/** Seed blank registration answers; never transfer consent, terms or a previous save. */
-export function carryTrialToEnrol(trial, enrol = createRegistrationDraft()) {
-  const result = { ...enrol };
-  for (const field of SHARED_PARENT_FIELDS) {
-    if (field === "phoneCountry") continue;
-    if (!result[field] && trial[field]) result[field] = trial[field];
-  }
-  if (!enrol.phone && trial.phone) result.phoneCountry = trial.phoneCountry || "IN";
-  if (result.age === "other") result.age = "";
-  return result;
 }
 
 const limits = new Map();

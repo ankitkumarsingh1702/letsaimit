@@ -4,42 +4,85 @@ import { useSiteActions } from "../../context/SiteActions.jsx";
 import SignIn from "../../pages/SignIn.jsx";
 import ProfileAvatar from "../../components/ProfileAvatar.jsx";
 import { mediaProps } from "../../lib/media.js";
-import { fetchMyRegistrations } from "./parentRequests.js";
+import { fetchMyRegistrations, takeParentRegistration } from "./parentRequests.js";
 import { useParentTracker } from "../tracker/useParentTracker.js";
 import ParentTracker from "./ParentTracker.jsx";
 import BillingPanel from "../billing/BillingPanel.jsx";
 import DeleteAccountPanel, { AccountDeletionNotice } from "../account/DeleteAccountPanel.jsx";
 import "./parent-requests.css";
 
-const formatDate = value => value && Number.isFinite(Date.parse(value)) ? new Intl.DateTimeFormat("en-IN", { timeZone: "Asia/Kolkata", dateStyle: "medium", timeStyle: "short" }).format(new Date(value)) : "—";
+const submittedDate = new Intl.DateTimeFormat("en-IN", { timeZone: "Asia/Kolkata", day: "numeric", month: "short", year: "numeric" });
 const decisionLabels = { pending: "Pending review", accepted: "Accepted", declined: "Declined" };
-const views = [{ id: "dashboard", label: "Dashboard", icon: "dashboard" }, { id: "tracker", label: "Tracker", icon: "tracker" }, { id: "account", label: "Account", icon: "account" }];
+const views = [
+  { id: "requests", label: "My requests" },
+  { id: "payments", label: "Payments" },
+  { id: "tracking", label: "Tracking" },
+  { id: "account", label: "Account" },
+];
+
+function viewUrl(view) {
+  return view === "requests" ? "/parent/" : `/parent/?view=${view}`;
+}
+
+function readView() {
+  const value = typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("view");
+  if (value === "tracker") return "tracking";
+  return views.some(item => item.id === value) ? value : "requests";
+}
 
 function ParentIcon({ name }) {
   const paths = {
-    dashboard: <><rect x="3" y="3" width="7" height="7" rx="2" /><rect x="14" y="3" width="7" height="7" rx="2" /><rect x="3" y="14" width="7" height="7" rx="2" /><rect x="14" y="14" width="7" height="7" rx="2" /></>,
-    tracker: <><rect x="4" y="4" width="16" height="17" rx="2" /><path d="M8 2v4m8-4v4M4 10h16m-12 5 3 3 5-5" /></>,
+    requests: <><rect x="5" y="3" width="14" height="18" rx="2" /><path d="M9 8h6m-6 4h6m-6 4h4" /></>,
+    payments: <><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 10h18m-14 5h3" /></>,
+    tracking: <><rect x="4" y="4" width="16" height="17" rx="2" /><path d="M8 2v4m8-4v4M4 10h16m-12 5 3 3 5-5" /></>,
     account: <><circle cx="12" cy="7" r="4" /><path d="M4 22v-3a8 8 0 0 1 16 0v3" /></>,
-    website: <><path d="M13 4h7v7m0-7L10 14" /><path d="M9 5H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4" /></>,
-    exit: <><path d="M9 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4M13 7l5 5-5 5M8 12h13" /></>,
+    success: <><circle cx="12" cy="12" r="9" /><path d="m8 12 3 3 5-6" /></>,
+    arrow: <path d="M4 12h15m-6-6 6 6-6 6" />,
   };
-  return <svg className="parent-dashboard-icon" viewBox="0 0 24 24" aria-hidden="true">{paths[name] || paths.dashboard}</svg>;
+  return <svg className="parent-dashboard-icon" viewBox="0 0 24 24" aria-hidden="true">{paths[name]}</svg>;
 }
 
-export function PendingEnrolmentNotice({ loaded, rows }) {
-  const pending = loaded ? rows.filter(row => row.formType === "enrol" && row.reviewDecision === "pending").length : 0;
-  return pending ? <p className="parent-request-pending" role="status">Awaiting approval · {pending} {pending === 1 ? "enrolment" : "enrolments"}</p> : null;
+function RegistrationLink({ another = false }) {
+  return <a className="parent-registration-link" href="/register/">{another ? "Register another child" : "Register your child"}<ParentIcon name="arrow" /></a>;
 }
 
-export function ParentRequestError({ error, loaded }) {
-  return error ? <p className="parent-request-error" role="alert">{error}{loaded ? " Showing your previously loaded requests." : ""}</p> : null;
+export function ParentRequestError({ error, loaded, onRetry }) {
+  return error ? <div className="parent-request-error" role="alert"><span>{error}{loaded ? " Showing your previously loaded requests." : ""}</span>{onRetry && <button className="parent-dashboard-text-button" type="button" onClick={onRetry}>Try again</button>}</div> : null;
+}
+
+export function ParentRequestList({ rows, receivedId, onViewPayments }) {
+  const received = rows.find(row => row.formType === "enrol" && row.id === receivedId);
+  const visible = received ? [received, ...rows.filter(row => row !== received)] : rows;
+  return <>
+    {received && <div className="parent-request-received" role="status">
+      <ParentIcon name="success" />
+      <div><strong>Registration received</strong>{received.reviewDecision === "pending" && <p>We’ll email you after review.</p>}</div>
+    </div>}
+    <ul className="parent-request-list" aria-label="Submitted requests">
+      {visible.map(row => {
+        const trial = row.formType === "trial";
+        const title = trial ? "Free trial" : row.childName || "Child registration";
+        return <li key={row.id} className="parent-request-row" data-received={row === received || undefined}>
+          <div className="parent-request-subject">
+            <strong>{title}</strong>
+            <span>{[row.sport, row.community].filter(Boolean).join(" · ")}</span>
+          </div>
+          <time className="parent-request-date" dateTime={row.submittedAt}>{submittedDate.format(new Date(row.submittedAt))}</time>
+          <span className="parent-request-status" data-decision={row.reviewDecision}>{decisionLabels[row.reviewDecision]}</span>
+          <div className="parent-request-next">{!trial && row.reviewDecision === "accepted" && <a className="parent-request-payment" href={viewUrl("payments")} onClick={onViewPayments}>View payments<ParentIcon name="arrow" /></a>}</div>
+        </li>;
+      })}
+    </ul>
+  </>;
 }
 
 export function OwnRequests({ auth }) {
   const { openForm } = useSiteActions();
   const tracker = useParentTracker(auth);
-  const [view, setView] = React.useState(() => typeof window !== "undefined" && views.some(item => item.id === new URLSearchParams(window.location.search).get("view")) ? new URLSearchParams(window.location.search).get("view") : "dashboard");
+  const [view, setView] = React.useState(readView);
+  const [receivedId, setReceivedId] = React.useState(null);
   const heading = React.useRef(null);
+  const receiptChecked = React.useRef(false);
   const [rows, setRows] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [loaded, setLoaded] = React.useState(false);
@@ -49,29 +92,45 @@ export function OwnRequests({ auth }) {
   const flight = React.useRef(null);
   const queued = React.useRef(false);
   const loadedRef = React.useRef(false);
+
   const load = React.useCallback(() => {
     if (!alive.current || document.visibilityState === "hidden") return Promise.resolve();
     if (flight.current) { queued.current = true; return flight.current; }
     const request = ++sequence.current;
     if (!loadedRef.current) setLoading(true);
     const work = (async () => {
-    try {
-      const saved = await fetchMyRegistrations({ client: auth.client, verifyGoogleUser: auth.verifyGoogleUser, userId: auth.user.id });
-      if (!alive.current || sequence.current !== request) return;
-      setRows(saved); setLoaded(true); loadedRef.current = true; setError("");
-    } catch (cause) {
-      if (alive.current && sequence.current === request) setError(cause.message || "Your requests could not load. Please retry.");
-    } finally {
-      flight.current = null;
-      if (alive.current && sequence.current === request) setLoading(false);
-      if (alive.current && queued.current) { queued.current = false; queueMicrotask(() => { void load(); }); }
-    }
+      try {
+        const saved = await fetchMyRegistrations({ client: auth.client, verifyGoogleUser: auth.verifyGoogleUser, userId: auth.user.id });
+        if (!alive.current || sequence.current !== request) return;
+        setRows(saved);
+        setLoaded(true);
+        loadedRef.current = true;
+        setError("");
+      } catch (cause) {
+        if (alive.current && sequence.current === request) {
+          if (["identity_changed", "access_denied"].includes(cause.code)) {
+            setRows([]);
+            setLoaded(false);
+            loadedRef.current = false;
+          }
+          setError(cause.message || "Your requests could not load. Please retry.");
+        }
+      } finally {
+        flight.current = null;
+        if (alive.current && sequence.current === request) setLoading(false);
+        if (alive.current && queued.current) {
+          queued.current = false;
+          queueMicrotask(() => { void load(); });
+        }
+      }
     })();
     flight.current = work;
     return work;
   }, [auth.client, auth.verifyGoogleUser, auth.user.id]);
+
   React.useEffect(() => {
-    alive.current = true; void load();
+    alive.current = true;
+    void load();
     const refresh = () => { if (document.visibilityState === "visible") void load(); };
     const saved = event => { if (event.detail?.userId === auth.user.id) refresh(); };
     const interval = window.setInterval(refresh, 5000);
@@ -79,41 +138,87 @@ export function OwnRequests({ auth }) {
     window.addEventListener("letsaimit:registration-saved", saved);
     document.addEventListener("visibilitychange", refresh);
     return () => {
-      alive.current = false; ++sequence.current; queued.current = false;
+      alive.current = false;
+      ++sequence.current;
+      queued.current = false;
       window.clearInterval(interval);
       window.removeEventListener("focus", refresh);
       window.removeEventListener("letsaimit:registration-saved", saved);
       document.removeEventListener("visibilitychange", refresh);
     };
   }, [load, auth.user.id]);
+
+  React.useEffect(() => {
+    if (receiptChecked.current) return;
+    receiptChecked.current = true;
+    setReceivedId(takeParentRegistration(auth.user.id));
+  }, [auth.user.id]);
+
   React.useEffect(() => {
     const resume = new URLSearchParams(window.location.search).get("resume");
-    if (!["trial", "enrol"].includes(resume)) return;
-    window.history.replaceState(window.history.state, "", "/parent/");
-    openForm(resume === "enrol" ? "enroll" : "trial");
+    if (resume === "enrol") {
+      window.location.replace("/register/?resume=enrol");
+    } else if (resume === "trial") {
+      window.history.replaceState(window.history.state, "", "/parent/");
+      openForm("trial");
+    }
   }, [openForm]);
-  function changeView(next) {
+
+  React.useEffect(() => {
+    const onBack = () => setView(readView());
+    window.addEventListener("popstate", onBack);
+    return () => window.removeEventListener("popstate", onBack);
+  }, []);
+
+  function changeView(event, next) {
+    if (event.button !== 0 || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+    event.preventDefault();
+    if (view === next) return;
+    window.history.pushState(window.history.state, "", viewUrl(next));
     setView(next);
-    const url = new URL(window.location.href);
-    if (next === "dashboard") url.searchParams.delete("view"); else url.searchParams.set("view", next);
-    window.history.replaceState(window.history.state, "", url.pathname + url.search + url.hash);
-    window.requestAnimationFrame(() => { heading.current?.focus({ preventScroll: true }); window.scrollTo({ top: 0, behavior: "instant" }); });
+    window.requestAnimationFrame(() => {
+      heading.current?.focus({ preventScroll: true });
+      window.scrollTo({ top: 0, behavior: "instant" });
+    });
   }
+
+  const name = auth.user.displayName || auth.user.email;
   return <div className="parent-app">
-    <aside className="parent-dashboard-sidebar"><a className="parent-dashboard-brand" href="/" aria-label="LetsAimIt home"><img {...mediaProps("logo.png", "110px")} alt="LetsAimIt" /></a><p className="parent-dashboard-sidebar-label">PARENT</p><nav className="parent-dashboard-nav" aria-label="Parent navigation">{views.map(item => <button key={item.id} type="button" aria-current={view === item.id ? "page" : undefined} onClick={() => changeView(item.id)}><ParentIcon name={item.icon} /><span>{item.label}</span></button>)}</nav><div className="parent-dashboard-utilities">{auth.phase === "authorized" && <a href="/admin/"><ParentIcon name="account" />Team dashboard</a>}<a href="/coach-dashboard/"><ParentIcon name="tracker" />Coaching tracker</a><a href="/"><ParentIcon name="website" />Website</a><button type="button" onClick={() => { void auth.signOut(); }}><ParentIcon name="exit" />Sign out</button></div></aside>
-    <div className="parent-dashboard-workspace"><header className="parent-dashboard-topbar"><span className="parent-dashboard-title">Parent dashboard</span><div className="parent-dashboard-user"><ProfileAvatar name={auth.user.displayName || auth.user.email} src={auth.user.avatarUrl} /><span><strong>{auth.user.displayName || auth.user.email}</strong><span>{auth.user.email}</span></span><details className="parent-dashboard-mobile-tools"><summary aria-label="Parent workspace actions">•••</summary><div>{auth.phase === "authorized" && <a href="/admin/">Team dashboard</a>}<a href="/coach-dashboard/">Coaching tracker</a><a href="/">Website</a><button type="button" onClick={() => { void auth.signOut(); }}>Sign out</button></div></details></div></header>
-      <section className="parent-requests" aria-labelledby="parent-requests-title"><header className="parent-requests-heading"><div><h1 ref={heading} tabIndex={-1} id="parent-requests-title">{views.find(item => item.id === view)?.label || "Dashboard"}</h1><p>Parent workspace</p></div><div className="parent-request-actions"><button type="button" className="btn" onClick={event => openForm("enroll", event.currentTarget)}>Enrol a child</button></div></header>
-        <div hidden={view !== "dashboard"}>
-          <ParentRequestError error={error} loaded={loaded} />
-          <PendingEnrolmentNotice loaded={loaded} rows={rows} />
-          <BillingPanel key={auth.user.id} auth={auth} />
-          <section className="parent-request-history" aria-labelledby="parent-request-history-title"><header className="parent-request-history-heading"><h2 id="parent-request-history-title">Requests{loaded ? ` · ${rows.length}` : ""}</h2><div className="parent-request-actions"><button type="button" className="btn" onClick={load} disabled={loading}>{loading ? "Loading…" : "Refresh requests"}</button><button type="button" className="btn" onClick={event => openForm("trial", event.currentTarget)}>Free trial</button></div></header>
-          {!loaded ? <p className="parent-request-empty" role="status">{loading ? "Loading your saved requests…" : "Your request list is not loaded. Please retry."}</p> : rows.length ? <div className="parent-request-scroll" tabIndex={0} role="region" aria-label="Your submitted requests"><table className="parent-request-table"><caption className="parent-dashboard-sr-only">{rows.length} saved {rows.length === 1 ? "request" : "requests"}. Times are in India Standard Time.</caption><thead><tr><th scope="col">Type</th><th scope="col">Child</th><th scope="col">Sport</th><th scope="col">Community</th><th scope="col">Submitted · IST</th><th scope="col">Review</th><th scope="col">Reviewed · IST</th></tr></thead><tbody>{rows.map(row => <tr key={row.id}><td>{row.formType === "enrol" ? "Enrolment" : "Trial"}</td><td title={row.childName}>{row.childName || "—"}</td><td>{row.sport}</td><td title={row.community}>{row.community}</td><td>{formatDate(row.submittedAt)}</td><td>{decisionLabels[row.reviewDecision]}</td><td>{formatDate(row.reviewedAt)}</td></tr>)}</tbody></table></div> : <p className="parent-request-empty" role="status">No requests have been sent with this Google account yet.</p>}
-          </section>
-        </div>
-        <div hidden={view !== "tracker"}><ParentTracker tracker={tracker} /></div>
-        <div hidden={view !== "account"}><DeleteAccountPanel auth={auth} /></div>
+    <header className="parent-dashboard-header">
+      <div className="parent-dashboard-topbar">
+        <a className="parent-dashboard-brand" href="/" aria-label="LetsAimIt home"><img {...mediaProps("logo.png", "94px")} alt="LetsAimIt" /></a>
+        <details className="parent-dashboard-user">
+          <summary aria-label="Parent account actions"><ProfileAvatar name={name} src={auth.user.avatarUrl} /><span className="parent-dashboard-user-name">{name}</span><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.5" /></svg></summary>
+          <div className="parent-dashboard-menu">
+            <span>{auth.user.email}</span>
+            {auth.phase === "authorized" && <a href="/admin/">Team dashboard</a>}
+            <a href="/coach-dashboard/">Coaching tracker</a>
+            <a href="/">Website</a>
+            <button type="button" onClick={() => { void auth.signOut(); }}>Sign out</button>
+          </div>
+        </details>
+      </div>
+      <nav className="parent-dashboard-nav" aria-label="Parent navigation">
+        {views.map(item => <a key={item.id} href={viewUrl(item.id)} aria-current={view === item.id ? "page" : undefined} onClick={event => changeView(event, item.id)}><ParentIcon name={item.id} /><span>{item.label}</span></a>)}
+      </nav>
+    </header>
+    <div className="parent-requests">
+      <header className="parent-requests-heading">
+        <h1 ref={heading} tabIndex={-1} id="parent-requests-title">{views.find(item => item.id === view)?.label}</h1>
+        {view === "requests" && loaded && rows.length > 0 && <RegistrationLink another={rows.some(row => row.formType === "enrol")} />}
+      </header>
+      <section className="parent-request-history" aria-label="Your registrations and trials" hidden={view !== "requests"}>
+        <ParentRequestError error={error} loaded={loaded} onRetry={load} />
+        {loading && <p className="parent-request-loading" role="status">Loading your saved requests…</p>}
+        {loaded && (rows.length ? <ParentRequestList rows={rows} receivedId={receivedId} onViewPayments={event => changeView(event, "payments")} /> : <div className="parent-request-empty">
+          <ParentIcon name="requests" />
+          <h2>No requests yet</h2>
+          <RegistrationLink />
+        </div>)}
       </section>
+      <div hidden={view !== "payments"}><BillingPanel key={auth.user.id} auth={auth} /></div>
+      <div hidden={view !== "tracking"}><ParentTracker tracker={tracker} /></div>
+      <div hidden={view !== "account"}><DeleteAccountPanel auth={auth} /></div>
     </div>
   </div>;
 }

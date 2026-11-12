@@ -13,6 +13,7 @@ export const PAGE_META = {
   notfound: { path: "/404/", title: "Page not found", description: "This page is not available. Explore LetsAimIt programmes, community sport and school consultancy." },
   admin: { path: "/admin/", title: "Team dashboard", description: "Sign in to the private LetsAimIt team dashboard and registration register." },
   signin: { path: "/sign-in/", title: "Sign in", description: "Sign in with your approved Google account to open the LetsAimIt team dashboard." },
+  register: { path: "/register/", title: "Register your child", description: "Register your child for LetsAimIt coaching." },
   parent: { path: "/parent/", title: "Parent dashboard", description: "View your child’s requests, fees, attendance and weekly coaching feedback." },
   coaching: { path: "/coach-dashboard/", title: "Coaching tracker", description: "Private attendance and weekly feedback for the LetsAimIt coaching team." },
 };
@@ -41,7 +42,7 @@ export function syncPageMeta(page) {
     'meta[property="og:url"]': SITE_ORIGIN + meta.path,
     'meta[name="twitter:title"]': title,
     'meta[name="twitter:description"]': meta.description,
-    'meta[name="robots"]': ["notfound", "admin", "signin", "parent", "coaching"].includes(page) ? "noindex, follow" : "index, follow, max-image-preview:large",
+    'meta[name="robots"]': ["notfound", "admin", "signin", "register", "parent", "coaching"].includes(page) ? "noindex, follow" : "index, follow, max-image-preview:large",
   };
   for (const [selector, value] of Object.entries(values)) document.querySelector(selector)?.setAttribute("content", value);
   document.querySelector('link[rel="canonical"]')?.setAttribute("href", SITE_ORIGIN + meta.path);

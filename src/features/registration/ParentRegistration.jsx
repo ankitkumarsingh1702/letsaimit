@@ -1,12 +1,12 @@
-import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { newSubmissionId, saveRegistration } from "../../lib/leadCapture.js";
 import { parseRegistration, REGISTRATION_AGES, REGISTRATION_COMMUNITIES, REGISTRATION_SPORTS } from "../../lib/registrationSchema.js";
-import { carryTrialToEnrol, createRegistrationDraft, nationalPhoneLimit, sanitizePhoneInput } from "./registrationDraft.js";
+import { createRegistrationDraft, nationalPhoneLimit, sanitizePhoneInput } from "./registrationDraft.js";
 import { firstInvalidRegistrationField, parentRegistrationResolver } from "./registrationResolver.js";
 import CountryCombobox from "./CountryCombobox.jsx";
 import { useAdminAuth } from "../../context/AdminAuth.jsx";
-import { storeRegistrationDraft, consumeRegistrationDraft, clearRegistrationDrafts, shouldClearBoundRegistration, canConfirmRegistrationReceipt } from "./registrationDraft.js";
+import { storeRegistrationDraft, readRegistrationDraft, consumeRegistrationDraft, clearRegistrationDraft, clearRegistrationDrafts, shouldClearBoundRegistration, canConfirmRegistrationReceipt } from "./registrationDraft.js";
 import { fetchBillingTerms, formatMoney } from "../billing/billingData.js";
 import "./registration.css";
 
@@ -35,15 +35,19 @@ export function completeVerifiedRegistrationSave({ receipt, submittedUserId, ver
   return true;
 }
 
-const ParentRegistration = forwardRef(function ParentRegistration({ mode, active, onSwitchKind, onSaved, Arrow }, ref) {
+export default function ParentRegistration({ mode, active, onSaved, onStageChange, Arrow }) {
   const auth = useAdminAuth();
   const isEnrol = mode === "enroll";
+  const googleUserId = auth.user?.isGoogle ? auth.user.id : null;
+  const [review, setReview] = useState(false);
+  const reviewing = isEnrol && review && Boolean(googleUserId);
+  const resumeEnrol = isEnrol && typeof window !== "undefined" && new URLSearchParams(window.location.search).get("resume") === "enrol";
   const [billingTerms, setBillingTerms] = useState(null);
   const [billingError, setBillingError] = useState("");
   const [billingRetry, setBillingRetry] = useState(0);
-  const { register, control, handleSubmit, getValues, reset, setValue, setError, setFocus, getFieldState, formState: { errors } } = useForm({
+  const { register, control, handleSubmit, getValues, reset, setValue, setError, setFocus, clearErrors, getFieldState, formState: { errors } } = useForm({
     defaultValues: createRegistrationDraft(), mode: "onTouched", reValidateMode: "onChange",
-    resolver: parentRegistrationResolver(mode, { billingRequired: billingTerms?.enabled === true }), shouldFocusError: false,
+    resolver: parentRegistrationResolver(mode, { billingRequired: billingTerms?.enabled === true, requireConsent: !isEnrol || reviewing }), shouldFocusError: false,
   });
   const phoneCountry = useWatch({ control, name: "phoneCountry" });
   const community = useWatch({ control, name: "community" });
@@ -55,10 +59,9 @@ const ParentRegistration = forwardRef(function ParentRegistration({ mode, active
   const pending = useRef(false);
   const requestGeneration = useRef(0);
   const activeRef = useRef(active);
-  const googleUserId = auth.user?.isGoogle ? auth.user.id : null;
   const boundAccount = useRef(googleUserId);
   useEffect(() => {
-    if (!active || !isEnrol) return;
+    if (!active || !isEnrol || !googleUserId) return;
     let current = true;
     setBillingTerms(null); setBillingError(""); setValue("billingConsent", false); setValue("billingTermsVersion", "");
     fetchBillingTerms(auth.client).then(terms => {
@@ -71,16 +74,24 @@ const ParentRegistration = forwardRef(function ParentRegistration({ mode, active
     activeRef.current = active;
     requestGeneration.current += 1;
     if (active) {
-      const kept = consumeRegistrationDraft(mode);
-      if (kept) { reset(kept); setRestored(true); submissionId.current = null; submissionUserId.current = null; }
+      const kept = isEnrol
+        ? (resumeEnrol ? readRegistrationDraft(mode) : null)
+        : consumeRegistrationDraft(mode);
+      if (kept) {
+        reset(kept);
+        setRestored(true);
+        setReview(isEnrol);
+        submissionId.current = null;
+        submissionUserId.current = null;
+      }
       setStatus(pending.current ? "saving" : "idle");
       setSaveError("");
     }
     return () => { activeRef.current = false; requestGeneration.current += 1; };
-  }, [active]);
+  }, [active, isEnrol, mode, reset, resumeEnrol]);
   useLayoutEffect(() => {
     if (shouldClearBoundRegistration(boundAccount.current, googleUserId)) {
-      reset(createRegistrationDraft()); clearRegistrationDrafts(); setRestored(false);
+      reset(createRegistrationDraft()); clearRegistrationDrafts(); setRestored(false); setReview(false);
     }
     boundAccount.current = googleUserId;
     requestGeneration.current += 1;
@@ -88,27 +99,18 @@ const ParentRegistration = forwardRef(function ParentRegistration({ mode, active
     setStatus("idle"); setSaveError("");
     setValue("consent", false); setValue("terms", false); setValue("billingConsent", false);
   }, [googleUserId, reset, setValue]);
-  useImperativeHandle(ref, () => ({
-    getValues,
-    clear: () => {
-      requestGeneration.current += 1;
-      reset(createRegistrationDraft());
-      submissionId.current = null; submissionUserId.current = null;
-      setRestored(false); setStatus("idle"); setSaveError("");
-    },
-    carryTrial: trial => {
-      const existing = getValues();
-      const seeded = carryTrialToEnrol(trial, existing);
-      if (JSON.stringify(seeded) !== JSON.stringify(existing)) {
-        reset(seeded); submissionId.current = null; setStatus("idle"); setSaveError("");
-      }
-    },
-  }), [getValues, reset]);
-
+  useLayoutEffect(() => {
+    if (active && isEnrol) onStageChange?.(reviewing ? "review" : "details");
+  }, [active, isEnrol, onStageChange, reviewing]);
   function markEdited() {
     requestGeneration.current += 1;
     submissionId.current = null;
     setStatus("idle"); setSaveError("");
+  }
+  function editDetails() {
+    clearErrors();
+    setSaveError("");
+    setReview(false);
   }
   const fieldId = name => `fm-${mode}-${name}`;
   function errorMessage(name) {
@@ -135,10 +137,21 @@ const ParentRegistration = forwardRef(function ParentRegistration({ mode, active
 
   async function submit(values) {
     if (!active || pending.current) return;
+    if (isEnrol && !reviewing && googleUserId) {
+      if (restored) storeRegistrationDraft(mode, values);
+      setReview(true);
+      return;
+    }
     pending.current = true;
     setStatus("verifying"); setSaveError("");
     const generation = requestGeneration.current;
     try {
+      if (isEnrol && !reviewing) {
+        if (!storeRegistrationDraft(mode, values)) throw new Error("This tab can’t keep your answers for sign-in. Check your browser settings and try again.");
+        setStatus("signing_in");
+        await auth.signIn("/register/?resume=enrol");
+        return;
+      }
       if (isEnrol && !billingTerms) throw new Error("Payment details could not load. Retry payment details below.");
       if (isEnrol && billingTerms.enabled && (values.billingConsent !== true || values.billingTermsVersion !== billingTerms.version)) {
         throw Object.assign(new Error("Please review the monthly payment details and agree before sending."), { field: "billingConsent" });
@@ -150,7 +163,7 @@ const ParentRegistration = forwardRef(function ParentRegistration({ mode, active
         if (auth.user?.isGoogle) throw new Error("Your Google account changed. Sign in again before sending.");
         if (!storeRegistrationDraft(mode, values)) throw new Error("Your browser could not keep these answers for sign-in. Allow this site's session storage and try again.");
         setStatus("signing_in");
-        await auth.signIn(`/parent/?resume=${isEnrol ? "enrol" : "trial"}`);
+        await auth.signIn("/parent/?resume=trial");
         return;
       }
       if (!auth.user?.isGoogle || auth.user.id !== actor.id) {
@@ -167,11 +180,11 @@ const ParentRegistration = forwardRef(function ParentRegistration({ mode, active
       if (!currentActor || currentActor.id !== actor.id) throw new Error("Your Google account changed. Check the account and submit again.");
       completeVerifiedRegistrationSave({ receipt, submittedUserId: actor.id, verifiedUser: currentActor, generation, currentGeneration: requestGeneration.current, active: activeRef.current,
         onComplete: () => {
-          clearRegistrationDrafts();
+          clearRegistrationDraft(mode);
           reset(createRegistrationDraft());
           submissionId.current = null; submissionUserId.current = null;
-          setRestored(false); setSaveError(""); setStatus("idle");
-          onSaved(mode, actor.id);
+          setRestored(false); setReview(false); setSaveError(""); setStatus("idle");
+          onSaved(mode, actor.id, receipt);
         },
       });
     } catch (error) {
@@ -191,7 +204,13 @@ const ParentRegistration = forwardRef(function ParentRegistration({ mode, active
   }
   function focusInvalid(nextErrors) {
     const first = firstInvalidRegistrationField(mode, nextErrors);
-    if (first) setFocus(first);
+    if (!first) return;
+    if (reviewing && !["consent", "terms", "billingConsent"].includes(first)) {
+      setReview(false);
+      requestAnimationFrame(() => setFocus(first));
+      return;
+    }
+    setFocus(first);
   }
   const phoneField = register("phone");
   function phoneChange(event) {
@@ -214,60 +233,99 @@ const ParentRegistration = forwardRef(function ParentRegistration({ mode, active
     markEdited();
   }
 
-  return <form className="fm-form registration-form" data-form-mode={mode} hidden={!active} style={!active ? { display: "none" } : undefined}
+  const ageOptions = REGISTRATION_AGES.map(age => ({ value: age, label: `${age} years` }));
+  if (!isEnrol) ageOptions.push({ value: "other", label: "Under 5 or over 14" });
+  const communityFields = <>
+    {select("community", "Community", REGISTRATION_COMMUNITIES)}
+    {community === "Another community" && input("otherCommunity", "Your society or locality", { full: true, maxLength: 120, autoComplete: "address-level3" })}
+  </>;
+  const contactFields = <>
+    {input("parentName", "Parent or guardian name", { maxLength: 80, autoComplete: "name" })}
+    {input("email", isEnrol ? "Contact email" : "Email address", { type: "email", inputMode: "email", maxLength: 254, autoComplete: "email" })}
+    <div className="fm-field"><label htmlFor={fieldId("phoneCountry")}>Phone country</label>
+      <Controller control={control} name="phoneCountry" render={({ field }) => <CountryCombobox id={fieldId("phoneCountry")} value={field.value} inputRef={field.ref} error={errors.phoneCountry} onBlur={field.onBlur}
+        onChange={code => { field.onChange(code); setValue("phone", getValues("phone"), { shouldValidate: getFieldState("phone").isTouched }); markEdited(); }} />} />
+      {errorMessage("phoneCountry")}
+    </div>
+    <div className="fm-field"><label htmlFor={fieldId("phone")}>Parent phone number</label>
+      <input id={fieldId("phone")} type="tel" inputMode="numeric" autoComplete="tel-national" {...phoneField} onChange={phoneChange} onPaste={phonePaste} required
+        maxLength={25} aria-invalid={errors.phone ? true : undefined} aria-describedby={`${fieldId("phone")}-hint ${fieldId("phone")}-error`} />
+      <span className="fm-hint registration-phone-hint" id={`${fieldId("phone")}-hint`}>{phoneCountry === "IN" ? "10 digits" : `Up to ${nationalPhoneLimit(phoneCountry)} digits`}</span>
+      {errorMessage("phone")}
+    </div>
+  </>;
+  const guardianConsent = <div className="sk-consent"><label className="fm-consent" htmlFor={fieldId("consent")}>
+    <input id={fieldId("consent")} type="checkbox" {...register("consent")} required aria-invalid={errors.consent ? true : undefined} aria-describedby={`${fieldId("consent")}-error`} />
+    <span>I’m the parent or guardian. I agree LetsAimIt can use these details to handle my request and contact me. <a href="/privacy/" target="_blank" rel="noopener noreferrer">Privacy policy</a></span>
+  </label>{errorMessage("consent")}</div>;
+  const busy = ["verifying", "saving", "signing_in"].includes(status);
+  const authBusy = ["checking", "signing_in", "signing_out"].includes(auth.phase);
+  let action = googleUserId ? "Send trial request" : "Continue with Google";
+  if (isEnrol && googleUserId) action = reviewing ? "Send registration" : "Review registration";
+  if (saveError && googleUserId && (!isEnrol || reviewing)) action = "Try again";
+  if (status === "signing_in") action = "Opening Google…";
+  else if (busy) action = "Sending…";
+  const details = reviewing ? getValues() : null;
+
+  return <form className="fm-form registration-form" data-form-mode={mode} hidden={!active}
     noValidate onSubmit={handleSubmit(submit, focusInvalid)} onChange={event => { if (event.target.name) markEdited(); }}>
-    <fieldset className="fm-fieldset" disabled={!active || ["verifying", "saving", "signing_in"].includes(status)}>
-      <div className="fm-fields">
-        {isEnrol && input("childName", "Child’s name", { maxLength: 80, autoComplete: "off" })}
-        {input("parentName", "Parent or guardian name", { maxLength: 80, autoComplete: "name" })}
-        {input("email", "Email address", { type: "email", inputMode: "email", maxLength: 254, autoComplete: "email" })}
-        <div className="fm-field"><label htmlFor={fieldId("phoneCountry")}>Phone country</label>
-          <Controller control={control} name="phoneCountry" render={({ field }) => <CountryCombobox id={fieldId("phoneCountry")} value={field.value} inputRef={field.ref} error={errors.phoneCountry} onBlur={field.onBlur}
-            onChange={code => { field.onChange(code); setValue("phone", getValues("phone"), { shouldValidate: getFieldState("phone").isTouched }); markEdited(); }} />} />
-          {errorMessage("phoneCountry")}
-        </div>
-        <div className="fm-field"><label htmlFor={fieldId("phone")}>Parent phone number</label>
-          <input id={fieldId("phone")} type="tel" inputMode="numeric" autoComplete="tel-national" {...phoneField} onChange={phoneChange} onPaste={phonePaste} required
-            maxLength={25} aria-invalid={errors.phone ? true : undefined} aria-describedby={`${fieldId("phone")}-hint ${fieldId("phone")}-error`} />
-          <span className="fm-hint registration-phone-hint" id={`${fieldId("phone")}-hint`}>{phoneCountry === "IN" ? "10 digits. Country code is selected separately." : `Enter the national number, up to ${nationalPhoneLimit(phoneCountry)} digits.`}</span>
-          {errorMessage("phone")}
-        </div>
-        {select("age", "Child’s age", [...REGISTRATION_AGES.map(age => ({ value: age, label: `${age} years` })), ...(!isEnrol ? [{ value: "other", label: "Under 5 or over 14" }] : [])])}
-        {select("community", "Community", REGISTRATION_COMMUNITIES)}
-        {community === "Another community" && input("otherCommunity", "Your society or locality", { full: true, maxLength: 120, autoComplete: "address-level3" })}
+    <fieldset className="fm-fieldset" disabled={!active || busy || isEnrol && authBusy}>
+      {isEnrol ? <div className="registration-detail-groups" hidden={reviewing}>
+        <section aria-labelledby={fieldId("child-details")}>
+          <h2 id={fieldId("child-details")}>Child details</h2>
+          <div className="fm-fields">
+            {input("childName", "Child’s name", { maxLength: 80, autoComplete: "off" })}
+            {select("age", "Child’s age", ageOptions)}
+            {select("sport", "Sport", REGISTRATION_SPORTS)}
+            {communityFields}
+            {input("address", "Address", { full: true, multiline: true, maxLength: 500, autoComplete: "street-address" })}
+            {input("note", "Note for the coach", { full: true, multiline: true, optional: true, maxLength: 500 })}
+          </div>
+        </section>
+        <section aria-labelledby={fieldId("parent-details")}>
+          <h2 id={fieldId("parent-details")}>Parent details</h2>
+          <div className="fm-fields">{contactFields}</div>
+        </section>
+      </div> : <div className="fm-fields">
+        {contactFields}
+        {select("age", "Child’s age", ageOptions)}
+        {communityFields}
         {select("sport", "Sport", REGISTRATION_SPORTS)}
-        {isEnrol && input("address", "Address", { full: true, multiline: true, maxLength: 500, autoComplete: "street-address" })}
-        {isEnrol && input("note", "Note for the coach", { full: true, multiline: true, optional: true, maxLength: 500 })}
-      </div>
+      </div>}
+      {reviewing && <>
+        <div className="registration-review-summary">
+          <div><h2>{details.childName}</h2><p>{details.sport} · {details.community === "Another community" ? details.otherCommunity : details.community}</p></div>
+          <button type="button" className="fm-text-button" onClick={editDetails}>Edit details</button>
+        </div>
+        <div className="registration-review-account">
+          <p>Signed in as <strong>{auth.user.email}</strong></p>
+          {details.email.toLowerCase().trim() !== auth.user.email?.toLowerCase() && <p>Contact email <strong>{details.email}</strong></p>}
+        </div>
+      </>}
       <div className="fm-form-footer">
-        {restored && <RegistrationResumeNotice />}
-        {auth.user?.isGoogle ? <p className="fm-handoff-note">Submitting as {auth.user.email}. <a href="/parent/">My requests</a></p> : <p className="fm-handoff-note">Google sign-in first. Then confirm consent and send. Answers stay in this tab for 30 minutes.</p>}
-        <div className="fm-full sk-consent"><label className="fm-consent" htmlFor={fieldId("consent")}>
-          <input id={fieldId("consent")} type="checkbox" {...register("consent")} required aria-invalid={errors.consent ? true : undefined} aria-describedby={`${fieldId("consent")}-error`} />
-          <span>I am the parent or guardian. I agree to use of these details for this enquiry and a reply from LetsAimIt. <a href="/privacy/" target="_blank" rel="noopener noreferrer">Privacy policy</a></span>
-        </label>{errorMessage("consent")}</div>
-        {isEnrol && <div className="registration-terms"><label className="fm-consent" htmlFor={fieldId("terms")}>
-          <input id={fieldId("terms")} type="checkbox" {...register("terms")} required aria-invalid={errors.terms ? true : undefined} aria-describedby={`${fieldId("terms")}-error`} />
-          <span>I accept the <a href="/terms/" target="_blank" rel="noopener noreferrer">programme terms</a> and <a href="/refunds/" target="_blank" rel="noopener noreferrer">cancellation policy</a>. Paid enrolment is non-refundable for personal absence or withdrawal.</span>
-        </label>{errorMessage("terms")}</div>}
-        {isEnrol && <div className="registration-billing" aria-label="Monthly payment details">
-          {!billingTerms ? <div className="registration-billing-loading"><p role={billingError ? "alert" : "status"}>{billingError || "Loading payment details…"}</p>{billingError && <button type="button" className="fm-text-button" onClick={() => setBillingRetry(value => value + 1)}>Retry payment details</button>}</div> : !billingTerms.enabled ? <p className="fm-handoff-note">Payment setup pending. No payment now.</p> : <>
-            <QuotedBillingPolicy lateFeePaise={billingTerms.lateFeePaise} />
-            <label className="fm-consent" htmlFor={fieldId("billingConsent")}><input id={fieldId("billingConsent")} type="checkbox" {...register("billingConsent")} required aria-invalid={errors.billingConsent ? true : undefined} aria-describedby={`${fieldId("billingConsent")}-error`} /><span>I agree to monthly billing at the quoted fee, payment dates and late fees.</span></label>
-            {errorMessage("billingConsent")}
-          </>}
-          <input type="hidden" {...register("billingTermsVersion")} />
-        </div>}
-          <button className="fm-primary" type="submit" disabled={["verifying", "saving", "signing_in"].includes(status) || ["checking", "signing_in", "signing_out"].includes(auth.phase) || isEnrol && !billingTerms}>
-            <span>{status === "verifying" ? "Checking Google…" : status === "saving" ? "Saving…" : status === "signing_in" ? "Opening Google…" : !auth.user?.isGoogle ? "Sign in, then send" : saveError ? "Retry save" : isEnrol ? "Send registration" : "Request a free trial"}</span><Arrow />
-          </button>
-        {saveError && <div className="fm-save-error" role="alert"><p>{saveError}</p><p>Your answers are still here. Please retry to confirm the save.</p></div>}
-        <button className="fm-text-button" type="button" onClick={() => onSwitchKind(isEnrol ? "trial" : "enroll")}>
-          {isEnrol ? "Try a session first" : "Ready to join? Enrol your child"}<Arrow />
+        {!isEnrol && <>
+          {restored && <RegistrationResumeNotice />}
+          {!restored && !googleUserId && <p className="fm-handoff-note">Sign in with Google to send your request.</p>}
+        </>}
+        {(!isEnrol || reviewing) && guardianConsent}
+        {reviewing && <>
+          <div className="registration-terms"><label className="fm-consent" htmlFor={fieldId("terms")}>
+            <input id={fieldId("terms")} type="checkbox" {...register("terms")} required aria-invalid={errors.terms ? true : undefined} aria-describedby={`${fieldId("terms")}-error`} />
+            <span>I accept the <a href="/terms/" target="_blank" rel="noopener noreferrer">programme terms</a> and <a href="/refunds/" target="_blank" rel="noopener noreferrer">cancellation policy</a>. Paid fees are non-refundable for personal absence or withdrawal.</span>
+          </label>{errorMessage("terms")}</div>
+          <div className="registration-billing" aria-label="Monthly payment details">
+            {!billingTerms ? <div className="registration-billing-loading"><p role={billingError ? "alert" : "status"}>{billingError || "Loading payment details…"}</p>{billingError && <button type="button" className="fm-text-button" onClick={() => setBillingRetry(value => value + 1)}>Retry payment details</button>}</div> : !billingTerms.enabled ? <p className="fm-handoff-note">We’ll share payment details after review.</p> : <>
+              <QuotedBillingPolicy lateFeePaise={billingTerms.lateFeePaise} />
+              <label className="fm-consent" htmlFor={fieldId("billingConsent")}><input id={fieldId("billingConsent")} type="checkbox" {...register("billingConsent")} required aria-invalid={errors.billingConsent ? true : undefined} aria-describedby={`${fieldId("billingConsent")}-error`} /><span>I agree to the quoted monthly fee, due dates and late fees.</span></label>
+              {errorMessage("billingConsent")}
+            </>}
+          </div>
+        </>}
+        {saveError && <div className="fm-save-error" role="alert"><p>{saveError}</p></div>}
+        <button className="fm-primary" type="submit" disabled={busy || authBusy || reviewing && !billingTerms}>
+          <span>{action}</span><Arrow />
         </button>
       </div>
     </fieldset>
   </form>;
-});
-
-export default ParentRegistration;
+}

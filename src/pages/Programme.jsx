@@ -1,8 +1,6 @@
-import { useSiteActions } from "../context/SiteActions.jsx";
-import { TrialButton } from "../components/ui.jsx";
+import { Arrow, RegisterLink, TrialButton } from "../components/ui.jsx";
 import { mediaProps } from "../lib/media.js";
 import { ProgrammeFilm } from "../components/ProgrammeFilm.jsx";
-import { Arrow } from "../components/ui.jsx";
 var questions = [
   [
     "Which sports are available?",
@@ -31,7 +29,6 @@ var questions = [
   ],
 ];
 function Programme() {
-  let { openForm } = useSiteActions();
   return (
     <div className="pg-page">
       <section className="pg-hero wrap" aria-labelledby="programme-heading">
@@ -49,7 +46,10 @@ function Programme() {
             <br />
             {" Build fitness through play."}
           </p>
-          <TrialButton />
+          <div className="programme-registration-actions">
+            <RegisterLink />
+            <TrialButton className="text-link">Try a free session</TrialButton>
+          </div>
         </div>
         <figure className="pg-hero-photo">
           <img
@@ -138,16 +138,7 @@ function Programme() {
           <p className="pg-community-note">
             Football and basketball at both.
           </p>
-          <TrialButton className="btn-dark">Request a free trial</TrialButton>
-          <button
-            className="pg-enroll text-link"
-            type="button"
-            data-action="enroll"
-            onClick={(event) => openForm("enroll", event.currentTarget)}
-          >
-            {"Ready to join? Enrol your child "}
-            <Arrow />
-          </button>
+          <RegisterLink className="btn-dark" />
         </div>
         <figure className="pg-fee-photo">
           <img

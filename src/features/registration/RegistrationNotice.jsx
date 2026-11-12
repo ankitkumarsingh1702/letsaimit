@@ -13,7 +13,7 @@ export default function RegistrationNotice({ notice, onDismiss }) {
   }, [notice, userId, onDismiss]);
   if (!notice || notice.userId !== userId) return null;
   return <div className="registration-notice" role="status">
-    <span>{notice.mode === "enroll" ? "Registration received." : "Trial request received."}</span>
+    <span><strong>Trial request received</strong><br />We’ll contact you to confirm a time.</span>
     <a href="/parent/">My requests</a>
     <button type="button" aria-label="Dismiss confirmation" onClick={onDismiss}>×</button>
   </div>;

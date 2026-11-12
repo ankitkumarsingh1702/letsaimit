@@ -84,21 +84,7 @@ function TextField({
 function FormSidebar({ mode, societyStep }) {
   let content = {
     trial: {
-      title: (
-        <>
-          Let’s get
-          <br />
-          {" playing."}
-        </>
-      ),
-      copy: (
-        <>
-          Football. Basketball. Fitness.
-          <br />
-          {" A lot to look forward to."}
-        </>
-      ),
-      label: "Your free trial",
+      title: "Try a free session",
       footer: (
         <>
           Nambiar Ellegenza
@@ -127,42 +113,14 @@ function FormSidebar({ mode, societyStep }) {
       label: "For your society",
       footer: "Let’s make room for play.",
     },
-    enroll: {
-      title: (
-        <>
-          Join the
-          <br />
-          {" team."}
-        </>
-      ),
-      copy: (
-        <>
-          New skills.
-          <br />
-          {" New friends."}
-          <br />
-          {" More ways to move."}
-        </>
-      ),
-      label: "Child registration",
-      footer: (
-        <>
-          Nambiar Ellegenza
-          <br />
-          Nambiar Bellezea
-          <br />
-          Bengaluru
-        </>
-      ),
-    },
   }[mode];
   return (
     <aside className="fm-aside">
-      <p className="fm-aside-label">{content.label}</p>
+      {content.label && <p className="fm-aside-label">{content.label}</p>}
       <h2 id="fm-dialog-title" className="fm-title">
         {content.title}
       </h2>
-      <p className="fm-aside-copy">{content.copy}</p>
+      {content.copy && <p className="fm-aside-copy">{content.copy}</p>}
       {mode === "society" && (
         <ol className="fm-step-list" aria-label="Enquiry steps">
           <li aria-current={societyStep === 1 ? "step" : void 0}>
@@ -191,23 +149,21 @@ function HandoffResult({ url }) {
     </div>
   );
 }
-function ContactDialog({ kind, onClose, onSwitchKind, onRegistrationSaved }) {
+function ContactDialog({ kind, onClose, onRegistrationSaved }) {
   const dialogRef = React.useRef(null);
-  const parentForms = React.useRef({});
   const headingRef = React.useRef(null);
   const fieldRefs = React.useRef({});
   const submissionIds = React.useRef({});
   const requestGeneration = React.useRef(0);
   const [drafts, setDrafts] = React.useState(createInitialDrafts);
-  const [consents, setConsents] = React.useState({ trial: false, enroll: false, society: false });
-  const [terms, setTerms] = React.useState(false);
+  const [consent, setConsent] = React.useState(false);
   const [societyStep, setSocietyStep] = React.useState(1);
   const [errors, setErrors] = React.useState({});
   const [handoffUrl, setHandoffUrl] = React.useState("");
   const [status, setStatus] = React.useState("idle");
   const [saveError, setSaveError] = React.useState("");
   const mode = kind || "trial";
-  const finalStep = mode !== "society" || societyStep === 2;
+  const finalStep = societyStep === 2;
   const isParent = mode !== "society";
 
   React.useLayoutEffect(() => {
@@ -230,16 +186,7 @@ function ContactDialog({ kind, onClose, onSwitchKind, onRegistrationSaved }) {
     headingRef.current?.focus({ preventScroll: true });
   }, [societyStep]);
   React.useEffect(() => () => document.body.classList.remove("form-open"), []);
-  React.useEffect(() => {
-    if (kind === "enroll" && parentForms.current.trial && parentForms.current.enroll) {
-      parentForms.current.enroll.carryTrial(parentForms.current.trial.getValues());
-    }
-  }, [kind]);
-
   function completeParentRegistration(savedMode, userId) {
-    // Both forms stay mounted; clear trial carry-over as well as the saved form.
-    parentForms.current.trial?.clear();
-    parentForms.current.enroll?.clear();
     onClose();
     onRegistrationSaved?.({ mode: savedMode, userId });
   }
@@ -251,13 +198,9 @@ function ContactDialog({ kind, onClose, onSwitchKind, onRegistrationSaved }) {
     delete submissionIds.current[mode];
   }
   function changeConsent(value) {
-    setConsents(previous => ({ ...previous, [mode]: value }));
+    setConsent(value);
     setErrors(previous => ({ ...previous, consent: "" }));
     setStatus("idle"); setHandoffUrl(""); setSaveError(""); delete submissionIds.current[mode];
-  }
-  function checkConsent(nextErrors) {
-    if (!consents[mode]) nextErrors.consent = isParent ? "Please confirm that you are the parent or guardian and agree." : "Please agree before continuing.";
-    if (mode === "enroll" && !terms) nextErrors.terms = "Please read and accept the programme terms.";
   }
   function focusError(nextErrors) {
     const field = Object.keys(nextErrors).find(name => nextErrors[name]);
@@ -268,7 +211,7 @@ function ContactDialog({ kind, onClose, onSwitchKind, onRegistrationSaved }) {
     event.preventDefault();
     if (status === "saving") return;
     const nextErrors = validateForm(mode, drafts[mode], societyStep);
-    if (finalStep) checkConsent(nextErrors);
+    if (finalStep && !consent) nextErrors.consent = "Please agree before continuing.";
     setErrors(nextErrors);
     if (focusError(nextErrors)) return;
     if (!finalStep) { setSocietyStep(2); return; }
@@ -283,24 +226,12 @@ function ContactDialog({ kind, onClose, onSwitchKind, onRegistrationSaved }) {
     const id = submissionIds.current[mode] ||= newSubmissionId();
     const generation = requestGeneration.current;
     try {
-      await saveLead(mode === "enroll" ? "enrol" : mode, drafts[mode], {
-        agreed: true, guardian: isParent, terms: mode === "enroll" && terms,
-      }, id);
+      await saveLead("society", drafts.society, { agreed: true }, id);
       if (requestGeneration.current === generation) setStatus("saved");
     } catch (error) { if (requestGeneration.current === generation) { setSaveError(error.message); setStatus("error"); } }
   }
   function fieldProps(name) {
     return { mode, name, value: drafts[mode][name], onChange: handleChange, error: errors[name], inputRef: element => { fieldRefs.current[name] = element; } };
-  }
-  function consentControls() {
-    return <>
-      <LeadConsent id={`fm-${mode}-consent`} checked={consents[mode]} onChange={changeConsent} guardian={isParent} error={errors.consent} inputRef={element => { fieldRefs.current.consent = element; }} />
-      {mode === "enroll" && <div>
-        <label className="fm-consent"><input type="checkbox" checked={terms} onChange={event => { setTerms(event.target.checked); setErrors(previous => ({ ...previous, terms: "" })); setStatus("idle"); setHandoffUrl(""); setSaveError(""); delete submissionIds.current.enroll; }} ref={element => { fieldRefs.current.terms = element; }} aria-describedby={errors.terms ? "fm-terms-error" : undefined} aria-invalid={errors.terms ? true : undefined} />
-          <span>I accept the <a href="/terms/" target="_blank" rel="noopener noreferrer">programme terms</a> and <a href="/refunds/" target="_blank" rel="noopener noreferrer">cancellation policy</a>. Paid enrolment is non-refundable for personal absence or withdrawal.</span></label>
-        {errors.terms && <p id="fm-terms-error" className="fm-consent-error">{errors.terms}</p>}
-      </div>}
-    </>;
   }
   function result() {
     if (status === "saved") return <div className="fm-success" role="status"><h4>Thank you. Details saved.</h4><p>We’ll be in touch to confirm the next step.</p><a href={handoffUrl} target="_blank" rel="noopener noreferrer">Continue in WhatsApp</a><p className="fm-handoff-note">Opens WhatsApp with a pre-filled message.</p></div>;
@@ -318,11 +249,10 @@ function ContactDialog({ kind, onClose, onSwitchKind, onRegistrationSaved }) {
       <div className="fm-content">
         <div className="fm-content-top">
           {mode === "society" && <p className="fm-mobile-step">Step {societyStep} of 2</p>}
-          <h3 ref={headingRef} className="fm-main-heading" tabIndex={-1}>{mode === "society" ? societyStep === 1 ? "Your society" : "Your contact details" : mode === "enroll" ? "Join the programme." : "Your first session. Free."}</h3>
-          <p className="fm-intro">{mode === "society" ? "Make room for play." : mode === "enroll" ? "Register with a parent or guardian." : "Choose a sport. We’ll confirm a time."}</p>
+          <h3 ref={headingRef} className="fm-main-heading" tabIndex={-1}>{mode === "society" ? (societyStep === 1 ? "Your society" : "Your contact details") : "Session details"}</h3>
+          {isParent && <p className="fm-intro">We’ll contact you to confirm a time.</p>}
         </div>
-        <ParentRegistration ref={form => { parentForms.current.trial = form; }} mode="trial" active={kind === "trial"} onSwitchKind={onSwitchKind} onSaved={completeParentRegistration} Arrow={FormArrow} />
-        <ParentRegistration ref={form => { parentForms.current.enroll = form; }} mode="enroll" active={kind === "enroll"} onSwitchKind={onSwitchKind} onSaved={completeParentRegistration} Arrow={FormArrow} />
+        <ParentRegistration mode="trial" active={kind === "trial"} onSaved={completeParentRegistration} Arrow={FormArrow} />
         {!isParent &&<form className="fm-form" data-form-mode={mode} noValidate onSubmit={handleSubmit}>
           <fieldset className="fm-fieldset" disabled={status === "saving"}>
             <div className="fm-fields">
@@ -339,12 +269,12 @@ function ContactDialog({ kind, onClose, onSwitchKind, onRegistrationSaved }) {
               </>}
             </div>
             <div className="fm-form-footer">
-              {finalStep && consentControls()}
+              {finalStep && <LeadConsent id="fm-society-consent" checked={consent} onChange={changeConsent} error={errors.consent} inputRef={element => { fieldRefs.current.consent = element; }} />}
               {status !== "saved" && <>
                 {finalStep && <p className="fm-handoff-note">{leadCaptureConfigured ? "Save your details. Then chat, if you like." : "Opens WhatsApp with a pre-filled message. Send it to share your details."}</p>}
                 <div className="fm-actions">
                   {mode === "society" && societyStep === 2 && <button className="fm-back" type="button" onClick={() => { setSocietyStep(1); setErrors({}); }}>Back</button>}
-                  <button className="fm-primary" type="submit" disabled={status === "saving"}><span>{!finalStep ? "Next" : status === "saving" ? "Saving…" : leadCaptureConfigured ? saveError ? "Retry save" : mode === "enroll" ? "Send registration" : "Send enquiry" : "Continue in WhatsApp"}</span><FormArrow /></button>
+                  <button className="fm-primary" type="submit" disabled={status === "saving"}><span>{!finalStep ? "Next" : status === "saving" ? "Saving…" : leadCaptureConfigured ? saveError ? "Retry save" : "Send enquiry" : "Continue in WhatsApp"}</span><FormArrow /></button>
                 </div>
               </>}
               {result()}

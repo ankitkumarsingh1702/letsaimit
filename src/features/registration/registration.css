@@ -9,6 +9,53 @@
 .registration-form .fm-error { font-size: 13px; line-height: 1.5; }
 .registration-form .registration-terms { margin-top: 14px; }
 .registration-form .registration-result a { text-decoration: underline; text-underline-offset: 3px; }
+.registration-form[data-form-mode="enroll"] .fm-fields { gap: 16px; }
+.registration-detail-groups:not([hidden]) { display: grid; gap: 28px; }
+.registration-detail-groups h2, .registration-review-summary h2 {
+  margin: 0 0 14px;
+  color: var(--green);
+  font: 650 var(--type-h3)/var(--line-h3) var(--font-body);
+}
+.registration-detail-groups section + section {
+  border-top: 1px solid var(--line);
+  padding-top: 24px;
+}
+.registration-review-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px 20px;
+  padding: 16px 20px;
+  background: var(--sage);
+  border-radius: 10px;
+}
+.registration-review-summary h2 { margin-bottom: 2px; overflow-wrap: anywhere; }
+.registration-review-summary p, .registration-review-account p { margin: 0; color: var(--muted); overflow-wrap: anywhere; }
+.registration-review-summary .fm-text-button {
+  justify-content: flex-start;
+  margin: 0;
+  min-height: 44px;
+  font-weight: 650;
+}
+.registration-review-account { margin-top: 16px; }
+.registration-review-account strong { color: var(--green); font-weight: 600; }
+.registration-form[data-form-mode="enroll"] .registration-billing {
+  padding: 14px 16px;
+  border-color: var(--line);
+  background: #f8faf5;
+}
+.registration-form[data-form-mode="enroll"] .registration-billing h4,
+.registration-form[data-form-mode="enroll"] .registration-billing p,
+.registration-form[data-form-mode="enroll"] .registration-billing .fm-consent > span {
+  font-size: var(--type-label);
+  line-height: var(--line-label);
+}
+.registration-form[data-form-mode="enroll"] .fm-primary:disabled { opacity: .65; cursor: wait; }
+@media (width <= 700px) {
+  .registration-form[data-form-mode="enroll"] .fm-fields { grid-template-columns: 1fr; }
+  .registration-review-summary { padding: 14px 16px; }
+}
 .registration-billing { margin-block: 14px; padding: 13px 14px; border: 1px solid #dce5da; border-radius: 6px; background: #f8faf5; }
 .registration-billing h4 { margin: 0 0 7px; color: #234d3b; font: 600 13px/1.5 var(--font-body); }
 .registration-billing > p, .registration-billing-loading > p { margin: 0 0 7px; color: #637468; font-size: 11px; line-height: 1.65; }

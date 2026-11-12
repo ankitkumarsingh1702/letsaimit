@@ -104,16 +104,16 @@ export function UpcomingMonth({ upcoming }) {
 
 export function InvoiceRows({ invoices, admin, onSelect }) {
   const headers = ["Child", ...(admin ? ["Parent"] : []), "Month", "Fees", "Due", "Late fee", "Total", "Status", "Pay", "Invoice"];
-  return <div className="billing-table-scroll" tabIndex={0} role="region" aria-label="Saved invoices, scroll for all columns"><table className={`billing-table${admin ? " billing-table-admin" : ""}`}><caption className="billing-sr-only">Monthly invoices. Indian rupees; dates in IST.</caption><thead><tr>{headers.map(label => <th scope="col" key={label}>{label}</th>)}</tr></thead><tbody>
-    {invoices.map(invoice => <tr key={invoice.id}>
+  return <div className="billing-table-scroll" tabIndex={0} role="region" aria-label="Saved invoices"><table role="table" className={`billing-table${admin ? " billing-table-admin" : ""}`}><caption className="billing-sr-only">Monthly invoices. Indian rupees; dates in IST.</caption><thead role="rowgroup"><tr role="row">{headers.map(label => <th scope="col" key={label}>{label}</th>)}</tr></thead><tbody role="rowgroup">
+    {invoices.map(invoice => <tr role="row" key={invoice.id}>
       <td><button className="billing-text-button billing-ellipsis" type="button" title={invoice.childName || invoice.number} onClick={() => onSelect(invoice.id)}>{invoice.childName || "Details"}</button></td>
       {admin && <td title={invoice.parentName}>{invoice.parentName || "—"}</td>}
-      <td>{month(invoice.periodStart)}</td><td className="billing-numeric">{formatMoney(invoice.baseAmountPaise)}</td><td>{date(invoice.dueDate)}</td><td className="billing-numeric">{formatMoney(invoice.lateFeePaise)}</td><td className="billing-numeric">{formatMoney(invoice.amountPaise)}</td>
+      <td>{month(invoice.periodStart)}</td><td className="billing-numeric">{formatMoney(invoice.baseAmountPaise)}</td><td>{!admin && <span className="billing-mobile-label" aria-hidden="true">Due</span>}{date(invoice.dueDate)}</td><td className="billing-numeric">{formatMoney(invoice.lateFeePaise)}</td><td className="billing-numeric">{!admin && <span className="billing-mobile-label" aria-hidden="true">Total</span>}{formatMoney(invoice.amountPaise)}</td>
       <td><span className="billing-status" data-status={invoice.status}>{BILLING_STATUS_LABELS[invoice.status]}</span></td>
       <td>{payable(invoice) ? <InvoiceLink href={invoice.paymentUrl} primary>Pay {formatMoney(invoice.amountPaise - invoice.paidPaise)}</InvoiceLink> : "—"}</td>
       <td>{invoice.invoiceUrl ? <InvoiceLink href={invoice.invoiceUrl}>View invoice</InvoiceLink> : <button type="button" className="billing-text-button" onClick={() => onSelect(invoice.id)}>Details</button>}</td>
     </tr>)}
-    {!invoices.length && <tr><td colSpan={headers.length} className="billing-empty">No invoices</td></tr>}
+    {!invoices.length && <tr role="row"><td colSpan={headers.length} className="billing-empty">No invoices</td></tr>}
   </tbody></table></div>;
 }
 
@@ -130,10 +130,20 @@ export function MonthDetails({ group, onClose }) {
 }
 
 export function ParentMonthRows({ groups, onSelect }) {
-  return <div className="billing-table-scroll" tabIndex={0} role="region" aria-label="Monthly coaching payments, scroll for all columns"><table className="billing-table billing-parent-table"><caption className="billing-sr-only">One row per child and month. Separate invoices retain their own payment links.</caption><thead><tr>{["Child", "Month", "Fees", "Due", "Late fee", "Total", "Status", "Pay", "Invoice"].map(label => <th key={label} scope="col">{label}</th>)}</tr></thead><tbody>{groups.map(group => {
+  return <div className="billing-table-scroll" tabIndex={0} role="region" aria-label="Monthly coaching payments"><table role="table" className="billing-table billing-parent-table"><caption className="billing-sr-only">One row per child and month. Separate invoices retain their own payment links.</caption><thead role="rowgroup"><tr role="row">{["Child", "Month", "Fees", "Due", "Late fee", "Total", "Status", "Pay", "Invoice"].map(label => <th key={label} scope="col">{label}</th>)}</tr></thead><tbody role="rowgroup">{groups.map(group => {
     const payables = group.invoices.filter(payable);
-    return <tr key={group.id}><td><button className="billing-text-button billing-ellipsis" type="button" title={group.childName} onClick={() => onSelect(group.id)}>{group.childName || "Details"}</button></td><td>{month(group.periodStart)}</td><td className="billing-numeric">{formatMoney(group.feesPaise)}</td><td>{date(group.dueDate)}</td><td className="billing-numeric">{formatMoney(group.lateFeePaise)}</td><td className="billing-numeric">{formatMoney(group.totalPaise)}</td><td><span className="billing-status" data-status={group.status}>{BILLING_STATUS_LABELS[group.status]}</span></td><td>{payables.length === 1 && group.pendingPaise === payables[0].amountPaise - payables[0].paidPaise ? <InvoiceLink href={payables[0].paymentUrl} primary>Pay {formatMoney(group.pendingPaise)}</InvoiceLink> : payables.length ? <button type="button" className="billing-button billing-button-primary" onClick={() => onSelect(group.id)}>View payments</button> : "—"}</td><td><button type="button" className="billing-text-button" onClick={() => onSelect(group.id)}>View</button></td></tr>;
-  })}{!groups.length && <tr><td colSpan={9} className="billing-empty">No invoices</td></tr>}</tbody></table></div>;
+    return <tr role="row" key={group.id}>
+      <td><button className="billing-text-button billing-ellipsis" type="button" title={group.childName} onClick={() => onSelect(group.id)}>{group.childName || "Details"}</button></td>
+      <td>{month(group.periodStart)}</td>
+      <td className="billing-numeric">{formatMoney(group.feesPaise)}</td>
+      <td><span className="billing-mobile-label" aria-hidden="true">Due</span>{date(group.dueDate)}</td>
+      <td className="billing-numeric">{formatMoney(group.lateFeePaise)}</td>
+      <td className="billing-numeric"><span className="billing-mobile-label" aria-hidden="true">Total</span>{formatMoney(group.totalPaise)}</td>
+      <td><span className="billing-status" data-status={group.status}>{BILLING_STATUS_LABELS[group.status]}</span></td>
+      <td>{payables.length === 1 && group.pendingPaise === payables[0].amountPaise - payables[0].paidPaise ? <InvoiceLink href={payables[0].paymentUrl} primary>Pay {formatMoney(group.pendingPaise)}</InvoiceLink> : payables.length ? <button type="button" className="billing-button billing-button-primary" onClick={() => onSelect(group.id)}>View payments</button> : "—"}</td>
+      <td><button type="button" className="billing-text-button" onClick={() => onSelect(group.id)}>{group.invoices.length === 1 ? "View invoice" : "View invoices"}</button></td>
+    </tr>;
+  })}{!groups.length && <tr role="row"><td colSpan={9} className="billing-empty">No invoices</td></tr>}</tbody></table></div>;
 }
 
 function StopBilling({ account, auth, onClose, onSaved }) {

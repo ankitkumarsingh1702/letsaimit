@@ -1,6 +1,7 @@
 import React from "react";
 import ProfileAvatar from "../components/ProfileAvatar.jsx";
 import { asset } from "../lib/assets.js";
+import { mediaProps } from "../lib/media.js";
 import { useAdminAuth } from "../context/AdminAuth.jsx";
 import { accessRequestHref } from "../lib/adminAuth.js";
 import { PUBLIC_BRAND } from "../lib/publicBrand.js";
@@ -11,6 +12,7 @@ export default function SignIn({ mode = "admin" } = {}) {
   const { phase, user, error, signOutRetryable, signIn, signOut, checkAccess } = useAdminAuth();
   const pending = ["checking", "signing_in", "signing_out"].includes(phase);
   const [entry, setEntry] = React.useState(["parent", "coach"].includes(mode) ? mode : "admin");
+  const parentEntry = mode === "parent";
   const isParent = entry === "parent";
   const isCoach = entry === "coach";
   const denied = entry === "admin" && phase === "denied";
@@ -30,21 +32,21 @@ export default function SignIn({ mode = "admin" } = {}) {
     const next = event.key === "Home" ? entries[0] : event.key === "End" ? entries[2] : entries[(current + (backwards ? 2 : 1)) % 3];
     setEntry(next); document.getElementById(`signin-tab-${next}`)?.focus();
   };
-  return <section className="signin-page" aria-labelledby="signin-heading">
+  return <section className={parentEntry ? "signin-page signin-page-parent" : "signin-page"} aria-labelledby="signin-heading">
     <div className="signin-wrap">
       <div className="signin-card">
-        <div className="signin-visual">
+        {!parentEntry && <div className="signin-visual">
           <img className="signin-ribbon" src={asset("signin-ribbon.svg")} alt="" width="500" height="800" />
           <div className="signin-art-shade" aria-hidden="true" />
           <div className="signin-role-tabs" data-entry-count="3" role="tablist" aria-label="Sign-in destination" onKeyDown={tabsKeyDown}>
             {[['parent', 'Parents'], ['coach', 'Coach'], ['admin', 'Admin']].map(([value, label]) => <button key={value} className="signin-role-tab" id={`signin-tab-${value}`} type="button" role="tab" aria-selected={entry === value} aria-controls="signin-panel" tabIndex={entry === value ? 0 : -1} onClick={() => chooseEntry(value)}>{label}</button>)}
           </div>
-        </div>
-        <div className="signin-panel" id="signin-panel" role="tabpanel" aria-labelledby={`signin-tab-${entry}`}>
+        </div>}
+        <div className="signin-panel" id="signin-panel" role={parentEntry ? undefined : "tabpanel"} aria-labelledby={parentEntry ? undefined : `signin-tab-${entry}`}>
           <div className="signin-content">
-            <div className="signin-role-icon"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="5" y="5" width="8" height="8" rx="2" /><rect x="19" y="5" width="8" height="8" rx="2" /><rect x="5" y="19" width="8" height="8" rx="2" /><rect x="19" y="19" width="8" height="8" rx="2" /></svg></div>
-            <h1 id="signin-heading">{denied ? "Admin access required." : authorized ? "You’re signed in." : "Sign in."}</h1>
-            <p className="signin-description">{isCoach ? "Use your Google account to open attendance and feedback for assigned children." : isParent ? authorized ? "View requests, fees, attendance and weekly feedback." : "Use your Google account to enrol and follow your child’s progress." : denied ? "You don’t have admin access. Request access from the LetsAimIt team." : authorized ? "Your team dashboard is ready." : "Sign in with your approved Google account to open the team dashboard."}</p>
+            {parentEntry ? <img className="signin-parent-logo" {...mediaProps("logo.png", "112px")} width="538" height="393" alt="LetsAimIt" /> : <div className="signin-role-icon"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="5" y="5" width="8" height="8" rx="2" /><rect x="19" y="5" width="8" height="8" rx="2" /><rect x="5" y="19" width="8" height="8" rx="2" /><rect x="19" y="19" width="8" height="8" rx="2" /></svg></div>}
+            <h1 id="signin-heading">{denied ? "Admin access required." : authorized ? "You’re signed in." : parentEntry ? "Parent sign in" : "Sign in."}</h1>
+            <p className="signin-description">{isCoach ? "Use your Google account to open attendance and feedback for assigned children." : isParent ? "View requests, payments and coaching updates." : denied ? "You don’t have admin access. Request access from the LetsAimIt team." : authorized ? "Your team dashboard is ready." : "Sign in with your approved Google account to open the team dashboard."}</p>
             {user?.email && <div className="signin-profile"><ProfileAvatar name={user.displayName || user.email} src={user.avatarUrl} /><div className="signin-profile-details"><strong>{user.displayName || user.email}</strong><span>{user.email}</span></div></div>}
             {authorized ? <a className="signin-google" href={isCoach ? "/coach-dashboard/" : isParent ? "/parent/" : "/admin/"}>{isParent ? "Parent dashboard" : isCoach ? "Coaching tracker" : "Open dashboard"}</a> : denied ? <>
               <a className="signin-google" href={accessRequestHref(user?.email)}>Request access</a>
@@ -59,6 +61,7 @@ export default function SignIn({ mode = "admin" } = {}) {
             {(denied || (phase === "error" && !authorized)) && <button className="signin-text-button" type="button" onClick={retry}>Check access again</button>}
             {user && <button className="signin-text-button" type="button" onClick={() => { void signOut(); }}>Sign out</button>}
             {signOutRetryable && <button className="signin-text-button" type="button" onClick={() => { void signOut(); }}>Retry sign-out</button>}
+            {parentEntry && !user && <a className="signin-text-button signin-register-link" href="/register/">Register your child</a>}
             <div className="signin-legal" aria-label="Policies"><a href={PUBLIC_BRAND.privacyUrl}>Privacy</a><span aria-hidden="true">·</span><a href={PUBLIC_BRAND.termsUrl}>Terms</a></div>
           </div>
         </div>

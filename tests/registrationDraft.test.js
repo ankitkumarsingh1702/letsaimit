@@ -1,26 +1,28 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { carryTrialToEnrol, createRegistrationDraft, filterPhoneCountries, nationalPhoneLimit, sanitizePhoneInput } from "../src/features/registration/registrationDraft.js";
+import { clearRegistrationDraft, createRegistrationDraft, filterPhoneCountries, nationalPhoneLimit, readRegistrationDraft, sanitizePhoneInput, storeRegistrationDraft } from "../src/features/registration/registrationDraft.js";
 import { firstInvalidRegistrationField, parentRegistrationResolver } from "../src/features/registration/registrationResolver.js";
 
 const complete = { ...createRegistrationDraft(), parentName: "Asha", email: "asha@example.com", phone: "9876543210", age: "8", sport: "Football", community: "Nambiar Ellegenza", consent: true };
-test("trial-to-enrol carries common answers and email without inferring consent or terms", () => {
-  const source = { ...complete, consent: true, terms: true };
-  const result = carryTrialToEnrol(source);
-  for (const key of ["parentName", "phone", "phoneCountry", "age", "community", "sport", "email"]) assert.equal(result[key], source[key]);
-  assert.equal(result.childName, ""); assert.equal(result.address, "");
-  assert.equal(result.consent, false); assert.equal(result.terms, false);
-  assert.equal(source.consent, true);
-});
-test("existing enrolment answers survive switching modes, while other age needs reselection", () => {
-  const existing = { ...createRegistrationDraft(), parentName: "Dev", phone: "2025550123", phoneCountry: "US", childName: "Sam", note: "Keep this note" };
-  const result = carryTrialToEnrol({ ...complete, age: "other" }, existing);
-  assert.equal(result.parentName, "Dev"); assert.equal(result.phoneCountry, "US");
-  assert.equal(result.childName, "Sam"); assert.equal(result.note, "Keep this note"); assert.equal(result.age, "");
-});
-test("international trial transfer carries country with its national number", () => {
-  const result = carryTrialToEnrol({ ...complete, phoneCountry: "GB", phone: "7400123456" });
-  assert.equal(result.phoneCountry, "GB"); assert.equal(result.phone, "7400123456");
+test("enrolment handoff preserves its details through review while trial has its own draft", () => {
+  const entries = new Map();
+  const storage = { getItem: key => entries.get(key), setItem: (key, value) => entries.set(key, value), removeItem: key => entries.delete(key) };
+  const values = { ...complete, childName: "Dev", address: "Elm West", community: "Another community", otherCommunity: "Elm West", terms: true, billingConsent: true };
+  assert.equal(storeRegistrationDraft("trial", complete, storage, 1000), true);
+  assert.equal(readRegistrationDraft("enrol", storage, 1100), null);
+  assert.equal(storeRegistrationDraft("enrol", values, storage, 1100), true);
+  const resumed = readRegistrationDraft("enrol", storage, 1200);
+  assert.equal(resumed.childName, "Dev");
+  assert.equal(resumed.otherCommunity, "Elm West");
+  assert.equal(resumed.consent, false);
+  assert.equal(resumed.terms, false);
+  assert.equal(resumed.billingConsent, false);
+  assert.deepEqual(readRegistrationDraft("enroll", storage, 1300), resumed);
+  clearRegistrationDraft("enrol", storage);
+  assert.equal(readRegistrationDraft("enrol", storage, 1400), null);
+  assert.equal(readRegistrationDraft("trial", storage, 1400).parentName, "Asha");
+  assert.equal(readRegistrationDraft("trial", storage, 1000 + 30 * 60 * 1000), null);
+  assert.equal(entries.size, 0, "expired private draft is discarded");
 });
 test("fresh drafts are independent, memory-only and start with an Indian country selection", () => {
   const first = createRegistrationDraft(); first.parentName = "Asha";
@@ -72,10 +74,6 @@ test("ambiguous overlong paste is kept invalid instead of silently becoming a di
   assert.equal(result.phone.replace(/\D/g, ""), "98765432101");
   assert.ok(parentRegistrationResolver("trial")({ ...complete, ...result }).errors.phone);
 });
-test("trial-to-enrol retains the actual locality entered for another community", () => {
-  const result = carryTrialToEnrol({ ...complete, community: "Another community", otherCommunity: "Elm West" });
-  assert.equal(result.community, "Another community"); assert.equal(result.otherCommunity, "Elm West");
-});
 test("resolver blocks unchecked consent and enrolment terms and reports field errors", () => {
   const resolver = parentRegistrationResolver("trial");
   assert.deepEqual(resolver(complete).errors, {});
@@ -86,9 +84,19 @@ test("resolver blocks unchecked consent and enrolment terms and reports field er
   assert.ok(enrol.errors.terms);
   assert.deepEqual(parentRegistrationResolver("enroll")({ ...complete, childName: "Dev", address: "Elm West", terms: true }).errors, {});
 });
+test("enrolment details can continue to Google without consent and review requires fresh consent", () => {
+  const values = { ...complete, childName: "Dev", address: "Elm West", consent: false };
+  const details = parentRegistrationResolver("enroll", { requireConsent: false, billingRequired: true });
+  const review = parentRegistrationResolver("enroll", { billingRequired: true });
+  assert.deepEqual(details(values).errors, {});
+  assert.ok(details({ ...values, childName: "" }).errors.childName);
+  assert.deepEqual(Object.keys(review(values).errors).sort(), ["billingConsent", "consent", "terms"]);
+  assert.deepEqual(review({ ...values, consent: true, terms: true, billingConsent: true }).errors, {});
+});
 test("first invalid focus follows visible form order, regardless of error insertion order", () => {
   assert.equal(firstInvalidRegistrationField("trial", { phone: {}, email: {}, parentName: {} }), "parentName");
   assert.equal(firstInvalidRegistrationField("enroll", { terms: {}, parentName: {}, childName: {} }), "childName");
+  assert.equal(firstInvalidRegistrationField("enroll", { address: {}, age: {}, email: {} }), "age");
   assert.equal(firstInvalidRegistrationField("trial", { phone: {}, phoneCountry: {} }), "phoneCountry");
   assert.equal(firstInvalidRegistrationField("trial", { sport: {}, otherCommunity: {} }), "otherCommunity");
   assert.equal(firstInvalidRegistrationField("trial", { consent: {} }), "consent");

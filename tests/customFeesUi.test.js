@@ -107,7 +107,8 @@ test("actual compact components expose exact payment links, not an aggregate amo
     const groups = groupParentInvoices([base, late]);
     const rows = renderToStaticMarkup(React.createElement(ParentMonthRows, { groups, onSelect: () => {} }));
     assert.match(rows, /View payments/); assert.doesNotMatch(rows, /href="https:\/\/rzp.io\/i\/base"/);
-    assert.equal((rows.match(/<tr>/g) || []).length, 2, "one header plus one child/month row");
+    assert.match(rows, />View invoices<\/button>/);
+    assert.equal((rows.match(/<tr role="row">/g) || []).length, 2, "one header plus one child/month row");
     const details = renderToStaticMarkup(React.createElement(MonthDetails, { group: groups[0], onClose: () => {} }));
     assert.match(details, /href="https:\/\/rzp.io\/i\/base"[^>]*>Pay ₹6,000/); assert.match(details, /href="https:\/\/rzp.io\/i\/late1"[^>]*>Pay ₹100/); assert.doesNotMatch(details, />Pay ₹6,100/);
     const paidBase = { ...base, status: "paid", paidPaise: 600000 };

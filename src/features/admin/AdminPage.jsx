@@ -358,10 +358,13 @@ export function AdminPage() {
     setReturnTarget(consumeAuthReturnTarget()); setReturnChecked(true);
   }, []);
   const returning = Boolean(returnTarget && typeof window !== "undefined" && returnTarget !== window.location.pathname + window.location.search);
+  const parentRegistrationReturn = returnTarget === "/register/?resume=enrol";
+  const canReturn = returning && !["checking", "signing_in", "signing_out"].includes(auth.phase)
+    && (auth.user?.isGoogle || parentRegistrationReturn);
   React.useEffect(() => {
-    if (returning && auth.user?.isGoogle && !["checking", "signing_in", "signing_out"].includes(auth.phase)) window.location.replace(returnTarget);
-  }, [returning, returnTarget, auth.phase, auth.user?.isGoogle]);
-  if (!returnChecked || returning && auth.user?.isGoogle) return <p className="adm-empty" role="status">Opening your page…</p>;
+    if (canReturn) window.location.replace(returnTarget);
+  }, [canReturn, returnTarget]);
+  if (!returnChecked || canReturn || returning && auth.phase === "checking") return <p className="adm-empty" role="status">Opening your page…</p>;
   // Unmounting destroys private rows and drafts immediately on sign-out/revocation.
   if (auth.phase !== "authorized" || !auth.user) return <SignIn />;
   return <AuthorizedAdmin key={auth.user.id} auth={auth} />;

@@ -5,7 +5,7 @@ import { useAdminAuth } from "../context/AdminAuth.jsx";
 import { scrollToNextEvent } from "../features/events/EventsPage.js";
 import { scrollToSchoolEnquiry } from "../features/schools/SchoolsPage.js";
 import { asset } from "../lib/assets.js";
-import { Arrow } from "./ui.jsx";
+import { Arrow, RegisterLink } from "./ui.jsx";
 import SocialDock from "./SocialDock.jsx";
 var navigation = [
   {
@@ -34,9 +34,9 @@ var navigation = [
     label: "Events",
   },
   {
-    page: "signin",
-    href: "/sign-in/",
-    label: "Sign in",
+    page: "parent",
+    href: "/parent/",
+    label: "Parent sign in",
   },
 ];
 function Header({ page, onSkipToContent }) {
@@ -45,6 +45,7 @@ function Header({ page, onSkipToContent }) {
   let menuToggleRef = React.useRef(null);
   let { openForm } = useSiteActions();
   let { phase, user } = useAdminAuth();
+  const registering = page === "register";
   let actionKind =
     page === "events"
       ? "event"
@@ -52,7 +53,7 @@ function Header({ page, onSkipToContent }) {
         ? "school"
         : page === "societies"
           ? "society"
-          : "trial";
+          : "register";
   React.useEffect(() => {
     setMenuOpen(false);
   }, [page]);
@@ -99,23 +100,13 @@ function Header({ page, onSkipToContent }) {
     }
   }
   function renderNavLink(item) {
-    if (item.page === "signin" && user?.isGoogle) return <React.Fragment key={item.page}>
-      <a href="/parent/" data-route="parent" aria-current={page === "parent" ? "page" : undefined} onClick={closeMenu}>Parent dashboard</a>
-      {phase === "authorized" && <a href="/admin/" data-route="admin" aria-current={page === "admin" ? "page" : undefined} onClick={closeMenu}>Dashboard</a>}
-    </React.Fragment>;
-    const isAdminLink = item.page === "signin" && phase === "authorized";
-    const targetPage = isAdminLink ? "admin" : item.page;
-    return (
-      <a
-        href={isAdminLink ? "/admin/" : item.href}
-        data-route={targetPage}
-        aria-current={page === targetPage ? "page" : void 0}
-        onClick={closeMenu}
-        key={item.page}
-      >
-        {isAdminLink ? "Dashboard" : item.label}
+    return <React.Fragment key={item.page}>
+      <a href={item.href} data-route={item.page} aria-current={page === item.page ? "page" : undefined} onClick={closeMenu}>
+        {item.page === "parent" && user?.isGoogle ? "My requests" : item.label}
       </a>
-    );
+      {item.page === "parent" && phase === "authorized" &&
+        <a href="/admin/" data-route="admin" onClick={closeMenu}>Team dashboard</a>}
+    </React.Fragment>;
   }
   return (
     <>
@@ -138,23 +129,22 @@ function Header({ page, onSkipToContent }) {
               alt="LetsAimIt"
             />
           </a>
+          {registering ? <a className="text-link registration-header-link" href="/parent/">
+            {user?.isGoogle ? "My requests" : "Parent sign in"}
+          </a> : <>
           <nav className="desktop-nav" aria-label="Main navigation">
             {navigation.map(renderNavLink)}
           </nav>
           <div className="header-actions">
-            <button
+            {actionKind === "register" ? <RegisterLink className="btn-lime header-trial" /> : <button
               className="btn btn-lime header-trial"
               type="button"
               data-action={actionKind}
               onClick={handlePrimaryAction}
             >
-              {page === "events"
-                ? "Up next"
-                : page === "societies" || page === "schools"
-                  ? "Enquire"
-                  : "Free trial"}
+              {page === "events" ? "Up next" : "Enquire"}
               <Arrow />
-            </button>
+            </button>}
             <button
               ref={menuToggleRef}
               className="menu-toggle"
@@ -169,8 +159,9 @@ function Header({ page, onSkipToContent }) {
               </svg>
             </button>
           </div>
+          </>}
         </div>
-        <nav
+        {!registering && <nav
           className="mobile-nav"
           id="mobile-menu"
           aria-label="Mobile navigation"
@@ -184,9 +175,9 @@ function Header({ page, onSkipToContent }) {
             Home
           </a>
           {navigation.map(renderNavLink)}
-        </nav>
+        </nav>}
       </header>
-      <SocialDock page={page} suspended={menuOpen} />
+      {!registering && <SocialDock page={page} suspended={menuOpen} />}
     </>
   );
 }

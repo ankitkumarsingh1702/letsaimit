@@ -9,7 +9,8 @@ const syncedTime = value => value && Number.isFinite(Date.parse(value)) ? new In
 
 function TrackerPagination({ count, page, onPage, label }) {
   const pages = Math.max(1, Math.ceil(count / PAGE_SIZE));
-  return <div className="parent-tracker-pagination"><span>{count} {count === 1 ? "row" : "rows"}</span><div><button type="button" className="parent-dashboard-button" aria-label={`Previous ${label} page`} disabled={page <= 1} onClick={() => onPage(page - 1)}>Previous</button><span>{page} / {pages}</span><button type="button" className="parent-dashboard-button" aria-label={`Next ${label} page`} disabled={page >= pages} onClick={() => onPage(page + 1)}>Next</button></div></div>;
+  if (pages === 1) return null;
+  return <div className="parent-tracker-pagination"><span>{count} records</span><div><button type="button" className="parent-dashboard-button" aria-label={`Previous ${label} page`} disabled={page <= 1} onClick={() => onPage(page - 1)}>Previous</button><span>{page} / {pages}</span><button type="button" className="parent-dashboard-button" aria-label={`Next ${label} page`} disabled={page >= pages} onClick={() => onPage(page + 1)}>Next</button></div></div>;
 }
 
 function FeedbackDetails({ feedback, childName, onClose }) {
@@ -22,7 +23,7 @@ function FeedbackDetails({ feedback, childName, onClose }) {
   }, []);
   return <dialog ref={dialog} className="parent-feedback-dialog" aria-labelledby={title} onCancel={event => { event.preventDefault(); onClose(); }}>
     <div className="parent-feedback-dialog-heading"><h2 id={title}>Weekly feedback</h2><button type="button" className="parent-dashboard-icon-button" aria-label="Close weekly feedback" onClick={onClose}>×</button></div>
-    <dl className="parent-feedback-facts"><dt>Child</dt><dd>{childName || "—"}</dd><dt>Week of</dt><dd>{date(feedback.weekStart)}</dd><dt>Coach</dt><dd>{feedback.coachName || "—"}</dd><dt>Shared</dt><dd>{date(feedback.publishedAt)}</dd></dl>
+    <dl className="parent-feedback-facts"><dt>Child</dt><dd>{childName || "—"}</dd><dt>Week of</dt><dd>{date(feedback.weekStart)}</dd><dt>Shared by</dt><dd>{feedback.coachName || "—"}</dd><dt>Shared</dt><dd>{date(feedback.publishedAt)}</dd></dl>
     <section><h3>Feedback</h3><p>{feedback.summary}</p></section>
     {feedback.nextStep && <section><h3>Next step</h3><p>{feedback.nextStep}</p></section>}
   </dialog>;
@@ -48,16 +49,73 @@ export default function ParentTracker({ tracker }) {
   const absent = attendance.filter(item => item.status === "absent").length;
   const updated = syncedTime(lastSynced);
   function changeFilter(setter, value) { setter(value); setAttendancePage(1); setFeedbackPage(1); setSelectedFeedback(null); }
-  return <section className="parent-tracker" aria-label="Your children’s tracker" aria-busy={loading}>
-    <div className="parent-tracker-toolbar"><div className="parent-tracker-filters"><label><span>Child</span><select value={selectedChild} onChange={event => changeFilter(setChild, event.target.value)} disabled={!snapshot}><option value="">All children</option>{children.map(item => <option key={item.registrationId} value={item.registrationId}>{item.childName || "Child"}</option>)}</select></label><label><span>Month</span><input type="month" value={month} onChange={event => changeFilter(setMonth, event.target.value)} disabled={!snapshot} /></label>{month && <button type="button" className="parent-dashboard-text-button" onClick={() => changeFilter(setMonth, "")}>All dates</button>}</div><div className="parent-tracker-sync"><span>{updated ? `Updated ${updated} IST` : loading ? "Loading…" : "Not synced"}</span><button type="button" className="parent-dashboard-button" onClick={refresh} disabled={loading}>{loading ? "Loading…" : "Refresh tracker"}</button></div></div>
-    {snapshot?.range && <p className="parent-tracker-range">Attendance · {date(snapshot.range.from)} – {date(snapshot.range.to)}<span>Feedback since {date(snapshot.range.feedbackFrom)}</span></p>}
-    {error && <div className="parent-tracker-error" role="alert"><span>{error}{snapshot ? " Showing the last saved tracker." : ""}</span><button type="button" className="parent-dashboard-text-button" onClick={refresh} disabled={loading}>Retry</button></div>}
-    {!snapshot ? <div className="parent-tracker-empty" role="status">{loading ? "Loading your tracker…" : "Tracker not loaded. Please retry."}</div> : <>
-      <dl className="parent-tracker-counts"><div><dt>Present</dt><dd>{present}</dd></div><div><dt>Absent</dt><dd>{absent}</dd></div><div><dt>Attendance</dt><dd>{present + absent ? `${Math.round(present / (present + absent) * 100)}%` : "—"}</dd></div><div><dt>Weekly feedback</dt><dd>{feedback.length}</dd></div></dl>
-      <section className="parent-tracker-card" aria-labelledby="parent-attendance-heading"><div className="parent-tracker-card-heading"><h2 id="parent-attendance-heading">Attendance</h2><span>Recorded sessions · IST</span></div><div className="parent-tracker-scroll" tabIndex={0} role="region" aria-label="Attendance records, scroll for all columns"><table className="parent-tracker-table parent-attendance-table"><caption className="parent-dashboard-sr-only">Saved attendance. An unmarked session is not counted as an absence.</caption><thead><tr><th scope="col">Date</th><th scope="col">Child</th><th scope="col">Attendance</th><th scope="col">Sport</th><th scope="col">Community</th><th scope="col">Marked by</th></tr></thead><tbody>{attendance.length ? attendance.slice((currentAttendancePage - 1) * PAGE_SIZE, currentAttendancePage * PAGE_SIZE).map(item => <tr key={item.id}><td><time dateTime={item.sessionDate}>{date(item.sessionDate)}</time></td><td title={childById.get(item.registrationId)?.childName}>{childById.get(item.registrationId)?.childName || "—"}</td><td><span className="parent-attendance-status" data-status={item.status}>{attendanceLabels[item.status] || "Not marked"}</span></td><td>{childById.get(item.registrationId)?.sport || "—"}</td><td title={childById.get(item.registrationId)?.community}>{childById.get(item.registrationId)?.community || "—"}</td><td title={item.coachName || undefined}>{item.coachName || "—"}</td></tr>) : <tr><td className="parent-tracker-empty-cell" colSpan={6}>{selectedChild || month ? "No attendance for this filter." : "No attendance recorded yet."}</td></tr>}</tbody></table></div><TrackerPagination count={attendance.length} page={currentAttendancePage} onPage={setAttendancePage} label="attendance" /></section>
-      <p className="parent-tracker-note">Only recorded sessions count. No session days are excluded.</p>
-      <section className="parent-tracker-card" aria-labelledby="parent-feedback-heading"><div className="parent-tracker-card-heading"><h2 id="parent-feedback-heading">Weekly feedback</h2><span>Shared by your coach</span></div><div className="parent-tracker-scroll" tabIndex={0} role="region" aria-label="Weekly feedback, scroll for all columns"><table className="parent-tracker-table parent-feedback-table"><thead><tr><th scope="col">Week of</th><th scope="col">Child</th><th scope="col">Feedback</th><th scope="col">Coach</th><th scope="col">Shared</th><th scope="col"><span className="parent-dashboard-sr-only">Details</span></th></tr></thead><tbody>{feedback.length ? feedback.slice((currentFeedbackPage - 1) * PAGE_SIZE, currentFeedbackPage * PAGE_SIZE).map(item => <tr key={item.id}><td><time dateTime={item.weekStart}>{date(item.weekStart)}</time></td><td title={childById.get(item.registrationId)?.childName}>{childById.get(item.registrationId)?.childName || "—"}</td><td title={item.summary}>{item.summary}</td><td title={item.coachName || undefined}>{item.coachName || "—"}</td><td><time dateTime={item.publishedAt}>{date(item.publishedAt)}</time></td><td><button type="button" className="parent-dashboard-text-button" aria-label={`View feedback for ${childById.get(item.registrationId)?.childName || "child"}, week of ${date(item.weekStart)}`} onClick={() => setSelectedFeedback(item.id)}>View</button></td></tr>) : <tr><td className="parent-tracker-empty-cell" colSpan={6}>{selectedChild || month ? "No feedback for this filter." : "No weekly feedback shared yet."}</td></tr>}</tbody></table></div><TrackerPagination count={feedback.length} page={currentFeedbackPage} onPage={setFeedbackPage} label="feedback" /></section>
-      {!children.length && <p className="parent-tracker-note">Your child’s tracker appears after enrolment is approved.</p>}
+  return <section className="parent-tracker" aria-label="Attendance and feedback" aria-busy={loading}>
+    {error && <div className="parent-tracker-error" role="alert">
+      <span>{error}{snapshot ? " Showing the last saved tracker." : ""}</span>
+      <button type="button" className="parent-dashboard-text-button" onClick={refresh} disabled={loading}>Try again</button>
+    </div>}
+    {loading && !snapshot && <div className="parent-tracker-empty" role="status">Loading your tracker…</div>}
+    {snapshot && !children.length && <div className="parent-tracker-empty">
+      <h2>Attendance and feedback</h2>
+      <p>Tracking starts after your child’s registration is approved.</p>
+    </div>}
+    {snapshot && children.length > 0 && <>
+      <div className="parent-tracker-toolbar">
+        <div className="parent-tracker-filters">
+          {children.length > 1 && <label><span>Child</span><select value={selectedChild} onChange={event => changeFilter(setChild, event.target.value)}>
+            <option value="">All children</option>{children.map(item => <option key={item.registrationId} value={item.registrationId}>{item.childName || "Child"}</option>)}
+          </select></label>}
+          <label><span>Month</span><input type="month" value={month} onChange={event => changeFilter(setMonth, event.target.value)} /></label>
+          {month && <button type="button" className="parent-dashboard-text-button" onClick={() => changeFilter(setMonth, "")}>All dates</button>}
+        </div>
+        <div className="parent-tracker-sync">
+          {updated && <span>Updated {updated} IST</span>}
+          <button type="button" className="parent-dashboard-button" onClick={refresh} disabled={loading}>Refresh</button>
+        </div>
+      </div>
+      {snapshot.range && <p className="parent-tracker-range">Attendance · {date(snapshot.range.from)} – {date(snapshot.range.to)}<span>Feedback since {date(snapshot.range.feedbackFrom)}</span></p>}
+      <dl className="parent-tracker-counts">
+        <div><dt>Present</dt><dd>{present}</dd></div>
+        <div><dt>Absent</dt><dd>{absent}</dd></div>
+        <div><dt>Attendance</dt><dd>{present + absent ? `${Math.round(present / (present + absent) * 100)}%` : "—"}</dd></div>
+      </dl>
+      <section className="parent-tracker-card" aria-labelledby="parent-attendance-heading">
+        <div className="parent-tracker-card-heading"><h2 id="parent-attendance-heading">Attendance</h2></div>
+        <div className="parent-tracker-scroll" tabIndex={0} role="region" aria-label="Attendance records">
+          <table className="parent-tracker-table parent-attendance-table">
+            <caption className="parent-dashboard-sr-only">Saved attendance. An unmarked session is not counted as an absence.</caption>
+            <thead><tr><th scope="col">Date</th><th scope="col">Child</th><th scope="col">Attendance</th><th scope="col">Sport</th><th scope="col">Community</th><th scope="col">Marked by</th></tr></thead>
+            <tbody>{attendance.length ? attendance.slice((currentAttendancePage - 1) * PAGE_SIZE, currentAttendancePage * PAGE_SIZE).map(item => {
+              const pupil = childById.get(item.registrationId);
+              return <tr key={item.id}>
+                <td><time dateTime={item.sessionDate}>{date(item.sessionDate)}</time></td>
+                <td title={pupil?.childName}>{pupil?.childName || "—"}</td>
+                <td><span className="parent-attendance-status" data-status={item.status}>{attendanceLabels[item.status] || "Not marked"}</span></td>
+                <td>{pupil?.sport || "—"}</td><td title={pupil?.community}>{pupil?.community || "—"}</td><td title={item.coachName || undefined}>{item.coachName || "—"}</td>
+              </tr>;
+            }) : <tr><td className="parent-tracker-empty-cell" colSpan={6}>{selectedChild || month ? "No attendance for this filter." : "No attendance recorded yet."}</td></tr>}</tbody>
+          </table>
+        </div>
+        <TrackerPagination count={attendance.length} page={currentAttendancePage} onPage={setAttendancePage} label="attendance" />
+      </section>
+      <section className="parent-tracker-card" aria-labelledby="parent-feedback-heading">
+        <div className="parent-tracker-card-heading"><h2 id="parent-feedback-heading">Weekly feedback</h2></div>
+        <div className="parent-tracker-scroll" tabIndex={0} role="region" aria-label="Weekly feedback">
+          <table className="parent-tracker-table parent-feedback-table">
+            <thead><tr><th scope="col">Week of</th><th scope="col">Child</th><th scope="col">Feedback</th><th scope="col">Shared by</th><th scope="col">Shared</th><th scope="col"><span className="parent-dashboard-sr-only">Details</span></th></tr></thead>
+            <tbody>{feedback.length ? feedback.slice((currentFeedbackPage - 1) * PAGE_SIZE, currentFeedbackPage * PAGE_SIZE).map(item => {
+              const name = childById.get(item.registrationId)?.childName;
+              return <tr key={item.id}>
+                <td><time dateTime={item.weekStart}>{date(item.weekStart)}</time></td>
+                <td title={name}>{name || "—"}</td><td title={item.summary}>{item.summary}</td>
+                <td title={item.coachName || undefined}>{item.coachName || "—"}</td><td><time dateTime={item.publishedAt}>{date(item.publishedAt)}</time></td>
+                <td><button type="button" className="parent-dashboard-text-button" aria-label={`View feedback for ${name || "child"}, week of ${date(item.weekStart)}`} onClick={() => setSelectedFeedback(item.id)}>View</button></td>
+              </tr>;
+            }) : <tr><td className="parent-tracker-empty-cell" colSpan={6}>{selectedChild || month ? "No feedback for this filter." : "No weekly feedback shared yet."}</td></tr>}</tbody>
+          </table>
+        </div>
+        <TrackerPagination count={feedback.length} page={currentFeedbackPage} onPage={setFeedbackPage} label="feedback" />
+      </section>
     </>}
     {selected && <FeedbackDetails feedback={selected} childName={childById.get(selected.registrationId)?.childName} onClose={() => setSelectedFeedback(null)} />}
   </section>;
