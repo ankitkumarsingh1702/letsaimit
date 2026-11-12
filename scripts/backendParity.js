@@ -74,6 +74,7 @@ export async function buildBackendParity({root=ROOT,target='all',targets}={}){
   if(target!=='all'&&!TARGETS.includes(target))fail('PARITY_TARGET_INVALID');
   root=await realpath(resolve(root));
   targets??=JSON.parse(await readFile(resolve(root,'deployment/release-targets.json'),'utf8'));
+  const emailAutomations=JSON.parse(await readFile(resolve(root,'deployment/email-automations.json'),'utf8'));
   const migrationDirectory=resolve(root,'supabase/migrations');
   const migrationNames=(await readdir(migrationDirectory)).filter(name=>name.endsWith('.sql')).sort();
   if(!migrationNames.length)fail('PARITY_MIGRATIONS_MISSING');
@@ -102,7 +103,12 @@ export async function buildBackendParity({root=ROOT,target='all',targets}={}){
   }
   const artifacts={brand:PUBLIC_BRAND,migrations,functions,dependencyMetadata,config:{path:'supabase/config.toml',sha256:digest(config)}};
   const backendArtifactDigest=digest(JSON.stringify(artifacts));
-  return {schemaVersion:1,scope:'source-plan-only',backendArtifactDigest,...artifacts,
-    requiredBackendSecrets:{operatorProvided:['ADMIN_DASHBOARD_ORIGIN','COACHING_DYNAMIC_EMAIL_READY','COACHING_EMAIL_SIGNING_SECRET','COACHING_FROM_EMAIL','COACHING_SMTP_HOST','COACHING_SMTP_PASSWORD','COACHING_SMTP_PORT','COACHING_SMTP_USER','NOTIFICATION_CRON_SECRET','RAZORPAY_KEY_ID','RAZORPAY_KEY_SECRET','RAZORPAY_WEBHOOK_SECRET','SMTP_FROM_EMAIL','SMTP_HOST','SMTP_PASSWORD','SMTP_PORT','SMTP_USER'],runtimeProvided:['SUPABASE_SERVICE_ROLE_KEY','SUPABASE_URL']},
+  const mailSettings=[
+    ...emailAutomations.sharedFunctionSettings,
+    ...Object.values(emailAutomations.transports.gmailSmtp.settings),
+    ...Object.values(emailAutomations.transports.attendanceAmp.settings),
+  ];
+  return {schemaVersion:1,scope:'source-plan-only',backendArtifactDigest,...artifacts,emailAutomations,
+    requiredBackendSecrets:{operatorProvided:[...mailSettings,'RAZORPAY_KEY_ID','RAZORPAY_KEY_SECRET','RAZORPAY_WEBHOOK_SECRET'].sort(),runtimeProvided:['SUPABASE_SERVICE_ROLE_KEY','SUPABASE_URL']},
     targets:(target==='all'?TARGETS:[target]).map(name=>targetPlan(name,targets,backendArtifactDigest))};
 }

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp,mkdir,writeFile,rm,readFile } from 'node:fs/promises';
+import { copyFile,mkdtemp,mkdir,writeFile,rm,readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -10,7 +10,8 @@ import { buildBackendParity } from '../scripts/backendParity.js';
 const targets={uat:{branch:'uat',origin:'https://uat.letsaimit.com',supabaseProjectRef:'aaaaaaaaaaaaaaaaaaaa'},production:{branch:'main',origin:'https://letsaimit.com',supabaseProjectRef:null}};
 async function fixture(t){
   const root=await mkdtemp(join(tmpdir(),'letsaimit-parity-'));t.after(()=>rm(root,{recursive:true,force:true}));
-  for(const path of ['supabase/migrations','supabase/functions/_shared','supabase/functions/mail'])await mkdir(join(root,path),{recursive:true});
+  for(const path of ['deployment','supabase/migrations','supabase/functions/_shared','supabase/functions/mail'])await mkdir(join(root,path),{recursive:true});
+  await copyFile(new URL('../deployment/email-automations.json',import.meta.url),join(root,'deployment/email-automations.json'));
   await writeFile(join(root,'supabase/migrations/20261109000002_second.sql'),'select 2;\n');
   await writeFile(join(root,'supabase/migrations/20261109000001_first.sql'),'select 1;\n');
   await writeFile(join(root,'supabase/functions/_shared/mail.js'),'export const title="LetsAimIt";\n');
@@ -23,6 +24,10 @@ test('one deterministic source inventory prepares both targets without claiming 
   const root=await fixture(t),plan=await buildBackendParity({root,targets});
   assert.deepEqual(await buildBackendParity({root,targets}),plan);
   assert.equal(plan.scope,'source-plan-only');assert.equal(plan.brand.name,'LetsAimIt');assert.equal(plan.brand.origin,'https://letsaimit.com');
+  assert.equal(plan.emailAutomations.targets.uat.interactiveAttendance,'paused');
+  assert.equal(plan.emailAutomations.targets.production.transactionalTransport,null);
+  assert.equal(plan.emailAutomations.transports[plan.emailAutomations.targets.uat.transactionalTransport].settings.from,'SMTP_FROM_EMAIL');
+  assert.ok(plan.requiredBackendSecrets.operatorProvided.includes(plan.emailAutomations.transports.attendanceAmp.settings.providerReady));
   assert.deepEqual(plan.migrations.map(m=>m.version),['20261109000001','20261109000002']);
   assert.ok(plan.migrations.every(m=>/^[a-f0-9]{64}$/.test(m.sha256)));
   assert.equal(plan.functions[0].verify_jwt,false);
