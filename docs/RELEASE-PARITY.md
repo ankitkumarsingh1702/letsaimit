@@ -43,6 +43,14 @@ controlled per target by `private.coaching_settings.manual_email_enabled`.
 Production remains pending configuration. All 404 tests, the site build, 59
 assets and the coaching worker Deno checks passed before release.
 
+UAT application `77c96b024972556ade194b35af11bbd6be1fa459` is ready on Vercel
+`dpl_5G2RSTeqFTj1LmmevWxZa2S2G3is` and assigned to `uat.letsaimit.com`.
+The UAT migration applied with both flags initially off. The deployed coaching
+worker returned HTTP 200 with its empty queue. Manual send was then enabled.
+The signed-in dashboard showed the enabled Send button and the attendance link
+format. The status reported `emailEnabled: true`, `deliveryMode: link` and
+`scheduledEnabled: false`.
+
 ## Public identity contract
 
 | Setting | Required value in both environments |
