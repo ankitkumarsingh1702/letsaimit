@@ -83,7 +83,7 @@ Raw ticket credentials travel only in POST bodies, never action URLs or logs.
 
 ## Backend configuration and activation
 
-[Email automation configuration](deployment/email-automations.json) lists the
+[Automation configuration](deployment/automations.json) lists the
 attendance worker, its schedule, sender settings and both delivery gates.
 
 Coaching uses its own authenticated `@letsaimit.com` sender. The existing

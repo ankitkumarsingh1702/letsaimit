@@ -74,7 +74,7 @@ export async function buildBackendParity({root=ROOT,target='all',targets}={}){
   if(target!=='all'&&!TARGETS.includes(target))fail('PARITY_TARGET_INVALID');
   root=await realpath(resolve(root));
   targets??=JSON.parse(await readFile(resolve(root,'deployment/release-targets.json'),'utf8'));
-  const emailAutomations=JSON.parse(await readFile(resolve(root,'deployment/email-automations.json'),'utf8'));
+  const {otherAutomations,...emailAutomations}=JSON.parse(await readFile(resolve(root,'deployment/automations.json'),'utf8'));
   const migrationDirectory=resolve(root,'supabase/migrations');
   const migrationNames=(await readdir(migrationDirectory)).filter(name=>name.endsWith('.sql')).sort();
   if(!migrationNames.length)fail('PARITY_MIGRATIONS_MISSING');
@@ -108,7 +108,7 @@ export async function buildBackendParity({root=ROOT,target='all',targets}={}){
     ...Object.values(emailAutomations.transports.gmailSmtp.settings),
     ...Object.values(emailAutomations.transports.attendanceAmp.settings),
   ];
-  return {schemaVersion:1,scope:'source-plan-only',backendArtifactDigest,...artifacts,emailAutomations,
+  return {schemaVersion:1,scope:'source-plan-only',backendArtifactDigest,...artifacts,emailAutomations,otherAutomations,
     requiredBackendSecrets:{operatorProvided:[...mailSettings,'RAZORPAY_KEY_ID','RAZORPAY_KEY_SECRET','RAZORPAY_WEBHOOK_SECRET'].sort(),runtimeProvided:['SUPABASE_SERVICE_ROLE_KEY','SUPABASE_URL']},
     targets:(target==='all'?TARGETS:[target]).map(name=>targetPlan(name,targets,backendArtifactDigest))};
 }

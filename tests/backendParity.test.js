@@ -11,7 +11,7 @@ const targets={uat:{branch:'uat',origin:'https://uat.letsaimit.com',supabaseProj
 async function fixture(t){
   const root=await mkdtemp(join(tmpdir(),'letsaimit-parity-'));t.after(()=>rm(root,{recursive:true,force:true}));
   for(const path of ['deployment','supabase/migrations','supabase/functions/_shared','supabase/functions/mail'])await mkdir(join(root,path),{recursive:true});
-  await copyFile(new URL('../deployment/email-automations.json',import.meta.url),join(root,'deployment/email-automations.json'));
+  await copyFile(new URL('../deployment/automations.json',import.meta.url),join(root,'deployment/automations.json'));
   await writeFile(join(root,'supabase/migrations/20261109000002_second.sql'),'select 2;\n');
   await writeFile(join(root,'supabase/migrations/20261109000001_first.sql'),'select 1;\n');
   await writeFile(join(root,'supabase/functions/_shared/mail.js'),'export const title="LetsAimIt";\n');
@@ -28,6 +28,9 @@ test('one deterministic source inventory prepares both targets without claiming 
   assert.equal(plan.emailAutomations.targets.production.transactionalTransport,null);
   assert.equal(plan.emailAutomations.transports[plan.emailAutomations.targets.uat.transactionalTransport].settings.from,'SMTP_FROM_EMAIL');
   assert.ok(plan.requiredBackendSecrets.operatorProvided.includes(plan.emailAutomations.transports.attendanceAmp.settings.providerReady));
+  const healthCron=JSON.parse(await readFile(new URL('../deployment/uat-health/vercel.json',import.meta.url),'utf8')).crons[0];
+  assert.equal(plan.otherAutomations.uatDatabaseHealth.route,healthCron.path);
+  assert.equal(plan.otherAutomations.uatDatabaseHealth.cronSchedule,healthCron.schedule);
   assert.deepEqual(plan.migrations.map(m=>m.version),['20261109000001','20261109000002']);
   assert.ok(plan.migrations.every(m=>/^[a-f0-9]{64}$/.test(m.sha256)));
   assert.equal(plan.functions[0].verify_jwt,false);

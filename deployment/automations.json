@@ -42,6 +42,7 @@
       "worker": "admin-notifications",
       "transport": "gmailSmtp",
       "cronJob": "letsaimit-admin-notifications",
+      "cronSchedule": "* * * * *",
       "dispatchSetting": "private.notification_settings.dispatch_enabled",
       "recipients": "Current approved admins",
       "registrationAlert": "After a saved trial or enrolment request",
@@ -56,6 +57,7 @@
       "worker": "billing-worker",
       "transport": "gmailSmtp",
       "cronJob": "letsaimit-billing-worker",
+      "cronSchedule": "* * * * *",
       "dispatchSetting": "private.billing_settings.enabled",
       "parentEmails": ["Invoices", "Reminders", "Receipts", "Refunds", "Fee changes"],
       "reminderSlotsIst": ["09:00", "12:00", "15:00", "18:00"],
@@ -65,6 +67,7 @@
       "worker": "coaching-worker",
       "transport": "attendanceAmp",
       "cronJob": "letsaimit-coaching-attendance",
+      "cronSchedule": "* * * * *",
       "dailyAt": "21:00",
       "timezone": "Asia/Kolkata",
       "manualTrigger": "send_coaching_attendance_now",
@@ -75,6 +78,44 @@
       "maxRosterSize": 100,
       "ticketLifetimeHours": 48,
       "actions": ["Present", "Absent", "No session"]
+    }
+  },
+  "otherAutomations": {
+    "accountDeletion": {
+      "platform": "Supabase",
+      "worker": "delete-account",
+      "trigger": "Confirmed account deletion request",
+      "cronJob": "letsaimit-account-deletions",
+      "cronSchedule": "* * * * *",
+      "settings": ["ADMIN_DASHBOARD_ORIGIN", "NOTIFICATION_CRON_SECRET"],
+      "vaultEntries": ["letsaimit_notification_worker_url", "letsaimit_notification_worker_secret"],
+      "source": "supabase/migrations/20261110190347_account_deletion.sql"
+    },
+    "uatDatabaseHealth": {
+      "platform": "Vercel",
+      "project": "letsaimit-uat-health",
+      "target": "uat",
+      "route": "/api/cron/supabase",
+      "rpc": "registration_health",
+      "cronSchedule": "0 6 */3 * *",
+      "timezone": "UTC",
+      "settings": ["CRON_SECRET", "SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY"],
+      "source": "deployment/uat-health/vercel.json"
+    },
+    "razorpayEvents": {
+      "platform": "Supabase",
+      "worker": "razorpay-webhook",
+      "trigger": "Signed Razorpay invoice, payment or refund event",
+      "settings": ["RAZORPAY_WEBHOOK_SECRET"],
+      "source": "supabase/functions/razorpay-webhook/index.ts"
+    },
+    "societyAndSchoolEnquiries": {
+      "platform": "Google Apps Script",
+      "trigger": "Society or school form submitted",
+      "destination": "Private Google Sheet",
+      "websiteSettings": ["VITE_LEAD_ENDPOINT"],
+      "scriptProperties": ["LETSAIMIT_LEAD_SHEET_ID"],
+      "source": "integrations/google-sheets/Code.gs"
     }
   }
 }

@@ -56,8 +56,9 @@ may supply presentation changes; preserve working backend integrations when
 the ZIP contains older or demo code. Release work does not authorize extra
 product processing or AI stages.
 
-For attendance and outbound email work, start with
-[deployment/email-automations.json](deployment/email-automations.json). It maps
-senders, worker settings, schedules and delivery gates. It contains setting
-names only for credentials, which belong in Supabase. Check the release parity
-ledger for live verification before changing a sender or enabling dispatch.
+For automation work, start with
+[deployment/automations.json](deployment/automations.json). It maps email
+senders, workers, schedules, delivery gates and other automated workflows.
+It lists credential setting names; their values belong in provider settings.
+Check the release parity ledger for live verification before changing a sender
+or enabling dispatch.
