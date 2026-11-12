@@ -1,0 +1,43 @@
+body[data-page="register"] .site-header {
+  position: static;
+}
+
+body[data-page="register"] .skip-link:not(:focus) {
+  clip-path: inset(50%);
+}
+
+.registration-page {
+  max-width: 740px;
+  padding-block: clamp(28px, 5vw, 64px) 72px;
+}
+
+.registration-page > h1 {
+  margin: 0 0 24px;
+  font-size: clamp(30px, 5vw, 48px);
+  line-height: 1.12;
+  font-weight: 750;
+  letter-spacing: -.035em;
+  scroll-margin-top: 20px;
+}
+
+.registration-page .fm-primary {
+  max-width: 100%;
+}
+
+.registration-header-link {
+  min-height: 44px;
+}
+
+.programme-registration-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 22px;
+}
+
+.programme-registration-actions .text-link {
+  background: transparent;
+  border: 0;
+  min-height: 44px;
+  padding: 0;
+}

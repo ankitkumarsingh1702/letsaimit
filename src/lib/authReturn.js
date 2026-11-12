@@ -15,9 +15,10 @@ export function validateAuthReturnTarget(value) {
   if (url.origin !== "https://letsaimit.com") return null;
   const entries = [...url.searchParams];
   if (url.pathname === "/coach-dashboard/" && !entries.length) return "/coach-dashboard/";
+  if (url.pathname === "/register/" && entries.length === 1 && url.searchParams.get("resume") === "enrol") return "/register/?resume=enrol";
   if (url.pathname === "/parent/") {
     if (!entries.length) return "/parent/";
-    if (entries.length === 1 && entries[0][0] === "view" && ["dashboard", "tracker", "account"].includes(entries[0][1])) return `/parent/?view=${entries[0][1]}`;
+    if (entries.length === 1 && entries[0][0] === "view" && ["dashboard", "requests", "payments", "tracking", "tracker", "account"].includes(entries[0][1])) return `/parent/?view=${entries[0][1]}`;
     if (entries.length !== 1 || entries[0][0] !== "resume" || !["trial", "enrol"].includes(entries[0][1])) return null;
     return `/parent/?resume=${entries[0][1]}`;
   }

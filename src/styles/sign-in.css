@@ -259,3 +259,16 @@
 @media (prefers-reduced-motion: reduce) {
   .signin-role-tab, .signin-google { transition: none; }
 }
+
+.signin-page-parent { min-height: 100svh; }
+.signin-page-parent .signin-wrap { max-width: 480px; }
+.signin-page-parent .signin-card {
+  grid-template-columns: minmax(0, 1fr);
+  min-height: 0;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+}
+.signin-page-parent .signin-panel { padding: clamp(25px, 6vw, 46px); }
+.signin-parent-logo { display: block; width: 90px; height: auto; margin: 0 auto 22px; }
+.signin-page-parent .signin-status:empty { min-height: 0; margin: 0; }
+.signin-register-link { width: fit-content; padding-block: 10px; }

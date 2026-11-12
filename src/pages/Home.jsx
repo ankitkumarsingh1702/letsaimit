@@ -1,9 +1,8 @@
-import { TrialButton } from "../components/ui.jsx";
+import { ArrowLink, RegisterLink } from "../components/ui.jsx";
 import { HomeFilm } from "../components/HomeFilm.jsx";
 import { HomeGallery } from "../components/HomeGallery.jsx";
 import { HomeCoach } from "../components/HomeCoach.jsx";
 import ParentStories from "../features/stories/ParentStories.js";
-import { ArrowLink } from "../components/ui.jsx";
 function Home() {
   return (
     <>
@@ -98,7 +97,7 @@ function Home() {
                 <li>Fitness</li>
               </ul>
             </div>
-            <TrialButton />
+            <RegisterLink />
           </div>
         </div>
         <HomeFilm />

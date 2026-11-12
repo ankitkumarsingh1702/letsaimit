@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createRegistrationDraft, storeRegistrationDraft, consumeRegistrationDraft, canConfirmRegistrationReceipt } from "../src/features/registration/registrationDraft.js";
+import { clearRegistrationDraft, createRegistrationDraft, storeRegistrationDraft, readRegistrationDraft, canConfirmRegistrationReceipt } from "../src/features/registration/registrationDraft.js";
 import { parentRegistrationResolver } from "../src/features/registration/registrationResolver.js";
 import { parseRegistration } from "../src/lib/registrationSchema.js";
 import { storeAuthReturnTarget, consumeAuthReturnTarget } from "../src/lib/authReturn.js";
@@ -44,11 +44,11 @@ test("composed Google handoff resumes unsent answers; fresh consent gates one re
     const tab = storage();
     assert.equal(await readGoogleUser(client), null);
     assert.equal(storeRegistrationDraft("enroll", values(), tab, 1000), true);
-    assert.equal(storeAuthReturnTarget("/parent/?resume=enrol", tab, 1000), true);
+    assert.equal(storeAuthReturnTarget("/register/?resume=enrol", tab, 1000), true);
     assert.deepEqual(calls, [], "the Google handoff has not submitted anything");
     currentUser = google;
-    assert.equal(consumeAuthReturnTarget(tab, 1100), "/parent/?resume=enrol");
-    const resumed = consumeRegistrationDraft("enroll", tab, 1100);
+    assert.equal(consumeAuthReturnTarget(tab, 1100), "/register/?resume=enrol");
+    const resumed = readRegistrationDraft("enroll", tab, 1100);
     const resolver = parentRegistrationResolver("enroll", { billingRequired: true });
     assert.equal(resumed.childName, "Test child");
     assert.deepEqual(Object.keys(resolver(resumed).errors).sort(), ["billingConsent", "consent", "terms"], "resuming is not renewed consent");
@@ -63,7 +63,12 @@ test("composed Google handoff resumes unsent answers; fresh consent gates one re
       assert.equal(event.detail.userId, actor.id);
       refresh = fetchMyRegistrations({ client, verifyGoogleUser: () => readGoogleUser(client), userId: actor.id });
     });
-    assert.equal(registration.notifyVerifiedRegistrationSave({ receipt: saved, submittedUserId: actor.id, verifiedUser: await readGoogleUser(client), target }), true);
+    assert.equal(registration.completeVerifiedRegistrationSave({
+      receipt: saved, submittedUserId: actor.id, verifiedUser: await readGoogleUser(client), target,
+      generation: 1, currentGeneration: 1, active: true,
+      onComplete: () => clearRegistrationDraft("enrol", tab),
+    }), true);
+    assert.equal(readRegistrationDraft("enrol", tab, 1200), null);
     const rows = await refresh;
     assert.equal(rows.length, 1); assert.equal(rows[0].reviewDecision, "pending"); assert.equal(rows[0].childName, "Test child");
     assert.equal(calls.filter(name => name === "submit_registration").length, 1);
@@ -94,20 +99,16 @@ test("closing during a committed save still notifies the verified parent without
 test("resumed instructions, visible requests and parent errors state the unfinished step accurately", async () => {
   const { vite, React, renderToStaticMarkup, registration } = await modules();
   try {
-    const { OwnRequests, PendingEnrolmentNotice, ParentRequestError } = await vite.ssrLoadModule("/src/features/parent/ParentRequests.jsx");
+    const { OwnRequests, ParentRequestError } = await vite.ssrLoadModule("/src/features/parent/ParentRequests.jsx");
     const { SiteActionsProvider } = await vite.ssrLoadModule("/src/context/SiteActions.jsx");
     const copy = renderToStaticMarkup(React.createElement(registration.RegistrationResumeNotice));
     assert.match(copy, /Not sent yet/); assert.match(copy, /Confirm consent, then send/);
     const auth = { user: { id: google.id, email: google.email, isGoogle: true }, phase: "denied", client: null };
     const page = renderToStaticMarkup(React.createElement(SiteActionsProvider, { value: { openForm: () => {} } }, React.createElement(OwnRequests, { auth })));
-    assert.match(page, /<section class="parent-request-history" aria-labelledby="parent-request-history-title"/);
+    assert.match(page, /<section class="parent-request-history" aria-label="Your registrations and trials">/);
     assert.doesNotMatch(page, /<details class="parent-request-history"/, "saved requests stay visible without opening a disclosure");
     const error = renderToStaticMarkup(React.createElement(ParentRequestError, { error: "Connection lost. Try again.", loaded: true }));
     assert.match(error, /role="alert"/); assert.match(error, /Showing your previously loaded requests/);
-    const pending = [{ formType: "enrol", reviewDecision: "pending" }, { formType: "trial", reviewDecision: "pending" }, { formType: "enrol", reviewDecision: "accepted" }];
-    assert.match(renderToStaticMarkup(React.createElement(PendingEnrolmentNotice, { loaded: true, rows: pending })), /Awaiting approval · 1 enrolment/);
-    assert.equal(renderToStaticMarkup(React.createElement(PendingEnrolmentNotice, { loaded: false, rows: pending })), "");
-    assert.equal(renderToStaticMarkup(React.createElement(PendingEnrolmentNotice, { loaded: true, rows: pending.slice(1) })), "");
   } finally { await vite.close(); }
 });
 

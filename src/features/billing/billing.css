@@ -50,6 +50,7 @@
 .billing-accounts-table th:last-child { width: 185px; }
 .billing-parent { margin-top: 0; padding-top: 0; }
 .billing-parent .billing-heading h2 { font-size: 14px; }
+.billing-mobile-label { display: none; }
 .billing-dialog { width: min(480px, calc(100vw - 28px)); max-height: calc(100dvh - 32px); overflow: auto; padding: 20px; border: 1px solid #dce3de; border-radius: 7px; color: #34473c; background: #fff; font: 400 12px/1.5 var(--font-body); }
 .billing-dialog::backdrop { background: #182b234d; }
 .billing-dialog-heading { display: flex; align-items: start; justify-content: space-between; gap: 15px; padding-bottom: 13px; border-bottom: 1px solid #e5e8e6; }

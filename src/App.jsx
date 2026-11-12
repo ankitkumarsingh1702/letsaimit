@@ -11,6 +11,7 @@ import { Privacy, Terms, Refunds } from "./pages/Legal.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import Admin from "./pages/Admin.jsx";
 import SignIn from "./pages/SignIn.jsx";
+import Register from "./pages/Register.jsx";
 import ParentRequests from "./features/parent/ParentRequests.jsx";
 import StaffTracker from "./features/tracker/StaffTracker.jsx";
 import { AdminAuthProvider } from "./context/AdminAuth.jsx";
@@ -33,11 +34,12 @@ var pages = {
   refunds: Refunds,
   admin: Admin,
   signin: SignIn,
+  register: Register,
   parent: ParentRequests,
   coaching: StaffTracker,
   notfound: NotFound,
 };
-var formKinds = new Set(["trial", "society", "enroll"]);
+var formKinds = new Set(["trial", "society"]);
 function App({ initialPage = "home" } = {}) {
   let page = useHashRoute(initialPage);
   let Page = pages[page];
@@ -69,11 +71,6 @@ function App({ initialPage = "home" } = {}) {
   let closeForm = React.useCallback(() => setFormKind(null), []);
   let dismissRegistrationNotice = React.useCallback(() => setRegistrationNotice(null), []);
   let closeCertificate = React.useCallback(() => setCertificate(null), []);
-  let switchFormKind = React.useCallback((kind) => {
-    if (formKinds.has(kind)) {
-      setFormKind(kind);
-    }
-  }, []);
   let actions = React.useMemo(
     () => ({
       openForm,
@@ -148,14 +145,13 @@ function App({ initialPage = "home" } = {}) {
       <main id="main" ref={mainRef} tabIndex={-1}>
         <Page />
       </main>
-      {!workspace && <Footer />}
+      {!workspace && page !== "register" && <Footer />}
       {page !== "admin" && <>
-      <ContactDialog
+      {page !== "register" && <ContactDialog
         kind={formKind}
         onClose={closeForm}
-        onSwitchKind={switchFormKind}
         onRegistrationSaved={setRegistrationNotice}
-      />
+      />}
       <RegistrationNotice notice={registrationNotice} onDismiss={dismissRegistrationNotice} />
       <MediaDialog certificate={certificate} onClose={closeCertificate} />
       <AnalyticsConsent /></>}

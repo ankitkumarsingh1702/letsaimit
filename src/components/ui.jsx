@@ -28,6 +28,9 @@ function TrialButton({
     </button>
   );
 }
+function RegisterLink({ className = "btn-lime" }) {
+  return <a className={`btn ${className}`} href="/register/">Register your child<Arrow /></a>;
+}
 function ArrowLink({ href, className = "", children }) {
   return (
     <a className={`text-link ${className}`.trim()} href={href}>
@@ -36,4 +39,4 @@ function ArrowLink({ href, className = "", children }) {
     </a>
   );
 }
-export { Arrow, TrialButton, ArrowLink };
+export { Arrow, RegisterLink, TrialButton, ArrowLink };

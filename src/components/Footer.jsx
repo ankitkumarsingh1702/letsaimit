@@ -1,8 +1,7 @@
 import { mediaProps } from "../lib/media.js";
-import { useSiteActions } from "../context/SiteActions.jsx";
+import { RegisterLink } from "./ui.jsx";
 import { asset } from "../lib/assets.js";
 function Footer() {
-  let { openForm } = useSiteActions();
   function scrollToTop() {
     window.scrollTo({
       top: 0,
@@ -39,17 +38,7 @@ function Footer() {
             <br />
             {" Close to home."}
           </p>
-          <button
-            className="btn btn-lime footer-trial"
-            data-action="trial"
-            type="button"
-            onClick={(event) => openForm("trial", event.currentTarget)}
-          >
-            Request a free trial
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M5 12h14m-6-6 6 6-6 6" />
-            </svg>
-          </button>
+          <RegisterLink className="btn-lime footer-trial" />
         </div>
       </div>
       <div className="wrap footer-content">
@@ -82,13 +71,8 @@ function Footer() {
           </div>
           <div className="footer-col">
             <h2>Let’s talk</h2>
-            <button
-              data-action="enroll"
-              type="button"
-              onClick={(event) => openForm("enroll", event.currentTarget)}
-            >
-              Enrol your child
-            </button>
+            <a href="/parent/">Parent sign in</a>
+            <a href="/sign-in/">Team sign in</a>
             <a
               href="https://wa.me/918868886074"
               target="_blank"
