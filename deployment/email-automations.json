@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "targets": {
+    "uat": {
+      "transactionalTransport": "gmailSmtp",
+      "interactiveAttendance": "paused"
+    },
+    "production": {
+      "transactionalTransport": null,
+      "interactiveAttendance": "pending_configuration"
+    }
+  },
+  "transports": {
+    "gmailSmtp": {
+      "host": "smtp.gmail.com",
+      "port": 465,
+      "settings": {
+        "from": "SMTP_FROM_EMAIL",
+        "user": "SMTP_USER",
+        "host": "SMTP_HOST",
+        "port": "SMTP_PORT",
+        "password": "SMTP_PASSWORD"
+      }
+    },
+    "attendanceAmp": {
+      "approvedSenderDomain": "letsaimit.com",
+      "settings": {
+        "from": "COACHING_FROM_EMAIL",
+        "user": "COACHING_SMTP_USER",
+        "host": "COACHING_SMTP_HOST",
+        "port": "COACHING_SMTP_PORT",
+        "password": "COACHING_SMTP_PASSWORD",
+        "ticketSigningSecret": "COACHING_EMAIL_SIGNING_SECRET",
+        "providerReady": "COACHING_DYNAMIC_EMAIL_READY"
+      },
+      "requiresGoogleSenderApproval": true
+    }
+  },
+  "sharedFunctionSettings": ["NOTIFICATION_CRON_SECRET", "ADMIN_DASHBOARD_ORIGIN"],
+  "automations": {
+    "registrationAndActivity": {
+      "worker": "admin-notifications",
+      "transport": "gmailSmtp",
+      "cronJob": "letsaimit-admin-notifications",
+      "dispatchSetting": "private.notification_settings.dispatch_enabled",
+      "recipients": "Current approved admins",
+      "registrationAlert": "After a saved trial or enrolment request",
+      "activityReport": {
+        "windowHours": 4,
+        "windowTimezone": "UTC",
+        "displayTimezone": "Asia/Kolkata",
+        "skipEmptyWindows": true
+      }
+    },
+    "billing": {
+      "worker": "billing-worker",
+      "transport": "gmailSmtp",
+      "cronJob": "letsaimit-billing-worker",
+      "dispatchSetting": "private.billing_settings.enabled",
+      "parentEmails": ["Invoices", "Reminders", "Receipts", "Refunds", "Fee changes"],
+      "reminderSlotsIst": ["09:00", "12:00", "15:00", "18:00"],
+      "adminSummary": "Last day of the month, from 18:00 IST"
+    },
+    "attendance": {
+      "worker": "coaching-worker",
+      "transport": "attendanceAmp",
+      "cronJob": "letsaimit-coaching-attendance",
+      "dailyAt": "21:00",
+      "timezone": "Asia/Kolkata",
+      "manualTrigger": "send_coaching_attendance_now",
+      "statusRpc": "get_coaching_attendance_email_status",
+      "actionRoute": "coaching-worker/attendance",
+      "dispatchSetting": "private.coaching_settings.email_enabled",
+      "recipients": "One email per current approved admin per session date",
+      "maxRosterSize": 100,
+      "ticketLifetimeHours": 48,
+      "actions": ["Present", "Absent", "No session"]
+    }
+  }
+}

@@ -97,6 +97,9 @@ website's `public/` or `dist/` directory.
 
 ## Backend secrets
 
+[Email automation configuration](deployment/email-automations.json) maps the
+sender settings to registration alerts, activity reports, billing and attendance.
+
 | Name | Value |
 | --- | --- |
 | `SMTP_HOST` | `smtp.gmail.com` |

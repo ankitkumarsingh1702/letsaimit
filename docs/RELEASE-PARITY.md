@@ -15,6 +15,19 @@ Earlier tables remain a dated record.
 Latest verified UAT workflow source: `f22e83265d612da094234699a4834f7248b2ef67`
 (project-local parity workflow and release checks; no additional product UI change).
 
+## 13 November 2026 — Email automation configuration
+
+[`deployment/email-automations.json`](../deployment/email-automations.json)
+lists the sender settings, workers, schedules and attendance gates in one
+place. The parity command includes it as configuration inventory. Supabase
+continues to own live credentials, job scheduling and dispatch settings.
+
+The 13 November UAT rollback restored the retained Gmail SMTP settings for
+registration alerts, four-hour activity reports and billing. The notification
+worker returned HTTP 200 with no jobs due, and its scheduler remained active.
+Interactive attendance remains paused pending sender approval. The production
+sender and backend are pending separate configuration.
+
 ## Public identity contract
 
 | Setting | Required value in both environments |
