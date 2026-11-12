@@ -470,3 +470,13 @@ HTTPS homepage is still 200 / 39,957 bytes with SHA-256
 | Sender handoff | Delegated GoDaddy Email & Office lists `contact@letsaimit.com` under Microsoft 365. Its Sign In action opens a separate mailbox login, which was prepared with that address. Domain SMTP relay or scoped provider sending access has not been verified. The existing personal Gmail app password is not the domain mailbox credential. No DNS or existing mail settings changed |
 | UAT website | `b8ba4fd265caceec4c71e264154108943475786b` / Vercel `dpl_Ffb7QSdweJ1h2xpjyJGhA9p7G7Ke` READY with `uat.letsaimit.com`. The new HTTPS route and deployed send control bundle verified. The signed-in owner in Chrome opened **Attendance** from Admin and saw the daily 9 PM IST schedule and disabled **Send attendance email** with the sender-setup pause. No live send or mark was attempted. Later documentation-only descendants retain the same runnable source |
 | Production boundary | Remote `main` is still `372be17da151f45d42c54b42b36d2d50ef51758a` and the production HTTPS homepage retains SHA-256 `6f32fc0cc051d17e1817e189f7a442bfe17b5e93a41e1a0bfeba0efb4aa5dc87`. No production website or backend mutation |
+
+## 12 November 2026 — Parent registration and dashboard
+
+| Item | Evidence |
+| --- | --- |
+| Application source | `f01ee9d`, merged to `uat` as `bdd194d3f88ff65c8e74ad14c7bb04114189317e`. Registration has a direct entry and a Google return to review. My requests, Payments and Tracking use the existing parent ownership checks. |
+| Local verification | 402 tests, the UAT-origin prerender build and 59 asset checks passed. Desktop and mobile Chromium verified the separate trial, mocked Google return and cancellation, field and consent validation, safe retry with the same submission ID, receipt and request highlight, invoice actions, attendance and feedback. |
+| UAT deployment | Vercel `dpl_6KQjtJbqpNt74ARkMFNwfbt8kMEU` READY and assigned to `https://uat.letsaimit.com`. An existing signed-in parent session loaded its saved request and invoice, opened Tracking with Attendance and Weekly feedback, and navigated to the registration form and back. No live submission or payment was made during verification. |
+| Backend and parity | No migration, Edge Function, secret, provider callback or configuration change. Parity plan digest `533b5210a502f5ca259fa78a1eaa9a47e5af08a31a991676f960f5d49b4664be` from the released source. UAT public billing terms returned HTTP 200. Production backend configuration remains pending in the target manifest. |
+| Production | Pending explicit promotion. `main` remained at `372be17da151f45d42c54b42b36d2d50ef51758a`. |
