@@ -11,7 +11,7 @@ const options = client => ({ client, userId: actor.id, verifyGoogleUser: verify,
 
 test('manual email dispatch takes no client roster or recipients and distinguishes queue from send', async () => {
   const calls = [];
-  const value = { sessionDate: '2026-11-11', emailEnabled: true, queued: 4, pending: 4, sent: 0, failed: 0 };
+  const value = { sessionDate: '2026-11-11', emailEnabled: true, scheduledEnabled: false, deliveryMode: 'link', queued: 4, pending: 4, sent: 0, failed: 0 };
   const config = options({ rpc(...args) { calls.push(args); return { data: { ...value, recipientEmail: 'private@example.test' } }; } });
   assert.deepEqual(await coachingEmailStatus(config, { send: true }), value);
   assert.deepEqual(calls, [['send_coaching_attendance_now']]);

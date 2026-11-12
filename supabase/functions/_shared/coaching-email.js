@@ -27,6 +27,28 @@ export function validateCoachingActionUrl(value){
 }
 const css='body{margin:0;background:#f6f8f7;color:#173f35;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5}main{max-width:660px;margin:20px auto;padding:20px;background:#fff;border:1px solid #e1e7e3;border-radius:6px}h1{font-size:21px;margin:12px 0 4px}p{margin:8px 0 14px}.muted{color:#64766e;font-size:12px}table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:9px 5px;border-bottom:1px solid #e5eae7;vertical-align:top}th{font-weight:400;color:#64766e}select{max-width:130px;padding:6px;border:1px solid #cad5ce;border-radius:4px;background:#fff;color:#173f35}button{margin:8px 6px 8px 0;padding:8px 12px;border:1px solid #cad5ce;border-radius:4px;background:#fff;color:#173f35;font-weight:600}.primary{background:#173f35;border-color:#173f35;color:#fff}button[disabled],select[disabled]{opacity:.6}.result{padding:8px 0}.brand{font-weight:700}@media(max-width:480px){main{margin:0;border-radius:0;padding:14px}th,td{padding:8px 3px;font-size:12px}.community{display:none}select{width:112px}}';
 
+export function validateCoachingDashboardOrigin(value) {
+  if (!['https://letsaimit.com', 'https://uat.letsaimit.com'].includes(value)) {
+    throw new TypeError('invalid_dashboard_origin');
+  }
+  return value;
+}
+
+/** The link opens the usual signed-in sheet, so the message needs no child data or access token. */
+export function buildCoachingAttendanceLinkEmail({ sessionDate, rows, dashboardOrigin }) {
+  const sessionLabel = date(sessionDate);
+  const rosterSize = validateCoachingRows(rows).length;
+  const link = new URL('/coach-dashboard/', validateCoachingDashboardOrigin(dashboardOrigin));
+  link.searchParams.set('date', sessionDate);
+  const copy = 'Open the attendance sheet to mark Present, Absent or No session.';
+  const count = `${rosterSize} ${rosterSize === 1 ? 'child' : 'children'}`;
+  return {
+    subject: `LetsAimIt: Attendance · ${sessionLabel}`,
+    html: `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Attendance</title><style>${css}</style></head><body><main><p class="brand">LetsAimIt</p><h1>Attendance</h1><p>${escape(sessionLabel)} · IST · ${count}</p><p>${copy}</p><p><a href="${escape(link.href)}">Open attendance sheet</a></p></main></body></html>`,
+    text: [`LetsAimIt — Attendance`, `${sessionLabel} · IST · ${count}`, '', copy, link.href].join('\n'),
+  };
+}
+
 /** Pure content. Recipient/session scope is checked by the worker and again by every action RPC. */
 export function buildCoachingAttendanceEmail({ticketId,recipientEmail,sessionDate,expiresAt,rows,token,actionUrl}={}){
   if(!isCoachingUuid(ticketId)||!isSingleMailbox(recipientEmail)||typeof token!=='string'||!/^[A-Za-z0-9_-]{43}$/.test(token))throw new TypeError('invalid_email_ticket');

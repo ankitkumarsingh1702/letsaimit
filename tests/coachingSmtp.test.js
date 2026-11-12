@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readCoachingSmtpConfiguration } from '../supabase/functions/_shared/coaching-smtp.js';
+import { readCoachingLinkSmtpConfiguration, readCoachingSmtpConfiguration } from '../supabase/functions/_shared/coaching-smtp.js';
 
 const dedicatedEnv = {
   COACHING_FROM_EMAIL: 'attendance@letsaimit.com',
@@ -10,6 +10,23 @@ const dedicatedEnv = {
   COACHING_SMTP_PASSWORD: 'synthetic password with spaces',
 };
 const config = values => readCoachingSmtpConfiguration(name => values[name]);
+
+test('manual attendance uses the existing Gmail credentials with the signed-in dashboard origin', () => {
+  const settings = {
+    SMTP_HOST: 'smtp.gmail.com', SMTP_PORT: '465', SMTP_FROM_EMAIL: 'sender@gmail.com',
+    SMTP_USER: 'sender@gmail.com', SMTP_PASSWORD: 'abcd abcd abcd abcd',
+    ADMIN_DASHBOARD_ORIGIN: 'https://uat.letsaimit.com',
+  };
+  const read = env => readCoachingLinkSmtpConfiguration(name => env[name]);
+  const { senderEmail, dashboardOrigin, transportOptions } = read(settings);
+  assert.equal(senderEmail, settings.SMTP_FROM_EMAIL);
+  assert.equal(dashboardOrigin, settings.ADMIN_DASHBOARD_ORIGIN);
+  assert.deepEqual(transportOptions.auth, { user: settings.SMTP_USER, pass: 'abcdabcdabcdabcd' });
+  assert.deepEqual(transportOptions.tls, { minVersion: 'TLSv1.2', rejectUnauthorized: true });
+  assert.equal(read({ ...settings, SMTP_FROM_EMAIL: 'another@gmail.com' }).transportOptions, null);
+  assert.equal(read({ ...settings, ADMIN_DASHBOARD_ORIGIN: 'https://example.test' }).transportOptions, null);
+  assert.equal(read(dedicatedEnv).transportOptions, null);
+});
 
 test('coaching SMTP cannot inherit the registration sender or connect as an unowned From address', () => {
   const legacyEnv = { SMTP_HOST: 'smtp.gmail.com', SMTP_PORT: '465', SMTP_FROM_EMAIL: 'sender@gmail.com', SMTP_USER: 'sender@gmail.com', SMTP_PASSWORD: 'legacy-test-value' };

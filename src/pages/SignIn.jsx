@@ -20,7 +20,8 @@ export default function SignIn({ mode = "admin" } = {}) {
   const retry = () => { void checkAccess().catch(() => {}); };
   const google = () => {
     const here = validateAuthReturnTarget(window.location.pathname + window.location.search);
-    void signIn(isCoach ? "/coach-dashboard/" : isParent ? here?.startsWith("/parent/") ? here : "/parent/" : here?.startsWith("/admin/") ? here : "/admin/").catch(() => {});
+    const destination = isCoach ? "/coach-dashboard/" : isParent ? "/parent/" : "/admin/";
+    void signIn(here?.startsWith(destination) ? here : destination).catch(() => {});
   };
   const chooseEntry = value => setEntry(value);
   const tabsKeyDown = event => {

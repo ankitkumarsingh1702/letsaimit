@@ -1,3 +1,5 @@
+import { validTrackerDate } from "../features/tracker/trackerData.js";
+
 const STORAGE_KEY = "letsaimit.auth.return.v1";
 const MAX_AGE_MS = 30 * 60 * 1000;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -14,7 +16,11 @@ export function validateAuthReturnTarget(value) {
   try { url = new URL(value, "https://letsaimit.com"); } catch { return null; }
   if (url.origin !== "https://letsaimit.com") return null;
   const entries = [...url.searchParams];
-  if (url.pathname === "/coach-dashboard/" && !entries.length) return "/coach-dashboard/";
+  if (url.pathname === "/coach-dashboard/") {
+    if (!entries.length) return "/coach-dashboard/";
+    if (entries.length === 1 && entries[0][0] === "date" && validTrackerDate(entries[0][1])) return `/coach-dashboard/?date=${entries[0][1]}`;
+    return null;
+  }
   if (url.pathname === "/register/" && entries.length === 1 && url.searchParams.get("resume") === "enrol") return "/register/?resume=enrol";
   if (url.pathname === "/parent/") {
     if (!entries.length) return "/parent/";

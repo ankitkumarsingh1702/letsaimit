@@ -1,6 +1,6 @@
 import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 import { isSingleMailbox } from './notification-worker.js';
-import { buildCoachingAttendanceEmail, coachingSheet, isCoachingUuid, MAX_COACHING_EMAIL_ROWS, validateCoachingActionUrl } from './coaching-email.js';
+import { buildCoachingAttendanceEmail, buildCoachingAttendanceLinkEmail, coachingSheet, isCoachingUuid, MAX_COACHING_EMAIL_ROWS, validateCoachingActionUrl, validateCoachingDashboardOrigin } from './coaching-email.js';
 
 const MAX_BODY=48*1024;
 const TOKEN=/^[A-Za-z0-9_-]{43}$/;
@@ -87,26 +87,64 @@ export function createCoachingEmailActionHandler({senderEmail,rpc,assertReady=()
 }
 
 /** Authenticated scheduler work cannot choose a recipient or take roster content from the HTTP body. */
-export function createCoachingWorkerHandler({secret,signingSecret,senderEmail,actionUrl,dynamicEmailReady=false,rpc,sendEmail,assertReady=()=>{},clock=Date.now,maxJobs=8}){
+export function createCoachingWorkerHandler({
+  secret, signingSecret, senderEmail, actionUrl, dynamicEmailReady=false,
+  dashboardOrigin='', sendLinkEmail=null, rpc, sendEmail, assertReady=()=>{}, clock=Date.now, maxJobs=8,
+}){
   return async request=>{
     if(request.method!=='POST')return json(405,{ok:false,error:'method_not_allowed'});
     if(typeof secret!=='string'||secret.length<32)return json(503,{ok:false,error:'not_configured'});
     if(!bearer(request.headers.get('Authorization'),secret))return json(401,{ok:false,error:'unauthorized'});
-    if(dynamicEmailReady!==true)return json(503,{ok:false,error:'dynamic_email_not_enabled'});
-    try{await assertReady();validateCoachingActionUrl(actionUrl);if(!isSingleMailbox(senderEmail)||typeof signingSecret!=='string'||signingSecret.length<32)throw new Error('configuration_error');}catch{return json(503,{ok:false,error:'not_configured'});}
+    const modes = [];
+    if (dynamicEmailReady === true && isSingleMailbox(senderEmail) && typeof signingSecret === 'string' && signingSecret.length >= 32) {
+      try {
+        validateCoachingActionUrl(actionUrl);
+        modes.push('interactive');
+      } catch { /* Link delivery can still use its own validated configuration. */ }
+    }
+    if (typeof sendLinkEmail === 'function') {
+      try {
+        validateCoachingDashboardOrigin(dashboardOrigin);
+        modes.push('link');
+      } catch { /* Invalid dashboard origins never appear in mail. */ }
+    }
+    if (!modes.length) {
+      return json(503,{ok:false,error:dynamicEmailReady ? 'not_configured' : 'dynamic_email_not_enabled'});
+    }
+    try { await assertReady(); } catch { return json(503,{ok:false,error:'not_configured'}); }
     const counts={processed:0,sent:0,skipped:0,failedAttempts:0,unconfirmed:0};const deadline=clock()+90000;
     try{
-      await rpc('enqueue_coaching_attendance',{});
+      if (modes.includes('interactive')) await rpc('enqueue_coaching_attendance',{});
       for(let i=0;i<Math.min(8,Math.max(1,maxJobs))&&clock()<deadline;i++){
-        const job=await rpc('claim_coaching_email',{});if(!job)break;counts.processed++;
+        const job = modes.includes('link')
+          ? await rpc('claim_coaching_email_for_modes', { p_modes: modes })
+          : await rpc('claim_coaching_email', {});
+        if (!job) break;
+        counts.processed++;
         try{
           const prepared=await rpc('prepare_coaching_email',{p_id:job.id,p_lease_token:job.leaseToken});
           if(!prepared||prepared.state==='skip'){counts.skipped++;continue;}
-          if(prepared.state!=='ready'||prepared.ticketId!==job.id||!isSingleMailbox(prepared.recipientEmail)||prepared.recipientEmail.toLowerCase()===senderEmail.toLowerCase()||Date.parse(prepared.expiresAt)<=clock()||!Number.isFinite(Date.parse(prepared.expiresAt)))throw new Error('invalid_job');
-          const token=deriveCoachingEmailToken(signingSecret,prepared.ticketId);
-          const message=buildCoachingAttendanceEmail({...prepared,token,actionUrl});
-          if(await rpc('set_coaching_email_token',{p_id:job.id,p_lease_token:job.leaseToken,p_token_hash:coachingTokenHash(token)})!==true)throw new Error('lease_expired');
-          const delivered=await sendEmail({...message,recipientEmail:prepared.recipientEmail,messageId:`<coaching-${job.id}@letsaimit.com>`});
+          const mode = prepared.deliveryMode ?? 'interactive';
+          if (prepared.state !== 'ready' || prepared.ticketId !== job.id || !isSingleMailbox(prepared.recipientEmail)
+            || !modes.includes(mode) || mode !== (job.deliveryMode ?? 'interactive')
+            || Date.parse(prepared.expiresAt) <= clock() || !Number.isFinite(Date.parse(prepared.expiresAt))) {
+            throw new Error('invalid_job');
+          }
+          const envelope = { recipientEmail: prepared.recipientEmail, messageId: `<coaching-${job.id}@letsaimit.com>` };
+          let delivered;
+          if (mode === 'link') {
+            const message = buildCoachingAttendanceLinkEmail({ ...prepared, dashboardOrigin });
+            delivered = await sendLinkEmail({ ...message, ...envelope });
+          } else {
+            if (prepared.recipientEmail.toLowerCase() === senderEmail.toLowerCase()) throw new Error('invalid_job');
+            const token = deriveCoachingEmailToken(signingSecret, prepared.ticketId);
+            const message = buildCoachingAttendanceEmail({ ...prepared, token, actionUrl });
+            const stored = await rpc('set_coaching_email_token', {
+              p_id: job.id, p_lease_token: job.leaseToken, p_token_hash: coachingTokenHash(token),
+            });
+            if (stored !== true) throw new Error('lease_expired');
+            delivered = await sendEmail({ ...message, ...envelope });
+          }
           if(delivered?.accepted!==true)throw new Error('transport_failure');
           if(await rpc('finish_coaching_email',{p_id:job.id,p_lease_token:job.leaseToken,p_outcome:'sent',p_error_code:''}))counts.sent++;else counts.unconfirmed++;
         }catch{

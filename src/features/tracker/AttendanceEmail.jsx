@@ -1,7 +1,7 @@
 import React from 'react';
 import { coachingEmailStatus, todayIST } from './trackerData.js';
 
-export default function AttendanceEmail({ auth, enabled, date, hasChildren }) {
+export default function AttendanceEmail({ auth, date, hasChildren }) {
   const [status, setStatus] = React.useState(null);
   const [notice, setNotice] = React.useState('');
   const [error, setError] = React.useState('');
@@ -17,7 +17,6 @@ export default function AttendanceEmail({ auth, enabled, date, hasChildren }) {
   React.useEffect(() => {
     const generation = ++scope.current;
     setStatus(null); setNotice(''); setError(''); setReadFailed(false); setBusy(false);
-    if (!enabled) return;
     let reading = false;
     async function refresh() {
       if (reading || flight.current || document.visibilityState === 'hidden') return;
@@ -34,9 +33,9 @@ export default function AttendanceEmail({ auth, enabled, date, hasChildren }) {
     const interval = window.setInterval(refresh, 10000);
     window.addEventListener('focus', refresh);
     return () => { ++scope.current; window.clearInterval(interval); window.removeEventListener('focus', refresh); };
-  }, [client, enabled, userId, verifyGoogleUser]);
+  }, [client, userId, verifyGoogleUser]);
 
-  const canSend = enabled && current?.emailEnabled !== false && date === today && hasChildren;
+  const canSend = current?.emailEnabled === true && date === today && hasChildren;
   async function send() {
     if (!canSend || date !== todayIST() || flight.current) return;
     const generation = scope.current;
@@ -56,11 +55,11 @@ export default function AttendanceEmail({ auth, enabled, date, hasChildren }) {
     }
   }
 
-  const paused = !enabled || current?.emailEnabled === false;
+  const paused = current?.emailEnabled === false;
   return <section className="adm-card coaching-email-card" aria-labelledby="coaching-email-title">
     <div><h2 id="coaching-email-title">Attendance email</h2>
-      <p>Today’s sheet · Approved admins · Daily at 9 PM IST</p>
-      {paused ? <p>Email paused until Gmail sender setup is complete.</p> : date !== today ? <p>Select today to send.</p> : !hasChildren ? <p>No approved children to include.</p> : null}
+      <p>Today’s sheet · Approved admins{current?.scheduledEnabled && ' · Daily at 9 PM IST'}</p>
+      {paused ? <p>Attendance email is turned off.</p> : date !== today ? <p>Select today to send.</p> : !hasChildren ? <p>No approved children to include.</p> : current?.deliveryMode === 'link' ? <p>Email includes a link to mark attendance.</p> : null}
       {!paused && <p role="status">{current ? `${current.pending} queued · ${current.sent} sent${current.failed ? ` · ${current.failed} failed` : ''}` : readFailed ? 'Email status unavailable.' : 'Checking email status…'}{notice && ` ${notice}`}</p>}
       {error && <p className="coaching-email-error" role="alert">{error}</p>}
     </div>

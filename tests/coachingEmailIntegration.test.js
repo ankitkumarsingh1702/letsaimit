@@ -30,19 +30,79 @@ test('admin send → real coaching SQL → SMTP alternatives → Gmail POST → 
     await authenticated(admins[0],'review_registration',[receipt.id,'accepted',1,null]);ids.push(receipt.id);
   }
   const {today}=(await db.query("select (now() at time zone 'Asia/Kolkata')::date::text today")).rows[0];
-  await db.exec('update private.coaching_settings set email_enabled=true');
-  const queued={sessionDate:today,emailEnabled:true,queued:4,pending:4,sent:0,failed:0};
-  assert.deepEqual(await authenticated(admins[0],'send_coaching_attendance_now'),queued);
-  assert.equal((await db.query('select private.enqueue_coaching_attendance_at($1) n',[`${today}T21:00:00+05:30`])).rows[0].n,0);
-  const allowed=new Set(['enqueue_coaching_attendance','claim_coaching_email','prepare_coaching_email','set_coaching_email_token','finish_coaching_email','read_coaching_email_attendance','save_coaching_email_attendance']);
+  const allowed=new Set(['enqueue_coaching_attendance','claim_coaching_email','claim_coaching_email_for_modes','prepare_coaching_email','set_coaching_email_token','finish_coaching_email','read_coaching_email_attendance','save_coaching_email_attendance']);
   const rpc=async(name,args)=>{
     assert.ok(allowed.has(name));const entries=Object.entries(args);
-    return as('service_role',null,async()=> (await db.query(`select public.${name}(${entries.map(([key],i)=>`${key} => $${i+1}`).join(',')}) value`,entries.map(([_key,value])=>Array.isArray(value)||value&&typeof value==='object'?JSON.stringify(value):value))).rows[0].value);
+    return as('service_role',null,async()=> (await db.query(`select public.${name}(${entries.map(([key],i)=>`${key} => $${i+1}`).join(',')}) value`,entries.map(([key,value])=>key!=='p_modes' && value && typeof value==='object'?JSON.stringify(value):value))).rows[0].value);
   };
   const secret='synthetic-integration-worker-secret-32-plus',signingSecret='synthetic-integration-email-signing-secret-32-plus',senderEmail='attendance@letsaimit.com';
   const endpoint='https://abcdefghijklmnopqrst.supabase.co/functions/v1/coaching-worker/attendance';const sent=[];
+  const workerRequest = () => new Request(endpoint.replace('/attendance',''), { method:'POST', headers:{Authorization:`Bearer ${secret}`} });
+
+  await t.test('manual Gmail delivers an authenticated sheet link while scheduled and interactive delivery stay off', async () => {
+    await assert.rejects(authenticated(parent,'send_coaching_attendance_now'), { code:'42501' });
+    await db.exec('begin');
+    try {
+      await db.exec(`
+        create schema net;
+        create schema vault;
+        create table vault.decrypted_secrets(name text, decrypted_secret text);
+        insert into vault.decrypted_secrets values
+          ('letsaimit_notification_worker_url', 'https://example.supabase.co/functions/v1/admin-notifications'),
+          ('letsaimit_notification_worker_secret', repeat('x', 32));
+        create table private.test_coaching_wake(id bigint generated always as identity, url text);
+        create function net.http_post(url text, headers jsonb, body jsonb, timeout_milliseconds integer)
+          returns bigint language sql as $$insert into private.test_coaching_wake(url) values ($1) returning id$$;
+        update private.coaching_settings set manual_email_enabled=true;
+      `);
+      const expected = {sessionDate:today,emailEnabled:true,scheduledEnabled:false,deliveryMode:'link',queued:4,pending:4,sent:0,failed:0};
+      assert.equal((await db.query('select private.enqueue_coaching_attendance_at($1) n',[`${today}T21:00:00+05:30`])).rows[0].n,0);
+      assert.deepEqual(await authenticated(admins[0],'send_coaching_attendance_now'), expected);
+      assert.deepEqual(await authenticated(admins[1],'send_coaching_attendance_now'), { ...expected, queued:0 });
+      assert.deepEqual((await db.query('select url from private.test_coaching_wake')).rows, [
+        { url:'https://example.supabase.co/functions/v1/coaching-worker' },
+      ]);
+      assert.equal(await rpc('claim_coaching_email', {}), null);
+
+      const messages = [];
+      const linkWorker = createCoachingWorkerHandler({
+        secret, senderEmail: admins[0].email, dynamicEmailReady:false, dashboardOrigin:'https://uat.letsaimit.com',
+        rpc: async (name, args) => {
+          assert.ok(!['enqueue_coaching_attendance','set_coaching_email_token'].includes(name));
+          return rpc(name, args);
+        },
+        sendLinkEmail: async message => { messages.push(message); return { accepted:true }; },
+      });
+      const result = await linkWorker(workerRequest());
+      assert.equal(result.status, 200);
+      assert.equal((await result.json()).sent, 4);
+      assert.deepEqual(new Set(messages.map(message => message.recipientEmail)), new Set(admins.map(admin => admin.email)));
+      for (const message of messages) {
+        const url = `https://uat.letsaimit.com/coach-dashboard/?date=${today}`;
+        assert.equal(message.amp, undefined);
+        assert.ok(message.html.includes(`href="${url}"`));
+        assert.ok(message.text.includes(url));
+        assert.doesNotMatch(message.html+message.text, /Example child|integration\.parent|<form|token/i);
+      }
+      assert.deepEqual(await authenticated(admins[0],'get_coaching_attendance_email_status'), { ...expected, queued:0, pending:0, sent:4 });
+      assert.equal((await db.query('select count(*)::int n from private.coaching_email_tickets where token_hash is not null')).rows[0].n, 0);
+      await authenticated(admins[0], 'save_coaching_attendance', [today, JSON.stringify([
+        { registrationId:ids[0], status:'present', revision:0 },
+        { registrationId:ids[1], status:'absent', revision:0 },
+      ])]);
+      const tracker = await authenticated(parent, 'list_my_tracker');
+      assert.deepEqual(new Set(tracker.attendance.map(row => row.status)), new Set(['present','absent']));
+    } finally {
+      await db.exec('rollback');
+    }
+  });
+
+  await db.exec('update private.coaching_settings set email_enabled=true');
+  const queued={sessionDate:today,emailEnabled:true,scheduledEnabled:true,deliveryMode:'interactive',queued:4,pending:4,sent:0,failed:0};
+  assert.deepEqual(await authenticated(admins[0],'send_coaching_attendance_now'),queued);
+  assert.equal((await db.query('select private.enqueue_coaching_attendance_at($1) n',[`${today}T21:00:00+05:30`])).rows[0].n,0);
   const worker=createCoachingWorkerHandler({secret,signingSecret,senderEmail,actionUrl:endpoint,dynamicEmailReady:true,rpc,sendEmail:async message=>{sent.push(message);return {accepted:true};}});
-  const response=await worker(new Request(endpoint.replace('/attendance',''),{method:'POST',headers:{Authorization:`Bearer ${secret}`}}));
+  const response=await worker(workerRequest());
   assert.equal(response.status,200);assert.equal((await response.json()).sent,4);assert.equal(sent.length,4);assert.deepEqual(new Set(sent.map(m=>m.recipientEmail)),new Set(admins.map(a=>a.email)));
   assert.deepEqual(await authenticated(admins[0],'get_coaching_attendance_email_status'),{...queued,queued:0,pending:0,sent:4});
   for(const message of sent){assert.equal([...message.amp.matchAll(/name="status_/g)].length,8);assert.match(message.amp,/Not marked/);assert.doesNotMatch(message.amp,/integration\.parent|12025550123|Razorpay/);assert.doesNotMatch(message.text+message.html,/name="token"/);}

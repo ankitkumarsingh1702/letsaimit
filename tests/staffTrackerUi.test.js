@@ -30,10 +30,10 @@ test("assigned non-admin coach sees scoped attendance controls and can also open
   assert.doesNotMatch(html, /Gmail[^<]*ready|Email[^<]*sent|Attendance saved/);
 }));
 
-test('admin email action explains the schedule and stays disabled without sender setup', () => withStaffUi({ isAdmin: true, emailEnabled: false, children: [child], attendance: [], feedback: [] }, async ({ CoachingWorkspace }) => {
+test('admin email action waits for dispatch status instead of relying on the scheduled-email flag', () => withStaffUi({ isAdmin: true, emailEnabled: false, children: [child], attendance: [], feedback: [] }, async ({ CoachingWorkspace }) => {
   const html = renderToStaticMarkup(React.createElement(CoachingWorkspace, { auth: { ...auth, phase: 'authorized' } }));
-  assert.match(html, /Daily at 9 PM IST/);
-  assert.match(html, /Email paused until Gmail sender setup is complete/);
+  assert.match(html, /Checking email status/);
+  assert.doesNotMatch(html, /Daily at 9 PM IST|Gmail sender setup/);
   assert.match(html, /<button[^>]* disabled=""[^>]*>Send attendance email<\/button>/);
 }));
 

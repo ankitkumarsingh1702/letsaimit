@@ -53,9 +53,9 @@ deleted parent's child tracker content and anonymizes deleted coach presentation
 The existing financial archive/ledger remains unchanged. Re-signup never joins
 an old child's records by email or phone.
 
-## Daily Gmail attendance
+## Attendance email
 
-At **9 PM IST each day**, the minute scheduler queues one email for every
+When scheduled email is enabled, the minute scheduler queues one email at **9 PM IST** for every
 currently approved admin, including the owner. The roster includes approved
 enrolments even without an assigned coach. There is no old-day email catch-up.
 Roster capacity is 100; larger rosters fail explicitly rather than dropping rows.
@@ -64,9 +64,12 @@ An admin can open **Attendance → Send attendance email** to queue today's
 sheet immediately. `send_coaching_attendance_now()` takes no recipient, roster
 or date from the browser. It checks the current Google actor and admin access,
 then wakes the same worker after commit. The daily recipient/date key prevents
-duplicates at 9 PM or on repeated clicks. `get_coaching_attendance_email_status()`
-returns only today's aggregate counts to admins. A queued job is not sent;
-sent means the mail transport accepted it, not that Gmail rendered AMP.
+duplicates at 9 PM or on repeated clicks. With manual send enabled and interactive
+mail paused, the worker uses the existing Gmail SMTP account. The email links
+to the dated attendance sheet, where admins sign in and record attendance.
+`get_coaching_attendance_email_status()` reports manual availability, scheduled
+availability, the email format and today's aggregate counts to admins. A sent
+count means the mail transport accepted the message.
 
 The AMP email provides individual Present/Absent/No session choices, local
 **Mark all present** / **No session** controls and an explicit **Save**. **Load
@@ -86,8 +89,12 @@ Raw ticket credentials travel only in POST bodies, never action URLs or logs.
 [Automation configuration](deployment/automations.json) lists the
 attendance worker, its schedule, sender settings and both delivery gates.
 
-Coaching uses its own authenticated `@letsaimit.com` sender. The existing
-registration and billing SMTP settings are unchanged. Server-only values:
+Manual link emails use `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_FROM_EMAIL`
+and `SMTP_PASSWORD`, shared with registration and billing, plus
+`ADMIN_DASHBOARD_ORIGIN` for the target's signed-in attendance link. Enable
+`private.coaching_settings.manual_email_enabled` after deploying the worker
+and confirming SMTP settings for that target. Interactive attendance uses
+its own authenticated `@letsaimit.com` sender and the following server-only values:
 
 - `COACHING_FROM_EMAIL`: the exact sender reviewed by Google, distinct from all
   recipient addresses.
@@ -103,10 +110,10 @@ registration and billing SMTP settings are unchanged. Server-only values:
 The function reuses the target's `NOTIFICATION_CRON_SECRET` and Supabase runtime
 credentials. `private.wake_coaching_worker()`
 derives its target URL from the existing notification-worker Vault URL. Cron job
-`letsaimit-coaching-attendance` runs every minute; both the database's
-`email_enabled` flag and the function's readiness gate must be enabled for
-delivery. Keep them off while sender approval is pending. Preparation does not
-send emails, create coaching marks or change billing.
+`letsaimit-coaching-attendance` runs every minute and picks up retries for
+manual deliveries. Daily interactive sends require both the database's
+`email_enabled` flag and the function's readiness gate. Keep the daily gates
+off until sender approval is complete.
 
 Gmail-native controls require Google's per-sender approval and authenticated
 mail. LetsAimIt cannot satisfy the owned sender-domain website requirement with

@@ -118,7 +118,7 @@ test('coaching tracker preserves parent ownership, scoped coach writes and Gmail
   await t.test('admin send wakes the existing worker once and shares the 9 PM delivery tickets',async()=>{
     const send = user => staff(user, 'send_coaching_attendance_now');
     const status = user => staff(user, 'get_coaching_attendance_email_status');
-    const disabled = {sessionDate: today, emailEnabled: false, queued: 0, pending: 0, sent: 0, failed: 0};
+    const disabled = {sessionDate: today, emailEnabled: false, scheduledEnabled: false, deliveryMode: null, queued: 0, pending: 0, sent: 0, failed: 0};
 
     await as('anon', null, () => assert.rejects(rpc('send_coaching_attendance_now'), {code:'42501'}));
     await assert.rejects(send(coach), {code:'42501'});
@@ -140,7 +140,7 @@ test('coaching tracker preserves parent ownership, scoped coach writes and Gmail
         returns bigint language sql as $$insert into private.test_coaching_wake(url) values ($1) returning id$$;
         update private.coaching_settings set email_enabled=true;`);
 
-      const queued = {sessionDate: today, emailEnabled: true, queued: 4, pending: 4, sent: 0, failed: 0};
+      const queued = {sessionDate: today, emailEnabled: true, scheduledEnabled: true, deliveryMode: 'interactive', queued: 4, pending: 4, sent: 0, failed: 0};
       assert.deepEqual(await send(owner), queued);
       assert.deepEqual(await send(admins[1]), {...queued, queued:0});
       assert.equal((await db.query('select private.enqueue_coaching_attendance_at($1) n', [today+'T21:00:00+05:30'])).rows[0].n, 0);

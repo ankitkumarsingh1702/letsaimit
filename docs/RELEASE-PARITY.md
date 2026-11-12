@@ -29,6 +29,20 @@ worker returned HTTP 200 with no jobs due, and its scheduler remained active.
 Interactive attendance remains paused pending sender approval. The production
 sender and backend are pending separate configuration.
 
+## 13 November 2026 — Manual attendance email
+
+The manual Send action uses the existing Gmail SMTP configuration when
+interactive email is paused. Recipients receive a link to the dated attendance
+sheet and sign in to save their marks. The email carries the roster count and
+keeps child details on the dashboard. The daily schedule retains its existing
+interactive delivery gate.
+
+The forward migration `20261112213049_coaching_manual_gmail_delivery.sql`
+and the coaching worker use the same source for both targets. Activation is
+controlled per target by `private.coaching_settings.manual_email_enabled`.
+Production remains pending configuration. All 404 tests, the site build, 59
+assets and the coaching worker Deno checks passed before release.
+
 ## Public identity contract
 
 | Setting | Required value in both environments |

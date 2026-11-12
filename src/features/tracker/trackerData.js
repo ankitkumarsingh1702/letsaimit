@@ -149,7 +149,10 @@ export async function coachingEmailStatus(options, { send = false } = {}) {
       data.queued > data.pending || (!send && data.queued !== 0) ||
       (!data.emailEnabled && (data.pending || data.sent || data.failed))) throw problem(fallback);
   const { sessionDate, emailEnabled, queued, pending, sent, failed } = data;
-  return { sessionDate, emailEnabled, queued, pending, sent, failed };
+  const scheduledEnabled = data.scheduledEnabled === undefined ? emailEnabled : data.scheduledEnabled;
+  const deliveryMode = data.deliveryMode === undefined ? (emailEnabled ? 'interactive' : null) : data.deliveryMode;
+  if (typeof scheduledEnabled !== 'boolean' || (emailEnabled ? !['link', 'interactive'].includes(deliveryMode) : deliveryMode !== null)) throw problem(fallback);
+  return { sessionDate, emailEnabled, scheduledEnabled, deliveryMode, queued, pending, sent, failed };
 }
 
 export const ATTENDANCE_LABELS = { present: 'Present', absent: 'Absent', no_session: 'No session', unmarked: 'Not marked' };
