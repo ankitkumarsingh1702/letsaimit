@@ -252,6 +252,15 @@ export function AuthorizedAdmin({ auth }) {
     window.history.replaceState(null, "", url.pathname + url.search + url.hash);
   }, [hasLoaded, reviewIntent, rows]);
 
+  React.useEffect(() => {
+    if (view === "attendance") return;
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("view") !== "attendance") return;
+    url.searchParams.delete("view");
+    url.searchParams.delete("date");
+    window.history.replaceState(null, "", url.pathname + url.search + url.hash);
+  }, [view]);
+
   React.useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
   React.useEffect(() => {
     if (!toast) return;
