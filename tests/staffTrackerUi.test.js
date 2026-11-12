@@ -15,15 +15,17 @@ async function withStaffUi(snapshot, run) {
     enforce: "pre",
     load(id) { if (id.split("?")[0].endsWith("/src/features/tracker/useParentTracker.js")) return `export function useParentTracker() { return { ...${JSON.stringify(state)}, refresh() {} }; }`; },
   }] });
-  try { await run(await vite.ssrLoadModule("/src/features/tracker/StaffTracker.jsx")); }
+  try { await run(await vite.ssrLoadModule("/src/features/tracker/StaffTracker.jsx"), vite); }
   finally { await vite.close(); }
 }
 
 test("assigned non-admin coach sees scoped attendance controls and can also open parent workspace", () => withStaffUi({ isAdmin: false, emailEnabled: false, children: [child], attendance: [], feedback: [] }, async ({ CoachingWorkspace }) => {
   const html = renderToStaticMarkup(React.createElement(CoachingWorkspace, { auth }));
   assert.match(html, /aria-label="Coaching navigation"/);
-  assert.match(html, /href="\/parent\/"[^>]*>Parent dashboard/);
+  assert.match(html, /aria-label="Switch workspace from Coach"/);
+  assert.match(html, /href="\/parent\/"[^>]*>Parent<\/a>/);
   assert.match(html, /Attendance for Sample child/);
+  assert.match(html, /1 child · Assigned, approved enrolments only/);
   assert.match(html, /<option value="unmarked" selected="">Not marked<\/option>/);
   assert.match(html, /Not marked is not counted as absent/);
   assert.doesNotMatch(html, />Coach access<|href="\/admin\/"|Send attendance email/);
@@ -31,11 +33,40 @@ test("assigned non-admin coach sees scoped attendance controls and can also open
 }));
 
 test('admin email action waits for dispatch status instead of relying on the scheduled-email flag', () => withStaffUi({ isAdmin: true, emailEnabled: false, children: [child], attendance: [], feedback: [] }, async ({ CoachingWorkspace }) => {
-  const html = renderToStaticMarkup(React.createElement(CoachingWorkspace, { auth: { ...auth, phase: 'authorized' } }));
+  const html = renderToStaticMarkup(React.createElement(CoachingWorkspace, { auth: { ...auth, phase: 'authorized' }, embedded: true }));
   assert.match(html, /Checking email status/);
   assert.doesNotMatch(html, /Daily at 9 PM IST|Gmail sender setup/);
   assert.match(html, /<button[^>]* disabled=""[^>]*>Send attendance email<\/button>/);
 }));
+
+test("admin attendance opens inside Team Dashboard even before the register loads", () => withStaffUi(
+  { isAdmin: true, emailEnabled: false, children: [child, { ...child, registrationId: "c6fa700e-ce24-4b11-9d5c-7417d7724c01", childName: "Unassigned child", coachEmail: "" }], attendance: [], feedback: [] },
+  async (_, vite) => {
+    const { AuthorizedAdmin } = await vite.ssrLoadModule("/src/features/admin/AdminPage.jsx");
+    const originalWindow = Object.getOwnPropertyDescriptor(globalThis, "window");
+    Object.defineProperty(globalThis, "window", { configurable: true, value: {
+      location: new URL("https://uat.letsaimit.com/admin/?view=attendance&date=2026-11-01"),
+    } });
+    try {
+      const html = renderToStaticMarkup(React.createElement(AuthorizedAdmin, { auth: { ...auth, phase: "authorized" } }));
+      assert.match(html, /aria-label="Admin navigation"/);
+      assert.match(html, /aria-label="Switch workspace from Admin"/);
+      assert.match(html, /href="\/coach-dashboard\/"[^>]*>Coach<\/a>/);
+      assert.match(html, /aria-current="page"[^>]*><svg[^]*?<span>Attendance<\/span>/);
+      assert.match(html, /<h1 tabindex="-1">Attendance<\/h1>/);
+      assert.match(html, /type="date"[^>]*value="2026-11-01"/);
+      assert.match(html, /Attendance for Sample child/);
+      assert.match(html, /Attendance for Unassigned child/);
+      assert.match(html, /2 children · Approved enrolments only/);
+      assert.match(html, /Send attendance email/);
+      assert.match(html, /aria-label="Coaching tools"[^]*?Weekly feedback[^]*?Coach access/);
+      assert.doesNotMatch(html, /aria-label="Coaching navigation"|Loading saved requests/);
+    } finally {
+      if (originalWindow) Object.defineProperty(globalThis, "window", originalWindow);
+      else delete globalThis.window;
+    }
+  },
+));
 
 test("unloaded coaching state never claims attendance is saved or emails are enabled", () => withStaffUi(null, async ({ CoachingWorkspace }) => {
   const html = renderToStaticMarkup(React.createElement(CoachingWorkspace, { auth }));

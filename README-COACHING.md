@@ -2,13 +2,15 @@
 
 `/parent/` is a standalone parent workspace. Dashboard retains saved requests and
 fees; Tracker shows each child's recorded attendance and weekly feedback;
-Account retains the existing deletion flow. `/coach-dashboard/` is the staff
-workspace for attendance, manual feedback and admin-only coach assignments.
+Account retains the existing deletion flow. Admins open Attendance, Weekly
+feedback and Coach access from `/admin/?view=attendance`. `/coach-dashboard/`
+is the coach workspace for attendance and feedback on assigned children.
 
 One verified Google identity can use parent, coach and admin capabilities.
 Parents see only their current Auth UID's approved enrolments. Admins see the
 approved roster; coaches see only children currently assigned to their Google
-email after the assignment start date. Client navigation never grants access.
+email after the assignment start date. Trials and pending or declined
+enrolments stay in the Register. Client navigation never grants access.
 
 ## Saved records and interface
 
@@ -33,12 +35,19 @@ Forward migration `20261110220027_coaching_tracker_write_identity_lock.sql`
 serializes authenticated tracker writes with account deletion through the
 existing Auth identity lock. Parent/staff reads remain stable and read-only.
 
+Migration `20261112215334_default_coaching_assignment.sql` adds the private
+`coaching_settings.default_coach_email` setting. Configure it per target with
+Dhiraj’s Google sign-in address. New enrolments get a Register assignee and a
+tracker assignment when submitted. The tracker exposes the child only after
+approval. Existing rows and trial requests keep their assignments. Deleting the
+default coach’s account clears this setting along with existing assignments.
+
 Authenticated RPCs:
 
 | RPC | Result / permission |
 | --- | --- |
 | `list_my_tracker()` | Owned children, attendance, feedback and date range |
-| `list_staff_tracker(p_date)` | Current scoped roster, selected-day attendance, feedback, admin/scheduling flags |
+| `list_staff_tracker(p_date,p_scope)` | `admin` returns all eligible enrolments to verified admins. `coach` returns assigned eligible enrolments. The one-argument overload remains available to older clients. |
 | `set_coaching_assignment(...)` | Admin-only assignment receipt with new revision |
 | `save_coaching_attendance(p_session_date,p_rows)` | Atomic revision-checked rows; `{ok,attendance}` |
 | `save_coaching_feedback(...)` | Manual saved weekly feedback receipt |
@@ -66,7 +75,7 @@ or date from the browser. It checks the current Google actor and admin access,
 then wakes the same worker after commit. The daily recipient/date key prevents
 duplicates at 9 PM or on repeated clicks. With manual send enabled and interactive
 mail paused, the worker uses the existing Gmail SMTP account. The email links
-to the dated attendance sheet, where admins sign in and record attendance.
+to `/admin/?view=attendance&date=YYYY-MM-DD`, where admins sign in and record attendance.
 `get_coaching_attendance_email_status()` reports manual availability, scheduled
 availability, the email format and today's aggregate counts to admins. A sent
 count means the mail transport accepted the message.

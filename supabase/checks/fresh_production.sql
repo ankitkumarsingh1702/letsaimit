@@ -20,14 +20,15 @@ declare production_ref text:=current_setting('letsaimit.production_ref',true);
     'public.ingest_billing_webhook(text,text,text,text,text)',
     'public.prepare_account_deletion(uuid,text,boolean)','public.claim_account_deletions(uuid,integer)',
     'public.finish_account_deletion(uuid,uuid,boolean,text)','public.get_account_deletion_status(uuid)',
-    'public.enqueue_coaching_attendance()','public.claim_coaching_email()','public.prepare_coaching_email(uuid,uuid)',
+    'public.enqueue_coaching_attendance()','public.claim_coaching_email()','public.claim_coaching_email_for_modes(text[])','public.prepare_coaching_email(uuid,uuid)',
     'public.set_coaching_email_token(uuid,uuid,text)','public.finish_coaching_email(uuid,uuid,text,text)',
     'public.read_coaching_email_attendance(uuid,text)','public.save_coaching_email_attendance(uuid,text,jsonb)'];
   authenticated_rpcs text[]:=array['public.is_admin()','public.submit_registration(jsonb)','public.list_my_registrations()',
     'public.review_registration(uuid,text,bigint)','public.review_registration(uuid,text,bigint,integer)',
     'public.set_monthly_coaching_fee(uuid,integer,bigint)','public.cancel_billing_account(uuid,bigint)',
     'public.list_my_billing()','public.list_admin_billing()',
-    'public.list_my_tracker()','public.list_staff_tracker(date)','public.set_coaching_assignment(uuid,text,integer[],date,bigint)',
+    'public.list_my_tracker()','public.list_staff_tracker(date)','public.list_staff_tracker(date,text)','public.has_coaching_assignments()',
+    'public.set_coaching_assignment(uuid,text,integer[],date,bigint)',
     'public.save_coaching_attendance(date,jsonb)','public.save_coaching_feedback(uuid,date,text,text,bigint)',
     'public.get_coaching_attendance_email_status()','public.send_coaching_attendance_now()'];
 begin
@@ -58,7 +59,8 @@ begin
     or (select count(*) from private.billing_settings)<>1
     or (select enabled from private.billing_settings where id) is distinct from false
     or (select count(*) from private.coaching_settings)<>1
-    or (select email_enabled from private.coaching_settings where id) is distinct from false then
+    or (select email_enabled from private.coaching_settings where id) is distinct from false
+    or (select manual_email_enabled from private.coaching_settings where id) is distinct from false then
     raise exception 'FRESH_BACKEND_DISPATCH_MUST_STAY_DISABLED';
   end if;
   if has_any_column_privilege('anon','public.registrations','SELECT,INSERT,UPDATE')
@@ -92,7 +94,8 @@ begin
     raise exception 'FRESH_BACKEND_PRIVATE_FUNCTION_GRANT';
   end if;
   foreach name in array array['private.require_google_user()','public.list_my_registrations()','public.list_my_billing()',
-    'public.list_my_tracker()','public.list_staff_tracker(date)','public.read_coaching_email_attendance(uuid,text)',
+    'public.list_my_tracker()','public.list_staff_tracker(date)','public.list_staff_tracker(date,text)','public.has_coaching_assignments()',
+    'public.read_coaching_email_attendance(uuid,text)',
     'public.get_coaching_attendance_email_status()'] loop
     routine:=to_regprocedure(name);
     if routine is null or (select provolatile from pg_proc where oid=routine)<>'s' then raise exception 'FRESH_BACKEND_READ_RPC_VOLATILITY: %',name;end if;
@@ -142,8 +145,8 @@ select ns.nspname as schema,p.proname,pg_get_function_identity_arguments(p.oid) 
       'enqueue_admin_notification_digests','claim_admin_notification','prepare_admin_notification','finish_admin_notification',
       'enqueue_billing_work','claim_billing_job','prepare_billing_job','finish_billing_job','save_billing_provider_snapshot','ingest_billing_webhook',
       'prepare_account_deletion','claim_account_deletions','finish_account_deletion','get_account_deletion_status',
-      'list_my_tracker','list_staff_tracker','set_coaching_assignment','save_coaching_attendance','save_coaching_feedback',
-      'enqueue_coaching_attendance','claim_coaching_email','prepare_coaching_email','set_coaching_email_token','finish_coaching_email',
+      'list_my_tracker','list_staff_tracker','has_coaching_assignments','set_coaching_assignment','save_coaching_attendance','save_coaching_feedback',
+      'enqueue_coaching_attendance','claim_coaching_email','claim_coaching_email_for_modes','prepare_coaching_email','set_coaching_email_token','finish_coaching_email',
       'read_coaching_email_attendance','save_coaching_email_attendance','get_coaching_attendance_email_status','send_coaching_attendance_now'))
   order by ns.nspname,p.proname,arguments;
 select ns.nspname as schema,c.relname,p.polname,p.polcmd,p.polroles,

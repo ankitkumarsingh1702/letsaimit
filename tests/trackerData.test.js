@@ -63,6 +63,21 @@ test('staff snapshots cannot invent admin capability and use the selected date',
   await assert.rejects(fetchTracker({ ...options({ rpc: async () => ({ data: { ...raw, sessionDate: '2026-11-09' } }) }), staff: true, date: '2026-11-10' }), /selected attendance date/);
 });
 
+test('staff workspaces request explicit scope and reject snapshots for a different role', async () => {
+  const date = '2026-11-10';
+  const calls = [];
+  const raw = { children: [], attendance: [], feedback: [], sessionDate: date, isAdmin: false, emailEnabled: false };
+  const client = { rpc: async (...args) => { calls.push(args); return { data: raw }; } };
+  const staff = { ...options(client), staff: true, date };
+  assert.equal((await fetchTracker({ ...staff, scope: 'coach' })).isAdmin, false);
+  assert.deepEqual(calls[0], ['list_staff_tracker', { p_date: date, p_scope: 'coach' }]);
+  await assert.rejects(fetchTracker({ ...staff, scope: 'admin' }), { code: 'access_denied' });
+  assert.deepEqual(calls[1], ['list_staff_tracker', { p_date: date, p_scope: 'admin' }]);
+  raw.isAdmin = true;
+  await assert.rejects(fetchTracker({ ...staff, scope: 'coach' }), { code: 'access_denied' });
+  assert.equal((await fetchTracker({ ...staff, scope: 'admin' })).isAdmin, true);
+});
+
 test('atomic attendance saves only the explicit draft and requires a confirmed receipt', async () => {
   const rows = [{ registrationId: child.registrationId, status: 'present', revision: 0, private: 'drop' }];
   let request;

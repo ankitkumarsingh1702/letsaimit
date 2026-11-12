@@ -12,8 +12,13 @@ test('attendance email has an AMP form with local bulk choices, per-child status
   assert.equal(mail.subject,'LetsAimIt: Attendance · 11 Nov 2026');
   assert.match(mail.amp,/<html amp4email/);assert.match(mail.amp,/amp-form-0\.1\.js/);assert.match(mail.amp,/amp-bind-0\.1\.js/);
   assert.match(mail.amp,/Mark all present/);assert.match(mail.amp,/No session for all/);assert.match(mail.amp,/Save attendance/);
-  assert.equal([...mail.amp.matchAll(/name="status_/g)].length,2);assert.equal([...mail.amp.matchAll(/name="revision_/g)].length,2);
-  assert.match(mail.amp,/<option value="" \[selected\]="[^"]+" selected>Not marked/);assert.match(mail.amp,/<option value="absent" \[selected\]="[^"]+" selected>Absent/);
+  assert.equal([...mail.amp.matchAll(/type="radio" name="status_/g)].length,6);assert.equal([...mail.amp.matchAll(/name="revision_/g)].length,2);
+  assert.equal([...mail.amp.matchAll(/\]="ticket.used" checked required/g)].length,1);
+  assert.match(mail.amp,/<input type="radio" name="status_[^"]+" value="absent"[^>]+ checked required><span>✕ Absent/);
+  assert.match(mail.amp,/<span>✓ Present<\/span>/);
+  assert.match(mail.amp,/<span>No session<\/span>/);
+  assert.match(mail.amp,/<td id="child-0">Child &lt;one&gt;<\/td>/);
+  assert.match(mail.amp,/role="radiogroup" aria-labelledby="child-0"/);
   assert.match(mail.amp,/<input type="hidden" name="token"/);assert.match(mail.amp,/<input type="hidden" name="action" value="save"/);
   assert.match(mail.amp,/'present'/);assert.match(mail.amp,/'no_session'/);
   assert.match(mail.amp,/submit-success:AMP\.setState\(\{ticket:\{used:true\}\}\)/);

@@ -17,6 +17,7 @@ body[data-page="parent"] #main { min-height: 100dvh; padding: 0; }
 .parent-dashboard-topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 69px; }
 .parent-dashboard-brand { display: flex; align-items: center; min-height: 44px; }
 .parent-dashboard-brand img { width: 90px; height: auto; }
+.parent-dashboard-controls { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .parent-dashboard-user { position: relative; min-width: 0; }
 .parent-dashboard-user > summary { display: flex; align-items: center; gap: 8px; min-height: 44px; color: var(--ink); cursor: pointer; list-style: none; }
 .parent-dashboard-user > summary::-webkit-details-marker { display: none; }
@@ -123,6 +124,7 @@ body[data-page="parent"] #main { min-height: 100dvh; padding: 0; }
   .parent-app .billing-parent .billing-table td:first-child .billing-text-button { font-weight: 700; font-size: 13px; }
 }
 @media (max-width: 400px) {
+  .parent-dashboard-user-name { max-width: 24vw; }
   .parent-dashboard-nav > a { padding-inline: 2px; font-size: 12px; }
   .parent-dashboard-nav > a .parent-dashboard-icon { display: none; }
   .parent-requests-heading { gap: 6px; }

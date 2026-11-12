@@ -80,13 +80,17 @@ function rpcError(error, fallback) {
 }
 
 export async function fetchTracker(options) {
-  const { client, staff = false, date } = options;
+  const { client, staff = false, date, scope } = options;
   if (staff && !validTrackerDate(date)) throw problem('Choose a valid session date.');
+  if (scope !== undefined && (!staff || !['admin', 'coach'].includes(scope))) throw problem('Choose a tracker workspace.');
   await verifyActor(options);
-  const { data, error } = staff ? await client.rpc('list_staff_tracker', { p_date: date }) : await client.rpc('list_my_tracker');
+  const { data, error } = staff
+    ? await client.rpc('list_staff_tracker', scope ? { p_date: date, p_scope: scope } : { p_date: date })
+    : await client.rpc('list_my_tracker');
   if (error) throw rpcError(error, 'Tracker could not load. Please retry.');
   await verifyActor(options);
   if (staff && (data?.sessionDate !== date || !Array.isArray(data.attendance) || data.attendance.some(row => row.sessionDate !== date))) throw problem('The selected attendance date could not be confirmed.');
+  if (scope && data.isAdmin !== (scope === 'admin')) throw problem('Tracker access is unavailable for this workspace.', 'access_denied');
   return trackerSnapshot(data, { staff });
 }
 

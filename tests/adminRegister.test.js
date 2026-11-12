@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { mergeSavedRegistrations, normalizeRegistration, safeCsvValue } from "../src/features/admin/adminData.js";
+import { buildRegisterCsv, defaultFilters, filterRows, paginateRows, registerTables } from "../src/features/admin/admin-model.js";
 
 test("Supabase registrations retain canonical contact fields and immutable consent metadata", () => {
   const record = {
@@ -51,4 +52,53 @@ test("an in-flight list response cannot roll back a newer saved row revision", (
   assert.deepEqual(mergeSavedRegistrations([saved, removed], [newRow, late]), [newRow, saved]);
   const newer = { ...saved, revision: 3, notes: "Another admin update" };
   assert.deepEqual(mergeSavedRegistrations([saved], [newer]), [newer]);
+});
+
+test("the register tables partition saved rows and export the active filter beyond its current page", () => {
+  const rows = [
+    { id: "trial", formType: "trial", parentName: "Trial parent", status: "new" },
+    { id: "enrol", formType: "enrol", parentName: "Registration parent", status: "new" },
+    { id: "old", formType: "enquiry", parentName: "Older parent", status: "new" },
+    { id: "closed", formType: "enrol", parentName: "Closed parent", status: "closed" },
+  ];
+  const tables = registerTables(rows);
+  assert.deepEqual(tables.trial.map(row => row.id), ["trial"]);
+  assert.deepEqual(tables.enrol.map(row => row.id), ["enrol", "old", "closed"]);
+  const filters = { status: "new", pageSize: 1 };
+  assert.equal(paginateRows(filterRows(tables.enrol, filters), 1, 1).rows.length, 1);
+  const csv = buildRegisterCsv(tables.enrol, filters);
+  assert.equal(csv.rowCount, 2);
+  assert.match(csv.text, /Registration parent/);
+  assert.match(csv.text, /Older parent/);
+  assert.doesNotMatch(csv.text, /Trial parent|Closed parent/);
+  assert.equal(buildRegisterCsv(rows).rowCount, 4);
+});
+
+test("each register view renders its own accessible table and saved detail buttons", async () => {
+  const [{ createServer }, React, { renderToStaticMarkup }] = await Promise.all([import("vite"), import("react"), import("react-dom/server")]);
+  const vite = await createServer({ server: { middlewareMode: true, hmr: false }, appType: "custom" });
+  try {
+    const { Register } = await vite.ssrLoadModule("/src/features/admin/AdminPage.jsx");
+    const filters = defaultFilters();
+    const tables = registerTables([
+      { id: "trial", formType: "trial", parentName: "Trial parent", status: "new", submittedAt: "2026-11-10T00:00:00Z" },
+      { id: "enrol", formType: "enrol", parentName: "Registration parent", status: "new", submittedAt: "2026-11-10T00:00:00Z" },
+    ]);
+    const render = table => renderToStaticMarkup(React.createElement(Register, {
+      table, tableCounts: { enrol: 1, trial: 1 }, rows: tables[table], filtered: tables[table],
+      pagination: paginateRows(tables[table], 1, 10), filters, datePreset: "all", assignees: [], canExport: true,
+    }));
+    const enrol = render("enrol");
+    assert.match(enrol, /aria-pressed="true">Registrations/);
+    assert.match(enrol, /aria-label="Registrations table/);
+    assert.match(enrol, /Open Registration parent details/);
+    assert.doesNotMatch(enrol, /Open Trial parent details|>Type<|Clear filters/);
+    const trial = render("trial");
+    assert.match(trial, /aria-pressed="true">Free trials/);
+    assert.match(trial, /aria-label="Free trials table/);
+    assert.match(trial, /Open Trial parent details/);
+    assert.doesNotMatch(trial, /Open Registration parent details|>Type<|Clear filters/);
+  } finally {
+    await vite.close();
+  }
 });

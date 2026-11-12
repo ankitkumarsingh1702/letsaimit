@@ -2,6 +2,7 @@ import React from 'react';
 import { useAdminAuth } from '../../context/AdminAuth.jsx';
 import SignIn from '../../pages/SignIn.jsx';
 import ProfileAvatar from '../../components/ProfileAvatar.jsx';
+import WorkspaceSwitch from '../../components/WorkspaceSwitch.jsx';
 import { validateAuthReturnTarget } from '../../lib/authReturn.js';
 import { mediaProps } from '../../lib/media.js';
 import { useParentTracker } from './useParentTracker.js';
@@ -99,17 +100,18 @@ function initialAttendanceDate() {
   const today = todayIST();
   if (typeof window === 'undefined') return today;
   const target = validateAuthReturnTarget(window.location.pathname + window.location.search);
-  const date = target?.startsWith('/coach-dashboard/?date=') ? target.slice('/coach-dashboard/?date='.length) : null;
+  const date = target ? new URL(target, window.location.origin).searchParams.get('date') : null;
   return date && date <= today ? date : today;
 }
 
-export function CoachingWorkspace({ auth }) {
+export function CoachingWorkspace({ auth, embedded = false, headingRef, navigationRef }) {
   const [date, setDate] = React.useState(initialAttendanceDate), [view, setView] = React.useState('attendance');
   const [weekStart, setWeekStart] = React.useState(() => monday(todayIST()));
   const [childId, setChildId] = React.useState(''), [query, setQuery] = React.useState('');
   const [drafts, setDrafts] = React.useState({}), [busy, setBusy] = React.useState(false), [notice, setNotice] = React.useState(''), [saveError, setSaveError] = React.useState('');
-  const state = useParentTracker(auth, { staff: true, date });
+  const state = useParentTracker(auth, { staff: true, date, scope: embedded ? 'admin' : 'coach' });
   const children = state.snapshot?.children || [], attendance = state.snapshot?.attendance || [], feedback = state.snapshot?.feedback || [];
+  const adminView = embedded && state.snapshot?.isAdmin;
   const selectedChild = children.find(child => child.registrationId === childId) || children[0];
   const filtered = children.filter(child => !query.trim() || [child.childName, child.sport, child.community].some(value => value.toLowerCase().includes(query.trim().toLowerCase())));
   const saved = new Map(attendance.map(row => [row.registrationId, row]));
@@ -123,12 +125,24 @@ export function CoachingWorkspace({ auth }) {
     window.addEventListener('beforeunload', warn);
     return () => window.removeEventListener('beforeunload', warn);
   }, []);
-  const activeView = coachingView(view, state.snapshot?.isAdmin);
+  const activeView = coachingView(view, adminView);
   function mayLeaveEditor() {
     if (editor.current.busy) { setNotice('Wait for the save to finish.'); return false; }
     return mayLeaveTrackerEditor(editor.current, () => window.confirm('Discard unsaved changes?'));
   }
-  function chooseView(next) { if (next !== activeView && mayLeaveEditor()) { setView(next); setNotice(''); } }
+  function chooseView(next) {
+    if (next === activeView || !mayLeaveEditor()) return;
+    setView(next);
+    setNotice('');
+  }
+  React.useImperativeHandle(navigationRef, () => ({
+    mayLeave() {
+      if (busy) { setNotice('Wait for the save to finish.'); return false; }
+      if (!mayLeaveEditor()) return false;
+      return !Object.keys(drafts).length || window.confirm('Discard unsaved attendance?');
+    },
+    showAttendance: () => chooseView('attendance'),
+  }));
   function chooseChild(next) { if (next !== selectedChild?.registrationId && mayLeaveEditor()) { setChildId(next); setNotice(''); } }
   function chooseWeek(next) { if (next !== weekStart && mayLeaveEditor()) { setWeekStart(next); setNotice(''); } }
   function mark(ids, status) {
@@ -158,23 +172,41 @@ export function CoachingWorkspace({ auth }) {
   }
   async function onFeedbackSaved() { setNotice('Feedback published.'); changed(); await state.refresh(); }
   async function onAssignmentSaved() { setNotice('Coach access saved.'); changed(); await state.refresh(); }
-  const nav = [['attendance', 'Attendance'], ['feedback', 'Weekly feedback'], ...(state.snapshot?.isAdmin ? [['coaches', 'Coach access']] : [])];
-  return <div className="adm-app coaching-app"><aside className="adm-sidebar"><a className="adm-brand" href="/" aria-label="LetsAimIt home"><img {...mediaProps('logo.png', '110px')} alt="LetsAimIt" /></a><p className="adm-sidebar-label">COACHING</p><nav className="adm-nav" aria-label="Coaching navigation">{nav.map(([key, label]) => <button type="button" key={key} aria-current={activeView === key ? 'page' : undefined} onClick={() => chooseView(key)}>{label}</button>)}</nav><div className="adm-utilities">{auth.phase === 'authorized' && <a href="/admin/">Team dashboard</a>}<a href="/parent/">Parent dashboard</a><a href="/">Website</a><button type="button" onClick={() => { void auth.signOut(); }}>Sign out</button></div></aside>
-    <div className="adm-workspace"><header className="adm-topbar"><span>Coaching tracker</span><div className="adm-user"><ProfileAvatar name={auth.user.displayName || auth.user.email} src={auth.user.avatarUrl} /><span><strong>{auth.user.displayName || auth.user.email}</strong><span>{auth.user.email}</span></span></div></header>
-      <section className="adm-content"><div className="adm-page-heading"><div><h1>{nav.find(([key]) => key === activeView)?.[1] || 'Attendance'}</h1><p className="adm-date">{state.lastSynced ? `Updated ${stamp(state.lastSynced)} IST` : 'Loading tracker'}</p></div><button type="button" className="adm-button adm-button-outline" onClick={state.refresh} disabled={state.loading}>Refresh</button></div>
+  const nav = [['attendance', 'Attendance'], ['feedback', 'Weekly feedback'], ...(adminView ? [['coaches', 'Coach access']] : [])];
+  const navigation = nav.map(([key, label]) => <button
+    type="button" key={key}
+    aria-pressed={embedded ? activeView === key : undefined}
+    aria-current={!embedded && activeView === key ? 'page' : undefined}
+    onClick={() => chooseView(key)}>{label}</button>);
+  const content = <section className={embedded ? undefined : 'adm-content'}>
+        <div className="adm-page-heading">
+          <div><h1 ref={headingRef} tabIndex={embedded ? -1 : undefined}>{nav.find(([key]) => key === activeView)?.[1] || 'Attendance'}</h1><p className="adm-date">{state.lastSynced ? `Updated ${stamp(state.lastSynced)} IST` : 'Loading tracker'}</p></div>
+          <button type="button" className="adm-button adm-button-outline" onClick={state.refresh} disabled={state.loading}>Refresh</button>
+        </div>
+        {embedded && <nav className="adm-type-tabs coaching-team-tabs" aria-label="Coaching tools">{navigation}</nav>}
         {state.error && <p className="coaching-error" role="alert">{state.error}{state.snapshot ? ' Showing the last saved values.' : ''}</p>}
         {notice && <p className="coaching-notice" role="status">{notice}</p>}
         {!state.snapshot ? <div className="adm-card adm-empty" role="status"><h2>{state.loading ? 'Loading coaching records…' : 'Coaching records unavailable'}</h2><p>Access is limited to admins and assigned coaches.</p></div> : <>
-          {activeView === 'attendance' ? <>{state.snapshot.isAdmin && <AttendanceEmail auth={auth} date={date} hasChildren={children.length > 0} />}<div className="coaching-toolbar"><label>Session date<input type="date" required max={todayIST()} value={date} onChange={event => chooseDate(event.target.value)} disabled={busy} /></label><label className="coaching-search">Find child<input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Name, sport or community" /></label><div className="coaching-actions"><button className="adm-button adm-button-outline" type="button" onClick={() => mark(filtered.map(child => child.registrationId), 'present')} disabled={busy || !filtered.length}>Mark shown present</button><button className="adm-button adm-button-outline" type="button" onClick={() => mark(filtered.map(child => child.registrationId), 'no_session')} disabled={busy || !filtered.length}>No session</button></div></div>
-            <div className="adm-card coaching-table-wrap" role="region" aria-label="Attendance register, scroll for all columns" tabIndex={0}><table className="adm-table coaching-table"><thead><tr><th>Child</th><th>Sport</th><th>Community</th><th>Attendance</th><th>Marked by</th><th>Updated · IST</th></tr></thead><tbody>{filtered.map(child => { const row = saved.get(child.registrationId), draft = drafts[child.registrationId]; return <tr key={child.registrationId}><td>{child.childName}</td><td>{child.sport || '—'}</td><td>{child.community || '—'}</td><td><select aria-label={`Attendance for ${child.childName}`} value={draft?.status || row?.status || 'unmarked'} disabled={busy} onChange={event => mark([child.registrationId], event.target.value)}><option value="unmarked" disabled={Boolean(row)}>Not marked</option>{Object.entries(ATTENDANCE_LABELS).filter(([key]) => key !== 'unmarked').map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select>{draft && <span className="coaching-draft">Unsaved</span>}</td><td>{row?.coachName || '—'}</td><td>{row ? stamp(row.updatedAt) : '—'}</td></tr>; })}{!filtered.length && <tr><td colSpan={6} className="coaching-empty">{query ? 'No matching children' : 'No approved children'}</td></tr>}</tbody></table></div>
+          {activeView === 'attendance' ? <>
+            {adminView && <AttendanceEmail auth={auth} date={date} hasChildren={children.length > 0} />}
+            <p className="adm-date coaching-roster-summary" id="attendance-roster-summary">{children.length} {children.length === 1 ? 'child' : 'children'} · {embedded ? 'Approved enrolments only' : 'Assigned, approved enrolments only'}</p>
+            <div className="coaching-toolbar"><label>Session date<input type="date" required max={todayIST()} value={date} onChange={event => chooseDate(event.target.value)} disabled={busy} /></label><label className="coaching-search">Find child<input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Name, sport or community" /></label><div className="coaching-actions"><button className="adm-button adm-button-outline" type="button" onClick={() => mark(filtered.map(child => child.registrationId), 'present')} disabled={busy || !filtered.length}>Mark shown present</button><button className="adm-button adm-button-outline" type="button" onClick={() => mark(filtered.map(child => child.registrationId), 'no_session')} disabled={busy || !filtered.length}>No session</button></div></div>
+            <div className="adm-card coaching-table-wrap" role="region" aria-label="Attendance register, scroll for all columns" aria-describedby="attendance-roster-summary" tabIndex={0}><table className="adm-table coaching-table"><thead><tr><th>Child</th><th>Sport</th><th>Community</th><th>Attendance</th><th>Marked by</th><th>Updated · IST</th></tr></thead><tbody>{filtered.map(child => { const row = saved.get(child.registrationId), draft = drafts[child.registrationId]; return <tr key={child.registrationId}><td>{child.childName}</td><td>{child.sport || '—'}</td><td>{child.community || '—'}</td><td><select aria-label={`Attendance for ${child.childName}`} value={draft?.status || row?.status || 'unmarked'} disabled={busy} onChange={event => mark([child.registrationId], event.target.value)}><option value="unmarked" disabled={Boolean(row)}>Not marked</option>{Object.entries(ATTENDANCE_LABELS).filter(([key]) => key !== 'unmarked').map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select>{draft && <span className="coaching-draft">Unsaved</span>}</td><td>{row?.coachName || '—'}</td><td>{row ? stamp(row.updatedAt) : '—'}</td></tr>; })}{!filtered.length && <tr><td colSpan={6} className="coaching-empty">{query.trim() ? 'No matching children' : embedded ? 'No approved children' : 'No assigned children'}</td></tr>}</tbody></table></div>
             <div className="coaching-savebar"><p>{Object.keys(drafts).length ? `${Object.keys(drafts).length} unsaved` : 'Not marked is not counted as absent.'}</p><div className="coaching-actions"><button type="button" className="adm-button adm-button-outline" onClick={() => { setDrafts({}); setSaveError(''); void state.refresh(); }} disabled={busy}>Load latest</button><button type="button" className="adm-button adm-button-dark" onClick={submitAttendance} disabled={busy || !Object.keys(drafts).length}>{busy ? 'Saving…' : 'Save attendance'}</button></div></div>{saveError && <p className="coaching-error" role="alert">{saveError}</p>}
             </> : <>
               <div className="coaching-toolbar"><label>Child<select value={selectedChild?.registrationId || ''} onChange={event => chooseChild(event.target.value)}>{children.map(child => <option key={child.registrationId} value={child.registrationId}>{child.childName} · {child.sport}</option>)}</select></label>{activeView === 'feedback' && <label>Week starts Monday<input type="date" value={weekStart} max={todayIST()} required onChange={event => chooseWeek(event.target.value)} /></label>}</div>
-              {selectedChild ? activeView === 'feedback' ? <FeedbackEditor key={`${selectedChild.registrationId}:${weekStart}`} child={selectedChild} weekStart={weekStart} saved={feedback.find(row => row.registrationId === selectedChild.registrationId && row.weekStart === weekStart)} auth={auth} onSaved={onFeedbackSaved} onDraftState={onDraftState} /> : state.snapshot.isAdmin ? <AssignmentEditor key={selectedChild.registrationId} child={selectedChild} auth={auth} onSaved={onAssignmentSaved} onDraftState={onDraftState} /> : null : <p className="coaching-empty">No approved children</p>}
+              {selectedChild ? activeView === 'feedback' ? <FeedbackEditor key={`${selectedChild.registrationId}:${weekStart}`} child={selectedChild} weekStart={weekStart} saved={feedback.find(row => row.registrationId === selectedChild.registrationId && row.weekStart === weekStart)} auth={auth} onSaved={onFeedbackSaved} onDraftState={onDraftState} /> : adminView ? <AssignmentEditor key={selectedChild.registrationId} child={selectedChild} auth={auth} onSaved={onAssignmentSaved} onDraftState={onDraftState} /> : null : <p className="coaching-empty">{embedded ? 'No approved children' : 'No assigned children'}</p>}
               {activeView === 'feedback' && <div className="adm-card coaching-table-wrap"><table className="adm-table coaching-table"><caption>Published feedback · last 52 weeks</caption><thead><tr><th>Child</th><th>Week</th><th>Weekly update</th><th>Next step</th><th>Coach</th></tr></thead><tbody>{feedback.filter(row => row.registrationId === selectedChild?.registrationId).map(row => <tr key={row.id}><td>{selectedChild?.childName}</td><td>{row.weekStart}</td><td title={row.summary}>{row.summary}</td><td title={row.nextStep}>{row.nextStep || '—'}</td><td>{row.coachName || '—'}</td></tr>)}</tbody></table></div>}
             </>}
         </>}
-      </section>
+  </section>;
+  if (embedded) return content;
+
+  return <div className="adm-app coaching-app">
+    <aside className="adm-sidebar"><a className="adm-brand" href="/" aria-label="LetsAimIt home"><img {...mediaProps('logo.png', '110px')} alt="LetsAimIt" /></a><p className="adm-sidebar-label">COACHING</p><nav className="adm-nav" aria-label="Coaching navigation">{navigation}</nav><div className="adm-utilities"><a href="/">Website</a><button type="button" onClick={() => { void auth.signOut(); }}>Sign out</button></div></aside>
+    <div className="adm-workspace">
+      <header className="adm-topbar"><WorkspaceSwitch current="coach" canAdmin={auth.phase === 'authorized'} /><div className="adm-user"><ProfileAvatar name={auth.user.displayName || auth.user.email} src={auth.user.avatarUrl} /><span><strong>{auth.user.displayName || auth.user.email}</strong><span>{auth.user.email}</span></span></div></header>
+      {content}
     </div>
   </div>;
 }

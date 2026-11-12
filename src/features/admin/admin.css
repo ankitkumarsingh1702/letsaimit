@@ -71,8 +71,9 @@ body[data-page="admin"] #main { min-height: 100dvh; padding: 0; }
 .adm-register-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
 .adm-toolbar-actions { display: flex; align-items: center; gap: 8px; }
 .adm-type-tabs { display: inline-flex; gap: 2px; padding: 2px; border: 1px solid #e3e7e4; border-radius: 5px; background: #f7f9f7; }
-.adm-type-tabs button { min-height: 27px; padding: 3px 11px; border: 1px solid transparent; border-radius: 3px; background: transparent; color: #68746d; font-size: 11px; white-space: nowrap; }
+.adm-type-tabs button { display: inline-flex; align-items: center; gap: 6px; min-height: 27px; padding: 3px 11px; border: 1px solid transparent; border-radius: 3px; background: transparent; color: #68746d; font-size: 11px; white-space: nowrap; }
 .adm-type-tabs button[aria-pressed="true"] { border-color: #e0e5e0; background: #fff; color: #47634f; font-weight: 500; }
+.adm-type-count { font-size: 10px; font-variant-numeric: tabular-nums; }
 .adm-register-subhead { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 25px; margin-bottom: 7px; }
 .adm-register-subhead > p { display: flex; align-items: center; gap: 10px; color: #68746d; font-size: 11px; }
 .adm-register-subhead .adm-text-button { min-height: 24px; font-size: 10px; }
@@ -92,7 +93,7 @@ body[data-page="admin"] #main { min-height: 100dvh; padding: 0; }
 .adm-table-wrap:focus-visible { outline-offset: -2px; }
 .adm-register-card > .adm-table-wrap { max-height: 72dvh; }
 .adm-table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; text-align: left; background: #fff; }
-.adm-register-table { min-width: 1710px; }
+.adm-register-table { min-width: 1618px; }
 .adm-col-review { width: 120px; }
 .adm-table th { position: sticky; top: 0; z-index: 2; height: 33px; padding: 7px 11px; border-bottom: 1px solid #dfe5e0; background: #f8faf8; color: #68746d; font-size: 11px; line-height: 18px; font-weight: 500; white-space: nowrap; }
 .adm-table td { height: 38px; padding: 6px 11px; border-bottom: 1px solid #edf0ed; border-right: 1px solid #f3f5f3; color: #506055; background: #fff; font-size: 12px; line-height: 24px; white-space: nowrap; }
@@ -109,7 +110,7 @@ body[data-page="admin"] #main { min-height: 100dvh; padding: 0; }
 .adm-parent-button:hover { color: var(--green); text-decoration: underline; text-underline-offset: 3px; }
 .adm-numeric { font-variant-numeric: tabular-nums; }
 .adm-unassigned { color: #68746d; }
-.adm-col-parent { width: 158px; }.adm-col-child { width: 132px; }.adm-col-type { width: 92px; }.adm-col-age { width: 128px; }.adm-col-sport { width: 102px; }.adm-col-community { width: 176px; }.adm-col-email { width: 204px; }.adm-col-phone { width: 140px; }.adm-col-status { width: 108px; }.adm-col-assigned { width: 172px; }.adm-col-received { width: 178px; }
+.adm-col-parent { width: 158px; }.adm-col-child { width: 132px; }.adm-col-age { width: 128px; }.adm-col-sport { width: 102px; }.adm-col-community { width: 176px; }.adm-col-email { width: 204px; }.adm-col-phone { width: 140px; }.adm-col-status { width: 108px; }.adm-col-assigned { width: 172px; }.adm-col-received { width: 178px; }
 .adm-status { display: inline-flex; align-items: center; gap: 5px; max-width: 100%; padding: 1px 6px; border: 1px solid #e4e9e2; border-radius: 4px; background: #f5f7f3; color: #71806b; font-size: 10px; font-weight: 500; line-height: 17px; white-space: nowrap; }
 .adm-status > span { width: 4px; height: 4px; flex: 0 0 auto; border-radius: 50%; background: currentColor; }
 .adm-status-new { border-color: #eee6d3; background: #fbf8f0; color: #8a6d31; }.adm-status-contacted { border-color: #e3e8e0; background: #f4f6f1; color: #66745e; }.adm-status-confirmed { border-color: #dce9dc; background: #f0f7ee; color: #4f7246; }.adm-status-closed { border-color: #e5e8e5; background: #f5f6f5; color: #68746d; }
@@ -165,3 +166,8 @@ body[data-page="admin"] #main { min-height: 100dvh; padding: 0; }
 @media (max-width: 760px) { .adm-button, .adm-field input, .adm-field select { min-height: 36px; }.adm-nav button, .adm-type-tabs button { min-height: 34px; }.adm-icon-button { min-width: 32px; min-height: 32px; }.adm-mobile-tools > summary { width: 36px; height: 36px; }.adm-parent-button { min-height: 28px; }.adm-pagination select { min-height: 32px; }.adm-app input, .adm-app select { font-size: 16px; } }
 @media (max-width: 420px) { .adm-nav :is(button, a) { padding-inline: 7px; }.adm-content { padding-inline: 11px; }.adm-topbar { padding-inline: 11px; }.adm-page-actions > .adm-field { min-width: 100px; }.adm-type-tabs button { padding-inline: 8px; }.adm-toolbar-actions { gap: 5px; }.adm-button { padding-inline: 8px; font-size: 11px; }.adm-filter-panel { position: fixed; top: 150px; right: 12px; max-height: calc(100dvh - 175px); overflow-y: auto; }.adm-filter-grid { gap: 10px; }.adm-pagination { flex-wrap: wrap; gap: 5px; }.adm-pagination > div { margin-left: auto; }.adm-register-subhead { flex-wrap: wrap; gap: 0; }.adm-invite-form { padding: 0 12px 13px; gap: 9px; }.adm-team-note { padding-inline: 12px; }.adm-card-heading { padding-inline: 12px; } }
 @media (prefers-reduced-motion: reduce) { .adm-app *, .adm-app *::before, .adm-app *::after { scroll-behavior: auto; transition: none; } }
+
+@media (max-width: 380px) {
+  .adm-topbar-right { gap: 7px; }
+  .adm-topbar-right .adm-live-state { gap: 0; font-size: 0; }
+}

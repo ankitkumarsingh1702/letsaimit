@@ -3,6 +3,7 @@ import { useAdminAuth } from "../../context/AdminAuth.jsx";
 import { useSiteActions } from "../../context/SiteActions.jsx";
 import SignIn from "../../pages/SignIn.jsx";
 import ProfileAvatar from "../../components/ProfileAvatar.jsx";
+import WorkspaceSwitch from "../../components/WorkspaceSwitch.jsx";
 import { mediaProps } from "../../lib/media.js";
 import { fetchMyRegistrations, takeParentRegistration } from "./parentRequests.js";
 import { useParentTracker } from "../tracker/useParentTracker.js";
@@ -79,6 +80,34 @@ export function ParentRequestList({ rows, receivedId, onViewPayments }) {
 export function OwnRequests({ auth }) {
   const { openForm } = useSiteActions();
   const tracker = useParentTracker(auth);
+  const canAdmin = auth.phase === "authorized";
+  const [coachUserId, setCoachUserId] = React.useState(null);
+  const { client, user: { id: userId } } = auth;
+
+  React.useEffect(() => {
+    if (canAdmin || !client) return;
+    let active = true;
+    let checking = false;
+    async function checkCoachAccess() {
+      if (checking) return;
+      checking = true;
+      try {
+        const { data, error } = await client.rpc("has_coaching_assignments");
+        if (active) setCoachUserId(!error && data === true ? userId : null);
+      } catch {
+        if (active) setCoachUserId(null);
+      } finally {
+        checking = false;
+      }
+    }
+    void checkCoachAccess();
+    window.addEventListener("focus", checkCoachAccess);
+    return () => {
+      active = false;
+      window.removeEventListener("focus", checkCoachAccess);
+    };
+  }, [canAdmin, client, userId]);
+
   const [view, setView] = React.useState(readView);
   const [receivedId, setReceivedId] = React.useState(null);
   const heading = React.useRef(null);
@@ -187,16 +216,17 @@ export function OwnRequests({ auth }) {
     <header className="parent-dashboard-header">
       <div className="parent-dashboard-topbar">
         <a className="parent-dashboard-brand" href="/" aria-label="LetsAimIt home"><img {...mediaProps("logo.png", "94px")} alt="LetsAimIt" /></a>
-        <details className="parent-dashboard-user">
-          <summary aria-label="Parent account actions"><ProfileAvatar name={name} src={auth.user.avatarUrl} /><span className="parent-dashboard-user-name">{name}</span><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.5" /></svg></summary>
-          <div className="parent-dashboard-menu">
-            <span>{auth.user.email}</span>
-            {auth.phase === "authorized" && <a href="/admin/">Team dashboard</a>}
-            <a href="/coach-dashboard/">Coaching tracker</a>
-            <a href="/">Website</a>
-            <button type="button" onClick={() => { void auth.signOut(); }}>Sign out</button>
-          </div>
-        </details>
+        <div className="parent-dashboard-controls">
+          <WorkspaceSwitch current="parent" canAdmin={canAdmin} canCoach={canAdmin || coachUserId === userId} />
+          <details className="parent-dashboard-user">
+            <summary aria-label="Parent account actions"><ProfileAvatar name={name} src={auth.user.avatarUrl} /><span className="parent-dashboard-user-name">{name}</span><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.5" /></svg></summary>
+            <div className="parent-dashboard-menu">
+              <span>{auth.user.email}</span>
+              <a href="/">Website</a>
+              <button type="button" onClick={() => { void auth.signOut(); }}>Sign out</button>
+            </div>
+          </details>
+        </div>
       </div>
       <nav className="parent-dashboard-nav" aria-label="Parent navigation">
         {views.map(item => <a key={item.id} href={viewUrl(item.id)} aria-current={view === item.id ? "page" : undefined} onClick={event => changeView(event, item.id)}><ParentIcon name={item.id} /><span>{item.label}</span></a>)}

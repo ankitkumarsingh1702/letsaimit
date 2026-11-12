@@ -72,9 +72,16 @@ test("standalone parent navigation keeps fees, requests and account controls and
   assert.match(html, /<div hidden=""><section class="billing-panel billing-parent"[\s\S]*?Loading saved invoices/);
   assert.match(html, /Loading your saved requests/);
   assert.match(html, /Delete account/);
-  assert.equal((html.match(/href="\/coach-dashboard\/"/g) || []).length, 1, "the account menu gives the same access on desktop and mobile");
-  assert.doesNotMatch(html, /href="\/admin\/"/);
-  assert.match(render({ ...auth, phase: "authorized" }), /href="\/admin\/"[^>]*>.*Team dashboard/s, "one Google identity can use both workspaces");
+  assert.match(html, /class="workspace-switch-label">Parent<\/span>/);
+  assert.doesNotMatch(html, /href="\/(?:admin|coach-dashboard)\/"/);
+  const admin = render({ ...auth, phase: "authorized" });
+  assert.match(admin, /aria-label="Switch workspace from Parent"/);
+  assert.match(admin, /href="\/admin\/"[^>]*>Admin<\/a>/, "one Google identity can use both workspaces");
+  assert.match(admin, /href="\/coach-dashboard\/"[^>]*>Coach<\/a>/);
+  const { default: WorkspaceSwitch } = await vite.ssrLoadModule("/src/components/WorkspaceSwitch.jsx");
+  const coach = renderToStaticMarkup(React.createElement(WorkspaceSwitch, { current: "parent", canCoach: true }));
+  assert.match(coach, /href="\/coach-dashboard\/"[^>]*>Coach<\/a>/, "assigned coaches can return from Parent");
+  assert.doesNotMatch(coach, /href="\/admin\/"/);
 }));
 
 test("registration receipt is one-time and bound to the current parent and tab", () => {

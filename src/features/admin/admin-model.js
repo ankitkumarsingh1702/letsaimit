@@ -8,6 +8,10 @@ export const STATUS_OPTIONS = [
   { value: 'closed', label: 'Closed' },
 ];
 export const FORM_LABELS = { trial: 'Trial', enrol: 'Enrolment' };
+export const REGISTER_TABLES = [
+  { value: 'enrol', label: 'Registrations', empty: 'No registrations yet' },
+  { value: 'trial', label: 'Free trials', empty: 'No free trials yet' },
+];
 export const ADMIN_NOTE_LIMIT = 2000;
 export const ASSIGNEE_LIMIT = 254;
 
@@ -44,6 +48,17 @@ const collator = new Intl.Collator('en-IN', { numeric: true, sensitivity: 'base'
 const text = (value) => String(value ?? '');
 const searchable = (value) => text(value).normalize('NFKD').replace(/\p{M}/gu, '').toLowerCase();
 const dateValue = (value) => value == null || value === '' ? NaN : new Date(value).getTime();
+
+export function registerTableFor(row) {
+  return row.formType === 'trial' ? 'trial' : 'enrol';
+}
+
+/** Keep older saved requests visible even if they predate the current form types. */
+export function registerTables(rows) {
+  const tables = { enrol: [], trial: [] };
+  for (const row of rows) tables[registerTableFor(row)].push(row);
+  return tables;
+}
 
 /** No inferred test exclusions: UAT counts contain every saved request. */
 export function filterRows(rows, filters = {}) {

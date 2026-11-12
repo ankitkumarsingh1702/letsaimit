@@ -78,9 +78,9 @@ test('admin send → real coaching SQL → SMTP alternatives → Gmail POST → 
       assert.equal((await result.json()).sent, 4);
       assert.deepEqual(new Set(messages.map(message => message.recipientEmail)), new Set(admins.map(admin => admin.email)));
       for (const message of messages) {
-        const url = `https://uat.letsaimit.com/coach-dashboard/?date=${today}`;
+        const url = `https://uat.letsaimit.com/admin/?view=attendance&date=${today}`;
         assert.equal(message.amp, undefined);
-        assert.ok(message.html.includes(`href="${url}"`));
+        assert.ok(message.html.includes(`href="${url.replace('&','&amp;')}"`));
         assert.ok(message.text.includes(url));
         assert.doesNotMatch(message.html+message.text, /Example child|integration\.parent|<form|token/i);
       }
@@ -105,11 +105,11 @@ test('admin send → real coaching SQL → SMTP alternatives → Gmail POST → 
   const response=await worker(workerRequest());
   assert.equal(response.status,200);assert.equal((await response.json()).sent,4);assert.equal(sent.length,4);assert.deepEqual(new Set(sent.map(m=>m.recipientEmail)),new Set(admins.map(a=>a.email)));
   assert.deepEqual(await authenticated(admins[0],'get_coaching_attendance_email_status'),{...queued,queued:0,pending:0,sent:4});
-  for(const message of sent){assert.equal([...message.amp.matchAll(/name="status_/g)].length,8);assert.match(message.amp,/Not marked/);assert.doesNotMatch(message.amp,/integration\.parent|12025550123|Razorpay/);assert.doesNotMatch(message.text+message.html,/name="token"/);}
+  for(const message of sent){assert.equal([...message.amp.matchAll(/role="radiogroup"/g)].length,8);assert.match(message.amp,/✓ Present/);assert.match(message.amp,/✕ Absent/);assert.doesNotMatch(message.amp,/integration\.parent|12025550123|Razorpay/);assert.doesNotMatch(message.text+message.html,/name="token"/);}
   const hidden=(mail,name)=>mail.amp.match(new RegExp(`name="${name}" value="([^"]+)"`))[1];
   const initial=mail=>{
     const fields={ticketId:hidden(mail,'ticketId'),token:hidden(mail,'token'),action:'save'};
-    for(const [,id]of mail.amp.matchAll(/name="status_([0-9a-f]{32})"/g)){fields[`status_${id}`]='present';fields[`revision_${id}`]=hidden(mail,`revision_${id}`);}return fields;
+    for(const [,id]of mail.amp.matchAll(/name="status_([0-9a-f]{32})" value="present"/g)){fields[`status_${id}`]='present';fields[`revision_${id}`]=hidden(mail,`revision_${id}`);}return fields;
   };
   const request=fields=>new Request(endpoint,{method:'POST',headers:{'AMP-Email-Sender':senderEmail,'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(fields)});
   const first=initial(sent[0]);const fieldsInOrder=Object.keys(first).filter(k=>k.startsWith('status_'));first[fieldsInOrder[1]]='absent';first[fieldsInOrder[2]]='no_session';

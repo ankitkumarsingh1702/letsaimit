@@ -1,22 +1,25 @@
 import * as React from "react";
 import ProfileAvatar from "../../components/ProfileAvatar.jsx";
+import WorkspaceSwitch from "../../components/WorkspaceSwitch.jsx";
 import { mediaProps } from "../../lib/media.js";
 import { useAdminAuth } from "../../context/AdminAuth.jsx";
 import SignIn from "../../pages/SignIn.jsx";
 import RequestDetail from "./RequestDetail.jsx";
 import AdminOverview from "./AdminOverview.jsx";
 import { useAdminRegister } from "./useAdminRegister.js";
-import { filterRows, paginateRows, deriveSummary, formatIST, formatAge, periodForPreset, defaultFilters, buildRegisterCsv, STATUS_OPTIONS, FORM_LABELS, validateAdminInvite } from "./admin-model.js";
+import { filterRows, paginateRows, deriveSummary, formatIST, formatAge, periodForPreset, defaultFilters, buildRegisterCsv, STATUS_OPTIONS, REGISTER_TABLES, registerTables, registerTableFor, validateAdminInvite } from "./admin-model.js";
 import "./admin.css";
 import { REVIEW_OPTIONS, readReviewIntent } from "./review-contract.js";
 import { consumeAuthReturnTarget } from "../../lib/authReturn.js";
 import BillingPanel from "../billing/BillingPanel.jsx";
+import { CoachingWorkspace } from "../tracker/StaffTracker.jsx";
 
 const VIEWS = [
   { id: "overview", label: "Dashboard", icon: "overview" },
   { id: "register", label: "Register", icon: "register" },
   { id: "billing", label: "Billing", icon: "billing" },
   { id: "team", label: "Team", icon: "team" },
+  { id: "attendance", label: "Attendance", icon: "register" },
 ];
 
 function AdminIcon({ name, ...props }) {
@@ -55,9 +58,10 @@ function FilterSelect({ label, value, onChange, children }) {
   return <label className="adm-field"><span>{label}</span><select aria-label={label} value={value || ""} onChange={event => onChange(event.target.value || null)}>{children}</select></label>;
 }
 
-function Register({ rows, filtered, pagination, filters, setFilter, resetFilters, onOpen, onExport, canExport, assignees, datePreset, onDatePreset }) {
+export function Register({ rows, filtered, pagination, table, tableCounts, onTable, filters, setFilter, resetFilters, onOpen, onExport, canExport, assignees, datePreset, onDatePreset }) {
+  const { label, empty } = REGISTER_TABLES.find(item => item.value === table);
   const activeFilters = [filters.status, filters.reviewDecision, filters.community, filters.sport, filters.assignee, filters.onlyUnassigned, datePreset !== "all"].filter(Boolean).length;
-  const hasFilters = Boolean(filters.query || filters.formType || activeFilters);
+  const hasFilters = Boolean(filters.query || activeFilters);
   const unique = key => [...new Set(rows.map(row => row[key]).filter(Boolean))];
   function openFromRow(event, id) {
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
@@ -68,7 +72,7 @@ function Register({ rows, filtered, pagination, filters, setFilter, resetFilters
   const textCell = (value, className = "") => <span className={`adm-cell-text ${className}`.trim()} title={value || undefined}>{value || "—"}</span>;
   return <section className="adm-register" aria-label="Saved request register">
     <div className="adm-register-toolbar">
-      <div className="adm-type-tabs" role="group" aria-label="Request type">{[[null, "All"], ["trial", "Trial"], ["enrol", "Enrolment"]].map(([value, label]) => <button type="button" key={label} aria-pressed={filters.formType === value} onClick={() => setFilter("formType", value)}>{label}</button>)}</div>
+      <div className="adm-type-tabs" role="group" aria-label="Register tables">{REGISTER_TABLES.map(({ value, label }) => <button type="button" key={value} aria-pressed={table === value} onClick={() => onTable(value)}>{label}<span className="adm-type-count" aria-hidden="true">{tableCounts[value]}</span></button>)}</div>
       <div className="adm-toolbar-actions">
         <details className="adm-filters">
           <summary className="adm-button adm-button-white"><AdminIcon name="filter" />Filters {activeFilters > 0 && <span className="adm-count">{activeFilters}</span>}</summary>
@@ -90,17 +94,16 @@ function Register({ rows, filtered, pagination, filters, setFilter, resetFilters
         <button className="adm-button adm-button-white" type="button" onClick={onExport} disabled={!canExport || !filtered.length}><AdminIcon name="download" />Export CSV</button>
       </div>
     </div>
-    <div className="adm-register-subhead"><p aria-live="polite">{filtered.length} of {rows.length} requests{hasFilters && <button type="button" className="adm-text-button" onClick={resetFilters}>Clear filters</button>}</p><span className="adm-table-hint">Scroll to see all columns</span></div>
+    <div className="adm-register-subhead"><p aria-live="polite">{filtered.length} of {rows.length} requests{hasFilters && <button type="button" className="adm-text-button" onClick={resetFilters}>Clear filters</button>}</p>{filtered.length > 0 && <span className="adm-table-hint">Scroll to see all columns</span>}</div>
     <div className="adm-card adm-register-card">
-      {filtered.length === 0 ? <div className="adm-empty"><h2>No matches</h2><p>Try another search.</p><button className="adm-button adm-button-white" type="button" onClick={resetFilters}>Clear filters</button></div> : <>
-        <div className="adm-table-wrap" role="region" aria-label="Saved requests table, scroll horizontally for all columns" tabIndex={0}><table className="adm-table adm-register-table">
-          <caption className="adm-sr-only">Saved requests. Open a parent’s details to review and edit follow-up. Times are in India Standard Time.</caption>
-          <colgroup><col className="adm-col-parent" /><col className="adm-col-child" /><col className="adm-col-type" /><col className="adm-col-age" /><col className="adm-col-sport" /><col className="adm-col-community" /><col className="adm-col-email" /><col className="adm-col-phone" /><col className="adm-col-status" /><col className="adm-col-review" /><col className="adm-col-assigned" /><col className="adm-col-received" /></colgroup>
-          <thead><tr><th scope="col">Parent</th><th scope="col">Child</th><th scope="col">Type</th><th scope="col">Age</th><th scope="col">Sport</th><th scope="col">Community</th><th scope="col">Email</th><th scope="col">Phone</th><th scope="col">Follow-up status</th><th scope="col">Review</th><th scope="col">Assigned</th><th scope="col" title="India Standard Time">Received</th></tr></thead>
+      {filtered.length === 0 ? <div className="adm-empty"><h2>{rows.length ? "No matches" : empty}</h2></div> : <>
+        <div key={table} className="adm-table-wrap" role="region" aria-label={`${label} table, scroll horizontally for all columns`} tabIndex={0}><table className="adm-table adm-register-table">
+          <caption className="adm-sr-only">{label}. Open a parent’s details to review and edit follow-up. Times are in India Standard Time.</caption>
+          <colgroup><col className="adm-col-parent" /><col className="adm-col-child" /><col className="adm-col-age" /><col className="adm-col-sport" /><col className="adm-col-community" /><col className="adm-col-email" /><col className="adm-col-phone" /><col className="adm-col-status" /><col className="adm-col-review" /><col className="adm-col-assigned" /><col className="adm-col-received" /></colgroup>
+          <thead><tr><th scope="col">Parent</th><th scope="col">Child</th><th scope="col">Age</th><th scope="col">Sport</th><th scope="col">Community</th><th scope="col">Email</th><th scope="col">Phone</th><th scope="col">Follow-up status</th><th scope="col">Review</th><th scope="col">Assigned</th><th scope="col" title="India Standard Time">Received</th></tr></thead>
           <tbody>{pagination.rows.map(row => <tr key={row.id} className="adm-clickable-row" onClick={event => openFromRow(event, row.id)}>
             <td><button className="adm-parent-button" type="button" aria-label={`Open ${row.parentName || "request"} details`} title={row.parentName} onClick={() => onOpen(row.id)}>{row.parentName || "—"}</button></td>
             <td>{textCell(row.childName)}</td>
-            <td>{textCell(FORM_LABELS[row.formType] || row.formType)}</td>
             <td>{textCell(formatAge(row.age))}</td>
             <td>{textCell(row.sport)}</td>
             <td>{textCell(row.community)}</td>
@@ -204,9 +207,13 @@ function Team({ members, user, onInvite, onRemove }) {
 export function AuthorizedAdmin({ auth }) {
   const { rows, members, loading, error, liveState, lastSynced, refresh, save, review, inviteMember, removeMember } = useAdminRegister(auth);
   const [filters, setFilters] = React.useState(defaultFilters);
+  const [table, setTable] = React.useState("enrol");
   const [datePreset, setDatePreset] = React.useState("all");
   const [referenceIso, setReferenceIso] = React.useState(() => new Date().toISOString());
-  const [view, setView] = React.useState(() => typeof window !== "undefined" && new URLSearchParams(window.location.search).get("view") === "billing" ? "billing" : "overview");
+  const [view, setView] = React.useState(() => {
+    const requestedView = typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("view");
+    return ["billing", "attendance"].includes(requestedView) ? requestedView : "overview";
+  });
   const [selectedDetailId, setSelectedDetailId] = React.useState(null);
   const [selectedSnapshot, setSelectedSnapshot] = React.useState(null);
   const [reviewIntent] = React.useState(() => typeof window === "undefined" ? null : readReviewIntent(window.location.search));
@@ -216,8 +223,14 @@ export function AuthorizedAdmin({ auth }) {
   const [exporting, setExporting] = React.useState(false);
   const hasLoaded = lastSynced !== null;
   const headingRef = React.useRef(null);
+  const attendanceNavigationRef = React.useRef(null);
   const alive = React.useRef(true);
-  const filtered = React.useMemo(() => filterRows(rows, filters), [rows, filters]);
+  const tables = React.useMemo(() => registerTables(rows), [rows]);
+  const filteredTables = React.useMemo(() => ({
+    enrol: filterRows(tables.enrol, filters),
+    trial: filterRows(tables.trial, filters),
+  }), [tables, filters]);
+  const filtered = filteredTables[table];
   const pagination = React.useMemo(() => paginateRows(filtered, filters.page, filters.pageSize), [filtered, filters.page, filters.pageSize]);
   const overviewRows = React.useMemo(() => filterRows(rows, { period: filters.period }), [rows, filters.period]);
   const summary = React.useMemo(() => deriveSummary(overviewRows), [overviewRows]);
@@ -231,7 +244,7 @@ export function AuthorizedAdmin({ auth }) {
     intentOpened.current = true;
     setView("register");
     const found = rows.find(row => row.id === reviewIntent.id);
-    if (found) { setSelectedSnapshot(found); setSelectedDetailId(found.id); }
+    if (found) { setTable(registerTableFor(found)); setSelectedSnapshot(found); setSelectedDetailId(found.id); }
     else setToast("This request is no longer available in the saved register.");
     // Consume navigation intent, never a decision. A confirmed POST/RPC is required to decide.
     const url = new URL(window.location.href);
@@ -263,10 +276,18 @@ export function AuthorizedAdmin({ auth }) {
   }, [hasDraft]);
 
   function changeView(next) {
+    if (view === "attendance") {
+      if (next === "attendance") attendanceNavigationRef.current?.showAttendance();
+      else if (attendanceNavigationRef.current?.mayLeave() === false) return;
+    }
     setView(next);
     window.requestAnimationFrame(() => { headingRef.current?.focus({ preventScroll: true }); window.scrollTo({ top: 0, behavior: "instant" }); });
   }
   function setFilter(key, value) { setFilters(previous => ({ ...previous, [key]: value, page: key === "page" ? value : 1 })); }
+  function changeTable(nextTable) {
+    setTable(nextTable);
+    setFilter("page", 1);
+  }
   function setPeriod(preset) {
     const now = new Date().toISOString();
     setReferenceIso(now); setDatePreset(preset);
@@ -275,12 +296,19 @@ export function AuthorizedAdmin({ auth }) {
   function resetFilters() {
     setDatePreset("all"); setFilters(defaultFilters());
   }
-  function viewRegister(overrides = {}) {
-    setFilters(previous => ({ ...defaultFilters(), period: previous.period, ...overrides }));
+  function viewRegister({ formType, ...overrides } = {}) {
+    const nextFilters = { ...defaultFilters(), period: filters.period, ...overrides };
+    if (formType) setTable(formType);
+    else if (!filterRows(tables[table], nextFilters).length) {
+      const otherTable = table === "enrol" ? "trial" : "enrol";
+      if (filterRows(tables[otherTable], nextFilters).length) setTable(otherTable);
+    }
+    setFilters(nextFilters);
     changeView("register");
   }
   function searchRequests(query) {
     if (view !== "register") {
+      if (view === "attendance" && attendanceNavigationRef.current?.mayLeave() === false) return;
       setFilters(previous => ({ ...defaultFilters(), period: previous.period, query }));
       setView("register");
     } else setFilter("query", query);
@@ -303,13 +331,13 @@ export function AuthorizedAdmin({ auth }) {
     }
     return result;
   }
-  async function exportCsv(exportFilters) {
+  async function exportCsv(exportFilters, savedRows = rows) {
     if (!hasLoaded) return;
     setExporting(true);
     try {
       if (!await auth.checkAccess() || !alive.current) return;
       // Export saved values from the full loaded collection, never drawer drafts or the current page only.
-      const result = buildRegisterCsv(rows, exportFilters, { referenceIso: new Date().toISOString() });
+      const result = buildRegisterCsv(savedRows, exportFilters, { referenceIso: new Date().toISOString() });
       if (!await auth.checkAccess() || !alive.current) return;
       const url = URL.createObjectURL(new Blob([result.text], { type: "text/csv;charset=utf-8;" }));
       const link = document.createElement("a"); link.href = url; link.download = result.filename; document.body.appendChild(link); link.click(); link.remove();
@@ -326,20 +354,22 @@ export function AuthorizedAdmin({ auth }) {
     <aside className="adm-sidebar">
       <a className="adm-brand" href="/" aria-label="LetsAimIt home"><img {...mediaProps("logo.png", "110px")} alt="LetsAimIt" /></a>
       <p className="adm-sidebar-label">MENU</p>
-      <nav className="adm-nav" aria-label="Admin navigation">{VIEWS.map(item => <button key={item.id} type="button" aria-current={view === item.id ? "page" : undefined} onClick={() => changeView(item.id)}><AdminIcon name={item.icon} /><span>{item.label}</span>{item.id === "register" && hasLoaded && <span className="adm-nav-count">{rows.length}</span>}</button>)}<a href="/coach-dashboard/"><AdminIcon name="register" />Attendance</a></nav>
-      <div className="adm-utilities"><p className="adm-sidebar-label">GENERAL</p><a href="/parent/"><AdminIcon name="team" />Parent dashboard</a><a href="/"><AdminIcon name="external" />Website</a><button type="button" onClick={refresh}><AdminIcon name="reset" />Refresh register</button><button type="button" onClick={auth.signOut}><AdminIcon name="exit" />Sign out</button></div>
+      <nav className="adm-nav" aria-label="Admin navigation">{VIEWS.map(item => <button key={item.id} type="button" aria-current={view === item.id ? "page" : undefined} onClick={() => changeView(item.id)}><AdminIcon name={item.icon} /><span>{item.label}</span>{item.id === "register" && hasLoaded && <span className="adm-nav-count">{rows.length}</span>}</button>)}</nav>
+      <div className="adm-utilities"><p className="adm-sidebar-label">GENERAL</p><a href="/"><AdminIcon name="external" />Website</a><button type="button" onClick={refresh}><AdminIcon name="reset" />Refresh register</button><button type="button" onClick={auth.signOut}><AdminIcon name="exit" />Sign out</button></div>
     </aside>
     <div className="adm-workspace">
       <header className="adm-topbar">
         <label className="adm-search adm-global-search"><AdminIcon name="search" /><span className="adm-sr-only">Search requests</span><input type="search" placeholder="Search requests" value={filters.query} onChange={event => searchRequests(event.target.value)} /></label>
-        <div className="adm-topbar-right"><span className="adm-live-state" data-state={hasLoaded ? liveState : "not_synced"} role="status">{!hasLoaded ? "Not synced" : liveState === "live" ? "Live" : liveState === "paused" ? "Paused" : liveState === "reconnecting" ? "Reconnecting" : "Connecting"}</span><div className="adm-user"><Avatar name={auth.user.displayName || auth.user.email} src={auth.user.avatarUrl} small /><span><strong>{auth.user.displayName || auth.user.email}</strong><span>{auth.user.email}</span></span></div><details className="adm-mobile-tools"><summary aria-label="Workspace actions"><AdminIcon name="more" /></summary><div className="adm-tools-popup"><a href="/"><AdminIcon name="external" />Website</a><button type="button" onClick={refresh}><AdminIcon name="reset" />Refresh register</button><button type="button" onClick={auth.signOut}><AdminIcon name="exit" />Sign out</button></div></details></div>
+        <div className="adm-topbar-right"><WorkspaceSwitch current="admin" canAdmin canCoach /><span className="adm-live-state" data-state={hasLoaded ? liveState : "not_synced"} role="status">{!hasLoaded ? "Not synced" : liveState === "live" ? "Live" : liveState === "paused" ? "Paused" : liveState === "reconnecting" ? "Reconnecting" : "Connecting"}</span><div className="adm-user"><Avatar name={auth.user.displayName || auth.user.email} src={auth.user.avatarUrl} small /><span><strong>{auth.user.displayName || auth.user.email}</strong><span>{auth.user.email}</span></span></div><details className="adm-mobile-tools"><summary aria-label="Workspace actions"><AdminIcon name="more" /></summary><div className="adm-tools-popup"><a href="/"><AdminIcon name="external" />Website</a><button type="button" onClick={refresh}><AdminIcon name="reset" />Refresh register</button><button type="button" onClick={auth.signOut}><AdminIcon name="exit" />Sign out</button></div></details></div>
       </header>
       <div className="adm-content">
+        {view === "attendance" ? <CoachingWorkspace auth={auth} embedded headingRef={headingRef} navigationRef={attendanceNavigationRef} /> : <>
         <div className="adm-page-heading"><div><h1 ref={headingRef} tabIndex={-1}>{title}</h1><p className="adm-date">{formatIST(referenceIso, "date")} · IST{hasDraft && <span>Unsaved changes</span>}</p></div><div className="adm-page-actions">{["overview", "register"].includes(view) && <FilterSelect label="Period" value={datePreset} onChange={setPeriod}><option value="all">All dates</option><option value="today">Today</option><option value="last7">Last 7 days</option></FilterSelect>}{view === "overview" && hasLoaded && <button className="adm-button adm-button-outline" type="button" onClick={() => exportCsv({ period: filters.period })} disabled={!hasLoaded || exporting || loading}>Export CSV</button>}</div></div>
         {error && <div className="adm-notice adm-notice-error" role="alert"><p>{error}{hasLoaded && ` Showing the last saved snapshot from ${formatIST(lastSynced)} IST.`}</p><button className="adm-text-button" type="button" onClick={refresh}>Retry</button></div>}
         {auth.error && <div className="adm-notice" role="status">{auth.error}</div>}
-        {view === "billing" ? <BillingPanel key={auth.user.id} auth={auth} admin onOpenRequest={openRequest} /> : !hasLoaded ? <div className="adm-card adm-empty" role="status"><h2>{loading ? "Loading saved requests…" : "Register not loaded"}</h2>{!loading && <p>Saved requests and team details will appear when the connection is restored.</p>}</div> : view === "overview" ? <AdminOverview rows={overviewRows} summary={summary} members={members} auth={uiAuth} onOpen={openRequest} onViewRegister={viewRegister} onTeam={() => changeView("team")} Icon={AdminIcon} Avatar={Avatar} StatusBadge={StatusBadge} /> : view === "register" ? <Register rows={rows} filtered={filtered} pagination={pagination} filters={filters} setFilter={setFilter} resetFilters={resetFilters} onOpen={openRequest} onExport={() => exportCsv(filters)} canExport={!exporting} assignees={assignees} datePreset={datePreset} onDatePreset={setPeriod} /> : <Team members={members} user={auth.user} onInvite={inviteMember} onRemove={removeMember} />}
+        {view === "billing" ? <BillingPanel key={auth.user.id} auth={auth} admin onOpenRequest={openRequest} /> : !hasLoaded ? <div className="adm-card adm-empty" role="status"><h2>{loading ? "Loading saved requests…" : "Register not loaded"}</h2>{!loading && <p>Saved requests and team details will appear when the connection is restored.</p>}</div> : view === "overview" ? <AdminOverview rows={overviewRows} summary={summary} members={members} auth={uiAuth} onOpen={openRequest} onViewRegister={viewRegister} onTeam={() => changeView("team")} Icon={AdminIcon} Avatar={Avatar} StatusBadge={StatusBadge} /> : view === "register" ? <Register rows={tables[table]} filtered={filtered} pagination={pagination} table={table} tableCounts={{ enrol: filteredTables.enrol.length, trial: filteredTables.trial.length }} onTable={changeTable} filters={filters} setFilter={setFilter} resetFilters={resetFilters} onOpen={openRequest} onExport={() => exportCsv(filters, tables[table])} canExport={!exporting} assignees={assignees} datePreset={datePreset} onDatePreset={setPeriod} /> : <Team members={members} user={auth.user} onInvite={inviteMember} onRemove={removeMember} />}
         <footer className="adm-footer">{hasLoaded ? <><span>Counts include all saved requests, including any test submissions.</span><span>{periodLabel} · Synced {formatIST(lastSynced, "time")} IST</span></> : <><span>Waiting for the saved register.</span><span>Asia/Kolkata</span></>}</footer>
+        </>}
       </div>
     </div>
     <RequestDetail row={selectedRow} open={Boolean(selectedRow)} onClose={closeRequest} onSave={saveFollowUp} onReview={reviewRequest} initialDecision={reviewIntent && selectedRow?.id === reviewIntent.id ? reviewIntent.decision : null} assignees={assignees} canEdit onDraftChange={onDraftChange} />
