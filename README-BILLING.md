@@ -1,4 +1,4 @@
-# Monthly payments
+# Coaching payments
 
 The existing React, Google sign-in, Supabase and SMTP setup is retained. A parent
 sends an enrolment request and separately agrees to the displayed payment terms.
@@ -19,17 +19,32 @@ payment before recording money received.
 - First invoice: due on approval. Following calendar months: invoice on the 1st,
   due by the end of the 5th, in India Standard Time.
 - Admin fee changes take effect from the **next calendar month**. The fee-change
-  email and next invoice show the saved amount before payment. Existing invoices never change.
+  email and next invoice show the saved amount before payment.
   If no change is saved, the current fee continues.
 - Unpaid reminders have four daily slots: **09:00, 12:00, 15:00 and 18:00 IST**.
   Each parent receives one grouped reminder per slot across their children and
   unpaid invoices. Recovery sends the current slot only, not missed reminders.
   Paid invoices are removed from reminders after provider reconciliation.
-- Overdue coaching invoices retain the original monthly amount. Reminders list
-  the pending monthly invoices.
+- Overdue coaching invoices retain their amount until an admin adjusts them.
+  Reminders include payable monthly and one-time invoices.
 - Existing fixed-price agreements and legacy team accounts retain their saved
   coaching amounts. Stopping monthly billing stops future cycles. Previously
   issued coaching invoices remain payable.
+
+## Student payments
+
+Open **Students → student → Payments** to see the outstanding balance, monthly
+fee, invoices and activity. **Create invoice** sets an amount, due date and
+description for a one-time Razorpay invoice. Its link appears in the parent's
+payments and uses the existing invoice email. **Edit monthly fee** schedules the
+price for the next month.
+
+Open an unpaid invoice to adjust its amount or waive it. An issued invoice
+remains in the history. The worker confirms closure with Razorpay before
+creating a replacement with the new amount. A waiver creates no replacement.
+If a payment arrives during the adjustment, the saved payment takes precedence.
+Activity records who requested the change, when and why. Legacy accounts retain
+their existing consent and fee policy.
 
 ## Month-end review
 
@@ -43,8 +58,8 @@ is a dated snapshot; the dashboard shows the latest saved plan.
 
 All monetary values are integer paise; currency is INR. The database owns prices,
 dates, parent ownership, queue recipients, invoice identities and account states.
-Only current admins can choose fee amounts through the validated approval and
-next-month fee-change RPCs. Parent form payloads cannot select charge amounts.
+Only current admins can set prices or adjust unpaid invoices. Parent form
+payloads cannot select charge amounts.
 
 | Interface | Access | Result |
 | --- | --- | --- |
@@ -52,6 +67,8 @@ next-month fee-change RPCs. Parent form payloads cannot select charge amounts.
 | `submit_registration(payload)` | Verified Google parent | Durable registration receipt; new quoted enrolments require the current policy version and explicit quoted-fee consent |
 | `review_registration(p_id,p_decision,p_expected_revision,p_monthly_amount_paise)` | Current approved admin | Audited Accept/Decline; a new paid enrolment requires a valid admin quote |
 | `set_monthly_coaching_fee(p_registration_id,p_amount_paise,p_expected_revision)` | Current approved admin | Audited, revision-checked fee change effective next month |
+| `create_student_payment_invoice(...)` | Current approved admin | One-time invoice with a saved date, amount, description and request ID |
+| `adjust_student_payment_invoice(...)` | Current approved admin | Audited adjustment or waiver for an eligible unpaid invoice, with provider reconciliation |
 | `list_my_billing()` | Verified Google parent | That user's invoice history and billing accounts |
 | `list_admin_billing()` | Current approved admin | Saved invoices, accounts and aggregate totals |
 | `cancel_billing_account(p_registration_id,p_expected_revision)` | Current approved admin | Audited stop of future billing, guarded by revision |
@@ -123,8 +140,9 @@ its saved receipt, and retain captures and refunds in the accounting history.
 
 ## Financial reliability
 
-- Each registration has one coaching invoice per month. A durable creation job
-  records its intent before the provider request.
+- Each registration has one scheduled monthly invoice per cycle. One-time and
+  replacement invoices have their own records. A durable creation job records
+  the intent before the provider request.
 - Razorpay invoice creation has no documented general idempotency header. An
   ambiguous create is reconciled by its stable receipt; it is never blindly
   repeated. A bounded/incomplete scan needs operator attention, not another bill.

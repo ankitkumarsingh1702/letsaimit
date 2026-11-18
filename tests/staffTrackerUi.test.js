@@ -28,7 +28,7 @@ test("assigned non-admin coach sees scoped attendance controls and can also open
   assert.match(html, /Sample community <span>· 1 student<\/span>/);
   assert.match(html, /data-attendance="present"/);
   assert.match(html, /data-attendance="absent"/);
-  assert.match(html, />Email parents<\/button>/);
+  assert.doesNotMatch(html, />Email parents?<\/button>/);
   assert.doesNotMatch(html, /Email staff|href="\/admin\/"/);
   assert.doesNotMatch(html, /Gmail[^<]*ready|Email[^<]*sent|Attendance saved/);
 }));
@@ -39,7 +39,8 @@ test('Students keeps staff delivery and roster marking together while dispatch s
   assert.match(html, /Checking email status/);
   assert.doesNotMatch(html, /Daily at 9 PM IST|Gmail sender setup/);
   assert.match(html, /<button[^>]* disabled=""[^>]*>Email staff<\/button>/);
-  assert.match(html, /Attendance tools.*Mark shown present.*Email parents/);
+  assert.match(html, /Attendance tools.*Mark shown present/);
+  assert.doesNotMatch(html, />Email parents?<\/button>/);
 }));
 
 test("a dated legacy attendance link opens the relevant day inside Students", () => withStaffUi(

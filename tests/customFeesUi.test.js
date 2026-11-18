@@ -117,6 +117,16 @@ test("parent billing displays and links only the monthly amount, and enrolment k
     const details = renderToStaticMarkup(React.createElement(MonthDetails, { group: groups[0], onClose: () => {} }));
     assert.match(details, /href="https:\/\/rzp.io\/i\/base"[^>]*>Pay ₹1</);
     assert.doesNotMatch(details, /late fee|₹80[01]|\/i\/late/i);
+    const oneTime = billingInvoice({ ...raw, id: "invoice-one-off", kind: "one_off", description: "Training kit", base_amount_paise: 200000, amount_paise: 200000, payment_url: "https://rzp.io/i/kit" });
+    const combinedGroups = groupParentInvoices([base, oneTime, ...retired]);
+    const kitRows = renderToStaticMarkup(React.createElement(ParentMonthRows, { groups: combinedGroups, onSelect: () => {} }));
+    assert.equal(combinedGroups.length, 2, "the one-time invoice has its own row and amount");
+    assert.match(kitRows, /Training kit/);
+    assert.match(kitRows, /href="https:\/\/rzp.io\/i\/kit"[^>]*>Pay ₹2,000</);
+    assert.match(kitRows, /href="https:\/\/rzp.io\/i\/base"[^>]*>Pay ₹1</);
+    const adjustment = groupParentInvoices([{ ...oneTime, status: "processing", paymentUrl: null, invoiceUrl: null }])[0];
+    assert.equal(adjustment.pendingPaise, 200000);
+    assert.equal(adjustment.status, "processing");
     const pending = toAdminRequest({ ...record, review_decision: "pending", reviewed_at: null });
     const approval = renderToStaticMarkup(React.createElement(ReviewDecision, { row: pending, initialDecision: "accepted", canReview: true, onReview: async () => {} }));
     assert.match(approval, /value="6000"/); assert.match(approval, /Approve · ₹6,000\/month/);

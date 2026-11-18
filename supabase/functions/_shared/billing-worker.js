@@ -1,7 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 import { isSingleMailbox } from "./notification-worker.js";
 import { buildBillingEmail, buildBillingReminderEmail } from "./billing-email.js";
-import { isLateFeeInvoice } from "./razorpay-billing.js";
+import { isLateFeeInvoice, isTerminalInvoiceSnapshot } from "./razorpay-billing.js";
 
 const response = (status, body) => Response.json(body, { status, headers: { "Cache-Control": "no-store" } });
 function authorized(value, secret) {
@@ -45,7 +45,6 @@ export function createBillingWorker({ secret, rpc, provider, sendEmail, dashboar
           };
           if(work.kind==="cancel_invoice") {
             // Recover the original provider identity after an ambiguous creation response.
-            // The cancellation job never creates a replacement invoice.
             if(!work.invoice.provider_invoice_id) {
               stage="reconcile";
               const recovered=await provider.findByReceipt(work.invoice);
@@ -57,6 +56,12 @@ export function createBillingWorker({ secret, rpc, provider, sendEmail, dashboar
             }
             stage="cancel";
             const snapshot=await provider.cancelInvoice(work.invoice);
+            if (!isTerminalInvoiceSnapshot(snapshot)) {
+              await finish("retry", "provider_unavailable");
+              counts.deferred += 1;
+              continue;
+            }
+            // Persist the outcome before the database clears or replaces the outstanding invoice.
             if(!await save(work.invoice,snapshot)) throw Object.assign(new Error("snapshot_rejected"),{code:"invalid_provider_snapshot"});
             if(await finish("done")) counts.completed+=1;
             continue;
@@ -101,7 +106,7 @@ export function createBillingWorker({ secret, rpc, provider, sendEmail, dashboar
             counts.skipped += 1;
             continue;
           }
-          // Reconcile the unpaid monthly invoice before checking eligibility again and emailing it.
+          // Reconcile the unpaid invoice before checking eligibility again and emailing it.
           if (work.kind === "send_invoice" && work.invoice.provider_invoice_id) {
             stage = "reconcile";
             const snapshot = await provider.reconcileInvoice(work.invoice);

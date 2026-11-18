@@ -46,6 +46,25 @@ test("creating a bill sends the server amount and stable receipt without provide
   assert.equal(JSON.stringify(saved).includes("synthetic-provider-secret"), false);
 });
 
+test("one-off invoice creation preserves the saved description, amount and recipient", async () => {
+  const { client, calls } = clientFixture([invoice({amount:500000,amount_due:500000})]);
+  const saved = await client.createInvoice({ ...bill, kind: "one_off", description: "Spring clinic", amount_paise: 500000 });
+  const body = JSON.parse(calls[0].options.body);
+  assert.equal(body.description, "LetsAimIt: Spring clinic");
+  assert.deepEqual(body.line_items, [{ name: "Spring clinic", amount: 500000, currency: "INR", quantity: 1 }]);
+  assert.equal(body.customer.email, bill.parent_email);
+  assert.equal(body.email_notify, false);
+  assert.equal(body.expire_by, undefined);
+  assert.equal(saved.captured, false);
+  assert.equal(saved.paid_paise, 0);
+
+  const invalid = clientFixture([]);
+  for (const description of ["", "  ", "A".repeat(81), "a\nb", "<Invoice>"]) {
+    await assert.rejects(invalid.client.createInvoice({ ...bill, kind: "one_off", description }), /invalid_bill/);
+  }
+  assert.equal(invalid.calls.length, 0);
+});
+
 test("invalid amounts, identity fields and receipt substitutions never reach the provider", async () => {
   for (const changes of [{ amount_paise: 99 }, { amount_paise: -1 }, { amount_paise: 100.5 }, { amount_paise: Number.MAX_SAFE_INTEGER }, { currency: "USD" }, { receipt: "different-receipt" }, { parent_name: "Injected\r\nBcc" }, { parent_email: "a@b.test\n" }, { parent_phone: "+91 9876" }]) {
     const { client, calls } = clientFixture([]);
@@ -165,6 +184,24 @@ test("account deletion cancellation verifies the immutable invoice before closin
   assert.equal(calls[1].options.body,undefined,"cancellation never supplies another price or a refund request");
 });
 
+test("a balance adjustment accepts a verified closed invoice with no order or payment link", async () => {
+  const issued = invoice();
+  const cancelled = invoice({ status: "cancelled", amount_due: null, amount_paid: null, order_id: null, short_url: null });
+  const original = { ...bill, kind: "one_off", provider_invoice_id: issued.id, provider_order_id: issued.order_id, paid_paise: 0 };
+  const { client, calls } = clientFixture([issued, cancelled]);
+  const snapshot = await client.cancelInvoice(original);
+  assert.equal(snapshot.provider_status, "cancelled");
+  assert.equal(snapshot.payment_url, null);
+  assert.equal(snapshot.paid_paise, 0);
+  assert.equal(snapshot.amount_paise, original.amount_paise);
+  assert.deepEqual(calls.map(({ options }) => options.method), ["GET", "POST"]);
+
+  const conflicting = clientFixture([invoice({ ...cancelled, order_id: "order_99999999999999" })]);
+  await assert.rejects(conflicting.client.cancelInvoice(original), /invalid_provider_snapshot/);
+  const locallyPaid = clientFixture([cancelled]);
+  await assert.rejects(locallyPaid.client.cancelInvoice({ ...original, paid_paise: original.amount_paise }), /invalid_provider_snapshot/);
+});
+
 test("paid or terminal invoices are reconciled without a cancellation or refund POST", async () => {
   const paid=invoice({status:"paid",amount_paid:100,amount_due:0,payment_id:payment().id,paid_at:1794240100});
   const capture=clientFixture([paid,payment(),{items:[]}]);
@@ -185,6 +222,26 @@ test("a payment racing cancellation is preserved as captured money without initi
   assert.equal(saved.paid_paise,100);assert.equal(saved.captured,true);assert.equal(saved.provider_status,"paid");
   assert.equal(calls.filter(({options})=>options.method==="POST").length,1);
   assert.ok(calls.filter(({url})=>url.includes("/refunds")).every(({options})=>options.method==="GET"));
+});
+
+test("an in-progress checkout prevents cancellation until Razorpay confirms its outcome", async () => {
+  const inProgress = invoice({ payment_id: payment().id });
+  const paid = invoice({ status: "paid", amount_paid: 100, amount_due: 0, payment_id: payment().id });
+  const { client, calls } = clientFixture([
+    invoice(),
+    json({ error: { description: "Payment in progress" } }, 400),
+    inProgress,
+    payment({ status: "authorized", captured: false }),
+    paid,
+    payment(),
+    { items: [] },
+  ]);
+  const original = { ...bill, kind: "one_off", provider_invoice_id: paid.id };
+  await assert.rejects(client.cancelInvoice(original), /provider_unavailable/);
+  const reconciled = await client.cancelInvoice(original);
+  assert.equal(reconciled.captured, true);
+  assert.equal(reconciled.paid_paise, 100);
+  assert.equal(calls.filter(({ options }) => options.method === "POST").length, 1);
 });
 
 test("lost cancellation acknowledgements recover by GET and retries do not repeat a completed cancellation", async () => {

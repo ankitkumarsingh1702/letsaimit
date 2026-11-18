@@ -6,7 +6,6 @@ import { useStudentProfile } from './useStudentProfile.js';
 import { StudentOverview, StudentBilling } from './StudentProfileDetails.jsx';
 import { AssignmentEditor, FeedbackEditor, mayLeaveTrackerEditor } from './CoachingEditors.jsx';
 import AttendanceEmail from './AttendanceEmail.jsx';
-import ParentAttendanceAction from './ParentAttendanceAction.jsx';
 import StudentPractice from './StudentPractice.jsx';
 import './students.css';
 
@@ -48,7 +47,7 @@ function mondayOf(date) {
   return day.toISOString().slice(0, 10);
 }
 
-function StudentProfile({ auth, scope, date, student, actions, canEmail, onClose, onOpenBilling, refreshRoster, navigationRef }) {
+function StudentProfile({ auth, scope, date, student, actions, onClose, onOpenBilling, refreshRoster, navigationRef }) {
   const [section, setSection] = React.useState('overview');
   const [week, setWeek] = React.useState(() => mondayOf(date));
   const [notice, setNotice] = React.useState('');
@@ -97,10 +96,10 @@ function StudentProfile({ auth, scope, date, student, actions, canEmail, onClose
       <p>{[societyName(student), student.sport].filter(Boolean).join(' · ')}</p>
     </header>
     <section className="students-profile-attendance" aria-label="Session attendance">
-      <div><h2>Attendance</h2><time dateTime={date}>{sessionDate.format(new Date(`${date}T00:00:00+05:30`))} · IST</time></div>
-      <div className="students-profile-actions">{actions}
-        <ParentAttendanceAction key={date} auth={auth} scope={scope} date={date} registrationId={student.registrationId} disabled={!canEmail} />
+      <div><h2>Attendance</h2><time dateTime={date}>{sessionDate.format(new Date(`${date}T00:00:00+05:30`))} · IST</time>
+        <p className="students-attendance-hint">Parent email is automatic.</p>
       </div>
+      {actions}
     </section>
     <nav className="students-profile-nav" aria-label="Student profile">
       {sections.map(([id, label]) => <button type="button" key={id} aria-current={section === id ? 'page' : undefined}
@@ -132,7 +131,7 @@ function StudentProfile({ auth, scope, date, student, actions, canEmail, onClose
     {section === 'coach' && scope === 'admin' && <section className="students-profile-section" aria-label="Coach">
       <AssignmentEditor child={student} auth={auth} onSaved={coachSaved} onDraftState={onDraftState} />
     </section>}
-    {section === 'billing' && scope === 'admin' && <StudentBilling details={details} onOpenBilling={onOpenBilling} />}
+    {section === 'billing' && scope === 'admin' && <StudentBilling details={details} auth={auth} onOpenBilling={onOpenBilling} onDraftState={onDraftState} />}
   </div>;
 }
 
@@ -191,9 +190,6 @@ export function StudentsPanel({ auth, scope, date, onDateChange, tracker, headin
     return local?.sessionDate === date && (!row || row.revision < local.revision) ? local : row;
   }
   function canMark(child) { return scope === 'admin' || !child.startsOn || child.startsOn <= date; }
-  function canEmail(child) {
-    return canMark(child) && !pending[child.registrationId] && attendanceChoices.includes(recordFor(child.registrationId)?.status);
-  }
   async function markStudents(targets, status) {
     const rows = targets.filter(canMark).flatMap(({ registrationId }) => {
       const existing = recordFor(registrationId);
@@ -260,7 +256,7 @@ export function StudentsPanel({ auth, scope, date, onDateChange, tracker, headin
 
   return <section className="students-workspace" aria-busy={tracker.loading}>
     {selected ? <StudentProfile key={selected.registrationId} auth={auth} scope={scope} date={date} student={selected}
-      actions={actions(selected, true)} canEmail={canEmail(selected)} onClose={closeStudent} onOpenBilling={onOpenBilling}
+      actions={actions(selected, true)} onClose={closeStudent} onOpenBilling={onOpenBilling}
       refreshRoster={tracker.refresh} navigationRef={profileNavigation} /> : <>
       <div className="adm-page-heading"><h1 ref={headingRef} tabIndex={-1}>Students</h1></div>
       {tracker.error && <div className="students-error" role="alert">{tracker.error} <button type="button" className="adm-text-button" onClick={tracker.refresh}>Try again</button></div>}
@@ -282,7 +278,6 @@ export function StudentsPanel({ auth, scope, date, onDateChange, tracker, headin
                 onClick={() => markStudents(groups.flatMap(group => group.children), 'present')}>Mark shown present</button>
               <button type="button" className="students-button" disabled={Boolean(pendingIds.current.size) || !groups.some(group => group.children.some(canMark))}
                 onClick={() => markStudents(groups.flatMap(group => group.children), 'no_session')}>No session for shown</button>
-              <ParentAttendanceAction key={date} auth={auth} scope={scope} date={date} disabled={Boolean(pendingIds.current.size) || !children.some(canEmail)} />
             </div>
             {scope === 'admin' && <AttendanceEmail auth={auth} date={date} hasChildren={children.length > 0} active={toolsOpen} />}
           </div>

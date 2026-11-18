@@ -59,8 +59,7 @@ Authenticated RPCs:
 | `list_my_tracker()` | Owned children, attendance, feedback and date range |
 | `list_staff_tracker(p_date,p_scope)` | `admin` returns all eligible enrolments to verified admins. `coach` returns assigned eligible enrolments. The one-argument overload remains available to older clients. |
 | `list_coaching_students(p_date,p_scope)` | Active roster and attendance for the chosen day and staff scope |
-| `list_coaching_student_profile(p_registration_id,p_scope)` | One assigned or admin-visible student's details and feedback. Admins also receive monthly billing history. |
-| `queue_students_attendance_email(p_session_date,p_scope,p_registration_id)` | Queue one student's or all in-scope students' saved attendance for the selected date |
+| `list_coaching_student_profile(p_registration_id,p_scope)` | One assigned or admin-visible student's details and feedback. Admins also receive invoices and billing activity. |
 | `set_coaching_assignment(...)` | Admin-only assignment receipt with new revision |
 | `save_coaching_attendance(p_session_date,p_rows)` | Atomic revision-checked rows; `{ok,attendance}` |
 | `save_coaching_feedback(...)` | Manual saved weekly feedback receipt |
@@ -77,16 +76,12 @@ an old child's records by email or phone.
 
 ## Attendance email
 
-A saved Present or Absent mark for an active student can queue one notice
+A saved Present or Absent mark for an active student automatically queues one notice
 per student and session date. The existing coaching worker uses the
 registration's saved guardian contact and the existing LetsAimIt sender.
 Before sending, it reads the latest saved attendance. Corrections remain
 visible in Parent Tracker. The queue allows one send attempt, including when
 the transport outcome is uncertain.
-
-In **Students → Attendance tools**, use **Email parents** to queue saved
-attendance for the selected date. **Email parent** limits the same action to
-the open profile. Both use the original queue and recognise existing requests.
 
 When scheduled email is enabled, the minute scheduler queues one email at **9 PM IST** for every
 currently approved admin, including the owner. The roster includes approved

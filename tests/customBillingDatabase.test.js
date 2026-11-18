@@ -392,3 +392,182 @@ test('late-fee retirement removes collectable balances and preserves verified pr
   assert.equal((await invoiceFor(enrolment.id)).length,2,'next monthly invoice still generates');
   assert.equal((await db.query("select count(*)::int n from private.billing_invoices where kind='late_fee'")).rows[0].n,5);
 });
+
+test('student payment management preserves hosted invoices and immutable accounting', async t => {
+  const { db, rpc, as, service, submit, approve, edit, invoiceFor, prepareAt } = await setup(t);
+  await db.exec('update private.billing_settings set enabled=true where id');
+  const terms = await rpc('get_billing_terms');
+  const student = await submit(form('enrol', terms, 'Payment test student'));
+  const otherStudent = await submit(form('enrol', terms, 'Another student'), other);
+  await approve(student, 300000);
+  await approve(otherStudent, 10000);
+  const monthly = (await invoiceFor(student.id))[0];
+  const day = (await db.query("select (now() at time zone 'Asia/Kolkata')::date::text d")).rows[0].d;
+  const adminRpc = (name, args, user = admin) => as('authenticated', user, () => rpc(name, args));
+  const balance = (user = parent) => adminRpc('list_my_billing', [], user);
+  const profile = () => adminRpc('list_coaching_student_profile', [student.id, 'admin']);
+  const create = (amount, title, id, user = admin, due = day) =>
+    adminRpc('create_student_payment_invoice', [student.id, amount, due, title, id], user);
+  const adjust = (invoiceId, expected, amount, reason, id, user = admin, studentId = student.id) =>
+    adminRpc('adjust_student_payment_invoice', [studentId, invoiceId, expected, amount, reason, id], user);
+  const getInvoice = async id => (await db.query('select * from private.billing_invoices where id=$1', [id])).rows[0];
+  const jobs = async (invoiceId, kind) => (await db.query(
+    'select * from private.billing_jobs where invoice_id=$1 and kind=$2', [invoiceId, kind]
+  )).rows;
+  const saveSnapshot = (id, amount, status = 'issued', paid = 0, refunded = 0, extra = {}) => {
+    const hash = id.replaceAll('-', '');
+    const url = status === 'issued' || paid ? 'https://rzp.io/i/' + hash : '';
+    return service('save_billing_provider_snapshot', [id, JSON.stringify({
+      receipt: 'LAI' + hash, provider_invoice_id: 'inv_' + hash, provider_status: status, currency: 'INR',
+      amount_paise: amount, paid_paise: paid, refunded_paise: refunded,
+      payment_url: url, invoice_url: url,
+      ...(paid ? { provider_payment_id: 'pay_' + hash, captured: true, paid_at: new Date().toISOString() } : {}),
+      ...extra
+    })]);
+  };
+  let oneOff;
+
+  await t.test('an admin creates a distinct invoice once and only the owning parent gets its verified link', async () => {
+    const id = randomUUID();
+    await assert.rejects(create(500000, 'Tournament', id, parent), { code: '42501' });
+    await assert.rejects(create(99, 'Tournament', id), { code: '22023' });
+    await assert.rejects(create(500000, '<tag>', id), { code: '22023' });
+    await assert.rejects(create(500000, 'Tournament', id, admin, '2000-01-01'), { code: '22023' });
+    oneOff = await create(500000, 'Tournament', id);
+    assert.deepEqual(oneOff, { id, status: 'applied', invoiceId: oneOff.invoiceId, replacementInvoiceId: null });
+    assert.deepEqual(await create(500000, 'Tournament', id), oneOff);
+    await assert.rejects(create(200000, 'Tournament', id), { code: 'PT409' });
+    assert.equal((await jobs(oneOff.invoiceId, 'create_invoice')).length, 1);
+    const queued = (await jobs(oneOff.invoiceId, 'create_invoice'))[0];
+    const prepared = await prepareAt(queued, new Date().toISOString());
+    assert.equal(prepared.value.invoice.kind, 'one_off');
+    assert.equal(prepared.value.invoice.description, 'Tournament');
+    assert.equal(prepared.value.invoice.initial_invoice, false);
+    assert.equal((await service('prepare_billing_job', [queued.id, prepared.token])).invoice.description, 'Tournament');
+    const created = (await balance()).invoices.find(i => i.id === oneOff.invoiceId);
+    assert.equal(created.kind, 'one_off');
+    assert.equal(created.payment_url, '');
+    assert.equal(created.paid_paise, 0);
+    assert.equal((await balance(other)).invoices.some(i => i.id === oneOff.invoiceId), false);
+    const pendingBills = await balance();
+    assert.equal(pendingBills.summary.outstanding_paise, 800000);
+    assert.equal(pendingBills.upcoming_month.old_pending_paise, 800000);
+    await saveSnapshot(oneOff.invoiceId, 500000);
+    const issued = (await balance()).invoices.find(i => i.id === oneOff.invoiceId);
+    assert.match(issued.payment_url, /^https:\/\/rzp\.io\/i\//);
+    assert.equal(issued.description, 'Tournament');
+    const reminderAt = day + 'T09:00:00+05:30';
+    await db.query('select private.enqueue_billing_work_at($1)', [reminderAt]);
+    const reminder = (await jobs(oneOff.invoiceId, 'send_reminder'))[0];
+    assert.ok(reminder);
+    const reminderData = (await prepareAt(reminder, reminderAt)).value.invoices;
+    assert.deepEqual(reminderData.map(i => [i.kind, i.description]), [['one_off', 'Tournament']]);
+  });
+
+  await t.test('a pending adjustment disables old checkout and verifies cancellation before creating one replacement', async () => {
+    const id = randomUUID();
+    await assert.rejects(adjust(oneOff.invoiceId, 1, 200000, 'Correct the request', id), { code: 'PT409' });
+    await assert.rejects(adjust(oneOff.invoiceId, 500000, 200000, '', id), { code: '22023' });
+    await assert.rejects(adjust(oneOff.invoiceId, 500000, 200000, 'Correct the request', id, admin, otherStudent.id), { code: 'PT409' });
+    const result = await adjust(oneOff.invoiceId, 500000, 200000, 'Correct the request', id);
+    assert.equal(result.status, 'pending');
+    assert.deepEqual(await adjust(oneOff.invoiceId, 500000, 200000, 'Correct the request', id), result);
+    await assert.rejects(adjust(oneOff.invoiceId, 500000, 100000, 'Different target', randomUUID()), { code: 'PT409' });
+    const cancel = (await jobs(oneOff.invoiceId, 'cancel_invoice'))[0];
+    assert.equal((await prepareAt(cancel, new Date().toISOString())).value.kind, 'cancel_invoice');
+    const tail = (await balance()).invoices.find(i => i.id === oneOff.invoiceId);
+    assert.equal(tail.adjustment_pending, true);
+    assert.equal(tail.status, 'processing');
+    assert.equal(tail.payment_url, '');
+    assert.equal((await balance()).summary.outstanding_paise, 800000, 'the verified debt is kept while collection is paused');
+    assert.equal((await prepareAt((await jobs(oneOff.invoiceId, 'send_reminder'))[0], day+'T09:00:00+05:30')).value, null);
+    assert.equal((await profile()).billing.invoices.find(i => i.id === oneOff.invoiceId).canAdjust, false);
+    await assert.rejects(saveSnapshot(oneOff.invoiceId, 499999, 'cancelled'), { code: '22023' });
+    await saveSnapshot(oneOff.invoiceId, 500000);
+    assert.equal((await profile()).billing.activity.find(a => a.id === id).status, 'pending');
+    await db.query("update private.billing_jobs set state='failed',attempts=8 where id=$1", [cancel.id]);
+    assert.equal((await profile()).billing.activity.find(a => a.id === id).status, 'failed');
+    await adjust(oneOff.invoiceId, 500000, 200000, 'Correct the request', id, backup);
+    assert.equal((await jobs(oneOff.invoiceId, 'cancel_invoice'))[0].state, 'pending');
+    await saveSnapshot(oneOff.invoiceId, 500000, 'cancelled');
+    await saveSnapshot(oneOff.invoiceId, 500000, 'cancelled');
+    const complete = await adjust(oneOff.invoiceId, 500000, 200000, 'Correct the request', id);
+    assert.equal(complete.status, 'applied');
+    const replacement = await getInvoice(complete.replacementInvoiceId);
+    assert.equal(replacement.kind, 'one_off');
+    assert.equal(replacement.amount_paise, 200000);
+    assert.equal(replacement.replaces_invoice_id, oneOff.invoiceId);
+    assert.equal(replacement.description, 'Tournament');
+    assert.equal((await jobs(replacement.id, 'create_invoice')).length, 1);
+    assert.equal((await balance()).summary.outstanding_paise, 500000);
+    const activity = (await profile()).billing.activity.find(a => a.id === id);
+    assert.equal(activity.actorEmail, admin.email);
+    assert.equal(activity.reason, 'Correct the request');
+    assert.equal(activity.previousAmountPaise, 500000);
+    assert.equal(activity.replacementInvoiceId, replacement.id);
+    assert.equal((await getInvoice(oneOff.invoiceId)).amount_paise, 500000);
+  });
+
+  await t.test('a capture racing a waiver remains paid and the provider records capture and refund once', async () => {
+    const id = randomUUID();
+    await saveSnapshot(monthly.id, 300000);
+    const pending = await adjust(monthly.id, 300000, 0, 'Test waiver while capture races', id);
+    assert.equal(pending.status, 'pending');
+    await saveSnapshot(monthly.id, 300000, 'paid', 300000);
+    await saveSnapshot(monthly.id, 300000, 'paid', 300000, 25000);
+    await saveSnapshot(monthly.id, 300000, 'paid', 300000, 25000);
+    const complete = await adjust(monthly.id, 300000, 0, 'Test waiver while capture races', id);
+    assert.equal(complete.status, 'payment_received');
+    assert.equal(complete.replacementInvoiceId, null);
+    const billing = (await profile()).billing;
+    assert.equal(billing.invoices.find(i => i.id === monthly.id).status, 'partially_refunded');
+    assert.deepEqual(billing.activity.filter(a => a.invoiceId === monthly.id && a.id !== id).map(a => [a.type, a.amountPaise]).sort(),
+      [['payment_captured', 300000], ['refund_recorded', 25000]]);
+    await assert.rejects(adjust(monthly.id, 300000, 100, 'Adjust already captured invoice', randomUUID()), { code: 'PT409' });
+    await edit(student.id, 333300, 1);
+    assert.equal((await profile()).billing.activity.find(a => a.type === 'monthly_fee_changed').actorEmail, admin.email);
+  });
+
+  await t.test('an unclaimed local invoice can be waived without a provider job and an ambiguous one cannot', async () => {
+    const unclaimed = await create(100, '   ', randomUUID());
+    assert.equal((await getInvoice(unclaimed.invoiceId)).description, 'One-off payment');
+    const waived = await adjust(unclaimed.invoiceId, 100, 0, 'Remove duplicate charge', randomUUID());
+    assert.equal(waived.status, 'applied');
+    assert.equal(waived.replacementInvoiceId, null);
+    assert.equal((await jobs(unclaimed.invoiceId, 'create_invoice'))[0].state, 'cancelled');
+    assert.equal((await jobs(unclaimed.invoiceId, 'cancel_invoice')).length, 0);
+    const ambiguous = await create(200, 'Unknown provider outcome', randomUUID());
+    await db.query("update private.billing_jobs set attempts=1,state='ambiguous' where invoice_id=$1", [ambiguous.invoiceId]);
+    await assert.rejects(adjust(ambiguous.invoiceId, 200, 0, 'Wait for provider', randomUUID()), { code: 'PT409' });
+    assert.equal((await getInvoice(ambiguous.invoiceId)).status, 'creating');
+  });
+
+  await t.test('a replacement retains its monthly period and cancellation and catch-up never create extra debt', async () => {
+    const registration = await submit(form('enrol', terms, 'Monthly correction student'));
+    await approve(registration, 30000);
+    const original = (await invoiceFor(registration.id))[0];
+    await saveSnapshot(original.id, 30000);
+    const requestId = randomUUID();
+    await adjust(original.id, 30000, 10000, 'Correct the monthly invoice', requestId, admin, registration.id);
+    await saveSnapshot(original.id, 30000, 'expired');
+    const saved = await adjust(original.id, 30000, 10000, 'Correct the monthly invoice', requestId, admin, registration.id);
+    assert.equal(saved.status, 'applied');
+    const replacement = await getInvoice(saved.replacementInvoiceId);
+    assert.equal(replacement.kind, 'monthly');
+    assert.equal(replacement.period_start.getTime(), original.period_start.getTime());
+    assert.equal(replacement.due_date.getTime(), original.due_date.getTime());
+    await db.query('select private.enqueue_billing_work_at(now())');
+    assert.equal((await invoiceFor(registration.id)).length, 2);
+    assert.equal((await balance()).invoices.find(i => i.id === replacement.id).initial_invoice, false);
+
+    await saveSnapshot(replacement.id, 10000);
+    const closingRequest = randomUUID();
+    await adjust(replacement.id, 10000, 20000, 'Correct before billing stops', closingRequest, admin, registration.id);
+    await adminRpc('cancel_billing_account', [registration.id, 1]);
+    await saveSnapshot(replacement.id, 10000, 'cancelled');
+    const closed = await adjust(replacement.id, 10000, 20000, 'Correct before billing stops', closingRequest, admin, registration.id);
+    assert.equal(closed.status, 'account_closed');
+    assert.equal(closed.replacementInvoiceId, null);
+    assert.equal((await invoiceFor(registration.id)).length, 2);
+  });
+});

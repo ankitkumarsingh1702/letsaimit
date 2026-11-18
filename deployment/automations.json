@@ -61,7 +61,7 @@
       "cronJob": "letsaimit-billing-worker",
       "cronSchedule": "* * * * *",
       "dispatchSetting": "private.billing_settings.enabled",
-      "parentEmails": ["Invoices", "Reminders", "Receipts", "Refunds", "Fee changes"],
+      "parentEmails": ["Invoices", "Updated invoices", "Reminders", "Receipts", "Refunds", "Fee changes"],
       "reminderSlotsIst": ["09:00", "12:00", "15:00", "18:00"],
       "adminSummary": "Last day of the month, from 18:00 IST"
     },
@@ -87,7 +87,6 @@
         "dispatchSetting": "private.coaching_settings.parent_attendance_email_enabled",
         "trigger": "Saved Present or Absent attendance",
         "recipient": "Guardian contact saved on the active accepted enrolment",
-        "manualQueueRpc": "queue_students_attendance_email",
         "deduplication": "One notice per student and session date"
       }
     }

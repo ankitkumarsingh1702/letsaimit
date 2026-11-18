@@ -116,6 +116,8 @@ On an existing target, compare applied versions first; do not replay its schema:
     — the confirmed roster, practice attempts and parent attendance notices.
 17. `supabase/migrations/20261118135618_students_profile_and_active_roster.sql`
     — active accepted roster, profile details, sprint distances and manual parent notices.
+18. `supabase/migrations/20261118145719_student_payment_management.sql`
+    — one-time charges, unpaid invoice adjustments and automatic-only parent attendance notices.
 
 Apply the complete migration set in order to a new, empty target. For an existing
 target, verify what is applied and apply only the missing forward migrations.

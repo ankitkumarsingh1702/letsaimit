@@ -6,7 +6,8 @@ import "./billing.css";
 
 const date = value => value && Number.isFinite(Date.parse(value)) ? new Intl.DateTimeFormat("en-IN", { timeZone: "Asia/Kolkata", day: "numeric", month: "short", year: "numeric" }).format(new Date(value)) : "—";
 const month = value => value && Number.isFinite(Date.parse(value)) ? new Intl.DateTimeFormat("en-IN", { timeZone: "Asia/Kolkata", month: "short", year: "numeric" }).format(new Date(value)) : "—";
-const payable = invoice => invoice.kind === "monthly" && ["pending", "overdue"].includes(invoice.status) && invoice.paymentUrl && invoice.paidPaise < invoice.amountPaise;
+const payable = invoice => invoice.kind !== "late_fee" && ["pending", "overdue"].includes(invoice.status) && invoice.paymentUrl && invoice.paidPaise < invoice.amountPaise;
+const invoiceTitle = invoice => invoice.kind === "one_off" ? invoice.description || "One-time payment" : month(invoice.periodStart);
 
 function InvoiceLink({ href, children, primary = false }) {
   return href ? <a className={`billing-button${primary ? " billing-button-primary" : ""}`} href={href} target="_blank" rel="noopener noreferrer">{children}<span className="billing-sr-only"> · opens Razorpay in a new tab</span></a> : null;
@@ -32,8 +33,8 @@ function InvoiceDetails({ invoice, admin, onClose, onOpenRequest }) {
     <dl className="billing-facts">
       <dt>Child</dt><dd>{invoice.childName || "—"}</dd>
       {admin && <><dt>Parent</dt><dd>{invoice.parentName || "—"}</dd><dt>Email</dt><dd>{invoice.parentEmail || "—"}</dd></>}
-      <dt>Month</dt><dd>{month(invoice.periodStart)}</dd>
-      <dt>Type</dt><dd>{invoice.kind === "late_fee" ? "Historical late fee" : "Monthly programme"}</dd>
+      <dt>Type</dt><dd>{invoice.kind === "late_fee" ? "Historical late fee" : invoice.kind === "one_off" ? "One-time payment" : "Monthly programme"}</dd>
+      <dt>{invoice.kind === "one_off" ? "For" : "Month"}</dt><dd>{invoiceTitle(invoice)}</dd>
       <dt>Community</dt><dd>{invoice.community || "—"}</dd>
       <dt>Sport</dt><dd>{invoice.sport || "—"}</dd>
       <dt>Due</dt><dd>{date(invoice.dueDate)} · IST</dd>
@@ -100,12 +101,12 @@ export function UpcomingMonth({ upcoming }) {
 }
 
 export function InvoiceRows({ invoices, admin, onSelect }) {
-  const headers = ["Child", ...(admin ? ["Parent"] : []), "Month", "Due", "Total", "Status", "Pay", "Invoice"];
+  const headers = ["Child", ...(admin ? ["Parent"] : []), "For", "Due", "Total", "Status", "Pay", "Invoice"];
   return <div className="billing-table-scroll" tabIndex={0} role="region" aria-label="Saved invoices"><table role="table" className={`billing-table${admin ? " billing-table-admin" : ""}`}><caption className="billing-sr-only">Saved invoices. Amounts in Indian rupees and dates in IST.</caption><thead role="rowgroup"><tr role="row">{headers.map(label => <th scope="col" key={label}>{label}</th>)}</tr></thead><tbody role="rowgroup">
     {invoices.map(invoice => <tr role="row" key={invoice.id}>
       <td><button className="billing-text-button billing-ellipsis" type="button" title={invoice.childName || invoice.number} onClick={() => onSelect(invoice.id)}>{invoice.childName || "Details"}</button></td>
       {admin && <td title={invoice.parentName}>{invoice.parentName || "—"}</td>}
-      <td>{month(invoice.periodStart)}</td>
+      <td>{invoiceTitle(invoice)}</td>
       <td>{!admin && <span className="billing-mobile-label" aria-hidden="true">Due</span>}{date(invoice.dueDate)}</td>
       <td className="billing-numeric">{!admin && <span className="billing-mobile-label" aria-hidden="true">Total</span>}{formatMoney(invoice.amountPaise)}</td>
       <td><span className="billing-status" data-status={invoice.status}>{BILLING_STATUS_LABELS[invoice.status]}</span></td>
@@ -117,10 +118,10 @@ export function InvoiceRows({ invoices, admin, onSelect }) {
 }
 
 export function MonthDetails({ group, onClose }) {
-  return <BillingDialog title={`${group.childName || "Coaching"} · ${month(group.periodStart)}`} onClose={onClose}>
+  return <BillingDialog title={`${group.childName || "Coaching"} · ${invoiceTitle(group)}`} onClose={onClose}>
     <dl className="billing-facts billing-month-totals"><dt>Total</dt><dd>{formatMoney(group.totalPaise)}</dd><dt>Paid</dt><dd>{formatMoney(group.paidPaise)}</dd><dt>Pending</dt><dd>{formatMoney(group.pendingPaise)}</dd>{group.refundedPaise > 0 && <><dt>Refunded</dt><dd>{formatMoney(group.refundedPaise)}</dd></>}</dl>
     <div className="billing-month-items">{group.invoices.map(invoice => <div className="billing-month-item" key={invoice.id}>
-      <div><strong>Monthly fee · {formatMoney(invoice.amountPaise)}</strong><span className="billing-status" data-status={invoice.status}>{BILLING_STATUS_LABELS[invoice.status]}</span></div>
+      <div><strong>{invoice.kind === "one_off" ? "One-time payment" : "Monthly fee"} · {formatMoney(invoice.amountPaise)}</strong><span className="billing-status" data-status={invoice.status}>{BILLING_STATUS_LABELS[invoice.status]}</span></div>
       <p className="billing-note">{invoice.number} · Due {date(invoice.dueDate)}</p>
       <div className="billing-row-actions">{payable(invoice) && <InvoiceLink href={invoice.paymentUrl} primary>Pay {formatMoney(invoice.amountPaise - invoice.paidPaise)}</InvoiceLink>}<InvoiceLink href={invoice.invoiceUrl}>View invoice</InvoiceLink></div>
     </div>)}</div>
@@ -129,11 +130,11 @@ export function MonthDetails({ group, onClose }) {
 }
 
 export function ParentMonthRows({ groups, onSelect }) {
-  return <div className="billing-table-scroll" tabIndex={0} role="region" aria-label="Monthly coaching payments"><table role="table" className="billing-table billing-parent-table"><caption className="billing-sr-only">One row per child and month. Separate invoices retain their own payment links.</caption><thead role="rowgroup"><tr role="row">{["Child", "Month", "Due", "Total", "Status", "Pay", "Invoice"].map(label => <th key={label} scope="col">{label}</th>)}</tr></thead><tbody role="rowgroup">{groups.map(group => {
+  return <div className="billing-table-scroll" tabIndex={0} role="region" aria-label="Coaching payments"><table role="table" className="billing-table billing-parent-table"><thead role="rowgroup"><tr role="row">{["Child", "For", "Due", "Total", "Status", "Pay", "Invoice"].map(label => <th key={label} scope="col">{label}</th>)}</tr></thead><tbody role="rowgroup">{groups.map(group => {
     const payables = group.invoices.filter(payable);
     return <tr role="row" key={group.id}>
       <td><button className="billing-text-button billing-ellipsis" type="button" title={group.childName} onClick={() => onSelect(group.id)}>{group.childName || "Details"}</button></td>
-      <td>{month(group.periodStart)}</td>
+      <td>{invoiceTitle(group)}</td>
       <td><span className="billing-mobile-label" aria-hidden="true">Due</span>{date(group.dueDate)}</td>
       <td className="billing-numeric"><span className="billing-mobile-label" aria-hidden="true">Total</span>{formatMoney(group.totalPaise)}</td>
       <td><span className="billing-status" data-status={group.status}>{BILLING_STATUS_LABELS[group.status]}</span></td>
@@ -185,7 +186,7 @@ export default function BillingPanel({ auth, admin = false, onOpenRequest }) {
   const invoices = snapshot?.invoices || [];
   const filtered = React.useMemo(() => filterBillingInvoices(invoices, { query, status }), [invoices, query, status]);
   const parentGroups = React.useMemo(() => groupParentInvoices(invoices), [invoices]);
-  const filteredGroups = React.useMemo(() => parentGroups.filter(group => (!status || group.status === status) && (!query.trim() || [group.childName, month(group.periodStart)].some(value => value.toLocaleLowerCase("en-IN").includes(query.trim().toLocaleLowerCase("en-IN"))))), [parentGroups, query, status]);
+  const filteredGroups = React.useMemo(() => parentGroups.filter(group => (!status || group.status === status) && (!query.trim() || [group.childName, invoiceTitle(group)].some(value => value.toLocaleLowerCase("en-IN").includes(query.trim().toLocaleLowerCase("en-IN"))))), [parentGroups, query, status]);
   const rawInvoiceRows = admin || snapshot?.hasMore === true;
   const listCount = rawInvoiceRows ? filtered.length : filteredGroups.length;
   const totalPages = Math.max(1, Math.ceil(listCount / 25));

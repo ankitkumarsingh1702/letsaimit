@@ -1,0 +1,110 @@
+.student-billing {
+  display: grid;
+  gap: 22px;
+  max-inline-size: 46rem;
+  color: var(--students-ink, #253b30);
+  line-height: 1.5;
+}
+
+.student-billing :is(h2, h3, p, dl, dd, ul, ol) { margin: 0; }
+.student-billing p, .student-billing dd { overflow-wrap: anywhere; }
+.student-billing a { color: #285941; text-decoration: underline; text-underline-offset: 3px; }
+.student-billing-heading, .student-billing-section-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px 16px;
+}
+
+.students-workspace .student-billing-heading h2 { font-size: 21px; font-weight: 700; }
+.students-workspace .student-billing h3 { font-size: 15px; font-weight: 700; }
+.student-billing-section, .student-billing-editor { display: grid; gap: 10px; min-inline-size: 0; }
+.student-billing-summary, .student-billing-editor {
+  padding: clamp(14px, 3vw, 22px);
+  border: 1px solid var(--students-line, #dfe8e1);
+  border-radius: 12px;
+}
+
+.student-billing-summary { gap: 2px; background: var(--students-wash, #f6f9f6); }
+.student-billing-summary p:not(.student-billing-balance), .student-billing-activity p {
+  color: var(--students-muted, #53655b);
+  font-size: 13px;
+}
+
+.student-billing-summary .student-billing-balance {
+  font-size: clamp(26px, 3vw, 34px);
+  line-height: 1.25;
+  font-weight: 750;
+  letter-spacing: -.025em;
+  font-variant-numeric: tabular-nums;
+}
+
+.student-billing-summary .student-billing-fee { margin-block-start: 10px; }
+.student-billing-summary strong { color: var(--students-ink, #253b30); }
+.student-billing-buttons { display: flex; flex-wrap: wrap; gap: 8px; padding-block-start: 8px; }
+.student-billing .students-button-primary { color: #fff; background: #173e35; border-color: #173e35; }
+.student-billing .students-button-primary:hover:not(:disabled) { background: #225346; }
+.student-billing .students-button:disabled { opacity: .55; }
+
+.student-billing-editor label { display: grid; gap: 5px; max-inline-size: 30rem; font-weight: 600; }
+.student-billing-editor label small { color: var(--students-muted, #53655b); font-size: 13px; font-weight: 400; }
+.student-billing-editor input {
+  width: 100%;
+  min-inline-size: 0;
+  min-block-size: 44px;
+  box-sizing: border-box;
+  padding: 9px 12px;
+  border: 1px solid var(--students-line, #dfe8e1);
+  border-radius: 7px;
+  color: inherit;
+  background: #fff;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 400;
+}
+.student-billing-error { color: #922b21; }
+.student-billing-notice { color: #24593e; }
+
+.student-billing-list, .student-billing-activity { list-style: none; padding: 0; }
+.student-billing-list > li, .student-billing-activity > li {
+  min-inline-size: 0;
+  border-block-start: 1px solid var(--students-line, #dfe8e1);
+}
+.student-billing-list > li:last-child, .student-billing-activity > li:last-child { border-block-end: 1px solid var(--students-line, #dfe8e1); }
+.student-billing-list summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  min-block-size: 44px;
+  padding: 12px 8px;
+  cursor: pointer;
+  list-style: none;
+}
+.student-billing-list summary::-webkit-details-marker { display: none; }
+.student-billing-list summary:hover { background: var(--students-wash, #f6f9f6); }
+.student-billing-list-title { display: flex; flex-direction: column; min-inline-size: 0; overflow-wrap: anywhere; }
+.student-billing-list-title > span { color: var(--students-muted, #53655b); font-size: 13px; }
+.student-billing-invoice-total { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; }
+.student-billing-invoice-total::after { content: ''; display: block; inline-size: 7px; block-size: 7px; border: solid var(--students-muted, #53655b); border-width: 0 1px 1px 0; transform: rotate(45deg); }
+.student-billing-list details[open] .student-billing-invoice-total::after { transform: rotate(225deg); }
+.student-billing-badge { padding: 2px 6px; border-radius: 4px; background: #eef2ef; color: #3d5348; font-size: 12px; font-weight: 650; }
+.student-billing-badge[data-status='paid'] { color: #205940; background: #e8f3eb; }
+.student-billing-badge:is([data-status='overdue'], [data-status='failed']) { color: #77362e; background: #fbece8; }
+
+.student-billing-invoice-details { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; padding: 0 8px 12px; }
+.student-billing-invoice-details dl:not(:empty) { flex-basis: 100%; }
+.student-billing-invoice-details dl > div { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 6px; }
+.student-billing-invoice-details dt { color: var(--students-muted, #53655b); }
+.student-billing-invoice-details dd { font-weight: 600; }
+.student-billing-list .student-billing-editor { margin-block-end: 12px; }
+.student-billing-activity > li { padding: 10px 8px; }
+.student-billing-activity-value { font-variant-numeric: tabular-nums; }
+
+@media (max-width: 420px) {
+  .student-billing { gap: 16px; }
+  .student-billing-invoice-total { flex-basis: 100%; }
+  .student-billing-list summary { align-items: flex-start; }
+}

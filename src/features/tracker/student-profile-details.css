@@ -1,138 +1,49 @@
-.student-detail-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-}
-
-.student-detail-card {
+.student-overview, .student-detail-card {
+  max-width: 48rem;
   min-width: 0;
-  padding: clamp(16px, 2.5vw, 24px);
-  border: 1px solid var(--students-line, #dfe8e1);
-  border-radius: 12px;
-  background: #fff;
-  color: var(--students-ink, #253b30);
+  color: var(--students-ink);
 }
 
-.students-workspace .student-detail-card h2 { font-size: 16px; font-weight: 700; }
-.student-detail-wide { grid-column: 1 / -1; }
+.student-overview-section {
+  padding-block: 18px;
+  border-bottom: 1px solid var(--students-line);
+}
+
+.student-overview-section:first-child { padding-top: 4px; }
+
+.students-workspace .student-overview h2 {
+  font-size: 17px;
+  font-weight: 700;
+}
 
 .student-detail-facts {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 13px 20px;
-  margin: 14px 0 0;
+  gap: 10px;
+  margin: 12px 0 0;
 }
 
-.student-enrolment-facts { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.student-detail-facts > div, .student-payment-metrics > div { min-width: 0; }
-.student-detail-facts dt, .student-payment-metrics dt {
-  color: var(--students-muted, #53655b);
-  font-size: 12px;
-  font-weight: 500;
+.student-detail-facts > div {
+  display: grid;
+  grid-template-columns: minmax(6.5rem, 10rem) minmax(0, 1fr);
+  align-items: baseline;
+  gap: 8px 14px;
 }
 
-.student-detail-facts dd {
-  margin: 4px 0 0;
-  overflow-wrap: anywhere;
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1.5;
+.student-detail-facts dt { color: var(--students-muted); font-size: 13px; }
+.student-detail-facts dd { margin: 0; overflow-wrap: anywhere; white-space: pre-wrap; }
+.student-detail-contact { color: #285941; text-decoration: underline; text-underline-offset: 3px; }
+
+.student-overview-disclosure summary {
+  width: fit-content;
+  cursor: pointer;
+  font-weight: 650;
+  padding-block: 4px;
 }
 
-.student-detail-contact {
-  color: #285941;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.student-detail-notes {
-  padding-top: 14px;
-  border-top: 1px solid var(--students-line, #dfe8e1);
-}
-
-.student-detail-notes dd { white-space: pre-wrap; font-weight: 400; }
-.student-detail-consent { margin-top: 14px; border-top: 1px solid var(--students-line, #dfe8e1); }
-.student-detail-consent summary { width: fit-content; padding-top: 12px; cursor: pointer; font-weight: 650; }
-.student-detail-state { margin: 12px 0 0; color: var(--students-muted, #53655b); }
+.student-overview-consent { margin-top: 14px; }
+.student-detail-state { margin: 12px 0 0; color: var(--students-muted); }
 .student-detail-state p { margin: 0 0 8px; }
 
-.student-payment-heading {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 8px 16px;
-}
-
-.student-payment-metrics {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-  margin: 16px 0 20px;
-  font-variant-numeric: tabular-nums;
-}
-
-.student-payment-metrics > div {
-  padding: 10px 12px;
-  border-radius: 8px;
-  background: var(--students-wash, #f6f9f6);
-}
-
-.student-payment-metrics dd {
-  margin: 4px 0 0;
-  font-size: clamp(16px, 2.3vw, 24px);
-  font-weight: 650;
-  line-height: 1.2;
-  overflow-wrap: anywhere;
-}
-
-.student-payment-metrics .student-payment-date {
-  color: var(--students-muted, #53655b);
-  font-size: 11px;
-  font-weight: 500;
-  line-height: 1.4;
-}
-
-.students-workspace .student-payment-history { margin-bottom: 8px; font-size: 14px; font-weight: 650; }
-.student-invoice-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; }
-.student-invoice-table th, .student-invoice-table td {
-  padding: 10px 7px;
-  border-bottom: 1px solid var(--students-line, #dfe8e1);
-  vertical-align: top;
-  font-variant-numeric: tabular-nums;
-}
-
-.student-invoice-table thead th { color: var(--students-muted, #53655b); font-size: 11px; font-weight: 600; }
-.student-invoice-table tbody th { font-weight: 650; }
-.student-invoice-table small { display: block; margin-top: 4px; color: var(--students-muted, #53655b); }
-.student-invoice-mobile { display: none; }
-.student-invoice-status {
-  display: inline-block;
-  padding: 2px 6px;
-  border-radius: 4px;
-  background: var(--students-wash, #f6f9f6);
-  color: var(--students-ink, #253b30);
-  font-size: 11px;
-  font-weight: 650;
-}
-.student-invoice-status[data-status='paid'] { color: #205940; background: #e8f3eb; }
-.student-invoice-status[data-status='overdue'] { color: #77362e; background: #fbece8; }
-
-@media (max-width: 640px) {
-  .student-detail-grid { grid-template-columns: minmax(0, 1fr); gap: 12px; }
-  .student-enrolment-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .student-payment-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .student-payment-metrics > div:first-child { grid-column: 1 / -1; }
-  .student-invoice-table, .student-invoice-table tbody { display: block; }
-  .student-invoice-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-  .student-invoice-table tbody tr {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px 12px;
-    padding: 12px 0;
-    border-top: 1px solid var(--students-line, #dfe8e1);
-  }
-  .student-invoice-table th, .student-invoice-table td { padding: 0; border: 0; }
-  .student-invoice-table td:first-of-type { text-align: right; }
-  .student-invoice-mobile { display: block; margin-bottom: 2px; color: var(--students-muted, #53655b); font-size: 11px; }
+@media (max-width: 420px) {
+  .student-detail-facts > div { grid-template-columns: minmax(0, 1fr); gap: 2px; }
 }

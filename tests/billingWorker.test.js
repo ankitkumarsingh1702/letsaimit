@@ -25,9 +25,27 @@ test('a successful create is saved before completion; browser body cannot select
   const r=await f.handler(request);assert.equal((await r.json()).completed,1);assert.equal(f.calls.find(x=>x[0]==='create')[1].amount_paise,100);assert.deepEqual(f.calls.filter(x=>x[0].startsWith('save_')).map(x=>x[0]),['save_billing_provider_snapshot']);assert.equal(f.sent.length,0);
 });
 
+test('one-off invoices use the normal durable creation and notification flow', async () => {
+  const oneOff = { ...bill, kind: 'one_off', description: 'Skills clinic', amount_paise: 200000 };
+  const create = fixture({ invoice: oneOff });
+  await create.handler(call());
+  assert.deepEqual(create.calls.find(([name]) => name === 'create')[1], oneOff);
+  assert.equal(create.sent.length, 0);
+
+  const send = fixture({ kind: 'send_invoice', invoice: { ...oneOff, provider_invoice_id: 'inv_synthetic' } });
+  await send.handler(call());
+  assert.equal(send.calls.filter(([name]) => name === 'reconcile').length, 1);
+  assert.equal(send.sent.length, 1);
+  assert.equal(send.sent[0].recipientEmail, oneOff.parent_email);
+  assert.equal(send.sent[0].messageId, '<billing-job1@letsaimit.com>');
+  assert.match(send.sent[0].text, /Invoice: Skills clinic\nAmount: ₹2,000/);
+});
+
 test('an ambiguous provider create moves to reconciliation and is never blindly retried',async()=>{
-  const f=fixture({provider:{createInvoice:async()=>{throw new Error('network timeout secret');}}});const r=await f.handler(call());const body=await r.text();assert.equal(body.includes('secret'),false);const finish=f.calls.find(x=>x[0]==='finish_billing_job')[1];assert.equal(finish.p_outcome,'ambiguous');assert.equal(finish.p_failure_code,'creation_ambiguous');
-  const reconcile=fixture({kind:'reconcile_invoice'});await reconcile.handler(call());assert.equal(reconcile.calls.some(x=>x[0]==='create'),false);assert.equal(reconcile.calls.find(x=>x[0]==='finish_billing_job')[1].p_failure_code,'invoice_missing');
+  for (const invoice of [bill, { ...bill, kind: 'one_off', description: 'Skills clinic' }]) {
+    const f=fixture({invoice,provider:{createInvoice:async()=>{throw new Error('network timeout secret');}}});const r=await f.handler(call());const body=await r.text();assert.equal(body.includes('secret'),false);const finish=f.calls.find(x=>x[0]==='finish_billing_job')[1];assert.equal(finish.p_outcome,'ambiguous');assert.equal(finish.p_failure_code,'creation_ambiguous');
+    const reconcile=fixture({kind:'reconcile_invoice',invoice});await reconcile.handler(call());assert.equal(reconcile.calls.some(x=>x[0]==='create'),false);assert.equal(reconcile.calls.find(x=>x[0]==='finish_billing_job')[1].p_failure_code,'invoice_missing');
+  }
 });
 
 test('lost database save after successful creation is also ambiguous',async()=>{
@@ -169,6 +187,19 @@ test('paid races and cancellation retries preserve accounting and send no delete
   const failed=fixture({kind:'cancel_invoice',invoice:{...bill,provider_invoice_id:'inv_synthetic'},provider:{cancelInvoice:async()=>{throw new Error('private network detail');}}});
   const response=await failed.handler(call());assert.equal((await response.text()).includes('private'),false);
   const finish=failed.calls.find(x=>x[0]==='finish_billing_job')[1];assert.equal(finish.p_outcome,'retry');assert.equal(finish.p_failure_code,'provider_unavailable');
+});
+
+test('an unpaid adjustment waits when the original invoice stays payable', async () => {
+  const invoice = { ...bill, kind: 'one_off', provider_invoice_id: 'inv_synthetic' };
+  const opened = { provider_invoice_id: invoice.provider_invoice_id, provider_status: 'issued', paid_paise: 0 };
+  const f = fixture({ kind: 'cancel_invoice', invoice, provider: { cancelInvoice: async () => opened } });
+  const response = await f.handler(call());
+  assert.equal((await response.json()).completed, 0);
+  assert.equal(f.sent.length, 0);
+  assert.equal(f.calls.some(([name]) => ['create', 'save_billing_provider_snapshot'].includes(name)), false);
+  const finish = f.calls.find(([name]) => name === 'finish_billing_job')[1];
+  assert.equal(finish.p_outcome, 'retry');
+  assert.equal(finish.p_failure_code, 'provider_unavailable');
 });
 
 test('a deletion observed just before a new invoice or customer message suppresses that side effect',async()=>{

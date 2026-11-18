@@ -13,6 +13,25 @@ test("invoice email displays the saved fee without public team or fixed-price la
   assert.doesNotMatch(email.subject, /UAT|demo|preview/i); assert.doesNotMatch(email.html, /auto-debit|automatically charged/i);
 });
 
+test("one-off and replacement emails show the saved invoice without implying monthly enrolment", () => {
+  const oneOff = { ...invoice, kind: "one_off", description: "Skills clinic & equipment", amount_paise: 200000 };
+  const email = buildBillingEmail({ ...options, invoice: oneOff, kind: "send_invoice" });
+  assert.equal(email.subject, "LetsAimIt: Payment request");
+  assert.match(email.text, /Invoice: Skills clinic & equipment\nAmount: ₹2,000/);
+  assert.match(email.text, /Due by: 5 Dec 2026/);
+  assert.match(email.html, /Skills clinic &amp; equipment/);
+  assert.doesNotMatch(email.text, /Month:|monthly|enrolment/i);
+
+  const replacement = buildBillingEmail({
+    ...options,
+    invoice: { ...invoice, kind: "monthly", initial_invoice: true, pricing_model: "custom_quote", replaces_invoice_id: invoice.id },
+    kind: "send_invoice",
+  });
+  assert.equal(replacement.subject, "LetsAimIt: Updated invoice");
+  assert.match(replacement.text, /Month: 1 Dec 2026/);
+  assert.match(replacement.text, /Due by: 5 Dec 2026/);
+});
+
 test("reminders, paid receipts and refunds use separate saved monetary facts", () => {
   const reminder = buildBillingEmail({ ...options, kind: "send_reminder" });
   assert.equal(reminder.subject, "LetsAimIt: Payment reminder"); assert.match(reminder.text, /monthly fee is pending/);
@@ -65,6 +84,18 @@ test("grouped reminder displays one total and every saved monthly payment link",
   for(const change of [{total_paise:1},{invoice_count:3},{preflight_remaining:1},{invoices:[reminder.invoices[0],reminder.invoices[0]]}])assert.throws(()=>buildBillingReminderEmail({reminder:{...reminder,...change},dashboardOrigin:options.dashboardOrigin}));
   const late = { ...reminder.invoices[1], kind: "late_fee" };
   assert.throws(() => buildBillingReminderEmail({ reminder: { ...reminder, invoices: [reminder.invoices[0], late] }, dashboardOrigin: options.dashboardOrigin }), /Invalid reminder invoice/);
+});
+
+test("grouped reminders include a one-off balance under its own description", () => {
+  const invoices = [
+    { ...invoice, child_name: "First Child", kind: "monthly", paid_paise: 0 },
+    { ...invoice, id: "second-invoice", child_name: "Second Child", kind: "one_off", description: "Skills clinic", amount_paise: 200000, paid_paise: 0 },
+  ];
+  const reminder = { parent_name: "Parent", invoices, invoice_count: 2, total_paise: 200100, preflight_remaining: 0 };
+  const email = buildBillingReminderEmail({ reminder, dashboardOrigin: options.dashboardOrigin });
+  assert.match(email.text, /Total pending: ₹2,001/);
+  assert.match(email.text, /First Child · December 2026 · Monthly fee · ₹1/);
+  assert.match(email.text, /Second Child · Skills clinic · ₹2,000/);
 });
 
 test("a capped link list discloses its limit while preserving the full pending total",()=>{

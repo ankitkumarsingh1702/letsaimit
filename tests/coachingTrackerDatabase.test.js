@@ -96,7 +96,7 @@ test('coaching tracker preserves parent ownership, scoped coach writes and Gmail
     await as('authenticated',parent,()=>assert.rejects(rpc('claim_parent_attendance_email'),{code:'42501'}));
     await as('anon',null,()=>assert.rejects(rpc('list_coaching_students',[today,'admin']),{code:'42501'}));
     await as('anon',null,()=>assert.rejects(rpc('list_coaching_student_profile',[child,'admin']),{code:'42501'}));
-    await as('anon',null,()=>assert.rejects(rpc('queue_students_attendance_email',[today,'admin']),{code:'42501'}));
+    assert.equal((await db.query("select to_regprocedure('public.queue_students_attendance_email(date,text,uuid)') as fn")).rows[0].fn,null);
     await as('anon',null,()=>assert.rejects(rpc('list_coaching_practice',[child,'parent']),{code:'42501'}));
     await as('authenticated',owner,()=>assert.rejects(rpc('read_coaching_email_attendance',[randomUUID(),ticketToken]),{code:'42501'}));
     assert.equal((await db.query('select email_enabled from private.coaching_settings')).rows[0].email_enabled,false);
@@ -349,42 +349,6 @@ test('coaching tracker preserves parent ownership, scoped coach writes and Gmail
       await followUp(removed,'closed');
       assert.equal(await service('claim_parent_attendance_email'),null);
       assert.equal(await state(suppressed),'cancelled');
-    } finally {
-      await db.exec('rollback');
-    }
-  });
-  await t.test('manual parent email uses saved marks, explicit workspace scope and existing delivery dedupe',async()=>{
-    await db.exec('begin');
-    try {
-      const adminCoach=admins[1];
-      const assignedStudent=await enrol(parent,'Assigned only',{registeredEmail:'guardian@example.test'});
-      const otherStudent=await enrol(other,'Other roster');
-      const noSession=await enrol(other,'No session');
-      const closed=await enrol(other,'Closed enrolment');
-      await assign(assignedStudent,adminCoach.email);
-      await save(owner,today,[mark(assignedStudent),mark(otherStudent,'absent'),mark(noSession,'no_session'),mark(closed)]);
-      await followUp(closed,'closed');
-      const send=(actor,scope,id=null)=>staff(actor,'queue_students_attendance_email',[today,scope,id]);
-      await as('authenticated',adminCoach,()=>rejectsInTransaction(
-        ()=>rpc('queue_students_attendance_email',[today,'coach']),'PT409'));
-      await db.exec('update private.coaching_settings set parent_attendance_email_enabled=true');
-      assert.deepEqual(await send(adminCoach,'coach',otherStudent),{queued:0,alreadyQueued:0,eligible:0});
-      assert.deepEqual(await send(adminCoach,'coach'),{queued:1,alreadyQueued:0,eligible:1});
-      assert.deepEqual(await send(adminCoach,'coach',assignedStudent),{queued:0,alreadyQueued:1,eligible:1});
-      const notice=await service('claim_parent_attendance_email');
-      assert.equal(notice.childName,'Assigned only');
-      assert.equal(notice.recipientEmail,'guardian@example.test');
-      assert.equal(notice.status,'present');
-      assert.equal(await service('finish_parent_attendance_email',[notice.id,notice.leaseToken,'sent']),true);
-      await as('authenticated',coach,()=>rejectsInTransaction(
-        ()=>rpc('queue_students_attendance_email',[today,'admin']),'42501'));
-      assert.deepEqual(await send(adminCoach,'admin'),{queued:1,alreadyQueued:1,eligible:2});
-      const unconfirmed=await service('claim_parent_attendance_email');
-      assert.equal(unconfirmed.childName,'Other roster');
-      assert.equal(unconfirmed.status,'absent');
-      assert.equal(await service('finish_parent_attendance_email',[unconfirmed.id,unconfirmed.leaseToken,'unconfirmed']),true);
-      assert.deepEqual(await send(owner,'admin'),{queued:0,alreadyQueued:2,eligible:2});
-      assert.equal(await service('claim_parent_attendance_email'),null);
     } finally {
       await db.exec('rollback');
     }

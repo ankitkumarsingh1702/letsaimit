@@ -49,7 +49,8 @@ export function billingInvoice(record) {
     community: text(record.community), sport: text(record.sport), periodStart: record.period_start, dueDate: record.due_date,
     currency: "INR", amountPaise: record.amount_paise, baseAmountPaise: record.base_amount_paise,
     lateFeePaise: record.late_fee_paise, paidPaise: record.paid_paise, refundedPaise: record.refunded_paise,
-    kind: historicalLateFee ? "late_fee" : "monthly",
+    kind: historicalLateFee ? "late_fee" : record.kind === "one_off" ? "one_off" : "monthly",
+    description: text(record.description),
     status: record.status, paymentUrl: historicalLateFee ? null : safeRazorpayUrl(record.payment_url),
     invoiceUrl: historicalLateFee ? null : safeRazorpayUrl(record.invoice_url),
     createdAt: record.created_at, updatedAt: optionalDate(record.updated_at), paidAt: optionalDate(record.paid_at) };
@@ -63,7 +64,7 @@ export function billingSnapshot(value, { admin = false } = {}) {
     throw new Error("Billing totals could not be confirmed.");
   }
   return {
-    invoices: value.invoices.map(billingInvoice).filter(invoice => invoice.kind === "monthly" || (admin && invoice.paidPaise > 0)),
+    invoices: value.invoices.map(billingInvoice).filter(invoice => invoice.kind !== "late_fee" || (admin && invoice.paidPaise > 0)),
     hasMore: value.has_more === true,
     accounts: (value.accounts || []).map(billingAccount),
     upcomingMonth: value.upcoming_month ? upcomingBillingMonth(value.upcoming_month) : null,
@@ -94,14 +95,16 @@ export function upcomingBillingMonth(value) {
   return { month: value.month, children: rows, totalPaise: value.total_paise, oldPendingPaise: value.old_pending_paise, oldPendingCount: value.old_pending_count };
 }
 
-/** The parent asked for one child/month row; hosted invoices remain separate payment obligations. */
+/** Keep monthly charges together and give each one-time invoice its own row. */
 export function groupParentInvoices(invoices) {
   const groups = new Map();
   for (const invoice of invoices) {
-    if (invoice.kind !== "monthly") continue;
+    if (invoice.kind === "late_fee") continue;
+    const oneTime = invoice.kind === "one_off";
     const cycle = invoice.periodStart.slice(0, 7);
-    const key = `${invoice.registrationId}:${cycle}`;
+    const key = oneTime ? invoice.id : `${invoice.registrationId}:${cycle}`;
     if (!groups.has(key)) groups.set(key, { id: key, registrationId: invoice.registrationId, childName: invoice.childName,
+      kind: invoice.kind, description: oneTime ? invoice.description : "",
       periodStart: invoice.periodStart, invoices: [], totalPaise: 0, paidPaise: 0, refundedPaise: 0, pendingPaise: 0 });
     const group = groups.get(key);
     group.invoices.push(invoice);
@@ -118,7 +121,12 @@ export function groupParentInvoices(invoices) {
     const dueDate = candidates.map(invoice => invoice.dueDate).sort((a, b) => Date.parse(a) - Date.parse(b))[0];
     let status = "pending";
     if (!active.length) status = group.invoices.every(invoice => invoice.status === "cancelled") ? "cancelled" : "expired";
-    else if (group.pendingPaise > 0) status = unpaid.some(invoice => invoice.status === "overdue") ? "overdue" : unpaid.some(invoice => invoice.status === "failed") ? "failed" : unpaid.every(invoice => invoice.status === "creating") ? "creating" : "pending";
+    else if (group.pendingPaise > 0) {
+      if (unpaid.some(invoice => invoice.status === "overdue")) status = "overdue";
+      else if (unpaid.some(invoice => invoice.status === "failed")) status = "failed";
+      else if (unpaid.every(invoice => invoice.status === "processing")) status = "processing";
+      else if (unpaid.every(invoice => invoice.status === "creating")) status = "creating";
+    }
     else if (group.paidPaise > 0 && group.refundedPaise >= group.paidPaise) status = "refunded";
     else if (group.refundedPaise > 0) status = "partially_refunded";
     else if (group.paidPaise > 0) status = "paid";
@@ -162,7 +170,12 @@ export async function setNextMonthlyFee({ client, verifyGoogleUser, checkAccess,
   };
   await verify();
   const { data, error } = await client.rpc("set_monthly_coaching_fee", { p_registration_id: account.registrationId, p_amount_paise: amountPaise, p_expected_revision: account.revision });
-  if (error) throw new Error(error.code === "PT409" ? "Fee changed. Refresh and try again." : "Couldn’t save the fee. Try again.");
+  if (error) {
+    if (["PT409", "40001"].includes(error.code)) {
+      throw Object.assign(new Error("Fee changed. Refresh and try again."), { code: "conflict" });
+    }
+    throw new Error("Couldn’t save the fee. Try again.");
+  }
   await verify();
   const saved = billingAccount(Array.isArray(data) ? data[0] : data);
   if (saved.registrationId !== account.registrationId || saved.nextMonthAmountPaise !== amountPaise || saved.revision <= account.revision || saved.monthlyAmountPaise !== account.monthlyAmountPaise) throw new Error("The saved fee could not be confirmed. Refresh billing.");
@@ -175,7 +188,7 @@ export function formatMoney(value) {
 }
 export function filterBillingInvoices(rows, { query = "", status = "" } = {}) {
   const term = query.trim().toLocaleLowerCase("en-IN");
-  return rows.filter(row => (!status || row.status === status) && (!term || [row.number, row.parentName, row.parentEmail, row.childName, row.community, row.sport].some(value => value.toLocaleLowerCase("en-IN").includes(term))));
+  return rows.filter(row => (!status || row.status === status) && (!term || [row.number, row.parentName, row.parentEmail, row.childName, row.community, row.sport, text(row.description)].some(value => value.toLocaleLowerCase("en-IN").includes(term))));
 }
 
 export function billingCsv(rows) {

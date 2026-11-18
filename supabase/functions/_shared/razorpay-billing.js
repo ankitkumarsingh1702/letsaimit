@@ -2,6 +2,7 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const PROVIDER_ID = /^(inv|pay|order|rfnd)_[A-Za-z0-9]{6,40}$/;
 const RECEIPT = /^[A-Za-z0-9_-]{1,40}$/;
 const STATES = new Set(["draft", "issued", "partially_paid", "paid", "cancelled", "expired", "deleted"]);
+const CLOSED_STATES = new Set(["cancelled", "expired", "deleted"]);
 const encoder = new TextEncoder();
 
 /** Deliberately excludes provider response text, customer details and credentials. */
@@ -47,6 +48,19 @@ export function isLateFeeInvoice(bill) {
   return bill?.kind === "late_fee" || bill?.late_fee_paise > 0;
 }
 
+export function oneOffInvoiceDescription(bill) {
+  if (bill?.kind !== "one_off") return null;
+  const value = bill.description ?? "One-off payment";
+  if (typeof value !== "string" || !value.trim() || [...value].length > 80 || /[\p{Cc}<>]/u.test(value)) {
+    throw new BillingProviderError("invalid_bill");
+  }
+  return value.trim();
+}
+
+export function isTerminalInvoiceSnapshot(snapshot) {
+  return Boolean(snapshot && (CLOSED_STATES.has(snapshot.provider_status) || (snapshot.captured === true && snapshot.paid_paise > 0)));
+}
+
 function boundedTimestamp(value) {
   if (value == null || value === "") return null;
   if (!Number.isSafeInteger(value) || value <= 0 || value > 253402300799) invalid();
@@ -60,8 +74,11 @@ function baseSnapshot(entity, bill) {
   if (bill.provider_invoice_id && providerInvoiceId !== bill.provider_invoice_id) invalid();
   if (entity.receipt !== stableReceipt || entity.currency !== "INR" || money(entity.amount) !== amount || !STATES.has(entity.status)) invalid();
   if (entity.notes?.billing_id && entity.notes.billing_id !== bill.id) invalid();
-  const orderId = id(entity.order_id, "order", true);
-  if (bill.provider_order_id && orderId !== bill.provider_order_id) invalid();
+  const reportedOrderId = id(entity.order_id, "order", true);
+  const savedOrderId = id(bill.provider_order_id, "order", true);
+  // Razorpay can omit the order when it closes an invoice. Keep a previously verified order for payment matching.
+  const orderId = reportedOrderId ?? (CLOSED_STATES.has(entity.status) ? savedOrderId : null);
+  if (savedOrderId && orderId !== savedOrderId) invalid();
   const paid = money(entity.amount_paid ?? 0), due = money(entity.amount_due ?? (amount - paid));
   // A cancelled/expired invoice may have no collectible balance. Its original amount remains immutable.
   if (paid > amount || due > amount || (["issued", "partially_paid", "paid"].includes(entity.status) && paid + due !== amount)) invalid();
@@ -129,7 +146,7 @@ export function createRazorpayClient({ keyId, keySecret, fetch: fetcher = global
       return snapshot;
     }
     const payment = await call(`payments/${encodeURIComponent(snapshot.provider_payment_id)}`);
-    if (payment.entity !== "payment" || id(payment.id, "pay") !== snapshot.provider_payment_id || payment.invoice_id !== snapshot.provider_invoice_id || payment.order_id !== checked.orderId || payment.currency !== "INR" || money(payment.amount) !== snapshot.amount_paise) invalid();
+    if (payment.entity !== "payment" || id(payment.id, "pay") !== snapshot.provider_payment_id || payment.invoice_id !== snapshot.provider_invoice_id || !checked.orderId || payment.order_id !== checked.orderId || payment.currency !== "INR" || money(payment.amount) !== snapshot.amount_paise) invalid();
     if (payment.captured !== true || !["captured", "refunded"].includes(payment.status)) {
       if (checked.reportedPaid > 0 || entity.status === "paid") invalid();
       return { ...snapshot, provider_payment_id: null };
@@ -143,14 +160,15 @@ export function createRazorpayClient({ keyId, keySecret, fetch: fetcher = global
   async function createInvoice(bill) {
     if (isLateFeeInvoice(bill)) throw new BillingProviderError("invalid_bill");
     const { amount, stableReceipt } = validateBill(bill);
+    const oneOffDescription = oneOffInvoiceDescription(bill);
     const parentName = plain(bill.parent_name, 80).slice(0, 50);
     const parentEmail = plain(bill.parent_email, 254);
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(parentEmail)) throw new BillingProviderError("invalid_bill");
     const phone = bill.parent_phone ? plain(bill.parent_phone, 24) : "";
     if (phone && !/^\+?\d{7,15}$/.test(phone)) throw new BillingProviderError("invalid_bill");
-    const body = { type: "invoice", receipt: stableReceipt, description: "LetsAimIt monthly fee", partial_payment: false,
+    const body = { type: "invoice", receipt: stableReceipt, description: oneOffDescription ? `LetsAimIt: ${oneOffDescription}` : "LetsAimIt monthly fee", partial_payment: false,
       customer: { name: parentName, email: parentEmail, ...(phone ? { contact: phone } : {}) },
-      line_items: [{ name: "Monthly coaching", amount, currency: "INR", quantity: 1 }],
+      line_items: [{ name: oneOffDescription ?? "Monthly coaching", amount, currency: "INR", quantity: 1 }],
       sms_notify: false, email_notify: false, currency: "INR", notes: { billing_id: bill.id },
     };
     const entity = await call("invoices", { method: "POST", body });
@@ -169,21 +187,20 @@ export function createRazorpayClient({ keyId, keySecret, fetch: fetcher = global
   /** Close a known unpaid invoice, never its payment or refund history. Every retry starts with GET. */
   async function cancelInvoice(bill) {
     const before = await reconcileInvoice(bill);
-    const terminal = snapshot => snapshot.paid_paise > 0 || ["cancelled", "expired", "deleted"].includes(snapshot.provider_status);
-    if (terminal(before)) return before;
-    // A stale provider read is not authority to cancel money already recorded locally.
-    if ((Number.isSafeInteger(bill.paid_paise) && bill.paid_paise > before.paid_paise)
-      || !["draft", "issued"].includes(before.provider_status)) invalid();
+    // A stale provider read is not authority to close an invoice with locally recorded money.
+    if (Number.isSafeInteger(bill.paid_paise) && bill.paid_paise > before.paid_paise) invalid();
+    if (isTerminalInvoiceSnapshot(before)) return before;
+    if (!["draft", "issued"].includes(before.provider_status)) invalid();
     const path = `invoices/${encodeURIComponent(before.provider_invoice_id)}/cancel`;
     try {
       const cancelled = await canonical(await call(path, { method: "POST" }), bill);
-      if (terminal(cancelled)) return cancelled;
+      if (isTerminalInvoiceSnapshot(cancelled)) return cancelled;
     } catch {
       // A concurrent payment or a lost cancellation response must be resolved from the provider.
       // No refund endpoint is involved and a rejected/ambiguous POST is never treated as success.
     }
     const after = await reconcileInvoice(bill);
-    if (terminal(after)) return after;
+    if (isTerminalInvoiceSnapshot(after)) return after;
     throw new BillingProviderError("provider_unavailable");
   }
 
