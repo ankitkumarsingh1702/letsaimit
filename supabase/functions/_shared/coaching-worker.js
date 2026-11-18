@@ -1,6 +1,6 @@
 import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 import { isSingleMailbox } from './notification-worker.js';
-import { buildCoachingAttendanceEmail, buildCoachingAttendanceLinkEmail, coachingSheet, isCoachingUuid, MAX_COACHING_EMAIL_ROWS, validateCoachingActionUrl, validateCoachingDashboardOrigin } from './coaching-email.js';
+import { buildCoachingAttendanceEmail, buildCoachingAttendanceLinkEmail, buildParentAttendanceEmail, coachingSheet, isCoachingUuid, MAX_COACHING_EMAIL_ROWS, validateCoachingActionUrl, validateCoachingDashboardOrigin } from './coaching-email.js';
 
 const MAX_BODY=48*1024;
 const TOKEN=/^[A-Za-z0-9_-]{43}$/;
@@ -89,7 +89,8 @@ export function createCoachingEmailActionHandler({senderEmail,rpc,assertReady=()
 /** Authenticated scheduler work cannot choose a recipient or take roster content from the HTTP body. */
 export function createCoachingWorkerHandler({
   secret, signingSecret, senderEmail, actionUrl, dynamicEmailReady=false,
-  dashboardOrigin='', sendLinkEmail=null, rpc, sendEmail, assertReady=()=>{}, clock=Date.now, maxJobs=8,
+  dashboardOrigin='', sendLinkEmail=null, sendParentAttendanceEmail=null,
+  rpc, sendEmail, assertReady=()=>{}, clock=Date.now, maxJobs=8,
 }){
   return async request=>{
     if(request.method!=='POST')return json(405,{ok:false,error:'method_not_allowed'});
@@ -113,6 +114,9 @@ export function createCoachingWorkerHandler({
     }
     try { await assertReady(); } catch { return json(503,{ok:false,error:'not_configured'}); }
     const counts={processed:0,sent:0,skipped:0,failedAttempts:0,unconfirmed:0};const deadline=clock()+90000;
+    const parentDelivery = modes.includes('link') && typeof sendParentAttendanceEmail === 'function';
+    const parentCounts = parentDelivery ? { claimed: 0, sent: 0, unconfirmed: 0 } : null;
+    const result = () => parentCounts ? { ...counts, parentAttendance: parentCounts } : counts;
     try{
       if (modes.includes('interactive')) await rpc('enqueue_coaching_attendance',{});
       for(let i=0;i<Math.min(8,Math.max(1,maxJobs))&&clock()<deadline;i++){
@@ -152,8 +156,36 @@ export function createCoachingWorkerHandler({
           try{if(!await rpc('finish_coaching_email',{p_id:job.id,p_lease_token:job.leaseToken,p_outcome:'retry',p_error_code:'transport_failure'}))counts.unconfirmed++;}catch{counts.unconfirmed++;}
         }
       }
-      return json(200,{ok:true,...counts});
-    }catch{return json(503,{ok:false,error:'worker_unavailable',...counts});}
+      if (parentCounts) {
+        for (let i = 0; i < Math.min(8, Math.max(1, maxJobs)) && clock() < deadline - 22000; i++) {
+          const notice = await rpc('claim_parent_attendance_email', {});
+          if (!notice) break;
+          parentCounts.claimed++;
+          if (!isCoachingUuid(notice.id) || !isCoachingUuid(notice.leaseToken)) {
+            parentCounts.unconfirmed++;
+            continue;
+          }
+          let outcome = 'unconfirmed';
+          try {
+            if (!isSingleMailbox(notice.recipientEmail)) throw new TypeError('invalid_recipient');
+            const message = buildParentAttendanceEmail({ ...notice, dashboardOrigin });
+            const delivery = await sendParentAttendanceEmail({
+              ...message,
+              recipientEmail: notice.recipientEmail,
+              messageId: `<attendance-${notice.id}@letsaimit.com>`,
+            });
+            if (delivery?.accepted === true) outcome = 'sent';
+          } catch { /* Claim crosses the send boundary. An uncertain outcome is never resent. */ }
+          try {
+            if (await rpc('finish_parent_attendance_email', {
+              p_id: notice.id, p_lease_token: notice.leaseToken, p_outcome: outcome,
+            }) === true && outcome === 'sent') parentCounts.sent++;
+            else parentCounts.unconfirmed++;
+          } catch { parentCounts.unconfirmed++; }
+        }
+      }
+      return json(200,{ok:true,...result()});
+    }catch{return json(503,{ok:false,error:'worker_unavailable',...result()});}
   };
 }
 

@@ -1,16 +1,23 @@
 # Parent and coaching tracker
 
 `/parent/` is a standalone parent workspace. Dashboard retains saved requests and
-fees; Tracker shows each child's recorded attendance and weekly feedback;
-Account retains the existing deletion flow. Admins open Attendance, Weekly
-feedback and Coach access from `/admin/?view=attendance`. `/coach-dashboard/`
-is the coach workspace for attendance and feedback on assigned children.
+fees; Tracker shows each child's attendance, practice and weekly feedback;
+Account retains the existing deletion flow. Admins open Students from
+`/admin/?view=students` and use Attendance for the existing staff tools.
+`/coach-dashboard/` opens the Students roster for the signed-in coach.
 
 One verified Google identity can use parent, coach and admin capabilities.
 Parents see only their current Auth UID's approved enrolments. Admins see the
 approved roster; coaches see only children currently assigned to their Google
 email after the assignment start date. Trials and pending or declined
 enrolments stay in the Register. Client navigation never grants access.
+
+Students groups accepted enrolments with Confirmed follow-up status by society.
+The roster and profiles save to the same date-specific attendance record.
+Profiles also record warm-up, strength, 5 m, 10 m and 100 m sprints, push-ups
+and body balance. Each practice save creates its own dated attempt and can
+be retried with the same attempt ID. Staff and parents page through attempts
+by save time, with dates and times displayed in IST.
 
 ## Saved records and interface
 
@@ -35,12 +42,12 @@ Forward migration `20261110220027_coaching_tracker_write_identity_lock.sql`
 serializes authenticated tracker writes with account deletion through the
 existing Auth identity lock. Parent/staff reads remain stable and read-only.
 
-Migration `20261112215334_default_coaching_assignment.sql` adds the private
-`coaching_settings.default_coach_email` setting. Configure it per target with
-Dhiraj’s Google sign-in address. New enrolments get a Register assignee and a
-tracker assignment when submitted. The tracker exposes the child only after
-approval. Existing rows and trial requests keep their assignments. Deleting the
-default coach’s account clears this setting along with existing assignments.
+Configure `private.coaching_settings.default_coach_email` per target with the
+operator-verified default coach's Google sign-in address. After enabling the
+confirmed-student default, accepted enrolments receive a tracker assignment
+when they become Confirmed. The activation backfills confirmed students with
+an empty assignment and keeps named assignments. Register and tracker
+assignments serve their existing separate purposes.
 
 Authenticated RPCs:
 
@@ -48,6 +55,7 @@ Authenticated RPCs:
 | --- | --- |
 | `list_my_tracker()` | Owned children, attendance, feedback and date range |
 | `list_staff_tracker(p_date,p_scope)` | `admin` returns all eligible enrolments to verified admins. `coach` returns assigned eligible enrolments. The one-argument overload remains available to older clients. |
+| `list_coaching_students(p_date,p_scope)` | Confirmed roster and attendance for the chosen day and staff scope |
 | `set_coaching_assignment(...)` | Admin-only assignment receipt with new revision |
 | `save_coaching_attendance(p_session_date,p_rows)` | Atomic revision-checked rows; `{ok,attendance}` |
 | `save_coaching_feedback(...)` | Manual saved weekly feedback receipt |
@@ -63,6 +71,13 @@ The existing financial archive/ledger remains unchanged. Re-signup never joins
 an old child's records by email or phone.
 
 ## Attendance email
+
+A saved Present or Absent mark for a confirmed student can queue one notice
+per student and session date. The existing coaching worker uses the
+registration's saved guardian contact and the existing LetsAimIt sender.
+Before sending, it reads the latest saved attendance. Corrections remain
+visible in Parent Tracker. The queue allows one send attempt, including when
+the transport outcome is uncertain.
 
 When scheduled email is enabled, the minute scheduler queues one email at **9 PM IST** for every
 currently approved admin, including the owner. The roster includes approved
@@ -96,9 +111,9 @@ Raw ticket credentials travel only in POST bodies, never action URLs or logs.
 ## Backend configuration and activation
 
 [Automation configuration](deployment/automations.json) lists the
-attendance worker, its schedule, sender settings and both delivery gates.
+attendance worker, its schedule, sender settings and delivery gates.
 
-Manual link emails use `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_FROM_EMAIL`
+Manual link emails and parent notices use `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_FROM_EMAIL`
 and `SMTP_PASSWORD`, shared with registration and billing, plus
 `ADMIN_DASHBOARD_ORIGIN` for the target's signed-in attendance link. Enable
 `private.coaching_settings.manual_email_enabled` after deploying the worker

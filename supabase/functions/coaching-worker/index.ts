@@ -21,14 +21,16 @@ async function sendEmail(message: AttendanceMessage, from: string, options: NonN
     return {accepted:Array.isArray(result.accepted)&&result.accepted.some((email:unknown)=>typeof email==='string'&&email.toLowerCase()===message.recipientEmail.toLowerCase())};
   }finally{if(timer)clearTimeout(timer);transport.close();}
 }
+const sendUsingLetsAimItSender = linkSmtp.transportOptions
+  ? (message: AttendanceMessage) => sendEmail(message, linkSmtp.senderEmail, linkSmtp.transportOptions!)
+  : null;
 Deno.serve(createCoachingHandler({
   secret:env('NOTIFICATION_CRON_SECRET'),signingSecret:env('COACHING_EMAIL_SIGNING_SECRET'),senderEmail,
   actionUrl:`${supabaseUrl}/functions/v1/coaching-worker/attendance`,
   dynamicEmailReady:env('COACHING_DYNAMIC_EMAIL_READY')==='true' && !!transportOptions,
   dashboardOrigin:linkSmtp.dashboardOrigin,
-  sendLinkEmail:linkSmtp.transportOptions
-    ? (message: AttendanceMessage) => sendEmail(message, linkSmtp.senderEmail, linkSmtp.transportOptions!)
-    : null,
+  sendLinkEmail:sendUsingLetsAimItSender,
+  sendParentAttendanceEmail:sendUsingLetsAimItSender,
   sendEmail:(message: AttendanceMessage) => {
     if (!transportOptions) throw new Error('configuration_error');
     return sendEmail(message, senderEmail, transportOptions);

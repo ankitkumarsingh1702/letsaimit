@@ -30,7 +30,7 @@ test('admin send → real coaching SQL → SMTP alternatives → Gmail POST → 
     await authenticated(admins[0],'review_registration',[receipt.id,'accepted',1,null]);ids.push(receipt.id);
   }
   const {today}=(await db.query("select (now() at time zone 'Asia/Kolkata')::date::text today")).rows[0];
-  const allowed=new Set(['enqueue_coaching_attendance','claim_coaching_email','claim_coaching_email_for_modes','prepare_coaching_email','set_coaching_email_token','finish_coaching_email','read_coaching_email_attendance','save_coaching_email_attendance']);
+  const allowed=new Set(['enqueue_coaching_attendance','claim_coaching_email','claim_coaching_email_for_modes','prepare_coaching_email','set_coaching_email_token','finish_coaching_email','read_coaching_email_attendance','save_coaching_email_attendance','claim_parent_attendance_email','finish_parent_attendance_email']);
   const rpc=async(name,args)=>{
     assert.ok(allowed.has(name));const entries=Object.entries(args);
     return as('service_role',null,async()=> (await db.query(`select public.${name}(${entries.map(([key],i)=>`${key} => $${i+1}`).join(',')}) value`,entries.map(([key,value])=>key!=='p_modes' && value && typeof value==='object'?JSON.stringify(value):value))).rows[0].value);
@@ -131,4 +131,41 @@ test('admin send → real coaching SQL → SMTP alternatives → Gmail POST → 
   assert.ok(revokedMail&&expiredMail);
   const revoked=initial(revokedMail);await db.query('delete from public.allowed_admins where email=$1',[revokedMail.recipientEmail]);assert.equal((await action(request(revoked))).status,403);
   const expired=initial(expiredMail);await db.query("update private.coaching_email_tickets set expires_at=now()-interval '1 second' where id=$1",[expired.ticketId]);assert.equal((await action(request(expired))).status,403);
+
+  await t.test('a confirmed student’s attendance save delivers one parent notice through the existing worker', async () => {
+    const child = ids[0];
+    await as('authenticated', admins[0], () => db.query("update public.registrations set status='confirmed' where id=$1", [child]));
+    await db.exec('update private.coaching_settings set parent_attendance_email_enabled=true');
+    const { prior_day: day } = (await db.query("select ((now() at time zone 'Asia/Kolkata')::date-1)::text as prior_day")).rows[0];
+    const mark = (status, revision) => authenticated(admins[0], 'save_coaching_attendance', [
+      day,
+      JSON.stringify([{ registrationId: child, status, revision }]),
+    ]);
+    await mark('present', 0);
+    await mark('absent', 1);
+
+    const deliveries = [];
+    const parentWorker = createCoachingWorkerHandler({
+      secret,
+      dashboardOrigin: 'https://uat.letsaimit.com',
+      rpc,
+      sendLinkEmail: async () => { throw new Error('unexpected staff send'); },
+      sendParentAttendanceEmail: async message => {
+        deliveries.push(message);
+        return { accepted: true };
+      },
+    });
+    const delivered = await parentWorker(workerRequest());
+    assert.equal(delivered.status, 200);
+    assert.deepEqual((await delivered.json()).parentAttendance, { claimed: 1, sent: 1, unconfirmed: 0 });
+    assert.equal(deliveries.length, 1);
+    assert.equal(deliveries[0].recipientEmail, parent.email);
+    assert.match(deliveries[0].text, /Example child 1 was marked absent/);
+
+    await mark('present', 2);
+    assert.equal((await (await parentWorker(workerRequest())).json()).parentAttendance.sent, 0);
+    assert.equal(deliveries.length, 1);
+    const tracker = await authenticated(parent, 'list_my_tracker');
+    assert.equal(tracker.attendance.find(row => row.registrationId === child && row.sessionDate === day).status, 'present');
+  });
 });

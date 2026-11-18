@@ -30,6 +30,7 @@ export function validateAuthReturnTarget(value) {
   }
   if (url.pathname === "/admin/") {
     if (!entries.length) return "/admin/";
+    if (entries.length === 1 && url.searchParams.get("view") === "students") return "/admin/?view=students";
     if (url.searchParams.get("view") === "attendance") {
       if (entries.length === 1) return "/admin/?view=attendance";
       const date = url.searchParams.get("date");

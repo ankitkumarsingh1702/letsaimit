@@ -81,7 +81,14 @@
       "recipients": "One email per current approved admin per session date",
       "maxRosterSize": 100,
       "ticketLifetimeHours": 48,
-      "actions": ["Present", "Absent", "No session"]
+      "actions": ["Present", "Absent", "No session"],
+      "parentNotifications": {
+        "transport": "gmailSmtp",
+        "dispatchSetting": "private.coaching_settings.parent_attendance_email_enabled",
+        "trigger": "Saved Present or Absent attendance",
+        "recipient": "Guardian contact saved on the confirmed enrolment",
+        "deduplication": "One notice per student and session date"
+      }
     }
   },
   "otherAutomations": {

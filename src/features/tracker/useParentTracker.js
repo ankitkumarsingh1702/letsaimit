@@ -2,20 +2,20 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { fetchTracker, todayIST } from './trackerData.js';
 
 /** Auth-scoped snapshots; visible pages reconcile silently without a document reload. */
-export function useParentTracker(auth, { staff = false, date = null, scope } = {}) {
+export function useParentTracker(auth, { staff = false, date = null, scope, students = false } = {}) {
   const userId = auth.user?.id, client = auth.client;
   const [state, setState] = useState({ owner: null, snapshot: null, loading: true, error: '', lastSynced: null });
   const actor = useRef(auth); actor.current = auth;
   const generation = useRef(0), pending = useRef(null), queued = useRef(false), alive = useRef(false);
   const refreshRef = useRef(null);
-  const key = `${userId}:${staff}:${date || ''}:${scope || ''}:${staff && auth.phase === 'authorized' ? 'admin' : 'member'}`;
+  const key = `${userId}:${staff}:${date || ''}:${scope || ''}:${students}:${staff && auth.phase === 'authorized' ? 'admin' : 'member'}`;
   const refresh = useCallback(() => {
     if (!alive.current || !userId || !client || document.visibilityState === 'hidden') return Promise.resolve();
     if (pending.current?.key === key) { queued.current = true; return pending.current.promise; }
     const ticket = generation.current;
     const work = (async () => {
       try {
-        const snapshot = await fetchTracker({ client, userId, verifyGoogleUser: actor.current.verifyGoogleUser, staff, date: date || todayIST(), scope });
+        const snapshot = await fetchTracker({ client, userId, verifyGoogleUser: actor.current.verifyGoogleUser, staff, date: date || todayIST(), scope, students });
         if (alive.current && generation.current === ticket && actor.current.user?.id === userId) setState({ owner: key, snapshot, loading: false, error: '', lastSynced: new Date().toISOString() });
       } catch (error) {
         if (alive.current && generation.current === ticket && actor.current.user?.id === userId) setState(previous => ({
@@ -29,7 +29,7 @@ export function useParentTracker(auth, { staff = false, date = null, scope } = {
     })();
     pending.current = { key, promise: work };
     return work;
-  }, [client, userId, staff, date, scope, key]);
+  }, [client, userId, staff, date, scope, students, key]);
   refreshRef.current = refresh;
   useEffect(() => {
     alive.current = true; ++generation.current; pending.current = null; queued.current = false;

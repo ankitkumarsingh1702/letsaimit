@@ -68,24 +68,25 @@ export function trackerSnapshot(value, { staff = false } = {}) {
   return result;
 }
 
-async function verifyActor({ verifyGoogleUser, userId }) {
+export async function verifyActor({ verifyGoogleUser, userId }) {
   const user = await verifyGoogleUser();
   if (!user?.isGoogle || user.id !== userId) throw problem('Sign in with the same Google account.', 'identity_changed');
 }
 
-function rpcError(error, fallback) {
+export function rpcError(error, fallback) {
   if (['42501', 'PGRST301', 'PGRST302', 'PGRST303'].includes(error?.code)) return problem('Tracker access is unavailable for this account.', 'access_denied');
   if (['40001', 'PT409'].includes(error?.code)) return problem('This row changed. Load the latest values before saving.', 'conflict');
   return problem(fallback);
 }
 
 export async function fetchTracker(options) {
-  const { client, staff = false, date, scope } = options;
+  const { client, staff = false, date, scope, students = false } = options;
   if (staff && !validTrackerDate(date)) throw problem('Choose a valid session date.');
   if (scope !== undefined && (!staff || !['admin', 'coach'].includes(scope))) throw problem('Choose a tracker workspace.');
+  if (students && (!staff || !scope)) throw problem('Choose a students workspace.');
   await verifyActor(options);
   const { data, error } = staff
-    ? await client.rpc('list_staff_tracker', scope ? { p_date: date, p_scope: scope } : { p_date: date })
+    ? await client.rpc(students ? 'list_coaching_students' : 'list_staff_tracker', scope ? { p_date: date, p_scope: scope } : { p_date: date })
     : await client.rpc('list_my_tracker');
   if (error) throw rpcError(error, 'Tracker could not load. Please retry.');
   await verifyActor(options);

@@ -247,7 +247,7 @@ export function OwnRequests({ auth }) {
         </div>)}
       </section>
       <div hidden={view !== "payments"}><BillingPanel key={auth.user.id} auth={auth} /></div>
-      <div hidden={view !== "tracking"}><ParentTracker tracker={tracker} /></div>
+      <div hidden={view !== "tracking"}><ParentTracker tracker={tracker} auth={auth} active={view === "tracking"} /></div>
       <div hidden={view !== "account"}><DeleteAccountPanel auth={auth} /></div>
     </div>
   </div>;

@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { trackerSnapshot, fetchTracker, saveAttendance, saveWeeklyFeedback, saveCoachAssignment, validTrackerDate, todayIST, coachingEmailStatus } from '../src/features/tracker/trackerData.js';
+import { fetchCoachingPractice, saveCoachingPractice } from '../src/features/tracker/practiceData.js';
 
 const child = { registrationId: '10000000-0000-4000-8000-000000000001', childName: 'Child', sport: 'Football', community: 'Community', privateEmail: 'do-not-return@example.com' };
 const actor = { id: 'actor-a', isGoogle: true }, verify = async () => actor;
@@ -76,6 +77,9 @@ test('staff workspaces request explicit scope and reject snapshots for a differe
   raw.isAdmin = true;
   await assert.rejects(fetchTracker({ ...staff, scope: 'coach' }), { code: 'access_denied' });
   assert.equal((await fetchTracker({ ...staff, scope: 'admin' })).isAdmin, true);
+  assert.equal((await fetchTracker({ ...staff, scope: 'admin', students: true })).isAdmin, true);
+  assert.deepEqual(calls.at(-1), ['list_coaching_students', { p_date: date, p_scope: 'admin' }]);
+  await assert.rejects(fetchTracker({ ...staff, students: true }), /Choose a students workspace/);
 });
 
 test('atomic attendance saves only the explicit draft and requires a confirmed receipt', async () => {
@@ -111,4 +115,47 @@ test('coach access requires fresh admin permission and a matching mutation recei
   await assert.rejects(saveCoachAssignment({ ...draft, checkAccess: async () => false }), { code: 'access_denied' });
   assert.equal(calls, 0);
   assert.equal((await saveCoachAssignment(draft)).assignmentRevision, 2);
+});
+
+test('practice uses the scoped keyset cursor, retaining equal attempts on the same day', async () => {
+  const registrationId = child.registrationId;
+  const recordedAt = '2026-11-18T18:30:00.123456Z';
+  const attempts = Array.from({ length: 41 }, (_, index) => ({
+    id: `40000000-0000-4000-8000-${String(50 - index).padStart(12, '0')}`,
+    registrationId, exercise: 'sprint', durationMs: 4125, reps: null, distanceMeters: 10, recordedAt, sessionDate: '2026-11-19',
+  }));
+  const calls = [];
+  const config = {
+    ...options({
+      async rpc(name, args) {
+        calls.push({ name, args });
+        if (args.p_before_id) return { data: { attempts: attempts.slice(40), nextCursor: null } };
+        return { data: { attempts: attempts.slice(0, 40), nextCursor: { recordedAt, id: attempts[39].id } } };
+      },
+    }),
+    registrationId, scope: 'parent', from: '2026-11-19', to: '2026-11-19',
+  };
+  const current = await fetchCoachingPractice(config);
+  const older = await fetchCoachingPractice({ ...config, cursor: current.nextCursor });
+  assert.deepEqual([...current.attempts, ...older.attempts], attempts);
+  assert.deepEqual(calls[1], { name: 'list_coaching_practice', args: {
+    p_registration_id: registrationId, p_scope: 'parent', p_from: '2026-11-19', p_to: '2026-11-19', p_before_at: recordedAt, p_before_id: attempts[39].id,
+  } });
+  const responseWith = overrides => options({ rpc: async () => ({ data: { attempts: [{ ...attempts[0], ...overrides }], nextCursor: null } }) });
+  await assert.rejects(fetchCoachingPractice({ ...config, ...responseWith({ sessionDate: '2026-11-18' }) }), /confirm the practice attempt/);
+  await assert.rejects(fetchCoachingPractice({ ...config, ...responseWith({ registrationId: '10000000-0000-4000-8000-000000000002' }) }), { code: 'access_denied' });
+});
+
+test('a practice save sends the stable attempt key and confirms the exact result', async () => {
+  const attemptId = '40000000-0000-4000-8000-000000000001';
+  const registrationId = child.registrationId;
+  const saved = { id: attemptId, registrationId, exercise: 'push_ups', durationMs: null, reps: 12, distanceMeters: null, sessionDate: '2026-11-19', recordedAt: '2026-11-18T18:31:00Z' };
+  const calls = [];
+  const client = { rpc: async (...args) => { calls.push(args); return { data: saved }; } };
+  const draft = { ...options(client), registrationId, attemptId, exercise: 'push_ups', reps: 12 };
+  assert.deepEqual(await saveCoachingPractice(draft), saved);
+  assert.deepEqual(calls[0], ['save_coaching_practice', {
+    p_registration_id: registrationId, p_attempt_id: attemptId, p_exercise: 'push_ups', p_duration_ms: null, p_reps: 12, p_distance_meters: null,
+  }]);
+  await assert.rejects(saveCoachingPractice({ ...draft, reps: 11 }), /confirm the attempt/);
 });

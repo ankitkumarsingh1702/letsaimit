@@ -74,6 +74,34 @@ test("unloaded coaching state never claims attendance is saved or emails are ena
   assert.doesNotMatch(html, /Save attendance|Attendance saved|Daily admin email|Scheduling on/);
 }));
 
+test("Students opens separately in Admin and groups attendance by society", async () => {
+  const societies = ["Nambiar Bellezea", "Nambiar Ellegenza"];
+  const children = societies.flatMap((community, group) => Array.from({ length: 5 }, (_, index) => ({
+    ...child,
+    registrationId: `c6fa700e-ce24-4b11-9d5c-7417d7724c${group}0${index}`,
+    childName: `${group === 0 ? "Bellezea" : "Ellegenza"} student ${index + 1}`,
+    community,
+  })));
+  await withStaffUi({ children, attendance: [], feedback: [], isAdmin: true, emailEnabled: false }, async (_, vite) => {
+    const { AuthorizedAdmin } = await vite.ssrLoadModule("/src/features/admin/AdminPage.jsx");
+    const originalWindow = Object.getOwnPropertyDescriptor(globalThis, "window");
+    Object.defineProperty(globalThis, "window", { configurable: true, value: { location: new URL("https://uat.letsaimit.com/admin/?view=students") } });
+    try {
+      const html = renderToStaticMarkup(React.createElement(AuthorizedAdmin, { auth: { ...auth, phase: "authorized" } }));
+      assert.match(html, /aria-current="page"[^>]*><svg[^]*?<span>Students<\/span>/);
+      assert.match(html, /Nambiar Bellezea <span>· 5 students<\/span>/);
+      assert.match(html, /Nambiar Ellegenza <span>· 5 students<\/span>/);
+      assert.ok(html.indexOf("Bellezea student 5") < html.indexOf("Nambiar Ellegenza"));
+      assert.equal((html.match(/data-attendance="present"/g) || []).length, 10);
+      assert.equal((html.match(/data-attendance="absent"/g) || []).length, 10);
+      assert.doesNotMatch(html, /Loading saved requests|Send attendance email|Search requests/);
+    } finally {
+      if (originalWindow) Object.defineProperty(globalThis, "window", originalWindow);
+      else delete globalThis.window;
+    }
+  });
+});
+
 test("manual feedback starts from the saved draft, escapes content and cannot publish an empty update", () => withStaffUi(null, async ({ FeedbackEditor, AssignmentEditor }) => {
   const blank = renderToStaticMarkup(React.createElement(FeedbackEditor, { child, weekStart: "2026-11-09", saved: undefined, auth, onSaved() {} }));
   assert.match(blank, /<textarea required="" maxLength="1500"/);

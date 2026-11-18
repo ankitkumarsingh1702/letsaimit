@@ -15,6 +15,18 @@
 .parent-tracker-card + .parent-tracker-card { margin-top: 16px; }
 .parent-tracker-card-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 43px; padding: 11px 13px; border-bottom: 1px solid #e2e7e3; }
 .parent-tracker-card-heading h2 { color: #35463d; font: 600 13px/1.4 var(--font-body); letter-spacing: -.01em; }
+.parent-practice-timezone { color: #68746d; font-size: 11px; }
+.parent-practice-days, .parent-practice-attempts { margin: 0; padding: 0; list-style: none; }
+.parent-practice-day { display: flex; align-items: center; gap: 10px; min-height: 37px; padding: 7px 13px; border-bottom: 1px solid #e7ebe8; background: #f8faf8; }
+.parent-practice-day h3 { margin: 0; color: #42554a; font: 600 12px/1.4 var(--font-body); }
+.parent-practice-days > li + li .parent-practice-day { border-top: 1px solid #e7ebe8; }
+.parent-practice-attempts > li { display: grid; grid-template-columns: 78px minmax(0,1fr) max-content; align-items: center; gap: 12px; min-height: 38px; padding: 6px 13px; color: #506055; font: 400 12px/1.5 var(--font-body); }
+.parent-practice-attempts > li + li { border-top: 1px solid #edf0ed; }
+.parent-practice-attempts time { color: #68746d; font-variant-numeric: tabular-nums; }
+.parent-practice-attempts strong { color: #35463d; font-weight: 600; font-variant-numeric: tabular-nums; }
+.parent-practice-message { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0; padding: 14px 13px; color: #68746d; font-size: 12px; }
+.parent-practice-message[role="alert"] { color: #7c4d40; background: #fffaf8; }
+.parent-practice-pagination { justify-content: flex-end; }
 .parent-tracker-scroll { width: 100%; max-width: 100%; overflow: auto; scrollbar-width: thin; }
 .parent-tracker-scroll:focus-visible { outline-offset: -2px; }
 .parent-tracker-table { width: 100%; min-width: 840px; border-collapse: collapse; table-layout: fixed; text-align: left; }
@@ -71,5 +83,7 @@
   .parent-tracker-filters select, .parent-tracker-filters input { width: 100%; min-width: 0; max-width: none; min-height: 44px; font-size: 16px; }
   .parent-tracker-counts dd { font-size: 19px; }
   .parent-tracker-pagination .parent-dashboard-button { min-height: 44px; }
+  .parent-practice-attempts > li { grid-template-columns: 65px minmax(0,1fr) max-content; gap: 8px; }
+  .parent-practice-message .parent-dashboard-text-button { min-height: 44px; }
   .parent-feedback-dialog { padding-inline: 17px; }
 }

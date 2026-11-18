@@ -8,8 +8,8 @@ import { rememberParentRegistration, takeParentRegistration } from "../src/featu
 async function withUi(run) {
   const vite = await createServer({ server: { middlewareMode: true, hmr: false }, appType: "custom", logLevel: "error" });
   try {
-    const { default: ParentTracker } = await vite.ssrLoadModule("/src/features/parent/ParentTracker.jsx");
-    await run({ React, renderToStaticMarkup, ParentTracker, vite });
+    const { default: ParentTracker, PracticeHistory } = await vite.ssrLoadModule("/src/features/parent/ParentTracker.jsx");
+    await run({ React, renderToStaticMarkup, ParentTracker, PracticeHistory, vite });
   } finally { await vite.close(); }
 }
 
@@ -57,6 +57,36 @@ test("loading, failed reads and empty tracker never fabricate attendance or feed
   assert.match(stale, /Showing the last saved tracker/);
   assert.match(stale, /Tracking starts after your child’s registration is approved/);
   assert.doesNotMatch(stale, /<dt>Present<\/dt>/);
+}));
+
+test("parent practice groups all attempts by the India calendar day and shows that child's saved attendance", () => withUi(async ({ React, renderToStaticMarkup, PracticeHistory }) => {
+  const day = "2026-11-19";
+  const attempts = [
+    { exercise: "push_ups", reps: 10, recordedAt: "2026-11-18T18:34:00Z" },
+    { exercise: "push_ups", reps: 7, recordedAt: "2026-11-18T18:33:00Z" },
+    { exercise: "sprint", distanceMeters: 10, durationMs: 4250, recordedAt: "2026-11-18T18:32:00Z" },
+    { exercise: "sprint", distanceMeters: 10, durationMs: 4100, recordedAt: "2026-11-18T18:31:00Z" },
+    { exercise: "sprint", distanceMeters: 10, durationMs: 4100, recordedAt: "2026-11-18T18:30:00Z" },
+  ].map((attempt, index) => ({ id: String(index), sessionDate: day, durationMs: null, reps: null, ...attempt }));
+  const previousDay = { id: "previous", sessionDate: "2026-11-18", exercise: "body_balance", durationMs: 23000, reps: null, recordedAt: "2026-11-18T18:29:59Z" };
+  const html = renderToStaticMarkup(React.createElement(PracticeHistory, {
+    history: { attempts: [...attempts, previousDay], canOlder: true },
+    attendance: [
+      { registrationId: child.registrationId, sessionDate: day, status: "present" },
+      { registrationId: "other-child", sessionDate: day, status: "absent" },
+    ],
+    selectedChild: child.registrationId,
+    monthValid: true,
+  }));
+  assert.equal((html.match(/19 Nov 2026/g) || []).length, 1);
+  assert.ok(html.indexOf("19 Nov 2026") < html.indexOf("18 Nov 2026"));
+  assert.match(html, /19 Nov 2026[\s\S]*?Present/);
+  assert.doesNotMatch(html, /Absent/);
+  assert.equal((html.match(/10 m sprint/g) || []).length, 3);
+  assert.equal((html.match(/4\.1 s/g) || []).length, 2, "equal results remain separate saved attempts");
+  assert.match(html, /10 reps[\s\S]*?7 reps/);
+  assert.match(html, /00:00:00[\s\S]*?23:59:59/);
+  assert.match(html, /<button[^>]*>Older<\/button>/);
 }));
 
 test("standalone parent navigation keeps fees, requests and account controls and does not require admin membership", () => withUi(async ({ React, renderToStaticMarkup, vite }) => {

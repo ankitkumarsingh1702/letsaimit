@@ -47,6 +47,56 @@ test('SMTP failure and ambiguous acknowledgement keep durable retry state and ne
   const ambiguous=fixture({finish:false});const result=await ambiguous.handler(workerRequest());assert.equal((await result.json()).unconfirmed,1);
 });
 
+test('parent attendance uses the saved recipient and never retries an uncertain SMTP delivery', async () => {
+  const parent = 'registered.guardian@example.test';
+  for (const smtpAccepts of [true, false]) {
+    let claimed = false;
+    const deliveries = [];
+    const finishes = [];
+    let adminClaims = 0;
+    const handler = createCoachingWorkerHandler({
+      secret, dashboardOrigin: 'https://uat.letsaimit.com',
+      sendLinkEmail: async () => { throw new Error('unexpected admin email'); },
+      sendParentAttendanceEmail: async message => {
+        deliveries.push(message);
+        if (!smtpAccepts) throw new Error('private SMTP timeout');
+        return { accepted: true };
+      },
+      rpc: async (name, args) => {
+        if (name === 'claim_coaching_email_for_modes') {
+          assert.deepEqual(args, { p_modes: ['link'] });
+          adminClaims++;
+          return null;
+        }
+        if (name === 'claim_parent_attendance_email') {
+          assert.deepEqual(args, {});
+          if (claimed) return null;
+          claimed = true;
+          return { id: ticketId, leaseToken, recipientEmail: parent, childName: 'A & B', sessionDate: '2026-11-18', status: 'present' };
+        }
+        assert.equal(name, 'finish_parent_attendance_email');
+        finishes.push(args);
+        return smtpAccepts;
+      },
+    });
+    const input = { recipientEmail: 'attacker@example.test', status: 'absent' };
+    const first = await handler(workerRequest('POST', `Bearer ${secret}`, input));
+    const body = await first.text();
+    assert.deepEqual(JSON.parse(body).parentAttendance, { claimed: 1, sent: Number(smtpAccepts), unconfirmed: Number(!smtpAccepts) });
+    assert.doesNotMatch(body, /guardian|SMTP timeout|A & B/);
+    const retry = await handler(workerRequest());
+    assert.deepEqual((await retry.json()).parentAttendance, { claimed: 0, sent: 0, unconfirmed: 0 });
+    assert.equal(adminClaims, 2);
+    assert.equal(deliveries.length, 1);
+    assert.equal(deliveries[0].recipientEmail, parent);
+    assert.equal(deliveries[0].messageId, `<attendance-${ticketId}@letsaimit.com>`);
+    assert.match(deliveries[0].html, /A &amp; B was marked present/);
+    assert.match(deliveries[0].text, /18 Nov 2026 \(IST\)/);
+    assert.match(deliveries[0].text, /\/parent\/\?view=tracking/);
+    assert.deepEqual(finishes, [{ p_id: ticketId, p_lease_token: leaseToken, p_outcome: smtpAccepts ? 'sent' : 'unconfirmed' }]);
+  }
+});
+
 test('AMP v2 save waits for a valid database receipt and exposes no token in the response',async()=>{
   const calls=[];const handler=createCoachingEmailActionHandler({senderEmail,rpc:async(name,args)=>{calls.push({name,args});return {ok:true,saved:true,ticketId,count:1};}});
   const response=await handler(actionRequest());assert.equal(response.status,200);assert.equal(response.headers.get('AMP-Email-Allow-Sender'),senderEmail);assert.equal(response.headers.get('Access-Control-Allow-Credentials'),null);

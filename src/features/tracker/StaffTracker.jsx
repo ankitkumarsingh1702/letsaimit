@@ -7,6 +7,7 @@ import { validateAuthReturnTarget } from '../../lib/authReturn.js';
 import { mediaProps } from '../../lib/media.js';
 import { useParentTracker } from './useParentTracker.js';
 import AttendanceEmail from './AttendanceEmail.jsx';
+import { StudentsPanel } from './StudentsWorkspace.jsx';
 import { ATTENDANCE_LABELS, saveAttendance, saveWeeklyFeedback, saveCoachAssignment, todayIST } from './trackerData.js';
 import '../admin/admin.css';
 import './staff-tracker.css';
@@ -20,7 +21,7 @@ function monday(date) {
 function stamp(value) { return value ? new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value)) : 'Not synced'; }
 const mutationOptions = auth => ({ client: auth.client, userId: auth.user.id, verifyGoogleUser: auth.verifyGoogleUser, checkAccess: auth.checkAccess });
 function changed() { window.dispatchEvent(new Event('letsaimit:tracker-changed')); }
-export const coachingView = (view, isAdmin) => ['attendance', 'feedback'].includes(view) || view === 'coaches' && isAdmin ? view : 'attendance';
+export const coachingView = (view, isAdmin) => ['students', 'attendance', 'feedback'].includes(view) || view === 'coaches' && isAdmin ? view : 'attendance';
 export const mayLeaveTrackerEditor = ({ dirty, busy }, confirmDiscard) => !busy && (!dirty || confirmDiscard());
 
 export function FeedbackEditor({ child, weekStart, saved, auth, onSaved, onDraftState }) {
@@ -104,12 +105,13 @@ function initialAttendanceDate() {
   return date && date <= today ? date : today;
 }
 
-export function CoachingWorkspace({ auth, embedded = false, headingRef, navigationRef }) {
-  const [date, setDate] = React.useState(initialAttendanceDate), [view, setView] = React.useState('attendance');
+export function CoachingWorkspace({ auth, embedded = false, headingRef, navigationRef, initialView = 'attendance' }) {
+  const [date, setDate] = React.useState(initialAttendanceDate), [view, setView] = React.useState(initialView);
   const [weekStart, setWeekStart] = React.useState(() => monday(todayIST()));
   const [childId, setChildId] = React.useState(''), [query, setQuery] = React.useState('');
   const [drafts, setDrafts] = React.useState({}), [busy, setBusy] = React.useState(false), [notice, setNotice] = React.useState(''), [saveError, setSaveError] = React.useState('');
-  const state = useParentTracker(auth, { staff: true, date, scope: embedded ? 'admin' : 'coach' });
+  const scope = embedded ? 'admin' : 'coach';
+  const state = useParentTracker(auth, { staff: true, date, scope, students: view === 'students' });
   const children = state.snapshot?.children || [], attendance = state.snapshot?.attendance || [], feedback = state.snapshot?.feedback || [];
   const adminView = embedded && state.snapshot?.isAdmin;
   const selectedChild = children.find(child => child.registrationId === childId) || children[0];
@@ -117,6 +119,9 @@ export function CoachingWorkspace({ auth, embedded = false, headingRef, navigati
   const saved = new Map(attendance.map(row => [row.registrationId, row]));
   const mounted = React.useRef(false);
   const editor = React.useRef({ dirty: false, busy: false });
+  const studentsNavigationRef = React.useRef(null);
+  const coachHeadingRef = React.useRef(null);
+  const pageHeadingRef = headingRef || coachHeadingRef;
   const attendanceDrafts = React.useRef(drafts); attendanceDrafts.current = drafts;
   const onDraftState = React.useCallback(next => { editor.current = next; }, []);
   React.useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
@@ -132,8 +137,12 @@ export function CoachingWorkspace({ auth, embedded = false, headingRef, navigati
   }
   function chooseView(next) {
     if (next === activeView || !mayLeaveEditor()) return;
+    if (activeView === 'students' && studentsNavigationRef.current?.mayLeave() === false) return;
+    if (busy || (activeView === 'attendance' && Object.keys(drafts).length && !window.confirm('Discard unsaved attendance?'))) return;
+    if (activeView === 'attendance') { setDrafts({}); setSaveError(''); }
     setView(next);
     setNotice('');
+    window.requestAnimationFrame(() => pageHeadingRef.current?.focus());
   }
   React.useImperativeHandle(navigationRef, () => ({
     mayLeave() {
@@ -172,15 +181,18 @@ export function CoachingWorkspace({ auth, embedded = false, headingRef, navigati
   }
   async function onFeedbackSaved() { setNotice('Feedback published.'); changed(); await state.refresh(); }
   async function onAssignmentSaved() { setNotice('Coach access saved.'); changed(); await state.refresh(); }
-  const nav = [['attendance', 'Attendance'], ['feedback', 'Weekly feedback'], ...(adminView ? [['coaches', 'Coach access']] : [])];
+  const nav = [...(embedded ? [] : [['students', 'Students']]), ['attendance', 'Attendance'], ['feedback', 'Weekly feedback'], ...(adminView ? [['coaches', 'Coach access']] : [])];
   const navigation = nav.map(([key, label]) => <button
     type="button" key={key}
     aria-pressed={embedded ? activeView === key : undefined}
     aria-current={!embedded && activeView === key ? 'page' : undefined}
     onClick={() => chooseView(key)}>{label}</button>);
-  const content = <section className={embedded ? undefined : 'adm-content'}>
+  const content = activeView === 'students' ? <div className="adm-content">
+    <StudentsPanel auth={auth} scope={scope} date={date} onDateChange={setDate} tracker={state}
+      headingRef={pageHeadingRef} navigationRef={studentsNavigationRef} />
+  </div> : <section className={embedded ? undefined : 'adm-content'}>
         <div className="adm-page-heading">
-          <div><h1 ref={headingRef} tabIndex={embedded ? -1 : undefined}>{nav.find(([key]) => key === activeView)?.[1] || 'Attendance'}</h1><p className="adm-date">{state.lastSynced ? `Updated ${stamp(state.lastSynced)} IST` : 'Loading tracker'}</p></div>
+          <div><h1 ref={pageHeadingRef} tabIndex={-1}>{nav.find(([key]) => key === activeView)?.[1] || 'Attendance'}</h1><p className="adm-date">{state.lastSynced ? `Updated ${stamp(state.lastSynced)} IST` : 'Loading tracker'}</p></div>
           <button type="button" className="adm-button adm-button-outline" onClick={state.refresh} disabled={state.loading}>Refresh</button>
         </div>
         {embedded && <nav className="adm-type-tabs coaching-team-tabs" aria-label="Coaching tools">{navigation}</nav>}
@@ -215,5 +227,6 @@ export default function StaffTracker() {
   const auth = useAdminAuth();
   if (['checking', 'signing_in', 'signing_out'].includes(auth.phase)) return <section className="coaching-gate" role="status"><h1>Coaching tracker</h1><p>Checking your Google account…</p></section>;
   if (!auth.user?.isGoogle) return <SignIn mode="coach" />;
-  return <CoachingWorkspace key={`${auth.user.id}:${auth.phase === 'authorized' ? 'admin' : 'coach'}`} auth={auth} />;
+  const hasDatedLink = typeof window !== 'undefined' && Boolean(validateAuthReturnTarget(window.location.pathname + window.location.search)?.includes('?date='));
+  return <CoachingWorkspace key={`${auth.user.id}:${auth.phase === 'authorized' ? 'admin' : 'coach'}`} auth={auth} initialView={hasDatedLink ? 'attendance' : 'students'} />;
 }

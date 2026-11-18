@@ -10,6 +10,7 @@ function memoryStorage() {
 test("OAuth return accepts exact parent/coaching destinations or an exact admin review intent", () => {
   for (const target of ["/parent/", "/parent/?resume=trial", "/parent/?resume=enrol", "/register/?resume=enrol", "/parent/?view=tracker", "/parent/?view=tracking", "/parent/?view=payments", "/parent/?view=requests", "/parent/?view=account", "/admin/", "/admin/?view=attendance", "/admin/?view=attendance&date=2026-11-13", "/coach-dashboard/", "/coach-dashboard/?date=2026-11-13"]) assert.equal(validateAuthReturnTarget(target), target);
   assert.equal(validateAuthReturnTarget("/admin/?date=2026-11-13&view=attendance"), "/admin/?view=attendance&date=2026-11-13");
+  assert.equal(validateAuthReturnTarget("/admin/?view=students"), "/admin/?view=students");
   assert.equal(validateAuthReturnTarget("/admin/?requestedDecision=accept&requestId=20000000-0000-4000-8000-000000000001"), "/admin/?requestId=20000000-0000-4000-8000-000000000001&requestedDecision=accept");
 });
 
@@ -19,6 +20,7 @@ test("OAuth return rejects open redirects, arbitrary queries, duplicated keys an
   ]) assert.equal(validateAuthReturnTarget(target), null, target);
   for (const target of ["/admin/?view=attendance&date=2026-02-30", "/admin/?view=attendance&date=2026-11-13&date=2026-11-12", "/admin/?view=attendance&next=evil", "/admin/?view=attendance&access_token=secret"]) assert.equal(validateAuthReturnTarget(target), null, target);
   for (const target of ['/coach-dashboard/?role=admin', '/coach-dashboard/?next=evil', '/coach-dashboard/?access_token=secret', '/coach-dashboard/?date=2026-02-30', '/coach-dashboard/?date=2026-11-13&date=2026-11-12']) assert.equal(validateAuthReturnTarget(target), null);
+  assert.equal(validateAuthReturnTarget("/admin/?view=students&access_token=secret"), null);
 });
 
 test("stored return is session-scoped, consumed once, and expires after thirty minutes", () => {

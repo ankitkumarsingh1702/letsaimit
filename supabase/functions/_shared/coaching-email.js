@@ -52,6 +52,19 @@ export function buildCoachingAttendanceLinkEmail({ sessionDate, rows, dashboardO
   };
 }
 
+export function buildParentAttendanceEmail({ childName, sessionDate, status, dashboardOrigin }) {
+  const child = text(childName, 80);
+  const session = date(sessionDate);
+  if (status !== 'present' && status !== 'absent') throw new TypeError('invalid_attendance');
+  const link = new URL('/parent/?view=tracking', validateCoachingDashboardOrigin(dashboardOrigin));
+  const line = `${child} was marked ${LABELS[status].toLowerCase()} on ${session} (IST).`;
+  return {
+    subject: 'LetsAimIt: Coaching attendance',
+    html: `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Coaching attendance</title><style>${css}</style></head><body><main><p class="brand">LetsAimIt</p><h1>Coaching attendance</h1><p>${escape(line)}</p><p><a href="${escape(link.href)}">Open Parent Tracker</a></p></main></body></html>`,
+    text: `${line}\n\nParent Tracker: ${link.href}`,
+  };
+}
+
 /** Pure content. Recipient/session scope is checked by the worker and again by every action RPC. */
 export function buildCoachingAttendanceEmail({ticketId,recipientEmail,sessionDate,expiresAt,rows,token,actionUrl}={}){
   if(!isCoachingUuid(ticketId)||!isSingleMailbox(recipientEmail)||typeof token!=='string'||!/^[A-Za-z0-9_-]{43}$/.test(token))throw new TypeError('invalid_email_ticket');
