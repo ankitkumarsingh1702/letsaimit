@@ -1,9 +1,10 @@
 import { z } from "zod";
 import { isSupportedCountry, parsePhoneNumberFromString } from "libphonenumber-js/max";
+import { COACHING_SOCIETIES } from "./coachingSocieties.js";
 
 export const REGISTRATION_AGES = Object.freeze(Array.from({ length: 10 }, (_, index) => String(index + 5)));
 export const REGISTRATION_SPORTS = Object.freeze(["Football", "Basketball", "Not sure"]);
-export const REGISTRATION_COMMUNITIES = Object.freeze(["Nambiar Ellegenza", "Nambiar Bellezea", "Another community"]);
+export const REGISTRATION_COMMUNITIES = Object.freeze([...COACHING_SOCIETIES, "Another community"]);
 
 const text = (label, maximum) => z.string({ error: `Enter ${label}.` }).trim()
   .min(1, `Enter ${label}.`).max(maximum, `Use ${maximum} characters or fewer.`)

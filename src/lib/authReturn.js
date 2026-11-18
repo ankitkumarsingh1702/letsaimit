@@ -30,11 +30,12 @@ export function validateAuthReturnTarget(value) {
   }
   if (url.pathname === "/admin/") {
     if (!entries.length) return "/admin/";
-    if (entries.length === 1 && url.searchParams.get("view") === "students") return "/admin/?view=students";
-    if (url.searchParams.get("view") === "attendance") {
-      if (entries.length === 1) return "/admin/?view=attendance";
+    const view = url.searchParams.get("view");
+    if (entries.length === 1 && view === "billing") return "/admin/?view=billing";
+    if (view === "students" || view === "attendance") {
+      if (entries.length === 1) return `/admin/?view=${view}`;
       const date = url.searchParams.get("date");
-      if (entries.length === 2 && validTrackerDate(date)) return `/admin/?view=attendance&date=${date}`;
+      if (entries.length === 2 && validTrackerDate(date)) return `/admin/?view=${view}&date=${date}`;
       return null;
     }
     if (entries.length !== 2 || !entries.every(([key]) => ["requestId", "requestedDecision"].includes(key))) return null;

@@ -25,21 +25,24 @@ test("assigned non-admin coach sees scoped attendance controls and can also open
   assert.match(html, /aria-label="Switch workspace from Coach"/);
   assert.match(html, /href="\/parent\/"[^>]*>Parent<\/a>/);
   assert.match(html, /Attendance for Sample child/);
-  assert.match(html, /1 child · Assigned, approved enrolments only/);
-  assert.match(html, /<option value="unmarked" selected="">Not marked<\/option>/);
-  assert.match(html, /Not marked is not counted as absent/);
-  assert.doesNotMatch(html, />Coach access<|href="\/admin\/"|Send attendance email/);
+  assert.match(html, /Sample community <span>· 1 student<\/span>/);
+  assert.match(html, /data-attendance="present"/);
+  assert.match(html, /data-attendance="absent"/);
+  assert.match(html, />Email parents<\/button>/);
+  assert.doesNotMatch(html, /Email staff|href="\/admin\/"/);
   assert.doesNotMatch(html, /Gmail[^<]*ready|Email[^<]*sent|Attendance saved/);
 }));
 
-test('admin email action waits for dispatch status instead of relying on the scheduled-email flag', () => withStaffUi({ isAdmin: true, emailEnabled: false, children: [child], attendance: [], feedback: [] }, async ({ CoachingWorkspace }) => {
-  const html = renderToStaticMarkup(React.createElement(CoachingWorkspace, { auth: { ...auth, phase: 'authorized' }, embedded: true }));
+test('Students keeps staff delivery and roster marking together while dispatch status loads', () => withStaffUi({ isAdmin: true, emailEnabled: false, children: [child], attendance: [], feedback: [] }, async (_, vite) => {
+  const { default: StudentsWorkspace } = await vite.ssrLoadModule("/src/features/tracker/StudentsWorkspace.jsx");
+  const html = renderToStaticMarkup(React.createElement(StudentsWorkspace, { auth: { ...auth, phase: 'authorized' } }));
   assert.match(html, /Checking email status/);
   assert.doesNotMatch(html, /Daily at 9 PM IST|Gmail sender setup/);
-  assert.match(html, /<button[^>]* disabled=""[^>]*>Send attendance email<\/button>/);
+  assert.match(html, /<button[^>]* disabled=""[^>]*>Email staff<\/button>/);
+  assert.match(html, /Attendance tools.*Mark shown present.*Email parents/);
 }));
 
-test("admin attendance opens inside Team Dashboard even before the register loads", () => withStaffUi(
+test("a dated legacy attendance link opens the relevant day inside Students", () => withStaffUi(
   { isAdmin: true, emailEnabled: false, children: [child, { ...child, registrationId: "c6fa700e-ce24-4b11-9d5c-7417d7724c01", childName: "Unassigned child", coachEmail: "" }], attendance: [], feedback: [] },
   async (_, vite) => {
     const { AuthorizedAdmin } = await vite.ssrLoadModule("/src/features/admin/AdminPage.jsx");
@@ -52,14 +55,14 @@ test("admin attendance opens inside Team Dashboard even before the register load
       assert.match(html, /aria-label="Admin navigation"/);
       assert.match(html, /aria-label="Switch workspace from Admin"/);
       assert.match(html, /href="\/coach-dashboard\/"[^>]*>Coach<\/a>/);
-      assert.match(html, /aria-current="page"[^>]*><svg[^]*?<span>Attendance<\/span>/);
-      assert.match(html, /<h1 tabindex="-1">Attendance<\/h1>/);
+      assert.match(html, /aria-current="page"[^>]*><svg[^]*?<span>Students<\/span>/);
+      assert.match(html, /<h1 tabindex="-1">Students<\/h1>/);
       assert.match(html, /type="date"[^>]*value="2026-11-01"/);
       assert.match(html, /Attendance for Sample child/);
       assert.match(html, /Attendance for Unassigned child/);
-      assert.match(html, /2 children · Approved enrolments only/);
-      assert.match(html, /Send attendance email/);
-      assert.match(html, /aria-label="Coaching tools"[^]*?Weekly feedback[^]*?Coach access/);
+      assert.match(html, /Sample community <span>· 2 students<\/span>/);
+      assert.match(html, /Email staff/);
+      assert.doesNotMatch(html, /<span>Attendance<\/span>/);
       assert.doesNotMatch(html, /aria-label="Coaching navigation"|Loading saved requests/);
     } finally {
       if (originalWindow) Object.defineProperty(globalThis, "window", originalWindow);
@@ -70,7 +73,7 @@ test("admin attendance opens inside Team Dashboard even before the register load
 
 test("unloaded coaching state never claims attendance is saved or emails are enabled", () => withStaffUi(null, async ({ CoachingWorkspace }) => {
   const html = renderToStaticMarkup(React.createElement(CoachingWorkspace, { auth }));
-  assert.match(html, /Loading coaching records/);
+  assert.match(html, /Loading students/);
   assert.doesNotMatch(html, /Save attendance|Attendance saved|Daily admin email|Scheduling on/);
 }));
 
@@ -91,10 +94,11 @@ test("Students opens separately in Admin and groups attendance by society", asyn
       assert.match(html, /aria-current="page"[^>]*><svg[^]*?<span>Students<\/span>/);
       assert.match(html, /Nambiar Bellezea <span>· 5 students<\/span>/);
       assert.match(html, /Nambiar Ellegenza <span>· 5 students<\/span>/);
-      assert.ok(html.indexOf("Bellezea student 5") < html.indexOf("Nambiar Ellegenza"));
+      assert.ok(html.indexOf("Bellezea student 5") < html.indexOf("<h2>Nambiar Ellegenza"));
       assert.equal((html.match(/data-attendance="present"/g) || []).length, 10);
       assert.equal((html.match(/data-attendance="absent"/g) || []).length, 10);
-      assert.doesNotMatch(html, /Loading saved requests|Send attendance email|Search requests/);
+      assert.match(html, /<option value="" selected="">All societies<\/option>/);
+      assert.doesNotMatch(html, /Loading saved requests|Search requests|<span>Attendance<\/span>/);
     } finally {
       if (originalWindow) Object.defineProperty(globalThis, "window", originalWindow);
       else delete globalThis.window;
@@ -102,7 +106,8 @@ test("Students opens separately in Admin and groups attendance by society", asyn
   });
 });
 
-test("manual feedback starts from the saved draft, escapes content and cannot publish an empty update", () => withStaffUi(null, async ({ FeedbackEditor, AssignmentEditor }) => {
+test("manual feedback starts from the saved draft, escapes content and cannot publish an empty update", () => withStaffUi(null, async (_, vite) => {
+  const { FeedbackEditor, AssignmentEditor } = await vite.ssrLoadModule("/src/features/tracker/CoachingEditors.jsx");
   const blank = renderToStaticMarkup(React.createElement(FeedbackEditor, { child, weekStart: "2026-11-09", saved: undefined, auth, onSaved() {} }));
   assert.match(blank, /<textarea required="" maxLength="1500"/);
   assert.match(blank, /disabled=""[^>]*>Publish feedback/);
@@ -114,17 +119,20 @@ test("manual feedback starts from the saved draft, escapes content and cannot pu
   const assignment = renderToStaticMarkup(React.createElement(AssignmentEditor, { child, auth: { ...auth, phase: "authorized" }, onSaved() {} }));
   assert.match(assignment, /value="coach@example\.test"/);
   assert.match(assignment, /Leave the email empty to remove coach access/);
-  assert.match(assignment, /One Google account can also be a parent or admin/);
+  assert.match(assignment, /Coach assignment/);
 }));
 
-test("losing admin scope removes the coach-access view without a stale private editor", () => withStaffUi(null, async ({ coachingView }) => {
-  assert.equal(coachingView("coaches", true), "coaches");
-  assert.equal(coachingView("coaches", false), "attendance");
-  assert.equal(coachingView("coaches", undefined), "attendance");
-  assert.equal(coachingView("feedback", false), "feedback", "assigned coaches keep feedback access independently of admin access");
+test("both coaching societies stay visible even when one roster is empty", () => withStaffUi(null, async (_, vite) => {
+  const { groupStudents } = await vite.ssrLoadModule("/src/features/tracker/StudentsWorkspace.jsx");
+  const assigned = [{ ...child, community: " Nambiar   Bellezea " }];
+  assert.deepEqual(groupStudents(assigned).map(group => [group.society, group.children.length]), [
+    ["Nambiar Bellezea", 1], ["Nambiar Ellegenza", 0],
+  ]);
+  assert.deepEqual(groupStudents(assigned, "", "nambiar ellegenza").map(group => group.children.length), [0]);
 }));
 
-test("child, week and view navigation cannot discard a dirty editor without confirmation or interrupt its save", () => withStaffUi(null, async ({ mayLeaveTrackerEditor }) => {
+test("child, week and view navigation cannot discard a dirty editor without confirmation or interrupt its save", () => withStaffUi(null, async (_, vite) => {
+  const { mayLeaveTrackerEditor } = await vite.ssrLoadModule("/src/features/tracker/CoachingEditors.jsx");
   let confirmations = 0;
   const keep = () => { ++confirmations; return false; };
   assert.equal(mayLeaveTrackerEditor({ dirty: true, busy: false }, keep), false);

@@ -546,3 +546,14 @@ HTTPS homepage is still 200 / 39,957 bytes with SHA-256
 | UAT database | Applied `20261118132944_students_workspace.sql` through a guarded transaction with RLS and grants checked. Migration SHA-256 `10a825e801b6e2e14108f3339f5cd71f702e6a00fd239deb66842d6c69001632`. Verified the existing Google account with the operator, then assigned the one unassigned confirmed student. Both confirmed students are now assigned to the verified default. |
 | UAT worker | Published and verified the existing coaching worker with bundle SHA-256 `dc91d48ad500005cf60bfce7f063aeb493626ba8f06d2b902e43707780a54b84`. Unsigned POST returned 401. Parent notices use the existing Gmail sender and active minute scheduler. UAT activation left the practice and notice tables empty. Live marks, practice and email delivery are reserved for the operator's test. |
 | Production | The shared source plan contains 16 migrations and five functions, digest `dac2d25b0d3d490d19d6f9791fad08f334d7b9e7f9b8637586c6afc056ed722c`. The production target still needs its own backend and promotion. |
+
+## 18 November 2026 — Student profile and coaching tools
+
+| Boundary | Evidence |
+| --- | --- |
+| Roster | Active accepted enrolments appear in Students, including New and Contacted follow-ups. The default filter shows both coaching societies in alphabetical order. Register retains application review. |
+| Profile and practice | Student and guardian details, weekly feedback, coach assignment, training and admin payment history share the student profile. Training has separate Sprint, Push-ups and Body balance controls. Custom distances preserve previous results and each new lap. |
+| Attendance | The dated staff link opens Students. Roster controls retain shared attendance. Individual and group parent requests use the same delivery queue and recipient scope as automatic notices. |
+| UAT database | Applied `20261118135618_students_profile_and_active_roster.sql` in a guarded transaction. SHA-256 `ab898a9482132ce6be49580f92f9215f125600b003a8987485c63472c66f2b4b`. Actual roster counts are Bellezea 2 and Ellegenza 1. The preflight found one missing coach on the earlier excluded enrolment. The post-apply count of active accepted enrolments without a coach is zero. |
+| Verification | Chrome sample data verified society filters, desktop and phone profiles, custom sprint and repetition saves, the payment summary, and mocked staff and parent requests. Source and database tests verified contact scope, admin billing, practice history, email deduplication and legacy dated links. |
+| Parity | The shared source plan contains 17 migrations and five functions, digest `6afd390145cbd8534c343ebf68631addada3a2b49095598d8bfd05c36c0b42e4`. Production backend setup remains pending. |

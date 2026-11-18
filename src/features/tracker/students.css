@@ -3,8 +3,10 @@
   --students-muted: #53655b;
   --students-line: #dfe8e1;
   --students-wash: #f6f9f6;
-  max-width: 1020px;
+  max-width: 1120px;
   padding-bottom: 32px;
+  font-size: 14px;
+  line-height: 1.5;
 }
 .adm-topbar.students-topbar { justify-content: flex-end; }
 .students-workspace h1, .students-workspace h2, .students-workspace h3 {
@@ -13,14 +15,22 @@
   letter-spacing: -.02em;
   margin: 0;
 }
-.students-workspace h2 { font-size: 15px; line-height: 1.4; font-weight: 650; }
-.students-toolbar { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; }
+.students-workspace .adm-page-heading h1 { font-size: 28px; font-weight: 700; }
+.students-workspace h2 { font-size: 16px; line-height: 1.4; font-weight: 650; }
+.students-toolbar { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; }
 .students-toolbar .adm-field { color: var(--students-muted); font-size: 12px; }
-.students-toolbar .adm-field input { min-height: 44px; min-width: 136px; font-size: 14px; }
-.students-toolbar .adm-field:last-child { flex: 1; max-width: 280px; }
+.students-toolbar .adm-field :is(input, select) { min-height: 44px; min-width: 136px; font-size: 14px; }
+.students-toolbar .students-search { flex: 1; min-width: 160px; max-width: 290px; }
+.students-session-tools { margin: 0 0 24px; }
+.students-session-tools > summary { min-height: 44px; padding: 10px 4px; width: fit-content; cursor: pointer; font-weight: 650; color: var(--students-ink); }
+.students-session-options { display: grid; gap: 12px; padding: 12px; border: 1px solid var(--students-line); border-radius: 8px; }
+.students-bulk-actions { display: flex; flex-wrap: wrap; align-items: start; gap: 8px; }
+.students-email-action { display: grid; grid-template-columns: auto; justify-items: start; gap: 3px; }
+.students-email-action p { margin: 0; font-size: 12px; }
 .students-society { margin-bottom: 24px; }
 .students-society h2 { margin-bottom: 8px; }
 .students-society h2 span { font-size: 13px; font-weight: 500; color: var(--students-muted); }
+.students-society-empty { margin: 0; padding: 11px 14px; border: 1px solid var(--students-line); border-radius: 8px; color: var(--students-muted); }
 .students-workspace ul { list-style: none; padding: 0; margin: 0; }
 .students-society > ul { border: 1px solid var(--students-line); border-radius: 8px; }
 .students-row, .students-profile-attendance {
@@ -60,7 +70,7 @@
   gap: 6px 10px;
 }
 .students-attendance-state { margin: 0; color: var(--students-muted); font-size: 11px; }
-.students-attendance-buttons, .students-distance, .students-exercise-actions, .students-history-pages {
+.students-attendance-buttons, .students-history-pages {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
@@ -86,7 +96,7 @@
 .students-empty { color: var(--students-muted); padding: 16px 0; }
 .students-error { color: #843c33; margin: 0; }
 .students-attendance .students-error { flex-basis: 100%; max-width: 220px; text-align: right; font-size: 11px; }
-.students-profile { max-width: 720px; }
+.students-profile { max-width: 1120px; }
 .students-back {
   padding-inline: 4px;
   border-color: transparent;
@@ -95,8 +105,8 @@
 }
 .students-back:hover { text-decoration: underline; }
 .students-profile-header { margin: 4px 0 18px; }
-.students-profile-header h1 { font-size: 23px; line-height: 1.3; font-weight: 650; overflow-wrap: anywhere; }
-.students-profile-header p { margin: 4px 0 0; font-size: 13px; color: var(--students-muted); }
+.students-profile-header h1 { font-size: clamp(24px, 2.5vw, 32px); line-height: 1.24; font-weight: 700; overflow-wrap: anywhere; }
+.students-profile-header p { margin: 6px 0 0; color: var(--students-muted); }
 .students-profile-attendance {
   padding: 10px 12px;
   border: 1px solid var(--students-line);
@@ -104,14 +114,33 @@
   background: var(--students-wash);
 }
 .students-profile-attendance time { font-size: 12px; color: var(--students-muted); }
-.students-practice, .students-history { margin-top: 24px; }
-.students-drills { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
-.students-drill { font-size: 13px; }
-.students-exercise { display: grid; gap: 10px; padding: 14px; border: 1px solid var(--students-line); border-radius: 8px; }
-.students-distance > button { min-width: 52px; }
-.students-stopwatch, .students-reps { margin: 0; font-size: 32px; line-height: 1.25; font-variant-numeric: tabular-nums; color: var(--students-ink); }
-.students-reps strong { font-weight: 650; }
-.students-exercise-actions .students-primary { min-width: 92px; }
+.students-profile-actions { display: flex; justify-content: flex-end; align-items: start; flex-wrap: wrap; gap: 8px; }
+.students-profile-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  margin: 20px 0 18px;
+  border-bottom: 1px solid var(--students-line);
+}
+.students-profile-nav button {
+  min-height: 44px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  padding: 7px 7px;
+  background: transparent;
+  color: var(--students-muted);
+  font-weight: 600;
+}
+.students-profile-nav button[aria-current="page"] { border-color: #32664d; color: #225038; }
+.students-profile-nav button:hover { color: #225038; }
+.students-profile-section { border: 1px solid var(--students-line); border-radius: 10px; padding: 18px; }
+.students-feedback-head { display: flex; gap: 10px; align-items: center; justify-content: space-between; }
+.students-profile-section .coaching-editor { max-width: none; margin: 0; }
+.students-feedback-history { margin-top: 20px; }
+.students-feedback-history li { display: grid; gap: 5px; border-top: 1px solid var(--students-line); margin-top: 10px; padding-top: 10px; }
+.students-feedback-history li p { margin: 0; overflow-wrap: anywhere; }
+.students-feedback-history time, .students-feedback-history small { color: var(--students-muted); }
+.students-history { margin-top: 24px; }
 .students-saved { color: #346545; margin: 0; }
 .students-history > p { margin: 8px 0 0; color: var(--students-muted); }
 .students-history-day { margin-top: 12px; }
@@ -130,9 +159,15 @@
 .students-history-pages { margin-top: 12px; }
 @media (max-width: 560px) {
   .students-toolbar { gap: 8px; margin-bottom: 18px; }
-  .students-toolbar .adm-field input { min-width: 110px; }
+  .students-toolbar .adm-field :is(input, select) { min-width: 110px; }
+  .students-toolbar .students-search { flex-basis: 100%; max-width: none; }
   .students-row, .students-profile-attendance { gap: 6px; padding-inline: 6px; }
-  .students-row .students-attendance, .students-profile-attendance .students-attendance { max-width: 138px; }
+  .students-row .students-attendance { max-width: 138px; }
+  .students-profile-attendance { align-items: flex-start; flex-wrap: wrap; padding: 10px; }
+  .students-profile-actions { justify-content: flex-start; }
+  .students-profile-nav { gap: 2px 7px; }
+  .students-profile-nav button { padding-inline: 4px; font-size: 13px; }
+  .students-profile-section { padding: 12px; }
   .students-attendance-buttons { flex-wrap: nowrap; }
   .students-attendance .students-button { padding-inline: 8px; }
 }

@@ -1,7 +1,7 @@
 import React from 'react';
 import { coachingEmailStatus, todayIST } from './trackerData.js';
 
-export default function AttendanceEmail({ auth, date, hasChildren }) {
+export default function AttendanceEmail({ auth, date, hasChildren, active = true }) {
   const [status, setStatus] = React.useState(null);
   const [notice, setNotice] = React.useState('');
   const [error, setError] = React.useState('');
@@ -15,6 +15,7 @@ export default function AttendanceEmail({ auth, date, hasChildren }) {
   const current = status?.sessionDate === today ? status : null;
 
   React.useEffect(() => {
+    if (!active) return;
     const generation = ++scope.current;
     setStatus(null); setNotice(''); setError(''); setReadFailed(false); setBusy(false);
     let reading = false;
@@ -33,9 +34,9 @@ export default function AttendanceEmail({ auth, date, hasChildren }) {
     const interval = window.setInterval(refresh, 10000);
     window.addEventListener('focus', refresh);
     return () => { ++scope.current; window.clearInterval(interval); window.removeEventListener('focus', refresh); };
-  }, [client, userId, verifyGoogleUser]);
+  }, [active, client, userId, verifyGoogleUser]);
 
-  const canSend = current?.emailEnabled === true && date === today && hasChildren;
+  const canSend = active && current?.emailEnabled === true && date === today && hasChildren;
   async function send() {
     if (!canSend || date !== todayIST() || flight.current) return;
     const generation = scope.current;
@@ -57,12 +58,12 @@ export default function AttendanceEmail({ auth, date, hasChildren }) {
 
   const paused = current?.emailEnabled === false;
   return <section className="adm-card coaching-email-card" aria-labelledby="coaching-email-title">
-    <div><h2 id="coaching-email-title">Attendance email</h2>
+    <div><h2 id="coaching-email-title">Staff attendance email</h2>
       <p>Today’s sheet · Approved admins{current?.scheduledEnabled && ' · Daily at 9 PM IST'}</p>
       {paused ? <p>Attendance email is turned off.</p> : date !== today ? <p>Select today to send.</p> : !hasChildren ? <p>No approved children to include.</p> : current?.deliveryMode === 'link' ? <p>Email includes a link to mark attendance.</p> : null}
       {!paused && <p role="status">{current ? `${current.pending} queued · ${current.sent} sent${current.failed ? ` · ${current.failed} failed` : ''}` : readFailed ? 'Email status unavailable.' : 'Checking email status…'}{notice && ` ${notice}`}</p>}
       {error && <p className="coaching-email-error" role="alert">{error}</p>}
     </div>
-    <button type="button" className="adm-button adm-button-outline" onClick={send} disabled={!canSend || busy}>{busy ? 'Queuing…' : 'Send attendance email'}</button>
+    <button type="button" className="adm-button adm-button-outline" onClick={send} disabled={!canSend || busy}>{busy ? 'Queuing…' : 'Email staff'}</button>
   </section>;
 }

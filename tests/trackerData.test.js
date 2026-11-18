@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { trackerSnapshot, fetchTracker, saveAttendance, saveWeeklyFeedback, saveCoachAssignment, validTrackerDate, todayIST, coachingEmailStatus } from '../src/features/tracker/trackerData.js';
-import { fetchCoachingPractice, saveCoachingPractice } from '../src/features/tracker/practiceData.js';
+import { fetchCoachingPractice, formatPracticeResult, practiceLabel, saveCoachingPractice } from '../src/features/tracker/practiceData.js';
 
 const child = { registrationId: '10000000-0000-4000-8000-000000000001', childName: 'Child', sport: 'Football', community: 'Community', privateEmail: 'do-not-return@example.com' };
 const actor = { id: 'actor-a', isGoogle: true }, verify = async () => actor;
@@ -158,4 +158,32 @@ test('a practice save sends the stable attempt key and confirms the exact result
     p_registration_id: registrationId, p_attempt_id: attemptId, p_exercise: 'push_ups', p_duration_ms: null, p_reps: 12, p_distance_meters: null,
   }]);
   await assert.rejects(saveCoachingPractice({ ...draft, reps: 11 }), /confirm the attempt/);
+});
+
+test('a custom sprint reaches the save RPC and appears with its distance and time in parent history', async () => {
+  const registrationId = child.registrationId;
+  const attemptId = '40000000-0000-4000-8000-000000000001';
+  const recordedAt = '2026-11-18T18:31:00Z';
+  const saved = { id: attemptId, registrationId, exercise: 'sprint', durationMs: 9275, reps: null, distanceMeters: 275, sessionDate: '2026-11-19', recordedAt };
+  const previous = { ...saved, id: '40000000-0000-4000-8000-000000000002', distanceMeters: 5, durationMs: 1510 };
+  let writes = 0;
+  const client = { async rpc(name, args) {
+    if (name === 'save_coaching_practice') {
+      writes++;
+      assert.equal(args.p_distance_meters, 275);
+      assert.equal(args.p_duration_ms, 9275);
+      return { data: saved };
+    }
+    assert.equal(name, 'list_coaching_practice');
+    return { data: { attempts: [saved, previous], nextCursor: null } };
+  } };
+  const draft = { ...options(client), registrationId, attemptId, exercise: 'sprint', durationMs: 9275, distanceMeters: 275 };
+  await assert.rejects(saveCoachingPractice({ ...draft, distanceMeters: 10001 }), /Check the result/);
+  assert.equal(writes, 0);
+  await saveCoachingPractice(draft);
+  const { attempts } = await fetchCoachingPractice({ ...options(client), registrationId, scope: 'parent' });
+  assert.deepEqual(attempts.map(lap => [practiceLabel(lap), formatPracticeResult(lap)]), [
+    ['275 m sprint', '9.275 s'],
+    ['5 m sprint', '1.51 s'],
+  ]);
 });

@@ -3,8 +3,8 @@ import { rpcError, validTrackerDate, verifyActor } from './trackerData.js';
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const PAGE_SIZE = 40;
 const maximumInteger = 2147483647;
+export const MAX_SPRINT_DISTANCE = 10000;
 const scopes = new Set(['parent', 'coach', 'admin']);
-const distances = new Set([5, 10, 100]);
 const calendar = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit' });
 const seconds = new Intl.NumberFormat('en-IN', { maximumFractionDigits: 3 });
 const exercises = { warm_up: 'Warm-up', strength: 'Strength', sprint: 'Sprint', push_ups: 'Push-ups', body_balance: 'Body balance' };
@@ -15,7 +15,8 @@ const loadError = 'Couldn’t load practice.';
 const saveError = 'Couldn’t confirm the attempt. Try again.';
 
 function validResult({ exercise, durationMs, reps, distanceMeters }) {
-  if (exercise === 'sprint') return positiveInteger(durationMs) && reps === null && distances.has(distanceMeters);
+  if (exercise === 'sprint') return positiveInteger(durationMs) && reps === null
+    && Number.isInteger(distanceMeters) && distanceMeters >= 1 && distanceMeters <= MAX_SPRINT_DISTANCE;
   if (exercise === 'body_balance') return positiveInteger(durationMs) && reps === null && distanceMeters === null;
   if (exercise === 'push_ups') return durationMs === null && positiveInteger(reps) && distanceMeters === null;
   return ['warm_up', 'strength'].includes(exercise) && durationMs === null && reps === null && distanceMeters === null;

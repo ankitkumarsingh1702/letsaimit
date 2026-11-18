@@ -12,12 +12,15 @@ approved roster; coaches see only children currently assigned to their Google
 email after the assignment start date. Trials and pending or declined
 enrolments stay in the Register. Client navigation never grants access.
 
-Students groups accepted enrolments with Confirmed follow-up status by society.
-The roster and profiles save to the same date-specific attendance record.
-Profiles also record warm-up, strength, 5 m, 10 m and 100 m sprints, push-ups
-and body balance. Each practice save creates its own dated attempt and can
-be retried with the same attempt ID. Staff and parents page through attempts
-by save time, with dates and times displayed in IST.
+Students groups active accepted enrolments by society. The default view
+includes both coaching societies. Roster and profile controls save to the
+same date-specific attendance record. Profiles show saved enrolment and
+guardian details, weekly feedback and coach assignment. Admin profiles also
+show amounts due, actual paid dates and planned monthly fees.
+
+Training has sections for Sprint, Push-ups and Body balance, with warm-up and
+strength completions available below. Each sprint lap keeps its distance and
+time. Staff and parents page through individual attempts by IST save time.
 
 ## Saved records and interface
 
@@ -44,9 +47,9 @@ existing Auth identity lock. Parent/staff reads remain stable and read-only.
 
 Configure `private.coaching_settings.default_coach_email` per target with the
 operator-verified default coach's Google sign-in address. After enabling the
-confirmed-student default, accepted enrolments receive a tracker assignment
-when they become Confirmed. The activation backfills confirmed students with
-an empty assignment and keeps named assignments. Register and tracker
+default, accepted enrolments receive a tracker assignment when they join the
+active roster. The migration backfills active students excluded by the earlier
+follow-up rule. Register and tracker
 assignments serve their existing separate purposes.
 
 Authenticated RPCs:
@@ -55,7 +58,9 @@ Authenticated RPCs:
 | --- | --- |
 | `list_my_tracker()` | Owned children, attendance, feedback and date range |
 | `list_staff_tracker(p_date,p_scope)` | `admin` returns all eligible enrolments to verified admins. `coach` returns assigned eligible enrolments. The one-argument overload remains available to older clients. |
-| `list_coaching_students(p_date,p_scope)` | Confirmed roster and attendance for the chosen day and staff scope |
+| `list_coaching_students(p_date,p_scope)` | Active roster and attendance for the chosen day and staff scope |
+| `list_coaching_student_profile(p_registration_id,p_scope)` | One assigned or admin-visible student's details and feedback. Admins also receive monthly billing history. |
+| `queue_students_attendance_email(p_session_date,p_scope,p_registration_id)` | Queue one student's or all in-scope students' saved attendance for the selected date |
 | `set_coaching_assignment(...)` | Admin-only assignment receipt with new revision |
 | `save_coaching_attendance(p_session_date,p_rows)` | Atomic revision-checked rows; `{ok,attendance}` |
 | `save_coaching_feedback(...)` | Manual saved weekly feedback receipt |
@@ -72,25 +77,29 @@ an old child's records by email or phone.
 
 ## Attendance email
 
-A saved Present or Absent mark for a confirmed student can queue one notice
+A saved Present or Absent mark for an active student can queue one notice
 per student and session date. The existing coaching worker uses the
 registration's saved guardian contact and the existing LetsAimIt sender.
 Before sending, it reads the latest saved attendance. Corrections remain
 visible in Parent Tracker. The queue allows one send attempt, including when
 the transport outcome is uncertain.
 
+In **Students → Attendance tools**, use **Email parents** to queue saved
+attendance for the selected date. **Email parent** limits the same action to
+the open profile. Both use the original queue and recognise existing requests.
+
 When scheduled email is enabled, the minute scheduler queues one email at **9 PM IST** for every
 currently approved admin, including the owner. The roster includes approved
 enrolments even without an assigned coach. There is no old-day email catch-up.
 Roster capacity is 100; larger rosters fail explicitly rather than dropping rows.
 
-An admin can open **Attendance → Send attendance email** to queue today's
+An admin can open **Students → Attendance tools → Email staff** to queue today's
 sheet immediately. `send_coaching_attendance_now()` takes no recipient, roster
 or date from the browser. It checks the current Google actor and admin access,
 then wakes the same worker after commit. The daily recipient/date key prevents
 duplicates at 9 PM or on repeated clicks. With manual send enabled and interactive
-mail paused, the worker uses the existing Gmail SMTP account. The email links
-to `/admin/?view=attendance&date=YYYY-MM-DD`, where admins sign in and record attendance.
+mail paused, the worker uses the existing Gmail SMTP account. The dated email
+link opens the Students roster for that session.
 `get_coaching_attendance_email_status()` reports manual availability, scheduled
 availability, the email format and today's aggregate counts to admins. A sent
 count means the mail transport accepted the message.

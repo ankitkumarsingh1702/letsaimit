@@ -18,7 +18,10 @@ test('coaching tracker preserves parent ownership, scoped coach writes and Gmail
     create function auth.uid() returns uuid language sql stable as $$select nullif(auth.jwt()->>'sub','')::uuid$$;
     grant usage on schema auth to anon,authenticated;grant execute on function auth.jwt(),auth.uid() to anon,authenticated;`);
   const directory=new URL('../supabase/migrations/',import.meta.url);
-  for(const name of (await readdir(directory)).filter(n=>n.endsWith('.sql')).sort())await db.exec(await readFile(new URL(name,directory),'utf8'));
+  const studentProfileUpgrade='20261118135618_students_profile_and_active_roster.sql';
+  const migrations=(await readdir(directory)).filter(n=>n.endsWith('.sql')).sort();
+  for(const name of migrations.filter(n=>n<studentProfileUpgrade))await db.exec(await readFile(new URL(name,directory),'utf8'));
+  const upgrade=await readFile(new URL(studentProfileUpgrade,directory),'utf8');
   for(const u of [...admins,parent,other,coach,outsider])await db.query('insert into auth.users values($1,$2)',[u.id,u.email]);
   for(const [i,u] of admins.entries())await db.query('insert into public.allowed_admins(email,is_owner) values($1,$2)',[u.email,i===0]);
   const rpc=async(name,args=[])=>(await db.query(`select public.${name}(${args.map((_,i)=>'$'+(i+1)).join(',')}) value`,args)).rows[0]?.value;
@@ -51,6 +54,33 @@ test('coaching tracker preserves parent ownership, scoped coach writes and Gmail
       [recipient,day,JSON.stringify(ids.map(registrationId=>({registrationId}))),hash(ticketToken),expires])).rows[0].id;
   }
 
+  await t.test('forward upgrade assigns active students missed by the old follow-up filter',async()=>{
+    await db.exec('begin');
+    try {
+      const confirmed=await enrol(parent,'Previously confirmed');
+      const contacted=await enrol(parent,'Previously contacted');
+      await followUp(confirmed);
+      await followUp(contacted,'contacted');
+      await followUp(otherChild,'closed');
+      await assign(sibling,other.email);
+      await db.query(
+        'update private.coaching_settings set default_coach_email=$1,confirmed_students_default_email=$1',
+        [coach.email]
+      );
+      await db.exec(upgrade);
+      const assignments=(await db.query('select registration_id,coach_email from private.coaching_assignments')).rows;
+      assert.deepEqual(new Map(assignments.map(row=>[row.registration_id,row.coach_email])),new Map([
+        [child,coach.email],[contacted,coach.email],[sibling,other.email]
+      ]));
+      const future=await enrol(parent,'Accepted after deployment');
+      assert.equal((await db.query('select coach_email from private.coaching_assignments where registration_id=$1',[future])).rows[0].coach_email,coach.email);
+    } finally {
+      await db.exec('rollback');
+    }
+  });
+  await db.exec(upgrade);
+  for(const name of migrations.filter(n=>n>studentProfileUpgrade))await db.exec(await readFile(new URL(name,directory),'utf8'));
+
   await t.test('tracker tables have RLS, no client table/column grants and no public RPC access',async()=>{
     const names=['coaching_assignments','coaching_attendance','coaching_feedback','coaching_settings','coaching_email_tickets','coaching_practice','parent_attendance_email_outbox'];
     for(const name of names){
@@ -65,6 +95,8 @@ test('coaching tracker preserves parent ownership, scoped coach writes and Gmail
     await as('authenticated',parent,()=>assert.rejects(rpc('claim_coaching_email'),{code:'42501'}));
     await as('authenticated',parent,()=>assert.rejects(rpc('claim_parent_attendance_email'),{code:'42501'}));
     await as('anon',null,()=>assert.rejects(rpc('list_coaching_students',[today,'admin']),{code:'42501'}));
+    await as('anon',null,()=>assert.rejects(rpc('list_coaching_student_profile',[child,'admin']),{code:'42501'}));
+    await as('anon',null,()=>assert.rejects(rpc('queue_students_attendance_email',[today,'admin']),{code:'42501'}));
     await as('anon',null,()=>assert.rejects(rpc('list_coaching_practice',[child,'parent']),{code:'42501'}));
     await as('authenticated',owner,()=>assert.rejects(rpc('read_coaching_email_attendance',[randomUUID(),ticketToken]),{code:'42501'}));
     assert.equal((await db.query('select email_enabled from private.coaching_settings')).rows[0].email_enabled,false);
@@ -88,7 +120,7 @@ test('coaching tracker preserves parent ownership, scoped coach writes and Gmail
     assert.equal((await assign(child,'',1)).assignmentRevision,2);
     assert.equal((await assign(child,coach.email,2)).assignmentRevision,3);
   });
-  await t.test('verified default assigns confirmed students once and retains existing coach choices',async()=>{
+  await t.test('verified default assigns accepted students once and retains existing coach choices',async()=>{
     assert.equal((await db.query('select default_coach_email from private.coaching_settings')).rows[0].default_coach_email,null);
     await as('authenticated',owner,()=>assert.rejects(db.query('update private.coaching_settings set default_coach_email=$1',[coach.email]),{code:'42501'}));
     await db.exec('begin');
@@ -108,15 +140,14 @@ test('coaching tracker preserves parent ownership, scoped coach writes and Gmail
       await followUp(newTrial);
       assert.deepEqual((await assignment()).rows,[]);
       await rejectsInTransaction(()=>activate(outsider.email),'22023');
-      assert.equal(await activate(coach.email),1);
+      assert.equal(await activate(coach.email),3);
       assert.equal(await activate(coach.email),0);
       assert.deepEqual((await assignment()).rows,[{coach_email:coach.email,starts_on:today,revision:1}]);
       assert.equal((await db.query('select registration_id from private.coaching_assignments where registration_id in ($1,$2)',[newTrial,pending])).rows.length,0);
       assert.equal((await db.query('select revision from private.coaching_assignments where registration_id=$1',[child])).rows[0].revision,3);
       assert.equal((await staff(coach,'list_coaching_students',[today,'coach'])).children.some(row=>row.registrationId===registration),true);
 
-      const future=await enrol(parent,'Newly confirmed child');
-      await followUp(future);
+      const future=await enrol(parent,'Newly accepted child');
       assert.equal((await db.query('select coach_email from private.coaching_assignments where registration_id=$1',[future])).rows[0].coach_email,coach.email);
 
       await assign(registration,'',1);
@@ -130,37 +161,39 @@ test('coaching tracker preserves parent ownership, scoped coach writes and Gmail
       await db.exec('rollback');
     }
   });
-  await t.test('Students lists only confirmed enrolments and exposes saved practice only within the selected role',async()=>{
+  await t.test('Students includes active accepted enrolments and keeps practice within the selected role',async()=>{
     await db.exec('begin');
     try {
-      const student=await enrol(parent,'Student One',{community:'Namber Balleja'});
-      const otherStudent=await enrol(other,'Student Two',{community:'Namber Elegance'});
+      const student=await enrol(parent,'Student One',{community:'Nambiar Bellezea'});
+      const otherStudent=await enrol(other,'Student Two',{community:'Nambiar Ellegenza'});
       await followUp(student);
-      await followUp(otherStudent);
       await followUp(pending);
       await followUp(trial);
+      for(const id of [child,sibling,otherChild])await followUp(id,'closed');
       await assign(student,coach.email);
       const savedAttendance=await save(coach,today,[mark(student)]);
       const roster=await staff(owner,'list_coaching_students',[today,'admin']);
       assert.deepEqual(roster.children.map(row=>[row.registrationId,row.community]).sort((a,b)=>a[1].localeCompare(b[1])),[
-        [student,'Namber Balleja'],[otherStudent,'Namber Elegance']
+        [student,'Nambiar Bellezea'],[otherStudent,'Nambiar Ellegenza']
       ]);
       assert.deepEqual(roster.attendance,savedAttendance.attendance);
       assert.deepEqual((await staff(coach,'list_coaching_students',[today,'coach'])).children.map(row=>row.registrationId),[student]);
       await as('authenticated',coach,()=>rejectsInTransaction(()=>rpc('list_coaching_students',[today,'admin']),'42501'));
 
       const attemptId=randomUUID();
-      const sprint=[student,attemptId,'sprint',2148,null,10];
+      const sprint=[student,attemptId,'sprint',2148,null,500];
       const first=await staff(coach,'save_coaching_practice',sprint);
       assert.deepEqual(first,{
         id:attemptId,registrationId:student,exercise:'sprint',durationMs:2148,
-        reps:null,distanceMeters:10,recordedAt:first.recordedAt,sessionDate:today
+        reps:null,distanceMeters:500,recordedAt:first.recordedAt,sessionDate:today
       });
       assert.deepEqual(await staff(coach,'save_coaching_practice',sprint),first);
       await as('authenticated',coach,()=>rejectsInTransaction(
-        ()=>rpc('save_coaching_practice',[student,attemptId,'sprint',2149,null,10]),'40001'));
-      await as('authenticated',coach,()=>rejectsInTransaction(
-        ()=>rpc('save_coaching_practice',[student,randomUUID(),'sprint',2148,null,20]),'22023'));
+        ()=>rpc('save_coaching_practice',[student,attemptId,'sprint',2149,null,500]),'40001'));
+      for(const distance of [0,10001,null]){
+        await as('authenticated',coach,()=>rejectsInTransaction(
+          ()=>rpc('save_coaching_practice',[student,randomUUID(),'sprint',2148,null,distance]),'22023'));
+      }
       await as('authenticated',coach,()=>rejectsInTransaction(
         ()=>rpc('save_coaching_practice',[otherStudent,randomUUID(),'strength',null,null,null]),'42501'));
       await as('authenticated',owner,()=>rejectsInTransaction(
@@ -169,6 +202,10 @@ test('coaching tracker preserves parent ownership, scoped coach writes and Gmail
         ()=>rpc('list_coaching_practice',[student,'parent']),'42501'));
       assert.deepEqual((await staff(parent,'list_coaching_practice',[student,'parent'])).attempts,[first]);
       assert.deepEqual((await staff(owner,'list_coaching_practice',[student,'admin'])).attempts,[first]);
+      for(const distance of [5,56,10000]){
+        const saved=await staff(coach,'save_coaching_practice',[student,randomUUID(),'sprint',2148,null,distance]);
+        assert.equal(saved.distanceMeters,distance);
+      }
 
       // Saving 500 sets on one day gets 500 independent IDs. Date filtering
       // uses the IST boundary, and identical timestamps test the cursor tie.
@@ -198,12 +235,72 @@ test('coaching tracker preserves parent ownership, scoped coach writes and Gmail
         }
         nextCursor=page.nextCursor;
       } while(nextCursor);
-      assert.equal(ids.size,503);
+      assert.equal(ids.size,506);
       await followUp(student,'closed');
       assert.deepEqual((await staff(coach,'list_coaching_students',[today,'coach'])).children,[]);
       await as('authenticated',coach,()=>rejectsInTransaction(
         ()=>rpc('list_coaching_practice',[student,'coach']),'42501'));
       assert.equal((await staff(parent,'list_coaching_practice',[student,'parent'])).attempts.length,40);
+    } finally {
+      await db.exec('rollback');
+    }
+  });
+  await t.test('a Students profile returns one child, saved feedback and verified billing for admins only',async()=>{
+    await db.exec('begin');
+    try {
+      const student=await enrol(parent,'Student Profile',{registeredEmail:'guardian@example.test'});
+      const otherStudent=await enrol(other,'Other Profile');
+      await assign(student,coach.email);
+      const feedback=await staff(coach,'save_coaching_feedback',[student,monday,'Strong sprint form.','Keep practicing.',0]);
+      await staff(owner,'save_coaching_feedback',[otherStudent,monday,'Other student.','',0]);
+      await as('authenticated',owner,()=>db.query(
+        "update public.registrations set notes='Internal follow-up' where id=$1",[student]
+      ));
+      const createAccount=async(studentId,ownerUid)=>(await db.query(`
+        insert into private.billing_accounts(registration_id,parent_user_id,start_month,team_testing,charge_amount_paise,
+          late_fee_paise,late_fee_policy,late_fees_enabled,billing_terms_version,pricing_model,initial_amount_paise)
+        values($1,$2,date_trunc('month',now())::date-interval '1 month',false,120000,0,'daily',false,
+          'fixture','custom_quote',120000) returning id
+      `,[studentId,ownerUid])).rows[0].id;
+      const account=await createAccount(student,parent.id);
+      const otherAccount=await createAccount(otherStudent,other.id);
+      const invoices=(await db.query(`
+        insert into private.billing_invoices(account_id,period_start,due_date,base_amount_paise,status,paid_paise,paid_at)
+        values ($1,date_trunc('month',now())::date-interval '1 month',now()-interval '1 month',120000,'paid',120000,now()-interval '1 month'),
+          ($1,date_trunc('month',now())::date,now()-interval '1 day',120000,'pending',0,null),
+          ($2,date_trunc('month',now())::date,now()-interval '1 day',9900,'pending',0,null)
+        returning id
+      `,[account,otherAccount])).rows;
+      const profile=await staff(owner,'list_coaching_student_profile',[student,'admin']);
+      assert.equal(profile.registrationId,student);
+      assert.equal(profile.school,null);
+      assert.equal(profile.age,'9');
+      assert.equal(profile.parentName,'Example parent');
+      assert.equal(profile.parentEmail,'guardian@example.test');
+      assert.equal(profile.parentPhone,'+12025550123');
+      assert.equal(profile.followUpNote,'Internal follow-up');
+      assert.deepEqual(profile.feedback,[feedback]);
+      assert.equal(profile.billing.currency,'INR');
+      assert.equal(profile.billing.monthlyAmountPaise,120000);
+      assert.equal(profile.billing.nextMonthAmountPaise,120000);
+      assert.equal(profile.billing.outstandingPaise,120000);
+      assert.deepEqual(profile.billing.invoices.map(row=>[row.id,row.status,row.paidPaise]),[
+        [invoices[1].id,'overdue',0],[invoices[0].id,'paid',120000]
+      ]);
+      assert.equal(profile.billing.nextDueAt,profile.billing.invoices[0].dueAt);
+      assert.ok(profile.billing.invoices[1].paidAt);
+      const assigned=await staff(coach,'list_coaching_student_profile',[student,'coach']);
+      assert.equal(assigned.parentEmail,profile.parentEmail);
+      assert.deepEqual(assigned.feedback,[feedback]);
+      assert.equal(Object.hasOwn(assigned,'billing'),false);
+      assert.equal(Object.hasOwn(assigned,'followUpNote'),false);
+      for(const [actor,id,scope]of [[owner,student,'coach'],[coach,student,'admin'],[coach,otherStudent,'coach'],[parent,student,'coach']]){
+        await as('authenticated',actor,()=>rejectsInTransaction(
+          ()=>rpc('list_coaching_student_profile',[id,scope]),'42501'));
+      }
+      await followUp(student,'closed');
+      await as('authenticated',owner,()=>rejectsInTransaction(
+        ()=>rpc('list_coaching_student_profile',[student,'admin']),'42501'));
     } finally {
       await db.exec('rollback');
     }
@@ -252,6 +349,42 @@ test('coaching tracker preserves parent ownership, scoped coach writes and Gmail
       await followUp(removed,'closed');
       assert.equal(await service('claim_parent_attendance_email'),null);
       assert.equal(await state(suppressed),'cancelled');
+    } finally {
+      await db.exec('rollback');
+    }
+  });
+  await t.test('manual parent email uses saved marks, explicit workspace scope and existing delivery dedupe',async()=>{
+    await db.exec('begin');
+    try {
+      const adminCoach=admins[1];
+      const assignedStudent=await enrol(parent,'Assigned only',{registeredEmail:'guardian@example.test'});
+      const otherStudent=await enrol(other,'Other roster');
+      const noSession=await enrol(other,'No session');
+      const closed=await enrol(other,'Closed enrolment');
+      await assign(assignedStudent,adminCoach.email);
+      await save(owner,today,[mark(assignedStudent),mark(otherStudent,'absent'),mark(noSession,'no_session'),mark(closed)]);
+      await followUp(closed,'closed');
+      const send=(actor,scope,id=null)=>staff(actor,'queue_students_attendance_email',[today,scope,id]);
+      await as('authenticated',adminCoach,()=>rejectsInTransaction(
+        ()=>rpc('queue_students_attendance_email',[today,'coach']),'PT409'));
+      await db.exec('update private.coaching_settings set parent_attendance_email_enabled=true');
+      assert.deepEqual(await send(adminCoach,'coach',otherStudent),{queued:0,alreadyQueued:0,eligible:0});
+      assert.deepEqual(await send(adminCoach,'coach'),{queued:1,alreadyQueued:0,eligible:1});
+      assert.deepEqual(await send(adminCoach,'coach',assignedStudent),{queued:0,alreadyQueued:1,eligible:1});
+      const notice=await service('claim_parent_attendance_email');
+      assert.equal(notice.childName,'Assigned only');
+      assert.equal(notice.recipientEmail,'guardian@example.test');
+      assert.equal(notice.status,'present');
+      assert.equal(await service('finish_parent_attendance_email',[notice.id,notice.leaseToken,'sent']),true);
+      await as('authenticated',coach,()=>rejectsInTransaction(
+        ()=>rpc('queue_students_attendance_email',[today,'admin']),'42501'));
+      assert.deepEqual(await send(adminCoach,'admin'),{queued:1,alreadyQueued:1,eligible:2});
+      const unconfirmed=await service('claim_parent_attendance_email');
+      assert.equal(unconfirmed.childName,'Other roster');
+      assert.equal(unconfirmed.status,'absent');
+      assert.equal(await service('finish_parent_attendance_email',[unconfirmed.id,unconfirmed.leaseToken,'unconfirmed']),true);
+      assert.deepEqual(await send(owner,'admin'),{queued:0,alreadyQueued:2,eligible:2});
+      assert.equal(await service('claim_parent_attendance_email'),null);
     } finally {
       await db.exec('rollback');
     }

@@ -86,7 +86,8 @@
         "transport": "gmailSmtp",
         "dispatchSetting": "private.coaching_settings.parent_attendance_email_enabled",
         "trigger": "Saved Present or Absent attendance",
-        "recipient": "Guardian contact saved on the confirmed enrolment",
+        "recipient": "Guardian contact saved on the active accepted enrolment",
+        "manualQueueRpc": "queue_students_attendance_email",
         "deduplication": "One notice per student and session date"
       }
     }

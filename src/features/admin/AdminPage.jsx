@@ -12,7 +12,6 @@ import "./admin.css";
 import { REVIEW_OPTIONS, readReviewIntent } from "./review-contract.js";
 import { consumeAuthReturnTarget } from "../../lib/authReturn.js";
 import BillingPanel from "../billing/BillingPanel.jsx";
-import { CoachingWorkspace } from "../tracker/StaffTracker.jsx";
 import StudentsWorkspace from "../tracker/StudentsWorkspace.jsx";
 
 const VIEWS = [
@@ -21,7 +20,6 @@ const VIEWS = [
   { id: "students", label: "Students", icon: "team" },
   { id: "billing", label: "Billing", icon: "billing" },
   { id: "team", label: "Team", icon: "team" },
-  { id: "attendance", label: "Attendance", icon: "register" },
 ];
 
 function AdminIcon({ name, ...props }) {
@@ -214,7 +212,8 @@ export function AuthorizedAdmin({ auth }) {
   const [referenceIso, setReferenceIso] = React.useState(() => new Date().toISOString());
   const [view, setView] = React.useState(() => {
     const requestedView = typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("view");
-    return ["billing", "attendance", "students"].includes(requestedView) ? requestedView : "overview";
+    if (requestedView === "attendance") return "students";
+    return ["billing", "students"].includes(requestedView) ? requestedView : "overview";
   });
   const [selectedDetailId, setSelectedDetailId] = React.useState(null);
   const [selectedSnapshot, setSelectedSnapshot] = React.useState(null);
@@ -225,7 +224,6 @@ export function AuthorizedAdmin({ auth }) {
   const [exporting, setExporting] = React.useState(false);
   const hasLoaded = lastSynced !== null;
   const headingRef = React.useRef(null);
-  const attendanceNavigationRef = React.useRef(null);
   const studentsNavigationRef = React.useRef(null);
   const alive = React.useRef(true);
   const tables = React.useMemo(() => registerTables(rows), [rows]);
@@ -256,12 +254,11 @@ export function AuthorizedAdmin({ auth }) {
   }, [hasLoaded, reviewIntent, rows]);
 
   React.useEffect(() => {
-    if (view === "attendance") return;
     const url = new URL(window.location.href);
-    if (view === "students") {
-      url.searchParams.set("view", "students");
-      url.searchParams.delete("date");
-    } else if (["attendance", "students"].includes(url.searchParams.get("view"))) {
+    if (view === "students" || view === "billing") {
+      url.searchParams.set("view", view);
+      if (view === "billing") url.searchParams.delete("date");
+    } else if (["attendance", "students", "billing"].includes(url.searchParams.get("view"))) {
       url.searchParams.delete("view");
       url.searchParams.delete("date");
     } else return;
@@ -292,10 +289,9 @@ export function AuthorizedAdmin({ auth }) {
   }, [hasDraft]);
 
   function changeView(next) {
-    if (view === "students" && next !== view && studentsNavigationRef.current?.mayLeave() === false) return;
-    if (view === "attendance") {
-      if (next === "attendance") attendanceNavigationRef.current?.showAttendance();
-      else if (attendanceNavigationRef.current?.mayLeave() === false) return;
+    if (view === "students") {
+      if (next === view) { studentsNavigationRef.current?.showRoster(); return; }
+      if (studentsNavigationRef.current?.mayLeave() === false) return;
     }
     setView(next);
     window.requestAnimationFrame(() => { headingRef.current?.focus({ preventScroll: true }); window.scrollTo({ top: 0, behavior: "instant" }); });
@@ -325,7 +321,7 @@ export function AuthorizedAdmin({ auth }) {
   }
   function searchRequests(query) {
     if (view !== "register") {
-      if (view === "attendance" && attendanceNavigationRef.current?.mayLeave() === false) return;
+      if (view === "students" && studentsNavigationRef.current?.mayLeave() === false) return;
       setFilters(previous => ({ ...defaultFilters(), period: previous.period, query }));
       setView("register");
     } else setFilter("query", query);
@@ -380,8 +376,7 @@ export function AuthorizedAdmin({ auth }) {
         <div className="adm-topbar-right"><WorkspaceSwitch current="admin" canAdmin canCoach />{view !== "students" && <span className="adm-live-state" data-state={hasLoaded ? liveState : "not_synced"} role="status">{!hasLoaded ? "Not synced" : liveState === "live" ? "Live" : liveState === "paused" ? "Paused" : liveState === "reconnecting" ? "Reconnecting" : "Connecting"}</span>}<div className="adm-user"><Avatar name={auth.user.displayName || auth.user.email} src={auth.user.avatarUrl} small /><span><strong>{auth.user.displayName || auth.user.email}</strong><span>{auth.user.email}</span></span></div><details className="adm-mobile-tools"><summary aria-label="Workspace actions"><AdminIcon name="more" /></summary><div className="adm-tools-popup"><a href="/"><AdminIcon name="external" />Website</a><button type="button" onClick={refresh}><AdminIcon name="reset" />Refresh register</button><button type="button" onClick={auth.signOut}><AdminIcon name="exit" />Sign out</button></div></details></div>
       </header>
       <div className="adm-content">
-        {view === "students" ? <StudentsWorkspace auth={auth} headingRef={headingRef} navigationRef={studentsNavigationRef} />
-        : view === "attendance" ? <CoachingWorkspace auth={auth} embedded headingRef={headingRef} navigationRef={attendanceNavigationRef} /> : <>
+        {view === "students" ? <StudentsWorkspace auth={auth} headingRef={headingRef} navigationRef={studentsNavigationRef} onOpenBilling={() => changeView("billing")} /> : <>
         <div className="adm-page-heading"><div><h1 ref={headingRef} tabIndex={-1}>{title}</h1><p className="adm-date">{formatIST(referenceIso, "date")} · IST{hasDraft && <span>Unsaved changes</span>}</p></div><div className="adm-page-actions">{["overview", "register"].includes(view) && <FilterSelect label="Period" value={datePreset} onChange={setPeriod}><option value="all">All dates</option><option value="today">Today</option><option value="last7">Last 7 days</option></FilterSelect>}{view === "overview" && hasLoaded && <button className="adm-button adm-button-outline" type="button" onClick={() => exportCsv({ period: filters.period })} disabled={!hasLoaded || exporting || loading}>Export CSV</button>}</div></div>
         {error && <div className="adm-notice adm-notice-error" role="alert"><p>{error}{hasLoaded && ` Showing the last saved snapshot from ${formatIST(lastSynced)} IST.`}</p><button className="adm-text-button" type="button" onClick={refresh}>Retry</button></div>}
         {auth.error && <div className="adm-notice" role="status">{auth.error}</div>}
