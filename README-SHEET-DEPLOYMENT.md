@@ -103,12 +103,20 @@ On an existing target, compare applied versions first; do not replay its schema:
     parent and staff reads retain their read-only transaction contract.
 11. `supabase/migrations/20261111045000_coaching_attendance_send_now.sql`
     — admin-only manual attendance dispatch and daily delivery status.
+12. `supabase/migrations/20261112213049_coaching_manual_gmail_delivery.sql`
+    — manual attendance delivery through the existing Gmail sender.
+13. `supabase/migrations/20261112215334_default_coaching_assignment.sql`
+    — default coach assignment for new enrolments.
+14. `supabase/migrations/20261112215500_staff_tracker_scope.sql`
+    — scope tracker access by the current staff role and assignment.
+15. `supabase/migrations/20261118083629_remove_late_fees.sql`
+    — monthly-only balances and reminders, retired late-fee invoices and
+    preserved provider payment history.
 
-Apply all eleven complete files in order to a new, empty target. For an existing
-target, verify what is applied and apply only the missing forward migrations;
-an existing ten-migration target needs only file 11. Record actual target
-versions and checks in the release ledger. Never copy UAT submissions, Auth
-users or private billing rows into production.
+Apply the complete migration set in order to a new, empty target. For an existing
+target, verify what is applied and apply only the missing forward migrations.
+Record actual target versions and checks in the release ledger. Never copy UAT
+submissions, Auth users or private billing rows into production.
 
 The second migration makes `is_admin` an authenticated, security-invoker wrapper
 and removes application-role access to the optional dashboard RLS helper.

@@ -8,6 +8,7 @@ const directory=new URL('../supabase/migrations/',import.meta.url);
 const names=(await readdir(directory)).filter(n=>n.endsWith('.sql')).sort();
 const files=await Promise.all(names.map(n=>readFile(new URL(n,directory),'utf8')));
 const customIndex=names.findIndex(n=>n.endsWith('_custom_coaching_fees.sql'));
+const retirementIndex=names.findIndex(n=>n.endsWith('_remove_late_fees.sql'));
 const admin={id:randomUUID(),email:'owner@example.test'},backup={id:randomUUID(),email:'backup@gmail.com'};
 const parent={id:randomUUID(),email:'verified.parent@example.test'},other={id:randomUUID(),email:'verified.other@example.test'};
 const claims=u=>({sub:u.id,email:u.email,app_metadata:{provider:'google'}});
@@ -17,7 +18,7 @@ function form(type='enrol',terms=null,child='Synthetic child'){
     termsAccepted:type==='enrol',consentVersion:'2026-11-09',termsVersion:type==='enrol'?'2026-11-05':'',
     ...(terms?{billingConsent:true,billingTermsVersion:terms.version,...(terms.pricing_model==='custom_quote'?{billingPricingMode:'custom_quote'}:{})}:{})}};
 }
-async function setup(t,{upgrade=true}={}){
+async function setup(t,{migrationCount=files.length}={}){
   const db=new PGlite();t.after(()=>db.close());
   await db.exec(`create role anon nologin;create role authenticated nologin;create role service_role nologin;
     create schema auth;create table auth.users(id uuid primary key,email text);
@@ -25,7 +26,7 @@ async function setup(t,{upgrade=true}={}){
     create function auth.uid() returns uuid language sql stable as $$select nullif(auth.jwt()->>'sub','')::uuid$$;
     grant usage on schema auth to anon,authenticated;grant execute on function auth.jwt(),auth.uid() to anon,authenticated;`);
   for(const u of [admin,backup,parent,other])await db.query('insert into auth.users(id,email) values($1,$2)',[u.id,u.email]);
-  for(let i=0;i<(upgrade?files.length:customIndex);i++)await db.exec(files[i]);
+  for(let i=0;i<migrationCount;i++)await db.exec(files[i]);
   await db.query('insert into public.allowed_admins(email,is_owner) values($1,true),($2,false)',[admin.email,backup.email]);
   const rpc=async(name,args=[])=> (await db.query(`select public.${name}(${args.map((_,i)=>'$'+(i+1)).join(',')}) value`,args)).rows[0].value;
   async function as(role,user,fn){await db.query("select set_config('request.jwt.claims',$1,false)",[JSON.stringify(user?claims(user):{})]);await db.exec(`set role ${role}`);try{return await fn();}finally{await db.exec('reset role');await db.query("select set_config('request.jwt.claims','{}',false)");}}
@@ -43,7 +44,7 @@ async function setup(t,{upgrade=true}={}){
 }
 
 test('custom quotes upgrade without changing legacy consent or past invoices',async t=>{
-  const x=await setup(t,{upgrade:false});const {db,rpc,as,submit,approve,edit,accountFor,invoiceFor,service,prepareAt}=x;
+  const x=await setup(t,{migrationCount:customIndex});const {db,rpc,as,submit,approve,edit,accountFor,invoiceFor,service,prepareAt}=x;
   await db.exec('update private.billing_settings set enabled=true where id');
   const oldTerms=await rpc('get_billing_terms');const legacyInput=form('enrol',oldTerms,'Legacy child');
   const legacy=await submit(legacyInput);
@@ -51,7 +52,7 @@ test('custom quotes upgrade without changing legacy consent or past invoices',as
   const oldAccount=await accountFor(legacy.id),oldInvoices=await invoiceFor(legacy.id);
   const pending=await submit(form('enrol',oldTerms,'Old pending'));
   const beforeCount=(await db.query('select count(*)::int n from private.billing_accounts')).rows[0].n;
-  for(let i=customIndex;i<files.length;i++)await db.exec(files[i]);
+  for(let i=customIndex;i<retirementIndex;i++)await db.exec(files[i]);
   let terms,receipt,input,account,invoice;
 
   await t.test('migration keeps legacy invoices and prices; public terms remove fixed checkout pricing',async()=>{
@@ -183,12 +184,12 @@ test('parent reminder slots and month-end admin snapshots are grouped, bounded a
   }
   for(let index=0;index<23;index++){
     const id=randomUUID();pendingIds.push(id);
-    await db.query(`insert into private.billing_invoices(id,account_id,kind,base_invoice_id,fee_date,period_start,due_date,base_amount_paise,late_fee_paise,status,provider_invoice_id,payment_url,invoice_url,created_at)
-      values($1,$2,'late_fee',$3,$4::date-$5::integer,$6,$7,0,10000,'pending',$8,$9,$9,$7::timestamptz-interval '1 minute')`,
-      [id,a1.id,i1.id,day,index+1,i1.period_start,at('09'),`inv_SlotFee${index}`,`https://rzp.io/i/fee${index}`]);
+    await db.query(`insert into private.billing_invoices(id,account_id,period_start,due_date,base_amount_paise,status,provider_invoice_id,payment_url,invoice_url,created_at)
+      values($1,$2,($3::date-make_interval(months=>$4::integer))::date,$5,10000,'pending',$6,$7,$7,$5::timestamptz-interval '1 minute')`,
+      [id,a1.id,i1.period_start,index+1,at('09'),`inv_SlotMonthly${index}`,`https://rzp.io/i/monthly${index}`]);
   }
   let firstJob,firstToken;
-  await t.test('one current slot per parent groups all children and late fees; repeating a slot never duplicates it',async()=>{
+  await t.test('one current slot per parent groups monthly invoices; repeating a slot never duplicates it',async()=>{
     await db.query('select private.enqueue_billing_work_at($1)',[at('09')]);await db.query('select private.enqueue_billing_work_at($1)',[at('09')]);
     const jobs=(await db.query("select * from private.billing_jobs where kind='send_reminder' order by dedupe_key")).rows;
     assert.equal(jobs.length,2,'25 invoices for one parent still create one job, plus the other parent');
@@ -244,14 +245,13 @@ test('parent reminder slots and month-end admin snapshots are grouped, bounded a
     const calendar=(await db.query("select (date_trunc('month',$1::date)+interval '1 month')::date::text next,((date_trunc('month',$1::date)+interval '1 month')::date-1)::text last",[day])).rows[0];
     const late=`${calendar.last}T18:00:00+05:30`;
     await db.query(`insert into private.billing_invoices(account_id,period_start,due_date,base_amount_paise) values($1,$2,$3,999900)`,[a3.id,calendar.next,late]);
-    await db.query(`insert into private.billing_invoices(account_id,kind,base_invoice_id,fee_date,period_start,due_date,base_amount_paise,late_fee_paise) values($1,'late_fee',$2,$3::date+1,$4,$5,0,10000)`,[a3.id,i3.id,calendar.next,i3.period_start,late]);
     await db.query('select private.enqueue_billing_work_at($1)',[`${calendar.last}T17:59:00+05:30`]);
     assert.equal((await db.query('select count(*)::int n from private.billing_month_summaries')).rows[0].n,0);
     await db.query('select private.enqueue_billing_work_at($1)',[late]);await db.query('select private.enqueue_billing_work_at($1)',[late]);
     const windows=(await db.query('select * from private.billing_month_summaries')).rows;assert.equal(windows.length,1);
     const s=windows[0].summary;assert.equal(s.month,calendar.next);assert.equal(s.children.length,3);assert.equal(s.total_paise,650000);
     assert.equal(s.children.reduce((n,r)=>n+r.monthly_fee_paise,0),650000);
-    const expected=(await db.query(`select coalesce(sum(i.amount_paise-i.paid_paise),0)::int total,count(*)::int n from private.billing_invoices i where i.period_start<$1::date and i.status in ('pending','creating') and (i.kind<>'late_fee' or i.fee_date<=$2::date)`,[calendar.next,calendar.last])).rows[0];
+    const expected=(await db.query(`select coalesce(sum(i.amount_paise-i.paid_paise),0)::int total,count(*)::int n from private.billing_invoices i where i.period_start<$1::date and i.status in ('pending','creating') and i.kind='monthly'`,[calendar.next])).rows[0];
     assert.equal(s.old_pending_paise,expected.total);assert.equal(s.old_pending_count,expected.n);
     const jobs=(await db.query("select * from private.billing_jobs where kind='send_month_summary'")).rows;assert.equal(jobs.length,2);
     await db.query('delete from public.allowed_admins where email=$1',[backup.email]);
@@ -272,4 +272,123 @@ test('parent reminder slots and month-end admin snapshots are grouped, bounded a
     const prepared=(await prepareAt(job,future.toISOString())).value;assert.equal(prepared.recipient_email,other.email);
     assert.ok(prepared.invoices.some(i=>i.id===i3.id),'the existing issued invoice is still payable and reminded');
   });
+});
+
+test('late-fee retirement removes collectable balances and preserves verified provider history',async t=>{
+  const {db,rpc,as,service,submit,approve,accountFor,invoiceFor,prepareAt}=await setup(t,{migrationCount:retirementIndex});
+  await db.exec('update private.billing_settings set enabled=true where id');
+  const originalTerms=await rpc('get_billing_terms');
+  assert.equal(originalTerms.late_fee_paise,10000);
+  const originalInput=form('enrol',originalTerms);
+  const enrolment=await submit(originalInput);
+  await approve(enrolment,100);
+  const account=await accountFor(enrolment.id);
+  const monthly=(await invoiceFor(enrolment.id))[0];
+  const day=(await db.query("select (now() at time zone 'Asia/Kolkata')::date::text local_day")).rows[0].local_day;
+  const slot=`${day}T18:00:00+05:30`;
+  const paymentUrl='https://rzp.io/i/synthetic';
+  await db.query(`update private.billing_invoices set status='pending',provider_invoice_id='inv_Monthly',
+    payment_url=$2,invoice_url=$2,due_date=now()-interval '10 days' where id=$1`,[monthly.id,paymentUrl]);
+
+  const fixtures={
+    issued:{providerId:'inv_Issued'},
+    failed:{jobState:'failed',failureCode:'provider_mismatch',attempts:1},
+    inFlight:{jobState:'processing',attempts:1},
+    unissued:{jobState:'pending',attempts:0},
+    refunded:{providerId:'inv_Refunded'},
+  };
+  for(const [index,fixture] of Object.values(fixtures).entries()){
+    fixture.id=(await db.query(`insert into private.billing_invoices(account_id,kind,base_invoice_id,fee_date,period_start,
+      due_date,base_amount_paise,late_fee_paise,status,provider_invoice_id,payment_url,invoice_url)
+      values($1,'late_fee',$2,$3::date-$4::integer,$5,now()-interval '1 day',0,10000,$6,$7,$8,$8) returning id`,
+    [account.id,monthly.id,day,index+1,monthly.period_start,fixture.providerId?'pending':'creating',
+      fixture.providerId??null,fixture.providerId?paymentUrl:''])).rows[0].id;
+    if(!fixture.jobState)continue;
+    fixture.lease=fixture.jobState==='processing'?randomUUID():null;
+    fixture.job=(await db.query(`insert into private.billing_jobs(invoice_id,kind,dedupe_key,state,attempts,failure_code,lease_token,lease_until)
+      values($1,'create_invoice','create:'||$1::uuid,$2,$3,$4,$5,
+        case when $5::uuid is not null then now()+interval '2 minutes' end) returning id`,
+    [fixture.id,fixture.jobState,fixture.attempts,fixture.failureCode??'',fixture.lease])).rows[0].id;
+  }
+  const snapshot=(fee,providerId,providerStatus,{paid=0,refunded=0}={})=>JSON.stringify({
+    receipt:'LAI'+fee.id.replaceAll('-',''),provider_invoice_id:providerId,provider_status:providerStatus,
+    amount_paise:10000,currency:'INR',paid_paise:paid,refunded_paise:refunded,
+    provider_payment_id:paid?`pay_${providerId.slice(4)}`:null,
+    paid_at:paid?new Date().toISOString():null,captured:paid>0,payment_url:paymentUrl,invoice_url:paymentUrl,
+  });
+  await service('save_billing_provider_snapshot',[fixtures.refunded.id,snapshot(fixtures.refunded,'inv_Refunded','paid',{paid:10000,refunded:1000})]);
+  await service('save_billing_provider_snapshot',[fixtures.issued.id,snapshot(fixtures.issued,'inv_Issued','issued')]);
+  const preCutoverSummary={month:'',total_paise:100,old_pending_paise:40100,old_pending_count:5};
+  const summaryMonth=(await db.query("select ($1::date+interval '1 month')::date::text as next_month",[monthly.period_start])).rows[0].next_month;
+  preCutoverSummary.month=summaryMonth;
+  await db.query('insert into private.billing_month_summaries(month,generated_at,summary) values($1,now(),$2)',[summaryMonth,JSON.stringify(preCutoverSummary)]);
+  const oldSummaryJob=(await db.query(`insert into private.billing_jobs(kind,summary_month,recipient_email,dedupe_key)
+    values('send_month_summary',$1,$2,'pre-retirement-summary') returning id`,[summaryMonth,admin.email])).rows[0];
+  const oldReminder=(await db.query(`insert into private.billing_jobs(invoice_id,kind,dedupe_key,created_at)
+    values($1,'send_reminder',$2,$3) returning id`,[fixtures.issued.id,`reminder:${parent.id}:${day}:18`,slot])).rows[0];
+
+  await db.exec(files[retirementIndex]);
+
+  const invoice=async id=>(await db.query('select * from private.billing_invoices where id=$1',[id])).rows[0];
+  const job=async id=>(await db.query('select * from private.billing_jobs where id=$1',[id])).rows[0];
+  const cancellationJobs=async()=>(await db.query("select * from private.billing_jobs where kind='cancel_invoice'")).rows;
+  const cancellations=await cancellationJobs();
+  assert.deepEqual(new Set(cancellations.map(row=>row.invoice_id)),new Set([fixtures.issued.id,fixtures.failed.id,fixtures.inFlight.id]));
+  assert.equal((await invoice(fixtures.unissued.id)).status,'cancelled');
+  assert.equal((await invoice(fixtures.issued.id)).status,'pending','an issued link is not locally marked cancelled before provider confirmation');
+  assert.equal((await job(fixtures.inFlight.job)).state,'ambiguous');
+  assert.equal(await service('prepare_billing_job',[fixtures.inFlight.job,fixtures.inFlight.lease]),null,'the cutover revokes old creation leases');
+  assert.equal((await job(fixtures.unissued.job)).state,'cancelled');
+  assert.equal((await db.query("select state from private.billing_jobs where invoice_id=$1 and kind='send_invoice'",[fixtures.issued.id])).rows[0].state,'cancelled');
+
+  const terms=await rpc('get_billing_terms');
+  assert.equal(terms.late_fee_paise,0);assert.equal(terms.late_fees_enabled,false);
+  assert.match(terms.version,/^billing-2026-11-18-[a-f0-9]{64}$/);
+  assert.equal((await submit(originalInput)).duplicate,true,'retries preserve the original accepted terms');
+  await assert.rejects(submit(form('enrol',originalTerms)),{code:'PT412'});
+  const fresh=await submit(form('enrol',terms));
+  assert.deepEqual((await db.query('select metadata from public.registrations where id=$1',[fresh.id])).rows[0].metadata.billingTerms,terms);
+  assert.equal((await accountFor(enrolment.id)).late_fees_enabled,true,'historical consent is preserved');
+
+  const mine=await as('authenticated',parent,()=>rpc('list_my_billing'));
+  assert.deepEqual(mine.invoices.map(row=>row.id),[monthly.id]);
+  assert.equal(mine.summary.outstanding_paise,100);
+  assert.equal(mine.upcoming_month.old_pending_paise,100);
+  const all=await as('authenticated',admin,()=>rpc('list_admin_billing'));
+  assert.equal(all.summary.outstanding_paise,100);
+  assert.equal(all.summary.captured_paise,10000);
+  assert.equal(all.summary.refunded_paise,1000);
+  assert.deepEqual(all.invoices.filter(row=>row.kind==='late_fee').map(row=>[row.id,row.payment_url,row.invoice_url]),[[fixtures.refunded.id,'','']]);
+  const movements=(await db.query('select kind,amount_paise from private.billing_ledger where invoice_id=$1 order by id',[fixtures.refunded.id])).rows;
+  assert.deepEqual(movements,[{kind:'capture',amount_paise:10000},{kind:'refund',amount_paise:1000}]);
+
+  const reminder=(await prepareAt(oldReminder,slot)).value;
+  assert.equal(reminder.total_paise,100);
+  assert.deepEqual(reminder.invoices.map(row=>row.id),[monthly.id]);
+  assert.deepEqual(reminder.preflight_invoices.map(row=>row.id),[monthly.id]);
+  const summary=(await prepareAt(oldSummaryJob,slot)).value.summary;
+  assert.equal(summary.total_paise,preCutoverSummary.total_paise);
+  assert.equal(summary.old_pending_paise,100);
+  assert.equal(summary.old_pending_count,1);
+  assert.deepEqual((await db.query('select summary from private.billing_month_summaries where month=$1',[summaryMonth])).rows[0].summary,preCutoverSummary);
+
+  const cancel=fixture=>cancellations.find(row=>row.invoice_id===fixture.id);
+  const unknown=(await prepareAt(cancel(fixtures.failed),slot)).value;
+  assert.equal(unknown.kind,'cancel_invoice');
+  assert.equal(unknown.invoice.provider_invoice_id,null);
+  assert.equal(unknown.invoice.receipt,'LAI'+fixtures.failed.id.replaceAll('-',''));
+
+  await service('save_billing_provider_snapshot',[fixtures.inFlight.id,snapshot(fixtures.inFlight,'inv_Recovered','issued')]);
+  assert.equal((await prepareAt(cancel(fixtures.inFlight),slot)).value.invoice.provider_invoice_id,'inv_Recovered');
+  await service('save_billing_provider_snapshot',[fixtures.inFlight.id,snapshot(fixtures.inFlight,'inv_Recovered','cancelled')]);
+  assert.equal((await invoice(fixtures.inFlight.id)).status,'cancelled');
+  await service('save_billing_provider_snapshot',[fixtures.issued.id,snapshot(fixtures.issued,'inv_Issued','paid',{paid:10000})]);
+  assert.equal((await prepareAt(cancel(fixtures.issued),slot)).value,null,'a captured invoice stops the pending cancellation');
+  assert.equal((await invoice(fixtures.issued.id)).paid_paise,10000,'a racing verified payment is recorded');
+  assert.equal((await cancellationJobs()).length,3,'processing delayed provider responses keeps one cancellation per invoice');
+
+  const later=`${summaryMonth}T18:00:00+05:30`;
+  await db.query('select private.enqueue_billing_work_at($1)',[later]);
+  assert.equal((await invoiceFor(enrolment.id)).length,2,'next monthly invoice still generates');
+  assert.equal((await db.query("select count(*)::int n from private.billing_invoices where kind='late_fee'")).rows[0].n,5);
 });

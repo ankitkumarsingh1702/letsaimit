@@ -54,11 +54,12 @@ test("invalid amounts, identity fields and receipt substitutions never reach the
   }
 });
 
-test("a separate late-fee invoice identifies the charge instead of calling it coaching", async () => {
-  const { client,calls }=clientFixture([invoice()]);
-  await client.createInvoice({...bill,kind:'late_fee',late_fee_paise:100,base_amount_paise:0});
-  const body=JSON.parse(calls[0].options.body);assert.equal(body.description,'LetsAimIt late fee');assert.equal(body.line_items[0].name,'Late fee');
-  assert.equal(body.line_items[0].amount,100);assert.equal(Object.hasOwn(body,'expire_by'),false);
+test("retired late fees never create a Razorpay invoice", async () => {
+  const { client, calls } = clientFixture([]);
+  for (const changes of [{ kind: "late_fee" }, { late_fee_paise: 100 }]) {
+    await assert.rejects(client.createInvoice({ ...bill, ...changes }), error => error.code === "invalid_bill");
+  }
+  assert.equal(calls.length, 0);
 });
 
 test("invoice creation transport failures, 5xx and malformed success are ambiguous", async () => {

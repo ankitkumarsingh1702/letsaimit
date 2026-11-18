@@ -39,7 +39,7 @@ same UID boundary.
 ## Financial history
 
 Deletion does not issue refunds, rewrite paid invoices, erase ledger movements,
-or create a replacement invoice. It stops future coaching cycles, late fees and
+or create a replacement invoice. It stops future coaching cycles and
 customer reminders. Unpaid hosted Razorpay invoices are queued for verified
 cancellation. A link is closed only when the provider confirms cancellation;
 Auth deletion alone does not cancel a hosted payment link.

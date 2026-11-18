@@ -1,6 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 import { isSingleMailbox } from "./notification-worker.js";
 import { buildBillingEmail, buildBillingReminderEmail } from "./billing-email.js";
+import { isLateFeeInvoice } from "./razorpay-billing.js";
 
 const response = (status, body) => Response.json(body, { status, headers: { "Cache-Control": "no-store" } });
 function authorized(value, secret) {
@@ -43,8 +44,8 @@ export function createBillingWorker({ secret, rpc, provider, sendEmail, dashboar
             counts.sent+=1;
           };
           if(work.kind==="cancel_invoice") {
-            // A deleted account can still have an in-flight/ambiguous provider creation to recover.
-            // Recover its original identity; deletion never authorizes another invoice creation.
+            // Recover the original provider identity after an ambiguous creation response.
+            // The cancellation job never creates a replacement invoice.
             if(!work.invoice.provider_invoice_id) {
               stage="reconcile";
               const recovered=await provider.findByReceipt(work.invoice);
@@ -71,6 +72,11 @@ export function createBillingWorker({ secret, rpc, provider, sendEmail, dashboar
           }
           if(work.kind==="send_reminder") {
             if(!Array.isArray(work.preflight_invoices)||work.preflight_invoices.length>20||!Number.isSafeInteger(work.preflight_remaining)||work.preflight_remaining<0) throw Object.assign(new Error("invalid_group"),{code:"invalid_bill"});
+            if (work.preflight_invoices.some(isLateFeeInvoice) || (Array.isArray(work.invoices) && work.invoices.some(isLateFeeInvoice))) {
+              await finish("retry", "configuration_error");
+              counts.deferred += 1;
+              continue;
+            }
             stage="reconcile";
             let outOfTime=false;
             for(const invoice of work.preflight_invoices) {
@@ -90,19 +96,13 @@ export function createBillingWorker({ secret, rpc, provider, sendEmail, dashboar
             if(await finish("done")) counts.completed+=1;
             continue;
           }
-          // Recheck the provider before emailing an unpaid bill or issuing a late-fee bill.
-          // The second preparation rechecks current ownership, account state and captured payment.
-          if (work.invoice.base_invoice_id && !work.invoice.base_provider_invoice_id) {
-            await finish("retry", "invoice_missing"); counts.deferred += 1; continue;
+          if (work.kind === "send_invoice" && isLateFeeInvoice(work.invoice)) {
+            await finish("cancelled");
+            counts.skipped += 1;
+            continue;
           }
-          if (work.invoice.base_provider_invoice_id) {
-            stage = "reconcile";
-            const base = { ...work.invoice.base_invoice, id: work.invoice.base_invoice_id, provider_invoice_id: work.invoice.base_provider_invoice_id };
-            const snapshot = await provider.reconcileInvoice(base);
-            if (!await save(base, snapshot)) throw Object.assign(new Error("snapshot_rejected"), { code: "invalid_provider_snapshot" });
-            work = await rpc("prepare_billing_job", lease);
-            if (!work) { counts.skipped += 1; continue; }
-          } else if (work.kind==="send_invoice" && work.invoice.provider_invoice_id) {
+          // Reconcile the unpaid monthly invoice before checking eligibility again and emailing it.
+          if (work.kind === "send_invoice" && work.invoice.provider_invoice_id) {
             stage = "reconcile";
             const snapshot = await provider.reconcileInvoice(work.invoice);
             if (!await save(work.invoice, snapshot)) throw Object.assign(new Error("snapshot_rejected"), { code: "invalid_provider_snapshot" });
@@ -113,6 +113,11 @@ export function createBillingWorker({ secret, rpc, provider, sendEmail, dashboar
             work=await rpc("prepare_billing_job",lease);
             if(!work) {counts.skipped+=1;continue;}
             if(work.kind!=="create_invoice") throw Object.assign(new Error("invalid_job"),{code:"invalid_bill"});
+            if (isLateFeeInvoice(work.invoice)) {
+              await finish("cancelled");
+              counts.skipped += 1;
+              continue;
+            }
             stage = "create";
             const snapshot = await provider.createInvoice(work.invoice);
             stage = "save_created";
@@ -130,7 +135,7 @@ export function createBillingWorker({ secret, rpc, provider, sendEmail, dashboar
             work=await rpc("prepare_billing_job",lease);
             if(!work) {counts.skipped+=1;continue;}
             if(work.kind!==expectedKind) throw Object.assign(new Error("invalid_job"),{code:"invalid_bill"});
-            const message = buildBillingEmail({ kind: work.kind, invoice: work.invoice, dashboardOrigin, teamTesting: work.team_testing });
+            const message = buildBillingEmail({ kind: work.kind, invoice: work.invoice, dashboardOrigin });
             await deliver(work.invoice.parent_email,message);
           } else throw Object.assign(new Error("invalid_job"), { code: "invalid_bill" });
           if (await finish("done")) counts.completed += 1;

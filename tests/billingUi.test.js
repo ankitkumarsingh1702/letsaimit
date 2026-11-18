@@ -17,13 +17,14 @@ const snapshot = {
   summary: { captured_paise: 0, refunded_paise: 0, outstanding_paise: 100, paid_count: 0, pending_count: 1, overdue_count: 0 },
 };
 const user = { id: "parent-1", isGoogle: true };
-const terms = { enabled: true, pricing_model: "custom_quote", default_amount_paise: 600000, late_fee_paise: 10000, late_fee_policy: "daily", late_fees_enabled: true, due_day: 5, version: `billing-2026-11-10-${"a".repeat(64)}` };
+const terms = { enabled: true, pricing_model: "custom_quote", default_amount_paise: 600000, late_fee_paise: 0, late_fee_policy: "daily", late_fees_enabled: false, due_day: 5, version: `billing-2026-11-10-${"a".repeat(64)}` };
 
 test("the enrolment quote policy and consent version come from public server terms", async () => {
   let called = "";
   const saved = await fetchBillingTerms({ rpc: async name => { called = name; return { data: terms }; } });
-  assert.equal(called, "get_billing_terms"); assert.equal(saved.pricingModel, "custom_quote"); assert.equal(saved.defaultAmountPaise, 600000); assert.equal(saved.lateFeesEnabled, true); assert.equal(saved.version, terms.version);
-  for (const change of [{ default_amount_paise: -1 }, { version: "client-chosen" }, { due_day: 6 }, { late_fees_enabled: "false" }, { pricing_model: "legacy" }]) assert.throws(() => publicBillingTerms({ ...terms, ...change }), /could not load/);
+  assert.equal(called, "get_billing_terms");
+  assert.deepEqual(saved, { enabled: true, pricingModel: "custom_quote", defaultAmountPaise: 600000, dueDay: 5, version: terms.version });
+  for (const change of [{ default_amount_paise: -1 }, { version: "client-chosen" }, { due_day: 6 }, { late_fees_enabled: true }, { late_fees_enabled: "false" }, { late_fees_enabled: undefined }, { pricing_model: "legacy" }]) assert.throws(() => publicBillingTerms({ ...terms, ...change }), /could not load/);
   await assert.rejects(fetchBillingTerms({ rpc: async () => ({ error: { code: "offline" } }) }), /could not load/);
 });
 
@@ -62,6 +63,19 @@ test("a missing financial snapshot never becomes a fabricated zero-revenue dashb
   assert.throws(() => billingSnapshot({ ...snapshot, summary: null }, { admin: true }), /could not be confirmed/);
   assert.throws(() => billingSnapshot({ ...snapshot, settings: null }), /could not load/);
   assert.throws(() => billingSnapshot({ ...snapshot, accounts: [{ ...snapshot.accounts[0], revision: 0 }] }), /could not be confirmed/);
+});
+
+test("retired charges never reach parent billing, and settled admin history has no checkout links", () => {
+  const late = { ...row, id: "waived-fee", kind: "late_fee", base_amount_paise: 0, late_fee_paise: 10000, amount_paise: 10000 };
+  const refunded = { ...late, id: "refunded-fee", status: "refunded", paid_paise: 10000, refunded_paise: 10000 };
+  const updated = { ...snapshot, invoices: [row, late, refunded] };
+  assert.deepEqual(billingSnapshot(updated).invoices.map(invoice => invoice.id), [row.id]);
+  const admin = billingSnapshot(updated, { admin: true });
+  assert.deepEqual(admin.invoices.map(invoice => invoice.id), [row.id, refunded.id]);
+  assert.equal(admin.invoices[1].paidPaise, 10000);
+  assert.equal(admin.invoices[1].refundedPaise, 10000);
+  assert.equal(admin.invoices[1].paymentUrl, null);
+  assert.equal(admin.invoices[1].invoiceUrl, null);
 });
 
 test("parent and admin use separate ownership-enforcing RPCs with identity checks on both sides", async () => {

@@ -7,11 +7,11 @@ import { firstInvalidRegistrationField, parentRegistrationResolver } from "./reg
 import CountryCombobox from "./CountryCombobox.jsx";
 import { useAdminAuth } from "../../context/AdminAuth.jsx";
 import { storeRegistrationDraft, readRegistrationDraft, consumeRegistrationDraft, clearRegistrationDraft, clearRegistrationDrafts, shouldClearBoundRegistration, canConfirmRegistrationReceipt } from "./registrationDraft.js";
-import { fetchBillingTerms, formatMoney } from "../billing/billingData.js";
+import { fetchBillingTerms } from "../billing/billingData.js";
 import "./registration.css";
 
-export function QuotedBillingPolicy({ lateFeePaise }) {
-  return <><h4>Monthly coaching</h4><p>Fee confirmed on approval. First payment due then.</p><p>Next months: pay 1–5 in advance. {formatMoney(lateFeePaise)}/day after due. No automatic debit.</p></>;
+export function QuotedBillingPolicy() {
+  return <><h4>Monthly coaching</h4><p>Fee confirmed on approval. First payment due then.</p><p>Next months: pay 1–5 in advance. No automatic debit.</p></>;
 }
 
 export function RegistrationResumeNotice() {
@@ -315,8 +315,8 @@ export default function ParentRegistration({ mode, active, onSaved, onStageChang
           </label>{errorMessage("terms")}</div>
           <div className="registration-billing" aria-label="Monthly payment details">
             {!billingTerms ? <div className="registration-billing-loading"><p role={billingError ? "alert" : "status"}>{billingError || "Loading payment details…"}</p>{billingError && <button type="button" className="fm-text-button" onClick={() => setBillingRetry(value => value + 1)}>Retry payment details</button>}</div> : !billingTerms.enabled ? <p className="fm-handoff-note">We’ll share payment details after review.</p> : <>
-              <QuotedBillingPolicy lateFeePaise={billingTerms.lateFeePaise} />
-              <label className="fm-consent" htmlFor={fieldId("billingConsent")}><input id={fieldId("billingConsent")} type="checkbox" {...register("billingConsent")} required aria-invalid={errors.billingConsent ? true : undefined} aria-describedby={`${fieldId("billingConsent")}-error`} /><span>I agree to the quoted monthly fee, due dates and late fees.</span></label>
+              <QuotedBillingPolicy />
+              <label className="fm-consent" htmlFor={fieldId("billingConsent")}><input id={fieldId("billingConsent")} type="checkbox" {...register("billingConsent")} required aria-invalid={errors.billingConsent ? true : undefined} aria-describedby={`${fieldId("billingConsent")}-error`} /><span>I agree to the quoted monthly fee and due dates.</span></label>
               {errorMessage("billingConsent")}
             </>}
           </div>

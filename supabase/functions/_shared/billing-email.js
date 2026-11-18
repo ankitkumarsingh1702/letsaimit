@@ -1,4 +1,4 @@
-import { safeRazorpayUrl } from "./razorpay-billing.js";
+import { isLateFeeInvoice, safeRazorpayUrl } from "./razorpay-billing.js";
 
 const escape = value => String(value).replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
 function text(value, max = 80) { if (typeof value !== "string" || !value.trim() || value.length > max || /[\u0000-\u001f\u007f]/u.test(value)) throw new TypeError("Invalid billing email."); return value.trim(); }
@@ -59,29 +59,29 @@ export function buildBillingReminderEmail({reminder,dashboardOrigin}={}) {
   if(!reminder||!Array.isArray(reminder.invoices)||reminder.invoices.length<1||reminder.invoices.length>100||!Number.isSafeInteger(reminder.invoice_count)||reminder.invoice_count<reminder.invoices.length||reminder.preflight_remaining!==0) throw new TypeError("Invalid payment reminder.");
   const parent=text(reminder.parent_name),seen=new Set();let displayedTotal=0;
   const invoices=reminder.invoices.map(invoice=>{
-    if(!invoice||invoice.currency!=="INR"||typeof invoice.id!=="string"||!invoice.id||seen.has(invoice.id)) throw new TypeError("Invalid reminder invoice.");
+    if(!invoice||invoice.currency!=="INR"||isLateFeeInvoice(invoice)||typeof invoice.id!=="string"||!invoice.id||seen.has(invoice.id)) throw new TypeError("Invalid reminder invoice.");
     seen.add(invoice.id);
     if(!Number.isSafeInteger(invoice.amount_paise)||!Number.isSafeInteger(invoice.paid_paise??0)||invoice.amount_paise<100||(invoice.paid_paise??0)!==0) throw new TypeError("Invalid pending balance.");
     displayedTotal+=invoice.amount_paise;
-    return {child:text(invoice.child_name),period:month(invoice.period_start),kind:invoice.kind==="late_fee"?"Late fee":"Monthly fee",fee:amount(invoice.amount_paise),url:safeRazorpayUrl(invoice.payment_url)};
+    return {child:text(invoice.child_name),period:month(invoice.period_start),fee:amount(invoice.amount_paise),url:safeRazorpayUrl(invoice.payment_url)};
   });
   if(!Number.isSafeInteger(displayedTotal)||!Number.isSafeInteger(reminder.total_paise)||reminder.total_paise<displayedTotal||reminder.invoices_truncated!==true&&(reminder.total_paise!==displayedTotal||reminder.invoice_count!==invoices.length)||reminder.invoices_truncated===true&&reminder.invoice_count<=invoices.length) throw new TypeError("Invalid reminder totals.");
-  const detailHtml=`<table style="width:100%;margin-top:20px;border-collapse:collapse;font-size:13px"><thead><tr>${["Child","Month","Fee","Pay"].map(value=>`<th style="text-align:left;padding:7px 5px;border-bottom:1px solid #e4e9e6">${value}</th>`).join("")}</tr></thead><tbody>${invoices.map(invoice=>`<tr><td style="padding:7px 5px;border-bottom:1px solid #e4e9e6">${escape(invoice.child)}</td><td style="padding:7px 5px;border-bottom:1px solid #e4e9e6">${escape(invoice.period)}<br><span style="color:#60736c">${invoice.kind}</span></td><td style="padding:7px 5px;border-bottom:1px solid #e4e9e6">${escape(invoice.fee)}</td><td style="padding:7px 5px;border-bottom:1px solid #e4e9e6"><a href="${escape(invoice.url)}" style="color:#143e35">Pay</a></td></tr>`).join("")}</tbody></table>`;
+  const detailHtml=`<table style="width:100%;margin-top:20px;border-collapse:collapse;font-size:13px"><thead><tr>${["Child","Month","Fee","Pay"].map(value=>`<th style="text-align:left;padding:7px 5px;border-bottom:1px solid #e4e9e6">${value}</th>`).join("")}</tr></thead><tbody>${invoices.map(invoice=>`<tr><td style="padding:7px 5px;border-bottom:1px solid #e4e9e6">${escape(invoice.child)}</td><td style="padding:7px 5px;border-bottom:1px solid #e4e9e6">${escape(invoice.period)}<br><span style="color:#60736c">Monthly fee</span></td><td style="padding:7px 5px;border-bottom:1px solid #e4e9e6">${escape(invoice.fee)}</td><td style="padding:7px 5px;border-bottom:1px solid #e4e9e6"><a href="${escape(invoice.url)}" style="color:#143e35">Pay</a></td></tr>`).join("")}</tbody></table>`;
   const notes=reminder.invoices_truncated===true?[`Showing ${invoices.length} of ${reminder.invoice_count} bills. The total includes all bills.`]:[];
-  return render({title:"Payment reminder",intro:[`Hi ${parent},`,"Your fees are pending."],rows:[["Total pending",amount(reminder.total_paise)],["Unpaid bills",reminder.invoice_count]],detailHtml,detailText:["",...invoices.flatMap(invoice=>[`${invoice.child} · ${invoice.period} · ${invoice.kind} · ${invoice.fee}`,`Pay: ${invoice.url}`])],notes,links:[["View all payments",`${origin(dashboardOrigin)}/parent/`]]});
+  return render({title:"Payment reminder",intro:[`Hi ${parent},`,"Your fees are pending."],rows:[["Total pending",amount(reminder.total_paise)],["Unpaid bills",reminder.invoice_count]],detailHtml,detailText:["",...invoices.flatMap(invoice=>[`${invoice.child} · ${invoice.period} · Monthly fee · ${invoice.fee}`,`Pay: ${invoice.url}`])],notes,links:[["View all payments",`${origin(dashboardOrigin)}/parent/`]]});
 }
 
 /** Content only. The queue chooses one saved parent address; no recipients come from a request body. */
-export function buildBillingEmail({ kind, invoice, summary, dashboardOrigin, teamTesting = false } = {}) {
+export function buildBillingEmail({ kind, invoice, summary, dashboardOrigin } = {}) {
   if (kind === "send_fee_change") return buildFeeChangeEmail({invoice,dashboardOrigin});
   if (kind === "send_month_summary") return buildMonthSummaryEmail({summary,dashboardOrigin});
   if (!titles[kind] || !invoice || typeof invoice !== "object" || invoice.currency !== "INR") throw new TypeError("Invalid billing email.");
   if (!["https://uat.letsaimit.com", "https://letsaimit.com"].includes(dashboardOrigin)) throw new TypeError("Invalid billing origin.");
-  const isLateFee = invoice.kind === "late_fee";
-  const initial=invoice.pricing_model==="custom_quote"&&invoice.initial_invoice===true;
-  const title = isLateFee && kind === "send_invoice" ? "Late fee" : initial&&kind==="send_invoice"?"Enrolment approved":titles[kind];
-  const parent = text(invoice.parent_name), reference = text(invoice.receipt, 40);
   const isReceipt = kind === "send_receipt", isRefund = kind === "send_refund";
+  if (!isReceipt && !isRefund && isLateFeeInvoice(invoice)) throw new TypeError("Invalid billing email.");
+  const initial=invoice.pricing_model==="custom_quote"&&invoice.initial_invoice===true;
+  const title = initial && kind === "send_invoice" ? "Enrolment approved" : titles[kind];
+  const parent = text(invoice.parent_name), reference = text(invoice.receipt, 40);
   const billed = amount(invoice.amount_paise);
   const paid = amount(invoice.paid_paise ?? 0), refunded = amount(invoice.refunded_paise ?? 0);
   const due = date(invoice.due_date), period = date(invoice.period_start);
@@ -89,13 +89,7 @@ export function buildBillingEmail({ kind, invoice, summary, dashboardOrigin, tea
   const payUrl = !isReceipt && !isRefund ? safeRazorpayUrl(invoice.payment_url) : null;
   const invoiceUrl = invoice.invoice_url ? safeRazorpayUrl(invoice.invoice_url) : null;
   const parentUrl = `${dashboardOrigin}/parent/`;
-  const message = isRefund ? "Your refund status is updated." : isReceipt ? "Thank you. Your payment is confirmed." : kind === "send_reminder" ? isLateFee ? "Your late fee is pending." : "Your monthly fee is pending." : isLateFee ? "Your late-fee invoice is ready." : "Your monthly invoice is ready.";
+  const message = isRefund ? "Your refund status is updated." : isReceipt ? "Thank you. Your payment is confirmed." : kind === "send_reminder" ? "Your monthly fee is pending." : "Your monthly invoice is ready.";
   const links = [...(payUrl ? [["Pay now", payUrl]] : []), ...(invoiceUrl ? [["View invoice", invoiceUrl]] : []), ["Your payments", parentUrl]];
-  let feeNote = "";
-  if (!teamTesting && !isLateFee && !isReceipt && !isRefund && invoice.late_fees_enabled === true && ["daily", "once"].includes(invoice.late_fee_policy)) {
-    if (!Number.isSafeInteger(invoice.late_fee_rate_paise) || invoice.late_fee_rate_paise <= 0) throw new TypeError("Invalid late-fee policy.");
-    const fee = amount(invoice.late_fee_rate_paise);
-    feeNote = invoice.late_fee_policy === "daily" ? `${fee} per overdue day after the due date.` : `Late fee: ${fee} once after the due date.`;
-  }
-  return render({title,intro:[`Hi ${parent},`,message],rows,links,notes:feeNote?[feeNote]:[]});
+  return render({title,intro:[`Hi ${parent},`,message],rows,links});
 }

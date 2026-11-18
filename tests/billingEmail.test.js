@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { buildBillingEmail,buildBillingReminderEmail } from "../supabase/functions/_shared/billing-email.js";
 
 const invoice = { id: "f84940a4-e4cb-4ebf-88cb-e63537834565", currency: "INR", parent_name: "Synthetic Parent", receipt: "LAIf84940a4e4cb4ebf88cbe63537834565", amount_paise: 100, paid_paise: 100, refunded_paise: 0, period_start: "2026-12-01", due_date: "2026-12-05", payment_url: "https://rzp.io/i/synthetic", invoice_url: "https://rzp.io/i/synthetic" };
-const options = { invoice, dashboardOrigin: "https://uat.letsaimit.com", teamTesting: true };
+const options = { invoice, dashboardOrigin: "https://uat.letsaimit.com" };
 
 test("invoice email displays the saved fee without public team or fixed-price language", () => {
   const email = buildBillingEmail({ ...options, kind: "send_invoice" });
@@ -28,29 +28,19 @@ test("SQL timestamptz due dates display their actual India calendar date", () =>
   assert.throws(()=>buildBillingEmail({...options,invoice:{...invoice,due_date:'2026-02-30T20:00:00+00:00'},kind:'send_reminder'}));
 });
 
-test("normal billing communicates daily late fee, while team payments cannot imply that fee is charged", () => {
-  const normal = buildBillingEmail({ ...options, invoice: { ...invoice, amount_paise: 60000, late_fees_enabled: true, late_fee_policy: 'daily', late_fee_rate_paise: 10000 }, teamTesting: false, kind: "send_invoice" });
-  assert.match(normal.text, /Amount: ₹600/); assert.match(normal.text, /₹100 per overdue day after the due date/);
-  const team = buildBillingEmail({ ...options, kind: "send_invoice" }); assert.doesNotMatch(team.text, /₹100 per overdue day/);
-});
-
-test("late-fee disclosures use the saved account policy and actual rate only when enabled",()=>{
-  for(const late_fees_enabled of [false,undefined]) {
-    const disabled=buildBillingEmail({...options,invoice:{...invoice,late_fees_enabled,late_fee_policy:'daily',late_fee_rate_paise:10000},teamTesting:false,kind:'send_invoice'});
-    assert.doesNotMatch(disabled.text,/overdue day|Late fee:/);
+test("monthly payment emails omit retired late-fee policies from legacy accounts", () => {
+  for (const kind of ["send_invoice", "send_reminder"]) {
+    const email = buildBillingEmail({ ...options, invoice: { ...invoice, amount_paise: 60000, late_fees_enabled: true, late_fee_policy: "daily", late_fee_rate_paise: 10000 }, kind });
+    assert.match(email.text, /Amount: ₹600/);
+    assert.doesNotMatch(email.text, /overdue day|late fee/i);
+    assert.doesNotMatch(email.html, /overdue day|late fee/i);
   }
-  const once=buildBillingEmail({...options,invoice:{...invoice,late_fees_enabled:true,late_fee_policy:'once',late_fee_rate_paise:15000},teamTesting:false,kind:'send_invoice'});
-  assert.match(once.text,/Late fee: ₹150 once after the due date/);assert.doesNotMatch(once.text,/per overdue day|₹100/);
-  const daily=buildBillingEmail({...options,invoice:{...invoice,late_fees_enabled:true,late_fee_policy:'daily',late_fee_rate_paise:12500},teamTesting:false,kind:'send_reminder'});
-  assert.match(daily.text,/₹125 per overdue day after the due date/);assert.doesNotMatch(daily.text,/₹100/);
-  const team=buildBillingEmail({...options,invoice:{...invoice,late_fees_enabled:true,late_fee_policy:'daily',late_fee_rate_paise:10000},kind:'send_invoice'});
-  assert.doesNotMatch(team.text,/₹100 per overdue day/);assert.doesNotMatch(team.text,/Team payment|test/i);
 });
 
 test("a custom initial fee states approval and immediate payment, including a ₹1 quote",()=>{
-  const first=buildBillingEmail({...options,invoice:{...invoice,pricing_model:'custom_quote',initial_invoice:true,child_name:'Synthetic Child',amount_paise:100},teamTesting:false,kind:'send_invoice'});
+  const first=buildBillingEmail({...options,invoice:{...invoice,pricing_model:'custom_quote',initial_invoice:true,child_name:'Synthetic Child',amount_paise:100},kind:'send_invoice'});
   assert.equal(first.subject,'LetsAimIt: Enrolment approved');assert.match(first.text,/Child: Synthetic Child/);assert.match(first.text,/Amount: ₹1/);assert.match(first.text,/Due by: Now/);assert.doesNotMatch(first.text,/₹600|Team|test/i);
-  const recurring=buildBillingEmail({...options,invoice:{...invoice,pricing_model:'custom_quote',initial_invoice:false,amount_paise:600000},teamTesting:false,kind:'send_invoice'});
+  const recurring=buildBillingEmail({...options,invoice:{...invoice,pricing_model:'custom_quote',initial_invoice:false,amount_paise:600000},kind:'send_invoice'});
   assert.equal(recurring.subject,'LetsAimIt: Monthly fee');assert.match(recurring.text,/Amount: ₹6,000/);assert.match(recurring.text,/Due by: 5 Dec 2026/);
 });
 
@@ -68,11 +58,13 @@ test("month-end admin summary keeps next-month fees and older unpaid balances se
   assert.throws(()=>buildBillingEmail({kind:'send_month_summary',summary:{...summary,total_paise:600000},dashboardOrigin:options.dashboardOrigin}),/Invalid month totals/);
 });
 
-test("grouped reminder displays one total and every saved payment link",()=>{
-  const reminder={parent_name:'Synthetic Parent',invoices:[{...invoice,child_name:'One',paid_paise:0,kind:'monthly'},{...invoice,id:'other',child_name:'Two',paid_paise:0,kind:'late_fee',amount_paise:10000,payment_url:'https://rzp.io/i/late'}],total_paise:10100,invoice_count:2,invoices_truncated:false,preflight_remaining:0};
+test("grouped reminder displays one total and every saved monthly payment link",()=>{
+  const reminder={parent_name:'Synthetic Parent',invoices:[{...invoice,child_name:'One',paid_paise:0,kind:'monthly'},{...invoice,id:'other',child_name:'Two',paid_paise:0,kind:'monthly',amount_paise:10000,payment_url:'https://rzp.io/i/other'}],total_paise:10100,invoice_count:2,invoices_truncated:false,preflight_remaining:0};
   const email=buildBillingReminderEmail({reminder,dashboardOrigin:options.dashboardOrigin});
-  assert.match(email.text,/Total pending: ₹101/);assert.match(email.text,/Unpaid bills: 2/);assert.match(email.text,/One · December 2026 · Monthly fee · ₹1/);assert.match(email.text,/Two · December 2026 · Late fee · ₹100/);assert.match(email.text,/https:\/\/rzp.io\/i\/late/);assert.doesNotMatch(email.text,/Team|₹600/);
+  assert.match(email.text,/Total pending: ₹101/);assert.match(email.text,/Unpaid bills: 2/);assert.match(email.text,/One · December 2026 · Monthly fee · ₹1/);assert.match(email.text,/Two · December 2026 · Monthly fee · ₹100/);assert.match(email.text,/https:\/\/rzp.io\/i\/other/);assert.doesNotMatch(email.text,/Team|₹600/);
   for(const change of [{total_paise:1},{invoice_count:3},{preflight_remaining:1},{invoices:[reminder.invoices[0],reminder.invoices[0]]}])assert.throws(()=>buildBillingReminderEmail({reminder:{...reminder,...change},dashboardOrigin:options.dashboardOrigin}));
+  const late = { ...reminder.invoices[1], kind: "late_fee" };
+  assert.throws(() => buildBillingReminderEmail({ reminder: { ...reminder, invoices: [reminder.invoices[0], late] }, dashboardOrigin: options.dashboardOrigin }), /Invalid reminder invoice/);
 });
 
 test("a capped link list discloses its limit while preserving the full pending total",()=>{
@@ -81,12 +73,16 @@ test("a capped link list discloses its limit while preserving the full pending t
   assert.match(email.text,/Total pending: ₹150/);assert.match(email.text,/Showing 100 of 150 bills. The total includes all bills/);assert.match(email.text,/View all payments:/);
 });
 
-test("late-fee invoices are labelled as late fees and do not promise another monthly charge",()=>{
-  const late={...invoice,kind:'late_fee',amount_paise:10000,late_fees_enabled:true,late_fee_policy:'daily',late_fee_rate_paise:10000};
-  const email=buildBillingEmail({...options,invoice:late,teamTesting:false,kind:'send_invoice'});
-  assert.equal(email.subject,'LetsAimIt: Late fee');assert.match(email.text,/Your late-fee invoice is ready/);assert.match(email.text,/Amount: ₹100/);
-  assert.doesNotMatch(email.text,/Monthly fee|Your monthly invoice|per overdue day/);
-  const reminder=buildBillingEmail({...options,invoice:late,teamTesting:false,kind:'send_reminder'});assert.match(reminder.text,/Your late fee is pending/);
+test("retired invoices can send historical receipts and refunds but cannot ask for payment", () => {
+  const late = { ...invoice, kind: "late_fee", amount_paise: 10000, paid_paise: 10000, refunded_paise: 10000 };
+  for (const kind of ["send_invoice", "send_reminder"]) {
+    assert.throws(() => buildBillingEmail({ ...options, invoice: late, kind }), /Invalid billing email/);
+  }
+  for (const [kind, expected] of [["send_receipt", /Paid: ₹100/], ["send_refund", /Refunded: ₹100/]]) {
+    const message = buildBillingEmail({ ...options, invoice: late, kind });
+    assert.match(message.text, expected);
+    assert.doesNotMatch(message.text, /Pay now:|overdue day/);
+  }
 });
 
 test("untrusted names and references are HTML escaped without changing plain text meaning", () => {

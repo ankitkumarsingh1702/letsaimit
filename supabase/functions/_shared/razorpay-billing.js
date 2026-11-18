@@ -43,6 +43,10 @@ function validateBill(bill) {
   return { amount, stableReceipt };
 }
 
+export function isLateFeeInvoice(bill) {
+  return bill?.kind === "late_fee" || bill?.late_fee_paise > 0;
+}
+
 function boundedTimestamp(value) {
   if (value == null || value === "") return null;
   if (!Number.isSafeInteger(value) || value <= 0 || value > 253402300799) invalid();
@@ -137,16 +141,16 @@ export function createRazorpayClient({ keyId, keySecret, fetch: fetcher = global
   }
 
   async function createInvoice(bill) {
+    if (isLateFeeInvoice(bill)) throw new BillingProviderError("invalid_bill");
     const { amount, stableReceipt } = validateBill(bill);
     const parentName = plain(bill.parent_name, 80).slice(0, 50);
     const parentEmail = plain(bill.parent_email, 254);
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(parentEmail)) throw new BillingProviderError("invalid_bill");
     const phone = bill.parent_phone ? plain(bill.parent_phone, 24) : "";
     if (phone && !/^\+?\d{7,15}$/.test(phone)) throw new BillingProviderError("invalid_bill");
-    const lateFee = bill.kind === "late_fee" || bill.late_fee_paise > 0;
-    const body = { type: "invoice", receipt: stableReceipt, description: lateFee ? "LetsAimIt late fee" : "LetsAimIt monthly fee", partial_payment: false,
+    const body = { type: "invoice", receipt: stableReceipt, description: "LetsAimIt monthly fee", partial_payment: false,
       customer: { name: parentName, email: parentEmail, ...(phone ? { contact: phone } : {}) },
-      line_items: [{ name: lateFee ? "Late fee" : "Monthly coaching", amount, currency: "INR", quantity: 1 }],
+      line_items: [{ name: "Monthly coaching", amount, currency: "INR", quantity: 1 }],
       sms_notify: false, email_notify: false, currency: "INR", notes: { billing_id: bill.id },
     };
     const entity = await call("invoices", { method: "POST", body });

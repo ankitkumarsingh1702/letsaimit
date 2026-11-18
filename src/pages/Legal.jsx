@@ -225,9 +225,8 @@ function Terms() {
           there is no automatic debit.
         </p>
         <p>
-          A ₹100 late fee applies for each overdue day under your agreed payment
-          terms. Late fees appear separately. We send up to four daily reminders
-          while payment is pending. Free trials have no fee.
+          We send up to four daily reminders while payment is pending. Free
+          trials have no fee.
         </p>
         <p>
           Fee changes apply from the next month. We email the new amount before

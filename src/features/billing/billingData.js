@@ -6,12 +6,13 @@ const optionalDate = value => value && Number.isFinite(Date.parse(value)) ? valu
 const money = value => Number.isSafeInteger(value) && value >= 0;
 
 export function publicBillingTerms(value) {
+  // Monthly-only consent must not be presented against an older fee-enabled backend.
   if (!value || typeof value.enabled !== "boolean" || value.pricing_model !== "custom_quote"
-    || !validMonthlyFeePaise(value.default_amount_paise) || !money(value.late_fee_paise)
-    || value.due_day !== 5 || value.late_fee_policy !== "daily" || typeof value.late_fees_enabled !== "boolean"
+    || !validMonthlyFeePaise(value.default_amount_paise) || value.due_day !== 5
+    || value.late_fees_enabled !== false
     || !/^billing-\d{4}-\d{2}-\d{2}-[a-f0-9]{64}$/.test(value.version || "")) throw new Error("Payment details could not load. Please retry.");
-  return { enabled: value.enabled, pricingModel: value.pricing_model, defaultAmountPaise: value.default_amount_paise, lateFeePaise: value.late_fee_paise,
-    lateFeesEnabled: value.late_fees_enabled, dueDay: value.due_day, version: value.version };
+  return { enabled: value.enabled, pricingModel: value.pricing_model, defaultAmountPaise: value.default_amount_paise,
+    dueDay: value.due_day, version: value.version };
 }
 
 /** Public pricing only. This RPC never returns registrations, identities or credentials. */
@@ -42,14 +43,15 @@ export function billingInvoice(record) {
   if (record.amount_paise !== record.base_amount_paise + record.late_fee_paise || record.refunded_paise > record.paid_paise) {
     throw new Error("The saved invoice totals could not be confirmed.");
   }
+  const historicalLateFee = record.kind === "late_fee";
   return { id: record.id, registrationId: record.registration_id, number: text(record.invoice_number) || record.id,
     childName: text(record.child_name), parentName: text(record.parent_name), parentEmail: text(record.parent_email),
     community: text(record.community), sport: text(record.sport), periodStart: record.period_start, dueDate: record.due_date,
     currency: "INR", amountPaise: record.amount_paise, baseAmountPaise: record.base_amount_paise,
     lateFeePaise: record.late_fee_paise, paidPaise: record.paid_paise, refundedPaise: record.refunded_paise,
-    kind: record.kind === "late_fee" ? "late_fee" : "monthly", baseInvoiceId: text(record.base_invoice_id),
-    teamTesting: record.team_testing === true, lateFeePreviewPaise: money(record.late_fee_preview_paise) ? record.late_fee_preview_paise : 0,
-    status: record.status, paymentUrl: safeRazorpayUrl(record.payment_url), invoiceUrl: safeRazorpayUrl(record.invoice_url),
+    kind: historicalLateFee ? "late_fee" : "monthly",
+    status: record.status, paymentUrl: historicalLateFee ? null : safeRazorpayUrl(record.payment_url),
+    invoiceUrl: historicalLateFee ? null : safeRazorpayUrl(record.invoice_url),
     createdAt: record.created_at, updatedAt: optionalDate(record.updated_at), paidAt: optionalDate(record.paid_at) };
 }
 
@@ -61,14 +63,11 @@ export function billingSnapshot(value, { admin = false } = {}) {
     throw new Error("Billing totals could not be confirmed.");
   }
   return {
-    invoices: value.invoices.map(billingInvoice),
+    invoices: value.invoices.map(billingInvoice).filter(invoice => invoice.kind === "monthly" || (admin && invoice.paidPaise > 0)),
     hasMore: value.has_more === true,
     accounts: (value.accounts || []).map(billingAccount),
     upcomingMonth: value.upcoming_month ? upcomingBillingMonth(value.upcoming_month) : null,
-    settings: { enabled: settings.enabled === true, dueDay: settings.due_day === 5 ? 5 : null,
-      lateFeesEnabled: settings.late_fees_enabled === true,
-      lateFeePaise: money(settings.late_fee_paise) ? settings.late_fee_paise : null,
-      lateFeePolicy: ["disabled", "pending", "once", "daily"].includes(settings.late_fee_policy) ? settings.late_fee_policy : "disabled" },
+    settings: { enabled: settings.enabled === true },
     summary: admin ? { capturedPaise: summary.captured_paise, refundedPaise: summary.refunded_paise,
       outstandingPaise: summary.outstanding_paise, paidCount: summary.paid_count,
       pendingCount: summary.pending_count, overdueCount: summary.overdue_count } : null,
@@ -99,15 +98,14 @@ export function upcomingBillingMonth(value) {
 export function groupParentInvoices(invoices) {
   const groups = new Map();
   for (const invoice of invoices) {
+    if (invoice.kind !== "monthly") continue;
     const cycle = invoice.periodStart.slice(0, 7);
     const key = `${invoice.registrationId}:${cycle}`;
     if (!groups.has(key)) groups.set(key, { id: key, registrationId: invoice.registrationId, childName: invoice.childName,
-      periodStart: invoice.periodStart, invoices: [], feesPaise: 0, lateFeePaise: 0, totalPaise: 0, paidPaise: 0, refundedPaise: 0, pendingPaise: 0 });
+      periodStart: invoice.periodStart, invoices: [], totalPaise: 0, paidPaise: 0, refundedPaise: 0, pendingPaise: 0 });
     const group = groups.get(key);
     group.invoices.push(invoice);
     if (["cancelled", "expired"].includes(invoice.status)) continue;
-    group.feesPaise += invoice.baseAmountPaise;
-    group.lateFeePaise += invoice.lateFeePaise;
     group.totalPaise += invoice.amountPaise;
     group.paidPaise += invoice.paidPaise;
     group.refundedPaise += invoice.refundedPaise;
@@ -116,8 +114,7 @@ export function groupParentInvoices(invoices) {
   return [...groups.values()].map(group => {
     const active = group.invoices.filter(invoice => !["cancelled", "expired"].includes(invoice.status));
     const unpaid = active.filter(invoice => invoice.amountPaise > invoice.paidPaise);
-    const monthly = active.filter(invoice => invoice.kind === "monthly");
-    const candidates = monthly.length ? monthly : unpaid.length ? unpaid : active.length ? active : group.invoices;
+    const candidates = active.length ? active : group.invoices;
     const dueDate = candidates.map(invoice => invoice.dueDate).sort((a, b) => Date.parse(a) - Date.parse(b))[0];
     let status = "pending";
     if (!active.length) status = group.invoices.every(invoice => invoice.status === "cancelled") ? "cancelled" : "expired";

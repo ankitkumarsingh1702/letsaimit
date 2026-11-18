@@ -106,15 +106,30 @@ test('definitive provider rejection and invalid inputs stop; rate limits retry w
   }
 });
 
-test('late fees require the complete original invoice and reconcile it before any create',async()=>{
-  let prepares=0;
-  const base={...bill,provider_invoice_id:'inv_synthetic_base'};
-  const late={...bill,id:'b97b1263-4417-4bb1-bf3d-fc58095d13f1',base_invoice_id:bill.id,base_provider_invoice_id:'inv_synthetic_base',base_invoice:base,kind:'late_fee'};
-  const f=fixture({invoice:late,prepare:()=>++prepares===1?{kind:'create_invoice',invoice:late,team_testing:false}:null});
-  await f.handler(call());assert.equal(f.calls.some(x=>x[0]==='create'),false);
-  const checked=f.calls.find(x=>x[0]==='reconcile')[1];assert.equal(checked.receipt,bill.receipt);assert.equal(checked.amount_paise,100);assert.equal(checked.currency,'INR');
-  assert.equal(f.calls.find(x=>x[0]==='save_billing_provider_snapshot')[1].p_invoice_id,bill.id);
-  const noBase=fixture({invoice:{...late,base_provider_invoice_id:null}});await noBase.handler(call());assert.equal(noBase.calls.some(x=>['create','reconcile'].includes(x[0])),false);assert.equal(noBase.calls.find(x=>x[0]==='finish_billing_job')[1].p_failure_code,'invoice_missing');
+test('retired invoice creation and collection jobs produce no provider calls or emails', async () => {
+  const late = { ...bill, kind: 'late_fee', base_invoice_id: 'older-monthly', base_provider_invoice_id: 'inv_base', provider_invoice_id: 'inv_synthetic' };
+  for (const kind of ['create_invoice', 'send_invoice']) {
+    const f = fixture({ kind, invoice: late });
+    const result = await f.handler(call());
+    assert.equal((await result.json()).skipped, 1, kind);
+    assert.equal(f.calls.some(([name]) => ['create', 'reconcile', 'find', 'cancel'].includes(name)), false, kind);
+    assert.equal(f.sent.length, 0, kind);
+    assert.equal(f.calls.find(([name]) => name === 'finish_billing_job')[1].p_outcome, 'cancelled', kind);
+  }
+});
+
+test('a stale reminder containing a retired invoice waits for fresh monthly totals', async () => {
+  const late = { ...bill, kind: 'late_fee', provider_invoice_id: 'inv_synthetic' };
+  for (const changes of [{ invoices: [late] }, { preflight_invoices: [late] }]) {
+    const f = fixture({ prepare: () => reminderWork(changes) });
+    const result = await f.handler(call());
+    assert.equal((await result.json()).deferred, 1);
+    assert.equal(f.calls.some(([name]) => ['create', 'reconcile', 'find', 'cancel'].includes(name)), false);
+    assert.equal(f.sent.length, 0);
+    const finish = f.calls.find(([name]) => name === 'finish_billing_job')[1];
+    assert.equal(finish.p_outcome, 'retry');
+    assert.equal(finish.p_failure_code, 'configuration_error');
+  }
 });
 
 test('failure codes emitted by the worker stay inside the database contract',async()=>{
@@ -125,7 +140,7 @@ test('failure codes emitted by the worker stay inside the database contract',asy
   }
 });
 
-test('deleted-account cancellation closes only the saved provider invoice, including a late-fee invoice',async()=>{
+test('cancellation closes only the saved retired invoice',async()=>{
   const invoice={...bill,kind:'late_fee',provider_invoice_id:'inv_synthetic',base_invoice_id:'older-monthly',base_provider_invoice_id:'inv_base'};
   const f=fixture({kind:'cancel_invoice',invoice});const result=await f.handler(call());
   assert.equal((await result.json()).completed,1);assert.equal(f.sent.length,0);
@@ -134,10 +149,11 @@ test('deleted-account cancellation closes only the saved provider invoice, inclu
   assert.ok(f.calls.findIndex(x=>x[0]==='save_billing_provider_snapshot')<f.calls.findIndex(x=>x[0]==='finish_billing_job'));
 });
 
-test('an ambiguous creation is recovered by receipt before cancellation, never recreated',async()=>{
+test('an ambiguous retired invoice creation is recovered by receipt before cancellation',async()=>{
   let prepares=0;
-  const known={...bill,provider_invoice_id:'inv_recovered'};
-  const f=fixture({prepare:()=>({kind:'cancel_invoice',invoice:++prepares===1?bill:known}),provider:{findByReceipt:async()=>({provider_invoice_id:'inv_recovered',provider_status:'issued',paid_paise:0})}});
+  const late={...bill,kind:'late_fee'};
+  const known={...late,provider_invoice_id:'inv_recovered'};
+  const f=fixture({prepare:()=>({kind:'cancel_invoice',invoice:++prepares===1?late:known}),provider:{findByReceipt:async()=>({provider_invoice_id:'inv_recovered',provider_status:'issued',paid_paise:0})}});
   await f.handler(call());
   assert.equal(f.calls.some(x=>x[0]==='create'),false);assert.equal(f.calls.find(x=>x[0]==='cancel')[1].provider_invoice_id,'inv_recovered');
   assert.equal(f.calls.filter(x=>x[0]==='save_billing_provider_snapshot').length,2);assert.equal(f.sent.length,0);

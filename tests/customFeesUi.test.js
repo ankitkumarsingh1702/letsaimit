@@ -82,46 +82,51 @@ test("next-month totals keep old unpaid invoices separate and reject an inconsis
   assert.throws(() => upcomingBillingMonth({ ...dto, total_paise: 1220000 }), /total could not be confirmed/);
 });
 
-test("parent groups one child/month without losing separately payable native invoices", () => {
+test("parent groups monthly invoices per child and keeps retired fees out of balances", () => {
   const invoices = [billingInvoice(raw), ...[1, 2].map(index => billingInvoice({ ...raw, id: `late-${index}`, invoice_number: `LATE-${index}`, kind: "late_fee", base_amount_paise: 0, late_fee_paise: 10000, amount_paise: 10000, payment_url: `https://rzp.io/i/late${index}`, invoice_url: `https://rzp.io/i/late${index}` }))];
   const [group] = groupParentInvoices(invoices);
-  assert.equal(group.invoices.length, 3); assert.equal(group.feesPaise, 600000); assert.equal(group.lateFeePaise, 20000); assert.equal(group.totalPaise, 620000); assert.equal(group.pendingPaise, 620000); assert.equal(group.status, "overdue");
+  assert.equal(group.invoices.length, 1); assert.equal(group.totalPaise, 600000); assert.equal(group.pendingPaise, 600000); assert.equal(group.status, "overdue");
   assert.equal(groupParentInvoices([...invoices, billingInvoice({ ...raw, id: "another-child", registration_id: "another-child", child_name: "Test child" })]).length, 2, "same display name is not an ownership key");
   const cancelled = billingInvoice({ ...raw, id: "cancelled-old", status: "cancelled" });
-  assert.equal(groupParentInvoices([...invoices, cancelled])[0].totalPaise, 620000);
+  assert.equal(groupParentInvoices([...invoices, cancelled])[0].totalPaise, 600000);
   const refunded = groupParentInvoices([billingInvoice({ ...raw, status: "refunded", paid_paise: 600000, refunded_paise: 600000 })])[0];
   assert.equal(refunded.pendingPaise, 0); assert.equal(refunded.status, "refunded");
   const paidMonthly = billingInvoice({ ...raw, status: "paid", paid_paise: 600000 });
   const lateOnly = billingInvoice({ ...raw, id: "late-only", kind: "late_fee", due_date: "2026-11-08T18:29:59Z", base_amount_paise: 0, late_fee_paise: 10000, amount_paise: 10000 });
-  assert.equal(groupParentInvoices([paidMonthly, lateOnly])[0].dueDate, raw.due_date, "monthly row keeps the programme due date; fee dates stay in invoice details");
+  assert.equal(groupParentInvoices([paidMonthly, lateOnly])[0].dueDate, raw.due_date, "monthly row keeps the programme due date");
+  assert.equal(groupParentInvoices([paidMonthly, lateOnly])[0].status, "paid");
+  assert.deepEqual(groupParentInvoices([lateOnly]), []);
 });
 
-test("actual compact components expose exact payment links, not an aggregate amount on a smaller invoice", async () => {
+test("parent billing displays and links only the monthly amount, and enrolment keeps monthly consent", async () => {
   const [{ createServer }, React, { renderToStaticMarkup }] = await Promise.all([import("vite"), import("react"), import("react-dom/server")]);
   const vite = await createServer({ server: { middlewareMode: true, hmr: false }, appType: "custom" });
   try {
     const { ParentMonthRows, MonthDetails, UpcomingMonth } = await vite.ssrLoadModule("/src/features/billing/BillingPanel.jsx");
     const { default: ReviewDecision } = await vite.ssrLoadModule("/src/features/admin/ReviewDecision.jsx");
     const { QuotedBillingPolicy } = await vite.ssrLoadModule("/src/features/registration/ParentRegistration.jsx");
-    const base = billingInvoice(raw), late = billingInvoice({ ...raw, id: "late-1", kind: "late_fee", base_amount_paise: 0, late_fee_paise: 10000, amount_paise: 10000, payment_url: "https://rzp.io/i/late1", invoice_url: "https://rzp.io/i/late1" });
-    const groups = groupParentInvoices([base, late]);
+    const { Terms } = await vite.ssrLoadModule("/src/pages/Legal.jsx");
+    const base = billingInvoice({ ...raw, base_amount_paise: 100, amount_paise: 100 });
+    const retired = Array.from({ length: 8 }, (_, index) => billingInvoice({ ...raw, id: `late-${index}`, kind: "late_fee", base_amount_paise: 0, late_fee_paise: 10000, amount_paise: 10000, payment_url: `https://rzp.io/i/late${index}`, invoice_url: `https://rzp.io/i/late${index}` }));
+    const groups = groupParentInvoices([base, ...retired]);
     const rows = renderToStaticMarkup(React.createElement(ParentMonthRows, { groups, onSelect: () => {} }));
-    assert.match(rows, /View payments/); assert.doesNotMatch(rows, /href="https:\/\/rzp.io\/i\/base"/);
-    assert.match(rows, />View invoices<\/button>/);
+    assert.match(rows, /href="https:\/\/rzp.io\/i\/base"[^>]*>Pay ₹1</);
+    assert.doesNotMatch(rows, /late fee|₹80[01]|\/i\/late/i);
+    assert.match(rows, />View invoice<\/button>/);
     assert.equal((rows.match(/<tr role="row">/g) || []).length, 2, "one header plus one child/month row");
     const details = renderToStaticMarkup(React.createElement(MonthDetails, { group: groups[0], onClose: () => {} }));
-    assert.match(details, /href="https:\/\/rzp.io\/i\/base"[^>]*>Pay ₹6,000/); assert.match(details, /href="https:\/\/rzp.io\/i\/late1"[^>]*>Pay ₹100/); assert.doesNotMatch(details, />Pay ₹6,100/);
-    const paidBase = { ...base, status: "paid", paidPaise: 600000 };
-    const onlyLate = renderToStaticMarkup(React.createElement(ParentMonthRows, { groups: groupParentInvoices([paidBase, late]), onSelect: () => {} }));
-    assert.match(onlyLate, /href="https:\/\/rzp.io\/i\/late1"[^>]*>Pay ₹100/);
+    assert.match(details, /href="https:\/\/rzp.io\/i\/base"[^>]*>Pay ₹1</);
+    assert.doesNotMatch(details, /late fee|₹80[01]|\/i\/late/i);
     const pending = toAdminRequest({ ...record, review_decision: "pending", reviewed_at: null });
     const approval = renderToStaticMarkup(React.createElement(ReviewDecision, { row: pending, initialDecision: "accepted", canReview: true, onReview: async () => {} }));
     assert.match(approval, /value="6000"/); assert.match(approval, /Approve · ₹6,000\/month/);
     const trial = renderToStaticMarkup(React.createElement(ReviewDecision, { row: { ...pending, formType: "trial" }, initialDecision: "accepted", canReview: true, onReview: async () => {} }));
     assert.doesNotMatch(trial, /Monthly fee|value="6000"/);
-    const policy = renderToStaticMarkup(React.createElement(QuotedBillingPolicy, { lateFeePaise: 10000 }));
-    assert.match(policy, /Fee confirmed on approval/); assert.match(policy, /First payment due then/); assert.match(policy, /pay 1–5 in advance/); assert.match(policy, /₹100\/day/); assert.match(policy, /No automatic debit/); assert.doesNotMatch(policy, /Team payment|Regular price|₹600(?:\s|<)/);
-    const upcoming = renderToStaticMarkup(React.createElement(UpcomingMonth, { upcoming: { month: "2026-12-01", children: [{ registrationId, childName: "Test child", parentName: "Test parent", monthlyFeePaise: 600000 }], totalPaise: 600000, oldPendingPaise: 620000, oldPendingCount: 3 } }));
-    assert.match(upcoming, /Next month total/); assert.match(upcoming, /Older unpaid invoices/); assert.match(upcoming, /₹6,000/); assert.match(upcoming, /₹6,200/);
+    const policy = renderToStaticMarkup(React.createElement(QuotedBillingPolicy));
+    assert.match(policy, /Fee confirmed on approval/); assert.match(policy, /First payment due then/); assert.match(policy, /pay 1–5 in advance/); assert.match(policy, /No automatic debit/); assert.doesNotMatch(policy, /late fee|per overdue day|₹100\/day|Team payment|Regular price|₹600(?:\s|<)/i);
+    const legal = renderToStaticMarkup(React.createElement(Terms));
+    assert.match(legal, /due by the 5th/); assert.doesNotMatch(legal, /late fee|per overdue day/i);
+    const upcoming = renderToStaticMarkup(React.createElement(UpcomingMonth, { upcoming: { month: "2026-12-01", children: [{ registrationId, childName: "Test child", parentName: "Test parent", monthlyFeePaise: 600000 }], totalPaise: 600000, oldPendingPaise: 100, oldPendingCount: 1 } }));
+    assert.match(upcoming, /Next month total/); assert.match(upcoming, /Older unpaid invoices/); assert.match(upcoming, /₹6,000/); assert.match(upcoming, /₹1</);
   } finally { await vite.close(); }
 });

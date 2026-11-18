@@ -6,7 +6,7 @@ import "./billing.css";
 
 const date = value => value && Number.isFinite(Date.parse(value)) ? new Intl.DateTimeFormat("en-IN", { timeZone: "Asia/Kolkata", day: "numeric", month: "short", year: "numeric" }).format(new Date(value)) : "—";
 const month = value => value && Number.isFinite(Date.parse(value)) ? new Intl.DateTimeFormat("en-IN", { timeZone: "Asia/Kolkata", month: "short", year: "numeric" }).format(new Date(value)) : "—";
-const payable = invoice => ["pending", "overdue"].includes(invoice.status) && invoice.paymentUrl && invoice.paidPaise < invoice.amountPaise;
+const payable = invoice => invoice.kind === "monthly" && ["pending", "overdue"].includes(invoice.status) && invoice.paymentUrl && invoice.paidPaise < invoice.amountPaise;
 
 function InvoiceLink({ href, children, primary = false }) {
   return href ? <a className={`billing-button${primary ? " billing-button-primary" : ""}`} href={href} target="_blank" rel="noopener noreferrer">{children}<span className="billing-sr-only"> · opens Razorpay in a new tab</span></a> : null;
@@ -33,13 +33,10 @@ function InvoiceDetails({ invoice, admin, onClose, onOpenRequest }) {
       <dt>Child</dt><dd>{invoice.childName || "—"}</dd>
       {admin && <><dt>Parent</dt><dd>{invoice.parentName || "—"}</dd><dt>Email</dt><dd>{invoice.parentEmail || "—"}</dd></>}
       <dt>Month</dt><dd>{month(invoice.periodStart)}</dd>
-      <dt>Type</dt><dd>{invoice.kind === "late_fee" ? "Late fee" : "Monthly programme"}</dd>
+      <dt>Type</dt><dd>{invoice.kind === "late_fee" ? "Historical late fee" : "Monthly programme"}</dd>
       <dt>Community</dt><dd>{invoice.community || "—"}</dd>
       <dt>Sport</dt><dd>{invoice.sport || "—"}</dd>
       <dt>Due</dt><dd>{date(invoice.dueDate)} · IST</dd>
-      <dt>Programme</dt><dd>{formatMoney(invoice.baseAmountPaise)}</dd>
-      <dt>Late fee</dt><dd>{formatMoney(invoice.lateFeePaise)}</dd>
-      {invoice.teamTesting && <><dt>Late fee preview</dt><dd>{formatMoney(invoice.lateFeePreviewPaise)} · not charged</dd></>}
       <dt>Paid</dt><dd>{formatMoney(invoice.paidPaise)}</dd>
       <dt>Refunded</dt><dd>{formatMoney(invoice.refundedPaise)}</dd>
       <dt>Paid on</dt><dd>{date(invoice.paidAt)}</dd>
@@ -103,12 +100,14 @@ export function UpcomingMonth({ upcoming }) {
 }
 
 export function InvoiceRows({ invoices, admin, onSelect }) {
-  const headers = ["Child", ...(admin ? ["Parent"] : []), "Month", "Fees", "Due", "Late fee", "Total", "Status", "Pay", "Invoice"];
-  return <div className="billing-table-scroll" tabIndex={0} role="region" aria-label="Saved invoices"><table role="table" className={`billing-table${admin ? " billing-table-admin" : ""}`}><caption className="billing-sr-only">Monthly invoices. Indian rupees; dates in IST.</caption><thead role="rowgroup"><tr role="row">{headers.map(label => <th scope="col" key={label}>{label}</th>)}</tr></thead><tbody role="rowgroup">
+  const headers = ["Child", ...(admin ? ["Parent"] : []), "Month", "Due", "Total", "Status", "Pay", "Invoice"];
+  return <div className="billing-table-scroll" tabIndex={0} role="region" aria-label="Saved invoices"><table role="table" className={`billing-table${admin ? " billing-table-admin" : ""}`}><caption className="billing-sr-only">Saved invoices. Amounts in Indian rupees and dates in IST.</caption><thead role="rowgroup"><tr role="row">{headers.map(label => <th scope="col" key={label}>{label}</th>)}</tr></thead><tbody role="rowgroup">
     {invoices.map(invoice => <tr role="row" key={invoice.id}>
       <td><button className="billing-text-button billing-ellipsis" type="button" title={invoice.childName || invoice.number} onClick={() => onSelect(invoice.id)}>{invoice.childName || "Details"}</button></td>
       {admin && <td title={invoice.parentName}>{invoice.parentName || "—"}</td>}
-      <td>{month(invoice.periodStart)}</td><td className="billing-numeric">{formatMoney(invoice.baseAmountPaise)}</td><td>{!admin && <span className="billing-mobile-label" aria-hidden="true">Due</span>}{date(invoice.dueDate)}</td><td className="billing-numeric">{formatMoney(invoice.lateFeePaise)}</td><td className="billing-numeric">{!admin && <span className="billing-mobile-label" aria-hidden="true">Total</span>}{formatMoney(invoice.amountPaise)}</td>
+      <td>{month(invoice.periodStart)}</td>
+      <td>{!admin && <span className="billing-mobile-label" aria-hidden="true">Due</span>}{date(invoice.dueDate)}</td>
+      <td className="billing-numeric">{!admin && <span className="billing-mobile-label" aria-hidden="true">Total</span>}{formatMoney(invoice.amountPaise)}</td>
       <td><span className="billing-status" data-status={invoice.status}>{BILLING_STATUS_LABELS[invoice.status]}</span></td>
       <td>{payable(invoice) ? <InvoiceLink href={invoice.paymentUrl} primary>Pay {formatMoney(invoice.amountPaise - invoice.paidPaise)}</InvoiceLink> : "—"}</td>
       <td>{invoice.invoiceUrl ? <InvoiceLink href={invoice.invoiceUrl}>View invoice</InvoiceLink> : <button type="button" className="billing-text-button" onClick={() => onSelect(invoice.id)}>Details</button>}</td>
@@ -119,9 +118,9 @@ export function InvoiceRows({ invoices, admin, onSelect }) {
 
 export function MonthDetails({ group, onClose }) {
   return <BillingDialog title={`${group.childName || "Coaching"} · ${month(group.periodStart)}`} onClose={onClose}>
-    <dl className="billing-facts billing-month-totals"><dt>Fees</dt><dd>{formatMoney(group.feesPaise)}</dd><dt>Late fee</dt><dd>{formatMoney(group.lateFeePaise)}</dd><dt>Total</dt><dd>{formatMoney(group.totalPaise)}</dd><dt>Paid</dt><dd>{formatMoney(group.paidPaise)}</dd><dt>Pending</dt><dd>{formatMoney(group.pendingPaise)}</dd>{group.refundedPaise > 0 && <><dt>Refunded</dt><dd>{formatMoney(group.refundedPaise)}</dd></>}</dl>
+    <dl className="billing-facts billing-month-totals"><dt>Total</dt><dd>{formatMoney(group.totalPaise)}</dd><dt>Paid</dt><dd>{formatMoney(group.paidPaise)}</dd><dt>Pending</dt><dd>{formatMoney(group.pendingPaise)}</dd>{group.refundedPaise > 0 && <><dt>Refunded</dt><dd>{formatMoney(group.refundedPaise)}</dd></>}</dl>
     <div className="billing-month-items">{group.invoices.map(invoice => <div className="billing-month-item" key={invoice.id}>
-      <div><strong>{invoice.kind === "late_fee" ? "Late fee" : "Monthly fee"} · {formatMoney(invoice.amountPaise)}</strong><span className="billing-status" data-status={invoice.status}>{BILLING_STATUS_LABELS[invoice.status]}</span></div>
+      <div><strong>Monthly fee · {formatMoney(invoice.amountPaise)}</strong><span className="billing-status" data-status={invoice.status}>{BILLING_STATUS_LABELS[invoice.status]}</span></div>
       <p className="billing-note">{invoice.number} · Due {date(invoice.dueDate)}</p>
       <div className="billing-row-actions">{payable(invoice) && <InvoiceLink href={invoice.paymentUrl} primary>Pay {formatMoney(invoice.amountPaise - invoice.paidPaise)}</InvoiceLink>}<InvoiceLink href={invoice.invoiceUrl}>View invoice</InvoiceLink></div>
     </div>)}</div>
@@ -130,20 +129,18 @@ export function MonthDetails({ group, onClose }) {
 }
 
 export function ParentMonthRows({ groups, onSelect }) {
-  return <div className="billing-table-scroll" tabIndex={0} role="region" aria-label="Monthly coaching payments"><table role="table" className="billing-table billing-parent-table"><caption className="billing-sr-only">One row per child and month. Separate invoices retain their own payment links.</caption><thead role="rowgroup"><tr role="row">{["Child", "Month", "Fees", "Due", "Late fee", "Total", "Status", "Pay", "Invoice"].map(label => <th key={label} scope="col">{label}</th>)}</tr></thead><tbody role="rowgroup">{groups.map(group => {
+  return <div className="billing-table-scroll" tabIndex={0} role="region" aria-label="Monthly coaching payments"><table role="table" className="billing-table billing-parent-table"><caption className="billing-sr-only">One row per child and month. Separate invoices retain their own payment links.</caption><thead role="rowgroup"><tr role="row">{["Child", "Month", "Due", "Total", "Status", "Pay", "Invoice"].map(label => <th key={label} scope="col">{label}</th>)}</tr></thead><tbody role="rowgroup">{groups.map(group => {
     const payables = group.invoices.filter(payable);
     return <tr role="row" key={group.id}>
       <td><button className="billing-text-button billing-ellipsis" type="button" title={group.childName} onClick={() => onSelect(group.id)}>{group.childName || "Details"}</button></td>
       <td>{month(group.periodStart)}</td>
-      <td className="billing-numeric">{formatMoney(group.feesPaise)}</td>
       <td><span className="billing-mobile-label" aria-hidden="true">Due</span>{date(group.dueDate)}</td>
-      <td className="billing-numeric">{formatMoney(group.lateFeePaise)}</td>
       <td className="billing-numeric"><span className="billing-mobile-label" aria-hidden="true">Total</span>{formatMoney(group.totalPaise)}</td>
       <td><span className="billing-status" data-status={group.status}>{BILLING_STATUS_LABELS[group.status]}</span></td>
       <td>{payables.length === 1 && group.pendingPaise === payables[0].amountPaise - payables[0].paidPaise ? <InvoiceLink href={payables[0].paymentUrl} primary>Pay {formatMoney(group.pendingPaise)}</InvoiceLink> : payables.length ? <button type="button" className="billing-button billing-button-primary" onClick={() => onSelect(group.id)}>View payments</button> : "—"}</td>
       <td><button type="button" className="billing-text-button" onClick={() => onSelect(group.id)}>{group.invoices.length === 1 ? "View invoice" : "View invoices"}</button></td>
     </tr>;
-  })}{!groups.length && <tr role="row"><td colSpan={9} className="billing-empty">No invoices</td></tr>}</tbody></table></div>;
+  })}{!groups.length && <tr role="row"><td colSpan={7} className="billing-empty">No invoices</td></tr>}</tbody></table></div>;
 }
 
 function StopBilling({ account, auth, onClose, onSaved }) {

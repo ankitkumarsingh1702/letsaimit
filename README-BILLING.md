@@ -25,13 +25,11 @@ payment before recording money received.
   Each parent receives one grouped reminder per slot across their children and
   unpaid invoices. Recovery sends the current slot only, not missed reminders.
   Paid invoices are removed from reminders after provider reconciliation.
-- **₹100 per overdue day** applies under the new quoted-fee agreement. Issued
-  invoices cannot change amounts; late fees are separate invoices. A normal
-  calendar invoice accrues these charges from the 6th while unpaid.
+- Overdue coaching invoices retain the original monthly amount. Reminders list
+  the pending monthly invoices.
 - Existing fixed-price agreements and legacy team accounts retain their saved
-  amounts and fee policy. They are not silently converted to quoted pricing.
-- Stopping monthly billing stops future cycles. Existing issued invoices remain
-  payable. This does not initiate a refund or cancel an existing provider invoice.
+  coaching amounts. Stopping monthly billing stops future cycles. Previously
+  issued coaching invoices remain payable.
 
 ## Month-end review
 
@@ -62,7 +60,7 @@ next-month fee-change RPCs. Parent form payloads cannot select charge amounts.
 
 The parent and admin dashboards use compact single-line rows, status/search
 filters, payment/invoice links and saved-row CSV. The parent sees child, month,
-fee, due date, late fee, total and status. Global totals are independent of filters. They
+fee, due date, total and status. Global totals are independent of filters. They
 show gross captured payments, processed refunds and outstanding balances. Net
 received is captured minus refunds; this is not a claim about bank settlements,
 provider fees or tax accounting. Invoice lists return the latest 1,000 records
@@ -74,7 +72,7 @@ is never optimistically marked paid in the browser.
 
 ## Backend setup
 
-Use the ordered migration in `supabase/migrations/` and the release procedure in
+Use the ordered migrations in `supabase/migrations/` and the release procedure in
 [README-SHEET-DEPLOYMENT.md](README-SHEET-DEPLOYMENT.md). The billing migration
 starts **disabled**. It does not backfill old accepted requests or charge an
 existing parent. Keep the target explicit: `nlgfcmywgwibvmbsgkox` is UAT.
@@ -115,12 +113,17 @@ The existing Vault worker secret is reused by the minute scheduler. Enable
 the active provider webhook configuration, signature/deduplication intake checks
 and the current quoted-fee policy are verified. Distinguish a locally signed smoke
 event from actual Razorpay delivery: the first captured-payment event is verified
-after the payer completes checkout. Preserve legacy account policy instead of
-upgrading old prices or enabling their previously disabled fees.
+after the payer completes checkout. Preserve previously agreed coaching prices.
+
+For an existing target migrating from daily late fees, apply the forward
+removal migration and deploy the updated billing worker. Verify that active
+balances contain only monthly invoices. Confirm cancellation of issued unpaid
+late-fee invoices through Razorpay. Reconcile any uncertain prior creation by
+its saved receipt, and retain captures and refunds in the accounting history.
 
 ## Financial reliability
 
-- Each registration/month and late-fee date is unique. A durable creation job
+- Each registration has one coaching invoice per month. A durable creation job
   records its intent before the provider request.
 - Razorpay invoice creation has no documented general idempotency header. An
   ambiguous create is reconciled by its stable receipt; it is never blindly
@@ -132,8 +135,8 @@ upgrading old prices or enabling their previously disabled fees.
   order and payment. Authorization alone is not captured revenue. Refund totals
   include processed refunds only. Reordered events cannot reduce saved captures
   or refunds, or double-count them.
-- Reminders and new late-fee invoices reconcile the parent bill first, then
-  recheck the durable job. Retry/lease state survives worker errors. SMTP has an
+- Reminders reconcile the parent bill first, then recheck the durable job.
+  Retry/lease state survives worker errors. SMTP has an
   unavoidable at-least-once ambiguity if delivery succeeds but acknowledgement
   is lost; stable message IDs help mailbox deduplication.
 - Grouped reminders reconcile pending invoices in bounded chunks across retries
