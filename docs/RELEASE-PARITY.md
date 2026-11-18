@@ -557,3 +557,14 @@ HTTPS homepage is still 200 / 39,957 bytes with SHA-256
 | UAT database | Applied `20261118135618_students_profile_and_active_roster.sql` in a guarded transaction. SHA-256 `ab898a9482132ce6be49580f92f9215f125600b003a8987485c63472c66f2b4b`. Actual roster counts are Bellezea 2 and Ellegenza 1. The preflight found one missing coach on the earlier excluded enrolment. The post-apply count of active accepted enrolments without a coach is zero. |
 | Verification | Chrome sample data verified society filters, desktop and phone profiles, custom sprint and repetition saves, the payment summary, and mocked staff and parent requests. Source and database tests verified contact scope, admin billing, practice history, email deduplication and legacy dated links. |
 | Parity | The shared source plan contains 17 migrations and five functions, digest `6afd390145cbd8534c343ebf68631addada3a2b49095598d8bfd05c36c0b42e4`. Production backend setup remains pending. |
+
+## 18 November 2026 — Student payments and automatic attendance email
+
+| Boundary | Evidence |
+| --- | --- |
+| Student payments | Admins can create one-time invoices, change the next monthly fee and adjust or waive eligible unpaid invoices. The activity list includes invoice creation, balance corrections, fee edits, captures and refunds. Issued invoices close through the billing worker before a replacement is prepared. One-time charges have their own entry in parent Payments. |
+| Attendance | Saving Present or Absent automatically queues one email per student and session. The manual parent controls and RPC were removed. UAT has the automatic trigger, parent dispatch and both existing schedulers enabled. |
+| UAT database and worker | Applied migration `20261118145719_student_payment_management.sql`, SHA-256 `d9ee00bd8d2d07639f7c453a68dd9b316723abc645209fcfb0689dde4c7fa110`. Verified role grants, audit-table RLS and the updated billing worker's three source hashes. Its unsigned endpoint returned 401. Three original monthly invoices, two paid records and ₹1 outstanding remained after the migration. No activity rows were created. |
+| UAT website | Source `f6f6eb2333f920bcefdb34900abeb78d3f32aaf7` deployed as Vercel `dpl_8vCPXEnvFnbW3N4ZBMKSRLY6JLeY`, READY on `uat.letsaimit.com`. The signed-in Admin saw both societies, Create invoice, Change monthly fee, Adjust outstanding on an overdue invoice and automatic attendance-email copy. Live verification was read-only. |
+| Local verification | All 439 tests passed. Mocked browser checks at 320, 390 and 1280 px exercised a ₹5,000 invoice, a lost-response retry with a single saved invoice, a ₹2,000 next-month fee and an unpaid adjustment with audit history. Provider and parent mail checks use synthetic records and mocks. |
+| Shared source | Source plan digest `ba8defc9e55b0376f038337d73925353f392c8d29c706c6480e795848e308cdc` includes 18 migrations and five functions. Production backend setup and promotion are pending. |
