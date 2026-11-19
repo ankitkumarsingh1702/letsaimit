@@ -7,6 +7,7 @@ export const PAGE_META = {
   societies: { path: "/societies/", title: "Sports for your society", description: "Bring football, basketball and active play to your community. LetsAimIt works with society committees in Bengaluru. Start a society enquiry." },
   schools: { path: "/schools/", title: "School fitness consultancy", description: "Practical guidance for your school's existing PE team. Curriculum advice, fitness assessment guidance, coach development and programme support." },
   events: { path: "/events/", title: "Events and match days", description: "Internal games, friendlies and tournaments. See Ellegenza Match Day moments and the football match day planned for 3 December 2026." },
+  blogs: { path: "/blogs/", title: "Blogs from Coach Dhiraj", description: "Coach Dhiraj’s notes on youth sport, coaching and helping children enjoy movement. Read his articles and posts from LinkedIn." },
   privacy: { path: "/privacy/", title: "Privacy policy", description: "How LetsAimIt handles parent, guardian and enquiry details, including consent, contact requests and children's information." },
   terms: { path: "/terms/", title: "Programme terms", description: "Terms for LetsAimIt football, basketball and fitness activities. Read enrolment, participation and payment conditions before joining." },
   refunds: { path: "/refunds/", title: "Cancellations & refunds", description: "LetsAimIt payment, withdrawal and cancellation terms. Paid enrolment is non-refundable for personal absence or withdrawal, subject to statutory rights." },

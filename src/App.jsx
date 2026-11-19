@@ -2,6 +2,7 @@ import * as React from "react";
 import { Home } from "./pages/Home.jsx";
 import { Programme } from "./pages/Programme.jsx";
 import { Coach } from "./pages/Coach.jsx";
+import { Blogs } from "./pages/Blogs.jsx";
 import { Societies } from "./pages/Societies.jsx";
 import SchoolsPage from "./features/schools/SchoolsPage.js";
 import EventsPage from "./features/events/EventsPage.js";
@@ -26,6 +27,7 @@ var pages = {
   home: Home,
   programme: Programme,
   coach: Coach,
+  blogs: Blogs,
   societies: Societies,
   schools: SchoolsPage,
   events: EventsPage,

@@ -68,6 +68,7 @@ function Footer() {
             <a href="/societies/">For societies</a>
             <a href="/schools/">For schools</a>
             <a href="/events/">Events</a>
+            <a href="/blogs/">Blogs</a>
           </div>
           <div className="footer-col">
             <h2>Let’s talk</h2>

@@ -34,6 +34,11 @@ var navigation = [
     label: "Events",
   },
   {
+    page: "blogs",
+    href: "/blogs/",
+    label: "Blogs",
+  },
+  {
     page: "parent",
     href: "/parent/",
     label: "Parent sign in",
@@ -58,7 +63,7 @@ function Header({ page, onSkipToContent }) {
     setMenuOpen(false);
   }, [page]);
   React.useEffect(() => {
-    let mobileQuery = window.matchMedia("(max-width: 1120px)");
+    let mobileQuery = window.matchMedia("(max-width: 1320px)");
     let closeOnBreakpoint = () => setMenuOpen(false);
     mobileQuery.addEventListener("change", closeOnBreakpoint);
     return () => mobileQuery.removeEventListener("change", closeOnBreakpoint);

@@ -1,9 +1,19 @@
 /* Use the established menu before the additional destinations crowd the header. */
-@media (min-width: 701px) and (max-width: 1120px) {
+@media (min-width: 701px) and (max-width: 1320px) {
   .site-header .desktop-nav {
     display: none;
   }
   .site-header .menu-toggle {
     display: block;
   }
+}
+
+@media (max-width: 380px) {
+  .site-header .header-trial {
+    min-height: 44px;
+    padding: 10px 12px;
+    font-size: 14px;
+    line-height: 20px;
+  }
+  .site-header .header-trial .arrow-icon { display: none; }
 }
