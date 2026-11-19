@@ -4,7 +4,6 @@
   "installCommand": "npm ci",
   "buildCommand": "if [ \"$VERCEL_GIT_COMMIT_REF\" = uat ]; then export VITE_SITE_ORIGIN=https://uat.letsaimit.com; elif [ \"$VERCEL_ENV\" = preview ] && [ -n \"$VERCEL_URL\" ]; then export VITE_SITE_ORIGIN=\"https://$VERCEL_URL\"; fi; npm run release:build",
   "outputDirectory": "dist",
-  "trailingSlash": true,
   "redirects": [
     {
       "source": "/index.html",
@@ -17,7 +16,82 @@
       "permanent": true
     },
     {
+      "source": "/programme",
+      "destination": "/programme/",
+      "permanent": true
+    },
+    {
+      "source": "/coach",
+      "destination": "/coach/",
+      "permanent": true
+    },
+    {
+      "source": "/societies",
+      "destination": "/societies/",
+      "permanent": true
+    },
+    {
+      "source": "/schools",
+      "destination": "/schools/",
+      "permanent": true
+    },
+    {
+      "source": "/events",
+      "destination": "/events/",
+      "permanent": true
+    },
+    {
+      "source": "/blogs",
+      "destination": "/blogs/",
+      "permanent": true
+    },
+    {
+      "source": "/privacy",
+      "destination": "/privacy/",
+      "permanent": true
+    },
+    {
+      "source": "/terms",
+      "destination": "/terms/",
+      "permanent": true
+    },
+    {
+      "source": "/refunds",
+      "destination": "/refunds/",
+      "permanent": true
+    },
+    {
+      "source": "/admin",
+      "destination": "/admin/",
+      "permanent": true
+    },
+    {
+      "source": "/sign-in",
+      "destination": "/sign-in/",
+      "permanent": true
+    },
+    {
+      "source": "/register",
+      "destination": "/register/",
+      "permanent": true
+    },
+    {
+      "source": "/parent",
+      "destination": "/parent/",
+      "permanent": true
+    },
+    {
+      "source": "/coach-dashboard",
+      "destination": "/coach-dashboard/",
+      "permanent": true
+    },
+    {
       "source": "/privacy-policy",
+      "destination": "/privacy/",
+      "permanent": true
+    },
+    {
+      "source": "/privacy-policy/",
       "destination": "/privacy/",
       "permanent": true
     },
@@ -27,7 +101,17 @@
       "permanent": true
     },
     {
+      "source": "/terms-and-conditions/",
+      "destination": "/terms/",
+      "permanent": true
+    },
+    {
       "source": "/refund-policy",
+      "destination": "/refunds/",
+      "permanent": true
+    },
+    {
+      "source": "/refund-policy/",
       "destination": "/refunds/",
       "permanent": true
     }
