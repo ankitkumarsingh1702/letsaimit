@@ -33,11 +33,19 @@ privacy and terms URLs are the production URLs listed in root `AGENTS.md`,
 including when Google sign-in starts on UAT. Do not expose an environment name
 as the product or OAuth app name. Share this branding and its configuration
 template; provider clients are environment configuration, not separate product
-implementations. Reuse a client only where the provider allows it. Google's
+implementations. Preserve the user's explicit 20 November 2026 decision to reuse
+the existing verified UAT Google client and Gmail SMTP sender/credential on
+production. Both target callbacks/origins are saved and production Google sign-in
+has been verified; consult the ledger for the latest evidence rather than
+restarting client creation or requesting the same credential saves.
+
+Google's
 [environment separation policy](https://developers.google.com/identity/verification/authentication-policy-compliance#use-separate-projects-for-testing-and-production)
 requires distinct test/production projects and excludes test endpoints from
-production clients. Prepare the needed internal clients with the public name
-**LetsAimIt**, target-specific origins and actual Supabase callbacks.
+production clients. The chosen shared client is a documented policy deviation;
+successful sign-in does not establish compliance or inherited project approval.
+Follow the current user choice unless a new instruction or actual provider
+rejection requires a concrete configuration change.
 
 Where setup is authorized, prepare and verify the production configuration
 alongside UAT; record its actual state instead of postponing all configuration
@@ -45,7 +53,12 @@ work or claiming it is already live. Promotion reuses the established brand
 design. Google branding changes can require provider review; custom auth-domain
 availability and cost require verification. Do not guarantee automatic approval
 or a free custom auth domain. Follow required provider trust boundaries without
-adding an extra product-processing or approval stage to this release flow.
+adding an extra product-processing or approval stage to this release flow. For
+authorized app-owned saves, use native CLI/API capabilities and the original
+private credential source, verify safe hashes/HMACs and target readbacks, and keep
+plaintext out of output, process arguments and Git. Do not turn a routine secret
+save into repeated user work. Hand off genuine MFA/password/reauthentication
+boundaries when they actually block access.
 
 ## Carry the tested release
 
@@ -71,14 +84,17 @@ Provider notification receipts do not establish indexing or AI citations.
 
 Production readiness includes its own environment variables, Supabase target,
 ordered applied migrations, RLS/grants, approved admin bootstrap, Auth URL
-configuration and its policy-compliant Google provider. A Git merge or successful
+configuration and the user-approved Google configuration with its recorded policy
+deviation. A Git merge or successful
 Vercel build does not apply or verify these. Read
 [README-SHEET-DEPLOYMENT.md](../../../README-SHEET-DEPLOYMENT.md) for the
 existing backend setup, then reconcile it with the target actually selected.
 Use provider-specific skills or tools for work that needs them.
 
-Never copy UAT test rows, private registration records or production secrets
-between targets as a shortcut. Do not promote a UAT-built browser bundle with
+Never copy UAT test rows, private registration records or Auth identities between
+targets. The authorized Google/Gmail credential reuse does not authorize copying
+other secrets; worker bearers, webhook signing secrets, public backend keys and
+routing remain target-specific. Do not promote a UAT-built browser bundle with
 inlined UAT configuration to production. Configure the selected environment
 and rebuild from the tested source. Keep the UAT health service's technical
 Vercel “Production” execution environment distinct from website production.
@@ -90,6 +106,11 @@ applied database migrations, deployed SHA and the live user journey. Check
 Google round trip and denied access, a saved registration receipt, saved
 follow-up persistence and CSV against that target where authorized. Do not
 silently generate test records on production to satisfy a check.
+
+Use mocks and approved read-only provider/connection checks for financial and
+email verification. A real charge or sent test email is not a required release
+gate. The user completes actual payments; distinguish source/connection checks
+from untested delivery, payment and parent journeys in the result.
 
 Update the ledger with evidence and remaining gaps. If a required target
 setting is unavailable, finish independent authorized work and state that

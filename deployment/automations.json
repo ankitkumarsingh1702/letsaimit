@@ -7,9 +7,9 @@
       "interactiveAttendance": "paused"
     },
     "production": {
-      "transactionalTransport": null,
-      "manualAttendance": "pending_configuration",
-      "interactiveAttendance": "pending_configuration"
+      "transactionalTransport": "gmailSmtp",
+      "manualAttendance": "gmailSmtp",
+      "interactiveAttendance": "paused"
     }
   },
   "transports": {

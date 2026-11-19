@@ -26,4 +26,23 @@ description: Check or sync LetsAimIt across its local checkout, GitHub repositor
 
 Follow the [project agreements](../../../AGENTS.md) and use [letsaimit-release](../letsaimit-release/SKILL.md) for requested merges and releases. A sync request alone does not authorize promotion to production.
 
+When an authorized sync includes backend configuration, preserve the user's
+20 November 2026 decision: production reuses the existing verified UAT Google
+client and Gmail SMTP sender/credential. Both Google origins/callbacks are saved
+and production sign-in has been verified. Read the current parity ledger rather
+than restarting those setup steps. Google's testing/production project-separation
+policy differs from this user-selected shared-client setup; retain the recorded
+deviation and do not claim compliance or silently create a replacement client.
+Database/Auth/business records, backend public keys, worker bearers, webhook
+signing secrets and routing stay separate.
+
+Use authorized native CLI/API operations for app-owned configuration saves and
+the approved original private credential source with safe hash/HMAC comparison
+and target readback. Keep plaintext and private source paths out of output,
+process arguments and Git. Do not repeatedly hand routine saves back to the
+user; hand off genuine MFA/password/reauthentication boundaries when needed.
+Use mocks and safe read-only/connection checks for email and payments, with no
+required real charge or sent test email. Configuration sync is not proof of an
+untested live delivery or payment journey.
+
 Verify the local HEAD, the GitHub branch tip, and Vercel deployment status relevant to the request after any update. Report the commit and branch for each version checked, the live production deployment when verified, and any difference or unresolved action. A skill invocation is a one-time operation.

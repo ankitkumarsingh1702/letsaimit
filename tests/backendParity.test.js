@@ -25,8 +25,12 @@ test('one deterministic source inventory prepares both targets without claiming 
   const root=await fixture(t),plan=await buildBackendParity({root,targets});
   assert.deepEqual(await buildBackendParity({root,targets}),plan);
   assert.equal(plan.scope,'source-plan-only');assert.equal(plan.brand.name,'LetsAimIt');assert.equal(plan.brand.origin,'https://letsaimit.com');
-  assert.equal(plan.emailAutomations.targets.uat.interactiveAttendance,'paused');
-  assert.equal(plan.emailAutomations.targets.production.transactionalTransport,null);
+  for(const target of ['uat','production']){
+    const profile=plan.emailAutomations.targets[target];
+    assert.deepEqual(profile,{transactionalTransport:'gmailSmtp',manualAttendance:'gmailSmtp',interactiveAttendance:'paused'});
+    assert.equal(plan.emailAutomations.transports[profile.transactionalTransport].settings.password,'SMTP_PASSWORD');
+    assert.equal(plan.emailAutomations.transports[profile.manualAttendance].settings.from,'SMTP_FROM_EMAIL');
+  }
   assert.equal(plan.emailAutomations.transports[plan.emailAutomations.targets.uat.transactionalTransport].settings.from,'SMTP_FROM_EMAIL');
   assert.ok(plan.requiredBackendSecrets.operatorProvided.includes(plan.emailAutomations.transports.attendanceAmp.settings.providerReady));
   const healthCron=JSON.parse(await readFile(new URL('../deployment/uat-health/vercel.json',import.meta.url),'utf8')).crons[0];

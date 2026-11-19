@@ -10,12 +10,20 @@ agreements here; do not install them into global Codex settings or skills.
 - Public app homepage: `https://letsaimit.com`.
 - Public privacy policy: `https://letsaimit.com/privacy/`.
 - Public terms: `https://letsaimit.com/terms/`.
-- Share the branding and configuration template across environments. Reuse an
-  OAuth client only within the provider's permitted scope. Google's
+- Share the branding and configuration template across environments. The user
+  explicitly chose on 20 November 2026 to reuse the existing verified UAT Google
+  OAuth client and the existing Gmail SMTP sender/credential on production.
+  Both application origins and Supabase callbacks are saved; real production
+  Google sign-in is verified in the parity ledger. Preserve that configuration
+  instead of creating another client/project or changing mail transport during
+  a routine release.
+- Google's
   [environment separation policy](https://developers.google.com/identity/verification/authentication-policy-compliance#use-separate-projects-for-testing-and-production)
-  requires separate testing/production projects and keeps testing endpoints out
-  of production clients. Use the necessary internal clients with the same
-  public name **LetsAimIt**. Keep credentials in provider settings.
+  requires separate testing/production projects and excludes testing endpoints
+  from production clients. The user's shared-client choice is a recorded
+  deviation from that policy, not a compliance or inherited-approval claim.
+  Do not silently replace the chosen setup; record any actual provider rejection
+  or new user decision before changing it. Keep credentials in provider settings.
 - Prepare both target configurations together within the authorized scope;
   record what is actually configured and verified. Production promotion
   carries the existing brand design rather than commissioning another one.
@@ -45,7 +53,10 @@ and the current evidence in [docs/RELEASE-PARITY.md](docs/RELEASE-PARITY.md).
 - A production build uses production configuration from the same tested
   source. A UAT bundle may contain an inlined UAT backend URL and is not
   automatically safe to alias to the production domain.
-- Keep database targets, secrets, registration data and test rows separate.
+- Keep database targets, registration data and test rows separate. Keep each
+  target's public backend key, worker bearer, webhook signing secret and routing
+  separate; the explicitly approved Google/Gmail reuse is not blanket permission
+  to copy other secrets or business records.
   A Git/Vercel deployment does not establish that database migrations,
   OAuth callbacks, grants or production environment variables are ready.
 - Record actual source SHAs and target verification. Mark missing production
@@ -61,4 +72,23 @@ For automation work, start with
 senders, workers, schedules, delivery gates and other automated workflows.
 It lists credential setting names; their values belong in provider settings.
 Check the release parity ledger for live verification before changing a sender
-or enabling dispatch.
+or enabling dispatch. Transactional and manual attendance mail use the approved
+Gmail SMTP configuration on both targets. Interactive/AMP attendance remains
+paused; its separate sender approval and credentials are not a release
+prerequisite while that delivery mode is disabled.
+
+## Authorized configuration work
+
+Complete authorized app-owned credential and configuration saves through native
+CLI/API tools where available. Reuse the approved original private credential
+source with safe digest/HMAC comparison and target readback; do not log plaintext,
+put secrets in command arguments or Git, or ask the user to repeat a completed
+save. Provider-returned hashes alone cannot recover an unavailable secret.
+Use a genuine MFA, account-password or provider reauthentication handoff only
+when that boundary actually prevents completion; ordinary app-secret entry is
+not automatically a manual-user task. Preserve the provider's trust boundaries.
+
+Use mocked financial/email flows and authorized read-only provider or connection
+checks for release verification. Do not require a real payment or sent test
+email just to complete a release gate. Actual payments remain the user's action;
+report untested delivery or payment journeys accurately.

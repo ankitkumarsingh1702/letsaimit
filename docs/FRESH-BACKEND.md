@@ -25,8 +25,8 @@ or empty its tables to satisfy a check.
    `public` with explicit grants and RLS. The migrations conditionally enable
    Net/Cron but do not install Vault. Verify actual extension availability.
 4. Apply all complete migration files in the exact order from the parity plan.
-   The current set has **18 files**, ending in
-   `20261118145719_student_payment_management.sql`. Do not add a seed, Auth users, test
+   The current set has **19 files**, ending in
+   `20261119195608_owned_billing_webhook_intake.sql`. Do not add a seed, Auth users, test
    registrations, old reviews or financial records. Using a working authorized
    CLI connection records real migration history:
 
@@ -109,6 +109,17 @@ or empty its tables to satisfy a check.
    read-only transaction. Do not invoke worker, enqueue, claim, deletion or
    payment RPCs to inspect readiness; those are operational actions.
 
+   Both webhook intake signatures are service-role-only:
+   `ingest_owned_billing_webhook(text,text,text,text,text,uuid)` and the retained
+   five-argument `ingest_billing_webhook(text,text,text,text,text)` wrapper.
+   Neither `anon` nor `authenticated` may execute them. The new intake accepts
+   only events owned by an existing local billing UUID or provider-ID mapping;
+   foreign and unresolved events do not create receipts or jobs. A local early
+   event may remain unlinked until the existing provider reconciliation binds
+   its IDs. The legacy wrapper raises a retryable error for unresolved ownership
+   instead of bypassing that boundary. Apply this migration before the updated
+   webhook handler; do not replay earlier migrations on an existing target.
+
 ## Ordered source set and side effects
 
 Keep each file complete. These are the current ordered migration versions;
@@ -134,6 +145,7 @@ the parity plan supplies their exact paths and hashes:
 | `20261118132944` | Students, practice attempts, disabled automatic parent attendance outbox and verified coach activation |
 | `20261118135618` | Active accepted roster/profile, custom sprint distances and accepted-student assignment backfill |
 | `20261118145719` | One-off invoices, logged outstanding adjustments and removal of manual parent attendance-email action |
+| `20261119195608` | Service-only owned webhook intake and explicit legacy wrapper; preserves local early-event durability and rejects foreign-target persistence |
 
 The migrations create four active minute schedules, but their handlers use
 target-specific gates and durable queues. On a fresh target all queues are

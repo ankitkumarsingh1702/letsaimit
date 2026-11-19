@@ -18,14 +18,18 @@ homepage, privacy and terms links use `https://letsaimit.com`,
 names belong in internal resource/configuration names, not customer-facing app
 branding, OAuth titles or email subjects.
 
-Maintain one branding/configuration template. Add the appropriate application's
-origin and actual Supabase callback to its permitted OAuth client configuration.
-Where a provider permits client reuse, reuse it. Google's
+Maintain one branding/configuration template. Preserve the user's explicit
+20 November 2026 choice to reuse the existing verified UAT Google client and
+Gmail SMTP sender/credential on production. Both origins and target Supabase
+callbacks have been saved and real production Google sign-in is verified; read
+the latest ledger evidence instead of recreating clients or repeating saves.
+Google's
 [OAuth policy](https://developers.google.com/identity/protocols/oauth2/policies#use-separate-projects-for-testing-and-production)
 requires separate deployment-tier projects and excludes test endpoints from
-production clients. Keep the public brand identical when separate internal
-credentials are required. Never promise that one project's verification approval
-automatically covers another project or that custom auth domains are free.
+production clients. Record the shared-client choice as a user-selected deviation,
+not a compliance claim. Do not silently substitute the unused separate project;
+an actual provider rejection or changed user instruction must be addressed
+explicitly. Never promise inherited brand approval or a free custom auth domain.
 
 ## Prepare both targets during each change
 
@@ -40,15 +44,29 @@ added on UAT, stage its production counterpart from that same source. Apply
 authorized, non-breaking infrastructure changes to configured targets where
 available; otherwise retain one deterministic migration/configuration set for
 both and record the exact pending prerequisite. Never replace a missing
-production reference with the UAT project or copy UAT records and secrets.
+production reference with the UAT project or copy UAT business/Auth records.
+Keep public backend keys, worker bearers, webhook signing secrets and routing
+target-specific. Reuse only the Google/Gmail credentials explicitly approved
+above, not unrelated secrets.
+
+For authorized app-owned configuration, prefer native CLI/API saves and the
+approved original private credential sources. Verify safe digest/HMAC matches
+and target readbacks without logging values, passing plaintext in command
+arguments or committing secret/source paths. Finish routine saves autonomously;
+do not ask the user to re-enter settings already available within that scope.
+Provider hashes cannot recover absent secrets. A genuine MFA, account-password
+or reauthentication boundary can require handoff; ordinary app-secret entry
+does not by itself require another manual chore.
 
 Use the current coaching-fee contract in [README-BILLING.md](../../../README-BILLING.md):
 admins quote the initial monthly fee and may change future fees from next month.
 ₹1 is a valid admin-selected amount for the user's live-provider test; it is not
 a fixed public plan. Preserve previously saved agreements and invoice amounts.
-The user completes actual payments; verify provider behavior with mocks and
-read-only checks during releases. Production payment activation remains a
-separate target setting.
+The user completes actual payments; verify provider/email behavior with mocks,
+authorized read-only provider calls and safe connection checks during releases.
+Do not require a real charge or sent test email for release readiness, and do
+not describe those checks as a completed live payment/delivery journey.
+Production payment activation remains a separate target setting.
 
 ## Keep the maintenance record current
 
@@ -72,7 +90,9 @@ production application deployment or financial activation.
 Use [the release skill](../letsaimit-release/SKILL.md) for the actual release.
 Before production promotion, require its configured backend, ordered applied
 migrations, grants/RLS, approved owner, environment secrets, Google round trip,
-payment webhook and live-flow evidence for the selected price. Rebuild the tested
+payment-webhook configuration and mocked provider-contract/read-only evidence
+for the selected price. Real charges and sent test emails are not prerequisites;
+record any untested user journey. Rebuild the tested
 source with production configuration rather than aliasing a UAT browser bundle.
 
 Continue already authorized routine work without asking for the same permission

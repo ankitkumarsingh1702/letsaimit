@@ -18,11 +18,13 @@ test('manual attendance uses the existing Gmail credentials with the signed-in d
     ADMIN_DASHBOARD_ORIGIN: 'https://uat.letsaimit.com',
   };
   const read = env => readCoachingLinkSmtpConfiguration(name => env[name]);
-  const { senderEmail, dashboardOrigin, transportOptions } = read(settings);
-  assert.equal(senderEmail, settings.SMTP_FROM_EMAIL);
-  assert.equal(dashboardOrigin, settings.ADMIN_DASHBOARD_ORIGIN);
-  assert.deepEqual(transportOptions.auth, { user: settings.SMTP_USER, pass: 'abcdabcdabcdabcd' });
-  assert.deepEqual(transportOptions.tls, { minVersion: 'TLSv1.2', rejectUnauthorized: true });
+  for (const origin of ['https://uat.letsaimit.com', 'https://letsaimit.com']) {
+    const { senderEmail, dashboardOrigin, transportOptions } = read({ ...settings, ADMIN_DASHBOARD_ORIGIN: origin });
+    assert.equal(senderEmail, settings.SMTP_FROM_EMAIL);
+    assert.equal(dashboardOrigin, origin, 'Shared Gmail credentials retain the selected target dashboard');
+    assert.deepEqual(transportOptions.auth, { user: settings.SMTP_USER, pass: 'abcdabcdabcdabcd' });
+    assert.deepEqual(transportOptions.tls, { minVersion: 'TLSv1.2', rejectUnauthorized: true });
+  }
   assert.equal(read({ ...settings, SMTP_FROM_EMAIL: 'another@gmail.com' }).transportOptions, null);
   assert.equal(read({ ...settings, ADMIN_DASHBOARD_ORIGIN: 'https://example.test' }).transportOptions, null);
   assert.equal(read(dedicatedEnv).transportOptions, null);
