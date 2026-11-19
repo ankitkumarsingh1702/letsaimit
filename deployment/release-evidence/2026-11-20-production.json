@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-19T21:04:14.742662+00:00",
+  "verifiedApplicationSourceSHA": "58cad26d0f21af74610b35f4539a64e0695a9e4b",
+  "laterEvidenceOnlyDescendants": "No runtime source or material content-date changes.",
+  "websites": {
+    "uat": {
+      "origin": "https://uat.letsaimit.com",
+      "deploymentId": "dpl_4CyDgucKft7zYboaqHuG7vVDmSWC",
+      "state": "READY"
+    },
+    "production": {
+      "origin": "https://letsaimit.com",
+      "deploymentId": "dpl_253Z8W6P7EDRDcsF4MBGSbbjxXdY",
+      "state": "READY",
+      "domainBindingIndependentlyVerified": true
+    }
+  },
+  "backend": {
+    "uatRef": "nlgfcmywgwibvmbsgkox",
+    "productionRef": "ktsrkjfysdqxangssrbf",
+    "orderedMigrations": 19,
+    "functions": 116,
+    "RlsTables": 25,
+    "policies": 6,
+    "activeEdgeFunctions": 5,
+    "compiledEdgeBundlesMatchBetweenTargets": true,
+    "sourceArtifactDigest": "b6910b43f2c44804fb29eb24bded39f505710eab21e3e6fc39d5fcab8a582b1e",
+    "productionExactSourceAndGrants": true,
+    "uatException": "One existing function differs only by whitespace; SQL tokens/string literals match."
+  },
+  "configuration": {
+    "customSecretNamesPerTarget": 12,
+    "reservedSecretNamesPerTarget": 7,
+    "intendedSharedDigestsMatch": 8,
+    "intendedTargetSpecificDigestsDiffer": 4,
+    "reservedDigestsDiffer": 7,
+    "sharedGoogleClientAndGmailExplicitlyChosenByUser": true,
+    "googleTierPolicyDeviation": "https://developers.google.com/identity/verification/authentication-policy-compliance#use-separate-projects-for-testing-and-production",
+    "smtpConnectionTlsAuthenticationVerified": true,
+    "razorpayReadOnlyAuthenticationVerified": true,
+    "productionOwnedWebhookActive": true,
+    "uatWebhookPreserved": true,
+    "onlyProductionApplicationCallback": "https://letsaimit.com/admin/"
+  },
+  "activation": {
+    "flags": {
+      "billingEnabled": true,
+      "coachingInteractiveEmail": false,
+      "coachingManualEmail": true,
+      "lateFeePaise": 0,
+      "lateFeesEnabled": false,
+      "notificationDispatch": true,
+      "parentAttendanceEmail": true
+    },
+    "observedMinuteJobsSucceeded": 4,
+    "emptyWorkersPassed": 4,
+    "scheduledHttp200Responses": 4,
+    "testBusinessRowsCreated": 0,
+    "emptyDigestWindowBookkeepingRows": 1,
+    "emailOrPaymentOrDeletionOperationsPerformed": false
+  },
+  "checks": {
+    "nodeTestsOnTestedUatSource": 478,
+    "indexingScriptMockTests": 13,
+    "targetedParityTransportChecks": 41,
+    "frozenDenoFunctionsChecked": 5,
+    "assetsChecked": 59,
+    "publicStrictChecks": 521,
+    "publicFailures": 0,
+    "publicGetRequests": 86,
+    "redirectStubHeaderObservationsNotApplicable": 50,
+    "realPublicDomainOwnerGoogleRoundTrip": true,
+    "billingSetupPendingNoticeAbsent": true,
+    "studentsMobileViewport": [
+      390,
+      844
+    ],
+    "studentsHorizontalOverflow": false,
+    "browserWarningsAndErrors": 0,
+    "compiledBrowserBackendIsProductionOnly": true
+  },
+  "discovery": {
+    "publicRoutes": 10,
+    "indexNow": {
+      "httpStatus": 200,
+      "accepted": 10,
+      "stateFile": ".cache/indexing-state.json",
+      "firstAttemptStatus": 202
+    },
+    "googleSitemap": {
+      "method": "Authorized Search Console UI",
+      "url": "https://letsaimit.com/sitemap.xml",
+      "status": "Sitemap processed successfully",
+      "discoveredPages": 10,
+      "discoveredVideos": 0,
+      "lastReadDate": "2026-11-20"
+    },
+    "googleIndexingApi": {
+      "eligibleUrls": 0,
+      "notificationsSent": 0,
+      "reason": "Current content is ordinary public coaching/policy/blog pages, not eligible JobPosting or live BroadcastEvent content."
+    },
+    "googleScriptApiToken": "Not configured; manual sitemap operation is separately verified.",
+    "indexingOrCitationsGuaranteed": false
+  },
+  "reservedLiveUserJourneys": [
+    "Actual parent inbox delivery",
+    "Actual payment transaction"
+  ],
+  "credentials": "Values and private source paths intentionally excluded."
+}
