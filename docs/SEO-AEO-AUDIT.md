@@ -121,3 +121,13 @@ Runnable source `91f5c9a` implements the six deliverables through the existing R
 The live production dry run exits 2 because the new discovery manifest, robots, sitemap and key are not deployed there, `/blogs/` still returns 404 and Google API authorization is absent. Provider dispatch is therefore pending. The requested Chrome account has verified Search Console access and its homepage inspection says “URL is on Google”; no access grants or credentials were changed.
 
 Production promotion remains pending. The shared backend source digest is unchanged at `ba8defc9e55b0376f038337d73925353f392c8d29c706c6480e795848e308cdc` (18 migrations and five functions), and the declared production Supabase target remains unconfigured. A UAT build does not establish production readiness or an indexing receipt.
+
+## UAT deployment verification
+
+Merged and pushed `649db9a1b73d793cff9dfaedcb095d3b563e835d` to `uat`. Vercel deployment `dpl_8MNbdK5UX2N3Bj166XjkS6GuEsJq` is READY on `https://uat.letsaimit.com`.
+
+The GET-only live audit made 72 requests with a maximum of six in parallel. All 498 applicable checks passed: ten public pages return direct 200 with matching initial metadata, schema, material hashes and dates; every Markdown alternative and both LLM files return correct content and MIME; robots permit the named public search/citation bots; the sitemap has zero indexable UAT entries; the IndexNow file matches; error paths return genuine 404. All 19 slashless/index.html aliases reach canonical 200 destinations in one 308 hop.
+
+The initial checker also required application response headers on redirects and reported 57 missing-header failures. Vercel's 19 generated redirects carry a 15-byte text/plain stub and omit the configured nosniff, referrer-policy and noindex headers. These were retained as explicit platform observations, rather than application-document failures. All canonical HTML, discovery-file and 404 header checks remain strict and pass. The original response evidence was preserved before this classification.
+
+Read-only Chrome verification on the deployed site confirmed Home → Programme → Blogs navigation, UAT canonical/noindex after hydration, one schema script, matching poster/preload URLs, the loaded blog hero and no horizontal overflow at 390 px. No application console errors were observed. No parent email, payment, registration or indexing notification was sent.
