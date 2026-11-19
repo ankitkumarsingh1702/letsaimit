@@ -1,0 +1,22 @@
+.related-pages {
+  padding-block: 32px 48px;
+  border-top: 1px solid rgb(20 62 53 / 16%);
+}
+.related-pages > p {
+  margin: 0 0 16px;
+  font-size: .875rem;
+  color: var(--green, #143e35);
+}
+.related-pages ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 32px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.related-pages a { min-height: 44px; }
+@media (max-width: 600px) {
+  .related-pages { padding-block: 24px 32px; }
+  .related-pages ul { display: grid; gap: 8px; }
+}

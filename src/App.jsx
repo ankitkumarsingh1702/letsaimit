@@ -20,6 +20,7 @@ import AnalyticsConsent from "./components/AnalyticsConsent.jsx";
 import { SiteActionsProvider } from "./context/SiteActions.jsx";
 import { Header } from "./components/Header.jsx";
 import { Footer } from "./components/Footer.jsx";
+import { RelatedPages } from "./components/RelatedPages.jsx";
 import { ContactDialog } from "./components/ContactDialog.jsx";
 import { MediaDialog } from "./components/MediaDialog.jsx";
 import RegistrationNotice from "./features/registration/RegistrationNotice.jsx";
@@ -146,6 +147,7 @@ function App({ initialPage = "home" } = {}) {
       {!workspace && <Header page={page} onSkipToContent={skipToContent} />}
       <main id="main" ref={mainRef} tabIndex={-1}>
         <Page />
+        <RelatedPages page={page} />
       </main>
       {!workspace && page !== "register" && <Footer />}
       {page !== "admin" && <>

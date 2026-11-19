@@ -3,10 +3,13 @@
 
 Requires Pillow with WebP support and ffmpeg. The checked-in outputs are ready
 to use; this script is only needed when source photographs or the film change.
+Use --image football-film-poster.jpg to regenerate only the poster, without
+re-encoding other photographs or the film.
 """
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import re
@@ -31,15 +34,21 @@ def digest(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def save_webp(image: Image.Image, target: Path, width: int, *, logo=False, thumb=False):
+def save_webp(image: Image.Image, target: Path, width: int, *, logo=False, thumb=False,
+              quality=None, content_hashed=False):
     height = max(1, round(image.height * width / image.width))
     resized = image.resize((width, height), Image.Resampling.LANCZOS)
-    options = {"format": "WEBP", "method": 6, "quality": 68 if thumb else 76}
+    options = {"format": "WEBP", "method": 6, "quality": quality if quality is not None else 68 if thumb else 76}
     if logo:
         options.update(lossless=True, quality=100, exact=True)
     elif image.mode == "RGBA":
         options.update(quality=84, alpha_quality=100, exact=True)
     resized.save(target, **options)
+    if content_hashed:
+        # Encoding changes must receive a fresh URL under immutable caching.
+        encoded_target = target.with_name(f"{target.stem}-{digest(target)[:8]}{target.suffix}")
+        target.replace(encoded_target)
+        target = encoded_target
     return {
         "src": str(target.relative_to(ASSETS)),
         "width": width,
@@ -50,9 +59,17 @@ def save_webp(image: Image.Image, target: Path, width: int, *, logo=False, thumb
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--image", action="append", default=[], help="Regenerate only this source image; repeat for more images. Skips video encoding.")
+    selected = set(parser.parse_args().image)
     OUTPUT.mkdir(parents=True, exist_ok=True)
-    images = {}
+    manifest = json.loads(MANIFEST.read_text(encoding="utf-8")) if selected else None
+    if selected.difference(manifest["images"] if manifest else {}):
+        parser.error("--image must name an existing image in the media manifest.")
+    images = dict(manifest["images"]) if manifest else {}
     for source in sorted(ASSETS.iterdir()):
+        if selected and source.name not in selected:
+            continue
         if source.suffix.lower() not in {".jpg", ".jpeg", ".png", ".webp"}:
             continue
         if (
@@ -64,20 +81,24 @@ def main():
         source_hash = digest(source)
         slug = re.sub(r"[^a-z0-9]+", "-", source.stem.lower()).strip("-")
         prefix = f"{slug}-{source_hash[:8]}"
+        previous = images.get(source.name, {})
         with Image.open(source) as raw:
             image = ImageOps.exif_transpose(raw)
             image = image.convert("RGBA" if "A" in image.getbands() else "RGB")
             is_logo = source.name == "logo.png"
+            is_poster = source.name == "football-film-poster.jpg"
             requested = (160, 320, 554) if is_logo else PHOTO_WIDTHS
             maximum = min(image.width, max(requested))
             widths = sorted({min(width, maximum) for width in requested})
             variants = [
-                save_webp(image, OUTPUT / f"{prefix}-{width}.webp", width, logo=is_logo)
+                save_webp(image, OUTPUT / f"{prefix}-{width}.webp", width, logo=is_logo,
+                          quality=28 if is_poster else None, content_hashed=is_poster)
                 for width in widths
             ]
             thumbnail = save_webp(
                 image, OUTPUT / f"{prefix}-thumb.webp", min(160, image.width),
                 logo=is_logo, thumb=True,
+                quality=28 if is_poster else None, content_hashed=is_poster,
             )
             images[source.name] = {
                 "source_sha256": source_hash,
@@ -87,7 +108,17 @@ def main():
                 "variants": variants,
                 "thumbnail": thumbnail,
             }
+            if is_poster:
+                current_paths = {variant["src"] for variant in variants} | {thumbnail["src"]}
+                for old in [*previous.get("variants", []), previous.get("thumbnail", {})]:
+                    if old.get("src") and old["src"] not in current_paths:
+                        (ASSETS / old["src"]).unlink(missing_ok=True)
         print(f"{source.name}: {len(variants)} responsive sizes + thumbnail", flush=True)
+
+    if selected:
+        manifest["images"] = images
+        MANIFEST.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+        return
 
     original_video = ASSETS / "football-film.mp4"
     source_hash = digest(original_video)

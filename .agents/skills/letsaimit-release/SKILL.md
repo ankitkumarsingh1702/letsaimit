@@ -60,6 +60,15 @@ and current-membership authorization, revision-safe follow-up editing,
 private saved-row CSV, invitation protections and live refresh behavior.
 Do not replace them with fixture data or navigation-only sign-in.
 
+For public content or discovery changes, follow
+[indexing operations](../../../docs/INDEXING.md): commit the source before
+building and refreshing `deployment/discovery-baseline.json`, retain the
+production discovery manifest, and run `npm run test:indexing` for provider
+script changes. Verify the deployed target's canonical, robots, sitemap,
+Markdown and schema responses. UAT/preview documents remain noindex; the
+post-deploy submission script accepts only the verified production origin.
+Provider notification receipts do not establish indexing or AI citations.
+
 Production readiness includes its own environment variables, Supabase target,
 ordered applied migrations, RLS/grants, approved admin bootstrap, Auth URL
 configuration and its policy-compliant Google provider. A Git merge or successful

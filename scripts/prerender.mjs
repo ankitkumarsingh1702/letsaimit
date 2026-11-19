@@ -1,85 +1,120 @@
 #!/usr/bin/env node
-/** Build real route documents so link-preview crawlers need no JavaScript. */
-import { mkdir, readFile, writeFile, rm } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
-import { pathToFileURL, fileURLToPath } from "node:url";
-import { build } from "vite";
+/** Build initial HTML and discovery documents from the same public route inventory. */
+import { mkdir, readFile, writeFile, rm } from 'node:fs/promises';
+import { dirname, resolve } from 'node:path';
+import { pathToFileURL, fileURLToPath } from 'node:url';
+import { build } from 'vite';
+import { buildDiscovery, contentHash, escapeXml, findElements, mainMarkdown, markdownPath, parseHtml, readBaseline, routeOutputFile, sourceLastmod, validateOrigin, validateRoutePath } from './discovery.mjs';
 
-const root = fileURLToPath(new URL("../", import.meta.url));
-const output = resolve(root, "dist");
-const serverOutput = resolve(root, ".ssr");
+const root = fileURLToPath(new URL('../', import.meta.url));
+const output = resolve(root, 'dist');
+const serverOutput = resolve(root, '.ssr');
+
 try {
-await build({
-  root,
-  configFile: resolve(root, "vite.config.js"),
-  build: { ssr: "src/entry-server.jsx", outDir: serverOutput, emptyOutDir: true, copyPublicDir: false },
-});
-const { render, PAGE_META, SITE_ORIGIN } = await import(pathToFileURL(resolve(root, ".ssr/entry-server.js")).href);
-const origin = new URL(SITE_ORIGIN);
-if (origin.protocol !== "https:" || origin.origin !== SITE_ORIGIN) {
-  throw new Error("VITE_SITE_ORIGIN must be a complete HTTPS origin, without a path, query or trailing slash.");
-}
-const template = await readFile(resolve(output, "index.html"), "utf8");
-const headMarker = /<!-- SITE_META_START -->[\s\S]*?<!-- SITE_META_END -->/;
-const rootMarker = /<div\s+id="root"\s*><\/div>/;
-if (!headMarker.test(template) || !rootMarker.test(template)) {
-  throw new Error("The built HTML is missing its metadata or root placeholder.");
-}
+  await build({
+    root,
+    configFile: resolve(root, 'vite.config.js'),
+    build: { ssr: 'src/entry-server.jsx', outDir: serverOutput, emptyOutDir: true, copyPublicDir: false },
+  });
+  const { render, PAGE_META, SITE_ORIGIN, PUBLIC_PAGES, isIndexablePage, robotsForPage, buildPageGraph, serializeJsonLd } = await import(pathToFileURL(resolve(serverOutput, 'entry-server.js')).href);
+  validateOrigin(SITE_ORIGIN);
+  const template = await readFile(resolve(output, 'index.html'), 'utf8');
+  const headMarker = /<!-- SITE_META_START -->[\s\S]*?<!-- SITE_META_END -->/;
+  const rootMarker = /<div\s+id="root"\s*><\/div>/;
+  if (!headMarker.test(template) || !rootMarker.test(template)) throw new Error('The built HTML is missing its metadata or root placeholder.');
 
-const escape = (value) => String(value).replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]);
-const shareImage = `${SITE_ORIGIN}/assets/share-letsaimit-1200x630.png`;
-const imageAlt = "LetsAimIt. Sport, close to home. Football, basketball and fitness. First session free.";
+  const baseline = await readBaseline(resolve(root, 'deployment/discovery-baseline.json'));
+  const rendered = new Map(Object.entries(PAGE_META).map(([page]) => [page, render(page)]));
+  const publicPages = PUBLIC_PAGES.map(details => {
+    validateRoutePath(details.path);
+    const url = SITE_ORIGIN + details.path;
+    const markdown = mainMarkdown(rendered.get(details.page), url);
+    const graph = buildPageGraph(details.page, { origin: SITE_ORIGIN });
+    const hash = contentHash({ ...details, markdown, graph }, SITE_ORIGIN);
+    const lastmod = sourceLastmod({ root, page: details.page, path: details.path, hash, baseline, sources: details.sources });
+    return { ...details, url, markdown, contentHash: hash, lastmod, markdownPath: markdownPath(details.path), indexable: isIndexablePage(details.page, SITE_ORIGIN) };
+  });
+  const publicByPage = new Map(publicPages.map(page => [page.page, page]));
+  const shareImage = `${SITE_ORIGIN}/assets/share-letsaimit-1200x630.png`;
+  const imageAlt = 'LetsAimIt. Sport, close to home. Football, basketball and fitness. First session free.';
 
-function metadata(page, details) {
-  const title = `${details.title} — LetsAimIt`;
-  const url = `${SITE_ORIGIN}${details.path}`;
-  return [
-    "<!-- SITE_META_START -->",
-    `<title>${escape(title)}</title>`,
-    `<meta name="description" content="${escape(details.description)}" />`,
-    `<link rel="canonical" href="${escape(url)}" />`,
-    `<meta name="robots" content="${["notfound", "admin", "signin", "register", "parent", "coaching"].includes(page) ? "noindex, follow" : "index, follow, max-image-preview:large"}" />`,
-    '<meta property="og:type" content="website" />',
-    '<meta property="og:site_name" content="LetsAimIt" />',
-    '<meta property="og:locale" content="en_IN" />',
-    `<meta property="og:title" content="${escape(title)}" />`,
-    `<meta property="og:description" content="${escape(details.description)}" />`,
-    `<meta property="og:url" content="${escape(url)}" />`,
-    `<meta property="og:image" content="${escape(shareImage)}" />`,
-    '<meta property="og:image:type" content="image/png" />',
-    '<meta property="og:image:width" content="1200" />',
-    '<meta property="og:image:height" content="630" />',
-    `<meta property="og:image:alt" content="${escape(imageAlt)}" />`,
-    '<meta name="twitter:card" content="summary_large_image" />',
-    `<meta name="twitter:title" content="${escape(title)}" />`,
-    `<meta name="twitter:description" content="${escape(details.description)}" />`,
-    `<meta name="twitter:image" content="${escape(shareImage)}" />`,
-    `<meta name="twitter:image:alt" content="${escape(imageAlt)}" />`,
-    "<!-- SITE_META_END -->",
-  ].join("\n    ");
-}
+  function metadata(page, details) {
+    const title = `${details.title} — LetsAimIt`;
+    const url = SITE_ORIGIN + details.path;
+    const publicPage = publicByPage.get(page);
+    const graph = buildPageGraph(page, { origin: SITE_ORIGIN, dateModified: publicPage?.lastmod });
+    const poster = page === 'home' ? findElements(parseHtml(rendered.get(page)), node => node.tag === 'video')[0]?.attributes.poster : null;
+    // Match the rendered poster request on aliases and local previews too.
+    const homePoster = poster || null;
+    return [
+      '<!-- SITE_META_START -->',
+      `<title>${escapeXml(title)}</title>`,
+      `<meta name="description" content="${escapeXml(details.description)}" />`,
+      `<link rel="canonical" href="${escapeXml(url)}" />`,
+      `<meta name="robots" content="${robotsForPage(page, SITE_ORIGIN)}" />`,
+      '<meta property="og:type" content="website" />',
+      '<meta property="og:site_name" content="LetsAimIt" />',
+      '<meta property="og:locale" content="en_IN" />',
+      `<meta property="og:title" content="${escapeXml(title)}" />`,
+      `<meta property="og:description" content="${escapeXml(details.description)}" />`,
+      `<meta property="og:url" content="${escapeXml(url)}" />`,
+      `<meta property="og:image" content="${escapeXml(shareImage)}" />`,
+      '<meta property="og:image:type" content="image/png" />',
+      '<meta property="og:image:width" content="1200" />',
+      '<meta property="og:image:height" content="630" />',
+      `<meta property="og:image:alt" content="${escapeXml(imageAlt)}" />`,
+      '<meta name="twitter:card" content="summary_large_image" />',
+      `<meta name="twitter:title" content="${escapeXml(title)}" />`,
+      `<meta name="twitter:description" content="${escapeXml(details.description)}" />`,
+      `<meta name="twitter:image" content="${escapeXml(shareImage)}" />`,
+      `<meta name="twitter:image:alt" content="${escapeXml(imageAlt)}" />`,
+      ...(publicPage ? [
+        `<link rel="alternate" type="text/markdown" href="${escapeXml(SITE_ORIGIN + publicPage.markdownPath)}" />`,
+        `<link rel="describedby" type="text/plain" href="${SITE_ORIGIN}/llms.txt" />`,
+      ] : []),
+      ...(homePoster ? [`<link rel="preload" as="image" fetchpriority="high" href="${escapeXml(homePoster)}" />`] : []),
+      `<script id="site-schema" type="application/ld+json">${serializeJsonLd(graph)}</script>`,
+      '<!-- SITE_META_END -->',
+    ].join('\n    ');
+  }
 
-const routes = [];
-for (const [page, details] of Object.entries(PAGE_META)) {
-  if (!/^\/(?:[a-z0-9-]+\/)?$/.test(details.path)) throw new Error(`Unsupported route path: ${details.path}`);
-  const body = render(page);
-  if (!body || !/<h1\b/.test(body)) throw new Error(`No rendered page heading for ${page}.`);
-  const html = template
-    .replace(headMarker, metadata(page, details))
-    .replace(rootMarker, () => `<div id="root" data-prerender-page="${escape(page)}">${body}</div>`)
-    .replace(/<body>/, `<body data-page="${escape(page)}">`);
-  const target = resolve(output, "." + details.path, "index.html");
-  await mkdir(dirname(target), { recursive: true });
-  await writeFile(target, html);
-  if (page === "notfound") await writeFile(resolve(output, "404.html"), html);
-  routes.push({ page, path: details.path, file: target.slice(output.length + 1), htmlBytes: Buffer.byteLength(html) });
-}
+  const routes = [];
+  const publicDocuments = new Map();
+  for (const [page, details] of Object.entries(PAGE_META)) {
+    validateRoutePath(details.path);
+    const body = rendered.get(page);
+    if (!body || !/<h1\b/.test(body)) throw new Error(`No rendered page heading for ${page}.`);
+    const html = template
+      .replace(headMarker, () => metadata(page, details))
+      .replace(rootMarker, () => `<div id="root" data-prerender-page="${escapeXml(page)}">${body}</div>`)
+      .replace(/<body>/, `<body data-page="${escapeXml(page)}">`);
+    // An explicit /404/index.html would return 200 on static hosting. Only
+    // publish the platform's error document so /404/ remains a genuine 404.
+    const file = routeOutputFile(page, details.path);
+    const target = resolve(output, file);
+    await mkdir(dirname(target), { recursive: true });
+    await writeFile(target, html);
+    if (publicByPage.has(page)) publicDocuments.set(details.path, html);
+    routes.push({ page, path: details.path, file, htmlBytes: Buffer.byteLength(html) });
+  }
 
-// Only build metadata is published here; no responses, account data or credentials.
-await writeFile(resolve(output, "route-manifest.json"), JSON.stringify({ origin: SITE_ORIGIN, routes }, null, 2) + "\n");
-console.log(`Prerendered ${routes.length} route documents and 404.html with page-specific share metadata.`);
-for (const { path, htmlBytes } of routes) console.log(`${path} ${htmlBytes.toLocaleString("en-IN")} bytes`);
+  const discovery = buildDiscovery({ pages: publicPages, documents: publicDocuments, origin: SITE_ORIGIN });
+  const files = [
+    ['sitemap.xml', discovery.sitemap], ['robots.txt', discovery.robots],
+    ['llms.txt', discovery.llms], ['llms-full.txt', discovery.full],
+    ['discovery-manifest.json', JSON.stringify(discovery.manifest, null, 2) + '\n'],
+    ...discovery.markdownFiles.map(file => [file.path.slice(1), file.content]),
+    ['route-manifest.json', JSON.stringify({ origin: SITE_ORIGIN, routes }, null, 2) + '\n'],
+  ];
+  for (const [file, contents] of files) {
+    const target = resolve(output, file);
+    await mkdir(dirname(target), { recursive: true });
+    await writeFile(target, contents);
+  }
+  console.log(`Prerendered ${routes.length} route documents with initial metadata and connected schema.`);
+  console.log(`Discovery covers ${publicPages.length} public pages, ${discovery.manifest.coverage.indexableCount} indexable URLs and zero orphans.`);
+  for (const { path, htmlBytes } of routes) console.log(`${path} ${htmlBytes.toLocaleString('en-IN')} bytes`);
 } finally {
-  // This server bundle is a build-time helper, never part of the public Site.
+  // The server bundle is a build helper and never part of the public deployment.
   await rm(serverOutput, { recursive: true, force: true });
 }

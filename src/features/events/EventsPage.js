@@ -200,7 +200,7 @@ export function createEventsPage(React, asset) {
             h("br"),
             "Game on.",
           ),
-          h("p", { className: "ev-intro" }, "Football. Friends. Teamwork."),
+          h("p", { className: "ev-intro" }, "Football events for children and families in Bengaluru. Play together, build teamwork and meet your community."),
           h(
             "div",
             { className: "ev-hero-actions" },

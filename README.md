@@ -2,7 +2,7 @@
 
 The updated website, with all editable React source, shared header/footer, approved content and local assets.
 
-**Public review site:** https://letsaimit-review.one92843.chatgpt.site/
+**Website:** [letsaimit.com](https://letsaimit.com) · **UAT:** [uat.letsaimit.com](https://uat.letsaimit.com)
 
 ## Run locally
 
@@ -24,7 +24,7 @@ Deploy the contents of `dist/` at your domain root. The production build contain
 
 ## Included
 
-- Home, Programme, Coach, Societies, Schools and Events.
+- Home, Programme, Coach, Societies, Schools, Events and Blogs.
 - Internal Privacy, Terms, and Fees & refunds pages.
 - A page-not-found view; old `/#/…` links remain compatible.
 - Shared responsive header, mobile menu and multisport footer.
@@ -67,7 +67,7 @@ Copy `.env.example` to `.env.local` if changing configuration. These are public 
 
 | Variable | Purpose |
 | --- | --- |
-| `VITE_SITE_ORIGIN` | Canonical HTTPS origin. Defaults to the current ChatGPT.site URL. Use `https://letsaimit.com` when deploying there. |
+| `VITE_SITE_ORIGIN` | Canonical HTTPS origin. Defaults to `https://letsaimit.com`; Vercel sets the UAT or preview origin during its build. Only production public content is indexable. |
 | `VITE_LEAD_ENDPOINT` | Optional legacy school/society Apps Script URL; blank for their WhatsApp handoff. |
 | `VITE_SUPABASE_URL` | Public Supabase project URL for the intended environment. |
 | `VITE_SUPABASE_PUBLISHABLE_KEY` | Public Supabase key; private access is enforced by database rules. |
@@ -108,10 +108,12 @@ scripts/                   Build, prerendering, media and asset verification
 
 `public/assets/` retains all source originals. The final build removes superseded original images/video from `dist/` after checking the rendered HTML and CSS use their optimised replacements. Certificates, footer art, fonts and source/license records are retained.
 
-Run `npm run verify:assets` to check the 54 original assets against the prior approved snapshot. `src/data/media-manifest.json` records the generated derivatives and their hashes. Python and ffmpeg are needed only to regenerate media; they are not needed for the normal React build.
+Run `npm run verify:assets` to check the 59 original assets against the approved snapshot. `src/data/media-manifest.json` records the generated derivatives and their hashes. Python with Pillow and ffmpeg regenerates media; the standalone indexing CLI uses Python's standard library. Neither is needed for the normal React build.
 
 ## Supporting notes
 
+- [SEO/AEO audit and gate evidence](docs/SEO-AEO-AUDIT.md)
+- [Public discovery and indexing operations](docs/INDEXING.md)
 - [Sharing and deployment](docs/SHARING-DEPLOYMENT.md)
 - [Native registration and private register](README-SHEET-DEPLOYMENT.md)
 - [Optional school/society capture](integrations/google-sheets/README.md)

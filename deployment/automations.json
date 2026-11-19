@@ -127,6 +127,29 @@
       "websiteSettings": ["VITE_LEAD_ENDPOINT"],
       "scriptProperties": ["LETSAIMIT_LEAD_SHEET_ID"],
       "source": "integrations/google-sheets/Code.gs"
+    },
+    "searchDiscovery": {
+      "platform": "Post-deploy CLI",
+      "trigger": "Reviewed production release after live canonical and crawler checks",
+      "source": "scripts/force-index.py",
+      "configuration": "deployment/indexing.json",
+      "settings": [
+        "GOOGLE_ACCESS_TOKEN"
+      ],
+      "defaultMode": "Read-only dry run; explicit --submit enables provider notifications",
+      "destinations": [
+        "IndexNow changed canonical URLs",
+        "Google Search Console sitemap",
+        "Google Indexing API eligible JobPosting or livestream pages only"
+      ],
+      "state": "Durable per-provider JSON receipt supplied with --state; keep in release storage, never in public output",
+      "gates": [
+        "Production origin only",
+        "Exact 200 canonical indexable URLs",
+        "Robots and sitemap agreement",
+        "Public IndexNow host verification",
+        "Provider credentials and eligibility"
+      ]
     }
   }
 }

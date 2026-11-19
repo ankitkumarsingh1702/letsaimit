@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Complete LetsAimIt React website with nine pages, shared navigation, local media and Google Sheets integration setup.",
+  "description": "LetsAimIt coaching website and student workspaces with prerendered public pages and search discovery.",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "vite build && node scripts/prerender.mjs && node scripts/prune-deployment.mjs",
@@ -11,7 +11,11 @@
     "verify:assets": "node scripts/verify-assets.mjs",
     "parity:plan": "node scripts/backend-parity.mjs",
     "release:build": "node scripts/check-release.mjs && node scripts/backend-parity.mjs > /tmp/letsaimit-backend-parity.json && npm test && npm run build",
-    "test": "node --test"
+    "test": "node --test",
+    "test:indexing": "python3 -m unittest discover -s tests -p force_index_test.py",
+    "index:check": "python3 scripts/force-index.py --dry-run",
+    "index:submit": "python3 scripts/force-index.py --submit",
+    "discovery:baseline": "node scripts/discovery-baseline.mjs"
   },
   "engines": {
     "node": ">=22.12.0"

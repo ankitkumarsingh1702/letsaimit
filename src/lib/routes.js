@@ -1,23 +1,6 @@
-import { PUBLIC_BRAND } from "./publicBrand.js";
-export const SITE_ORIGIN = (import.meta.env.VITE_SITE_ORIGIN || PUBLIC_BRAND.origin).replace(/\/$/, "");
-export const PAGE_META = {
-  home: { path: "/", title: "Sport, close to home", description: "Football and basketball for ages 5–14. Build fitness, confidence and friendships at Nambiar Ellegenza and Nambiar Bellezea, Bengaluru. First session free." },
-  programme: { path: "/programme/", title: "Football & basketball training", description: "Ages 5–14. Two sessions a week, 45–60 minutes each. Football and basketball at Nambiar Ellegenza and Nambiar Bellezea. Try your first session free." },
-  coach: { path: "/coach/", title: "Meet Coach Dhiraj", description: "Meet Dhiraj, former head coach at Frisco Soccer Association, Texas, and founder of LetsAimIt in Bengaluru. Explore his coaching story and credentials." },
-  societies: { path: "/societies/", title: "Sports for your society", description: "Bring football, basketball and active play to your community. LetsAimIt works with society committees in Bengaluru. Start a society enquiry." },
-  schools: { path: "/schools/", title: "School fitness consultancy", description: "Practical guidance for your school's existing PE team. Curriculum advice, fitness assessment guidance, coach development and programme support." },
-  events: { path: "/events/", title: "Events and match days", description: "Internal games, friendlies and tournaments. See Ellegenza Match Day moments and the football match day planned for 3 December 2026." },
-  blogs: { path: "/blogs/", title: "Blogs from Coach Dhiraj", description: "Coach Dhiraj’s notes on youth sport, coaching and helping children enjoy movement. Read his articles and posts from LinkedIn." },
-  privacy: { path: "/privacy/", title: "Privacy policy", description: "How LetsAimIt handles parent, guardian and enquiry details, including consent, contact requests and children's information." },
-  terms: { path: "/terms/", title: "Programme terms", description: "Terms for LetsAimIt football, basketball and fitness activities. Read enrolment, participation and payment conditions before joining." },
-  refunds: { path: "/refunds/", title: "Cancellations & refunds", description: "LetsAimIt payment, withdrawal and cancellation terms. Paid enrolment is non-refundable for personal absence or withdrawal, subject to statutory rights." },
-  notfound: { path: "/404/", title: "Page not found", description: "This page is not available. Explore LetsAimIt programmes, community sport and school consultancy." },
-  admin: { path: "/admin/", title: "Team dashboard", description: "Sign in to the private LetsAimIt team dashboard and registration register." },
-  signin: { path: "/sign-in/", title: "Sign in", description: "Sign in with your approved Google account to open the LetsAimIt team dashboard." },
-  register: { path: "/register/", title: "Register your child", description: "Register your child for LetsAimIt coaching." },
-  parent: { path: "/parent/", title: "Parent dashboard", description: "View your child’s requests, fees, attendance and weekly coaching feedback." },
-  coaching: { path: "/coach-dashboard/", title: "Coaching tracker", description: "Private attendance and weekly feedback for the LetsAimIt coaching team." },
-};
+import { PAGE_META, SITE_ORIGIN, robotsForPage, buildPageGraph, serializeJsonLd } from "./seo.js";
+export { PAGE_META, SITE_ORIGIN, PUBLIC_PAGES, INDEXABLE_PAGES, isProductionOrigin, isIndexablePage, robotsForPage } from "./seo.js";
+
 export const PAGE_TITLES = Object.fromEntries(Object.entries(PAGE_META).map(([key, value]) => [key, value.title]));
 export function pageFromPath(pathname = "/") {
   let path;
@@ -43,8 +26,45 @@ export function syncPageMeta(page) {
     'meta[property="og:url"]': SITE_ORIGIN + meta.path,
     'meta[name="twitter:title"]': title,
     'meta[name="twitter:description"]': meta.description,
-    'meta[name="robots"]': ["notfound", "admin", "signin", "register", "parent", "coaching"].includes(page) ? "noindex, follow" : "index, follow, max-image-preview:large",
+    'meta[name="robots"]': robotsForPage(page),
   };
   for (const [selector, value] of Object.entries(values)) document.querySelector(selector)?.setAttribute("content", value);
   document.querySelector('link[rel="canonical"]')?.setAttribute("href", SITE_ORIGIN + meta.path);
+  const publicPage = PAGE_META[page]?.indexable === true;
+  const markdownPath = meta.path === "/" ? "/index.md" : meta.path.slice(0, -1) + ".md";
+  for (const [rel, type, href] of [
+    ["alternate", "text/markdown", SITE_ORIGIN + markdownPath],
+    ["describedby", "text/plain", SITE_ORIGIN + "/llms.txt"],
+  ]) {
+    let link = document.querySelector(`link[rel="${rel}"][type="${type}"]`);
+    if (!publicPage) {
+      link?.remove();
+      continue;
+    }
+    if (!link) {
+      link = document.createElement("link");
+      link.setAttribute("rel", rel);
+      link.setAttribute("type", type);
+      document.head.append(link);
+    }
+    link.setAttribute("href", href);
+  }
+  let schema = document.getElementById("site-schema");
+  const dates = {};
+  if (schema?.textContent) {
+    try {
+      const existing = JSON.parse(schema.textContent)["@graph"]?.find(node => node["@id"] === SITE_ORIGIN + meta.path + "#webpage");
+      if (existing?.datePublished) dates.datePublished = existing.datePublished;
+      if (existing?.dateModified) dates.dateModified = existing.dateModified;
+    } catch {
+      // A stale or malformed graph is replaced from the current public route.
+    }
+  }
+  if (!schema) {
+    schema = document.createElement("script");
+    schema.id = "site-schema";
+    schema.type = "application/ld+json";
+    document.head.append(schema);
+  }
+  schema.textContent = serializeJsonLd(buildPageGraph(page, dates));
 }

@@ -20,7 +20,7 @@ and is not required in deployment or the source export.
 The current canonical origin is:
 
 ```text
-https://letsaimit-review.one92843.chatgpt.site
+https://letsaimit.com
 ```
 
 When moving the same source to another domain, set `VITE_SITE_ORIGIN` to its
@@ -43,10 +43,11 @@ This value is public configuration, not a credential.
 | For societies | `dist/societies/index.html` | `/societies/` |
 | For schools | `dist/schools/index.html` | `/schools/` |
 | Events | `dist/events/index.html` | `/events/` |
+| Blogs | `dist/blogs/index.html` | `/blogs/` |
 | Privacy | `dist/privacy/index.html` | `/privacy/` |
 | Terms | `dist/terms/index.html` | `/terms/` |
 | Cancellations and refunds | `dist/refunds/index.html` | `/refunds/` |
-| Page not found | `dist/404/index.html` and `dist/404.html` | `/404/` |
+| Page not found | `dist/404.html` (host error document) | Unknown paths, including `/404/`, return 404 |
 
 Previously shared hash links still open the matching page in the browser.
 Share the clean paths above for a page-specific link preview. A URL fragment
@@ -89,8 +90,9 @@ Configure the host to serve directory index documents for the routes above.
 Configure unknown paths to serve `404.html` with HTTP status **404**. The file
 is included, but the hosting platform decides the HTTP status; simply
 rewriting every unknown path to the home page with status 200 is not a real
-HTTP 404. No host-specific redirect file is generated without a verified
-hosting contract.
+HTTP 404. The repository's `vercel.json` preserves directory-index routes,
+redirects slashless and `index.html` aliases to their canonical URLs, and adds
+`noindex` response headers on private routes and non-production hosts.
 
 The 404 page has its own title and `noindex, follow` metadata. The React
 router also renders its page-not-found view for an unknown legacy hash route.
@@ -98,11 +100,18 @@ router also renders its page-not-found view for an unknown legacy hash route.
 ## Verified during implementation
 
 - The production client build and server rendering build complete.
-- All ten route documents contain one rendered H1.
+- All 16 route documents contain one rendered H1; ten are public content pages.
 - Titles, descriptions, canonical URLs, OG tags and Twitter tags are present
   exactly once and match their route.
 - The share PNG is exactly 1200 × 630; PNG icons are 32 × 32 and 180 × 180.
-- The generated 404 files have identical content and `noindex` metadata.
+- The host error document has `noindex` metadata; there is no public 200-status
+  `/404/index.html` file.
+
+The public inventory in `src/lib/seo.js` drives the sitemap, initial JSON-LD,
+Markdown alternatives and LLM files. Production lists all ten public pages;
+UAT and previews emit `noindex` documents and an empty sitemap. See
+[the SEO/AEO audit](SEO-AEO-AUDIT.md) for scope and verification, and
+[indexing operations](INDEXING.md) for the post-deploy provider gates.
 
 Browser interaction, real hosted route status codes, actual transfer sizes,
 and a sharing service's cached preview are separate end-to-end checks.

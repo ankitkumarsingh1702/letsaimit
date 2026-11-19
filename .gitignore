@@ -2,6 +2,8 @@ node_modules/
 dist/
 .ssr/
 .qa/
+.cache/
+__pycache__/
 .vercel/
 .DS_Store
 *.log

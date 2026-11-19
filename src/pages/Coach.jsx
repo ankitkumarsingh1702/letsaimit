@@ -42,7 +42,7 @@ function Coach() {
             <span>.</span>
           </h1>
           <p className="co-intro">
-            Youth football coach.
+            Dhiraj Mishra, youth football coach.
             <br />
             {" Father of two."}
           </p>

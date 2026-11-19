@@ -174,7 +174,7 @@ export function createSchoolsPage(React, asset) {
             h(
               "p",
               { className: "sk-hero-intro" },
-              "Practical advice for your PE team.",
+              "LetsAimIt helps school PE teams plan practical fitness sessions and active play.",
             ),
             h(
               Jump,
