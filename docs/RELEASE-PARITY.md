@@ -601,3 +601,21 @@ HTTPS homepage is still 200 / 39,957 bytes with SHA-256
 | Local verification | All 450 Node tests and 13 mocked Python provider tests pass; all 59 approved original assets remain unchanged. Chrome public navigation and 390 px phone checks pass. Lighthouse 13.6 mobile local homepage: performance 98, accessibility/best practices/SEO 100, LCP 2.4 s, TBT 0 ms and CLS 0. Search Console has no field CWV data |
 | Provider boundary | The requested Chrome account can access the verified Search Console property; the existing homepage reports “URL is on Google”. The general Google path is sitemap submission; current pages are ineligible for the restricted Indexing API. Production dry run fails closed while its new files and `/blogs/` are absent and scoped Google API authorization is missing. No notifications or new credentials/grants were created |
 | Production readiness | The same source and indexing configuration are staged. Backend digest remains `ba8defc9e55b0376f038337d73925353f392c8d29c706c6480e795848e308cdc`, with 18 migrations and five functions. The production target manifest still has no separate Supabase reference; explicit production promotion and its configuration/submission gates remain pending. No production website or backend changes were applied |
+
+## 19 November 2026 — Authorized production rollout, in progress
+
+The user explicitly approved both UAT and production, created the separate
+database after the password handoff, and confirmed the protected owner identity.
+
+| Boundary | Observed state |
+| --- | --- |
+| Production target | `ktsrkjfysdqxangssrbf`, `letsaimit-production`, Free/Nano in Mumbai (`ap-south-1`), Healthy. Separate from UAT `nlgfcmywgwibvmbsgkox` |
+| Website configuration | Saved `VITE_SITE_ORIGIN`, `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` on Vercel Production only. The production public key returned HTTP 200 from its own Auth settings endpoint; no private key was exposed or copied |
+| Fresh-target preflight | Selected the exact production dashboard endpoint, then verified an empty public/private application schema and zero Auth users. Vault 0.3.2 was installed; supported Net/Cron extensions were available |
+| Applied schema | Applied all 18 exact ordered migration byte sequences in one transaction through the authenticated production SQL editor. Bundle SHA-256 `0680dd15c9eb0dc2837727ebc3887d3f2a360c28a56497b566c2be3390fc1550`; success observed. No CLI migration history was fabricated |
+| Live database verification | Read-only checks verify 25 application tables, all 25 with RLS; singleton settings only, zero registrations/Auth users before owner sign-in, retired late fees and all five delivery/collection gates disabled. All 115 function bodies, attributes and normalized definitions and all six policy fingerprints match the isolated source baseline |
+| Owner and coach | Applied the separately confirmed owner bootstrap and verified default-coach activation. Result: one protected owner membership, zero Auth users and zero registrations. No UAT memberships, Auth identities or business rows were copied |
+| Authentication routing | Saved Site URL `https://letsaimit.com` and exactly one allowed callback destination, `https://letsaimit.com/admin/`, matching the shared sign-in flow. The production Google provider remains disabled pending its independent production client |
+| Anonymous boundary | Five parent/admin/student read RPCs reject anonymous requests with HTTP 401 / PostgreSQL 42501. No private records were returned. Public Auth features match UAT except for the pending Google provider |
+| Schedules and remaining setup | Four active minute schedules have the expected names and commands. Their queues are empty and delivery/collection gates remain disabled. Production Vault routing/bearer, five Edge deployments, Google client, sender/payment configuration and production website promotion/submissions remain pending; these are not established by the schema checks |
+| Source promotion | Prepare the merge of production's three legacy policy aliases into the tested UAT source, preserving all current release guards and SEO configuration. Revalidate the resulting source on UAT before advancing `main` |

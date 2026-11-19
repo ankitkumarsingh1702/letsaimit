@@ -1,18 +1,24 @@
 -- Read-only acceptance checks AFTER all migrations and the separate owner bootstrap.
 -- SET letsaimit.production_ref = '<production ref from release-targets.json>';
 -- SET letsaimit.uat_ref = '<uat ref from release-targets.json>';
+-- SET letsaimit.approved_owner_email = '<separately approved owner Google Gmail>';
+-- SET letsaimit.approved_coach_email = '<separately verified coach Google email>';
 -- Never run an existing database through fresh bootstrap or empty it to pass these checks.
 begin read only;
 do $verify$
 declare production_ref text:=current_setting('letsaimit.production_ref',true);
-  uat_ref text:=current_setting('letsaimit.uat_ref',true);name text;relation regclass;routine regprocedure;
+  uat_ref text:=current_setting('letsaimit.uat_ref',true);
+  owner_email text:=lower(btrim(current_setting('letsaimit.approved_owner_email',true)));
+  coach_email text:=lower(btrim(current_setting('letsaimit.approved_coach_email',true)));
+  name text;relation regclass;routine regprocedure;
   rls boolean;n bigint;valid boolean;
   tables text[]:=array['public.allowed_admins','public.registrations',
     'private.notification_settings','private.notification_digest_windows','private.notification_activity','private.admin_notification_outbox',
     'private.billing_settings','private.billing_accounts','private.billing_invoices','private.billing_ledger','private.billing_jobs',
     'private.billing_webhook_events','private.billing_approval_quotes','private.billing_price_changes','private.billing_month_summaries',
     'private.account_deletions','private.account_deletion_registrations',
-    'private.coaching_assignments','private.coaching_attendance','private.coaching_feedback','private.coaching_settings','private.coaching_email_tickets'];
+    'private.coaching_assignments','private.coaching_attendance','private.coaching_feedback','private.coaching_settings','private.coaching_email_tickets',
+    'private.coaching_practice','private.parent_attendance_email_outbox','private.billing_admin_invoice_changes'];
   service_rpcs text[]:=array['public.enqueue_admin_notification_digests()','public.claim_admin_notification()',
     'public.prepare_admin_notification(uuid,uuid)','public.finish_admin_notification(uuid,uuid,text,text)',
     'public.enqueue_billing_work()','public.claim_billing_job()','public.prepare_billing_job(uuid,uuid)',
@@ -22,7 +28,8 @@ declare production_ref text:=current_setting('letsaimit.production_ref',true);
     'public.finish_account_deletion(uuid,uuid,boolean,text)','public.get_account_deletion_status(uuid)',
     'public.enqueue_coaching_attendance()','public.claim_coaching_email()','public.claim_coaching_email_for_modes(text[])','public.prepare_coaching_email(uuid,uuid)',
     'public.set_coaching_email_token(uuid,uuid,text)','public.finish_coaching_email(uuid,uuid,text,text)',
-    'public.read_coaching_email_attendance(uuid,text)','public.save_coaching_email_attendance(uuid,text,jsonb)'];
+    'public.read_coaching_email_attendance(uuid,text)','public.save_coaching_email_attendance(uuid,text,jsonb)',
+    'public.claim_parent_attendance_email()','public.finish_parent_attendance_email(uuid,uuid,text)'];
   authenticated_rpcs text[]:=array['public.is_admin()','public.submit_registration(jsonb)','public.list_my_registrations()',
     'public.review_registration(uuid,text,bigint)','public.review_registration(uuid,text,bigint,integer)',
     'public.set_monthly_coaching_fee(uuid,integer,bigint)','public.cancel_billing_account(uuid,bigint)',
@@ -30,11 +37,20 @@ declare production_ref text:=current_setting('letsaimit.production_ref',true);
     'public.list_my_tracker()','public.list_staff_tracker(date)','public.list_staff_tracker(date,text)','public.has_coaching_assignments()',
     'public.set_coaching_assignment(uuid,text,integer[],date,bigint)',
     'public.save_coaching_attendance(date,jsonb)','public.save_coaching_feedback(uuid,date,text,text,bigint)',
-    'public.get_coaching_attendance_email_status()','public.send_coaching_attendance_now()'];
+    'public.get_coaching_attendance_email_status()','public.send_coaching_attendance_now()',
+    'public.list_coaching_students(date,text)','public.list_coaching_student_profile(uuid,text)',
+    'public.save_coaching_practice(uuid,uuid,text,integer,integer,integer)',
+    'public.list_coaching_practice(uuid,text,date,date,timestamptz,uuid)',
+    'public.create_student_payment_invoice(uuid,integer,date,text,uuid)',
+    'public.adjust_student_payment_invoice(uuid,uuid,integer,integer,text,uuid)'];
 begin
   if production_ref is null or production_ref!~'^[a-z0-9]{20}$'
     or uat_ref is null or uat_ref!~'^[a-z0-9]{20}$' or production_ref=uat_ref then
     raise exception 'FRESH_BACKEND_TARGET_REQUIRED';
+  end if;
+  if owner_email is null or owner_email!~'^[^[:space:]@]+@gmail[.]com$'
+    or coach_email is null or coach_email!~'^[^[:space:]@]+@[^[:space:]@]+[.][^[:space:]@]+$' then
+    raise exception 'FRESH_BACKEND_APPROVED_IDENTITIES_REQUIRED';
   end if;
   foreach name in array tables loop
     relation:=to_regclass(name);
@@ -53,15 +69,32 @@ begin
       if n<>0 then raise exception 'FRESH_BACKEND_APP_DATA_PRESENT: %',name;end if;
     end if;
   end loop;
-  if (select count(*) from public.allowed_admins where is_owner)<>1 then raise exception 'FRESH_BACKEND_OWNER_REQUIRED';end if;
+  if (select count(*) from public.allowed_admins)<>1
+    or not exists(select 1 from public.allowed_admins where is_owner and email=owner_email) then
+    raise exception 'FRESH_BACKEND_OWNER_REQUIRED';
+  end if;
+  if not exists(select 1 from private.coaching_settings where id
+    and default_coach_email=coach_email and confirmed_students_default_email=coach_email) then
+    raise exception 'FRESH_BACKEND_VERIFIED_COACH_REQUIRED';
+  end if;
   if (select count(*) from private.notification_settings)<>1
     or (select dispatch_enabled from private.notification_settings where id) is distinct from false
     or (select count(*) from private.billing_settings)<>1
     or (select enabled from private.billing_settings where id) is distinct from false
     or (select count(*) from private.coaching_settings)<>1
     or (select email_enabled from private.coaching_settings where id) is distinct from false
-    or (select manual_email_enabled from private.coaching_settings where id) is distinct from false then
+    or (select manual_email_enabled from private.coaching_settings where id) is distinct from false
+    or (select parent_attendance_email_enabled from private.coaching_settings where id) is distinct from false then
     raise exception 'FRESH_BACKEND_DISPATCH_MUST_STAY_DISABLED';
+  end if;
+  if (select late_fee_paise from private.billing_settings where id) is distinct from 0
+    or (select late_fees_enabled from private.billing_settings where id) is distinct from false
+    or not exists(select 1 from pg_constraint
+      where conrelid='private.billing_settings'::regclass and conname='billing_late_fees_retired' and convalidated) then
+    raise exception 'FRESH_BACKEND_LATE_FEES_RETIRED_REQUIRED';
+  end if;
+  if to_regprocedure('public.queue_students_attendance_email(date,text,uuid)') is not null then
+    raise exception 'FRESH_BACKEND_MANUAL_PARENT_ATTENDANCE_RPC_RETIRED_REQUIRED';
   end if;
   if has_any_column_privilege('anon','public.registrations','SELECT,INSERT,UPDATE')
     or has_any_column_privilege('authenticated','public.registrations','INSERT')
@@ -96,7 +129,9 @@ begin
   foreach name in array array['private.require_google_user()','public.list_my_registrations()','public.list_my_billing()',
     'public.list_my_tracker()','public.list_staff_tracker(date)','public.list_staff_tracker(date,text)','public.has_coaching_assignments()',
     'public.read_coaching_email_attendance(uuid,text)',
-    'public.get_coaching_attendance_email_status()'] loop
+    'public.get_coaching_attendance_email_status()',
+    'public.list_coaching_students(date,text)','public.list_coaching_student_profile(uuid,text)',
+    'public.list_coaching_practice(uuid,text,date,date,timestamptz,uuid)'] loop
     routine:=to_regprocedure(name);
     if routine is null or (select provolatile from pg_proc where oid=routine)<>'s' then raise exception 'FRESH_BACKEND_READ_RPC_VOLATILITY: %',name;end if;
   end loop;
@@ -105,10 +140,19 @@ begin
   end if;
   foreach name in array array['public.set_coaching_assignment(uuid,text,integer[],date,bigint)',
     'public.save_coaching_attendance(date,jsonb)','public.save_coaching_feedback(uuid,date,text,text,bigint)',
-    'public.send_coaching_attendance_now()'] loop
+    'public.send_coaching_attendance_now()',
+    'public.save_coaching_practice(uuid,uuid,text,integer,integer,integer)',
+    'private.lock_student_payment_account(uuid)'] loop
     routine:=to_regprocedure(name);
     if routine is null or (select position('private.lock_google_registration_user()' in prosrc) from pg_proc where oid=routine)=0 then
       raise exception 'FRESH_BACKEND_WRITE_IDENTITY_LOCK_MISSING: %',name;
+    end if;
+  end loop;
+  foreach name in array array['public.create_student_payment_invoice(uuid,integer,date,text,uuid)',
+    'public.adjust_student_payment_invoice(uuid,uuid,integer,integer,text,uuid)'] loop
+    routine:=to_regprocedure(name);
+    if routine is null or (select position('private.lock_student_payment_account(' in prosrc) from pg_proc where oid=routine)=0 then
+      raise exception 'FRESH_BACKEND_PAYMENT_IDENTITY_LOCK_MISSING: %',name;
     end if;
   end loop;
   if to_regclass('cron.job') is null or to_regclass('vault.decrypted_secrets') is null or to_regnamespace('net') is null then
@@ -147,7 +191,9 @@ select ns.nspname as schema,p.proname,pg_get_function_identity_arguments(p.oid) 
       'prepare_account_deletion','claim_account_deletions','finish_account_deletion','get_account_deletion_status',
       'list_my_tracker','list_staff_tracker','has_coaching_assignments','set_coaching_assignment','save_coaching_attendance','save_coaching_feedback',
       'enqueue_coaching_attendance','claim_coaching_email','claim_coaching_email_for_modes','prepare_coaching_email','set_coaching_email_token','finish_coaching_email',
-      'read_coaching_email_attendance','save_coaching_email_attendance','get_coaching_attendance_email_status','send_coaching_attendance_now'))
+      'read_coaching_email_attendance','save_coaching_email_attendance','get_coaching_attendance_email_status','send_coaching_attendance_now',
+      'list_coaching_students','list_coaching_student_profile','save_coaching_practice','list_coaching_practice',
+      'claim_parent_attendance_email','finish_parent_attendance_email','create_student_payment_invoice','adjust_student_payment_invoice'))
   order by ns.nspname,p.proname,arguments;
 select ns.nspname as schema,c.relname,p.polname,p.polcmd,p.polroles,
   encode(sha256(convert_to(coalesce(pg_get_expr(p.polqual,p.polrelid),'')||'|'||coalesce(pg_get_expr(p.polwithcheck,p.polrelid),''),'UTF8')),'hex') as policy_sha256

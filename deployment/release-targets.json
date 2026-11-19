@@ -7,6 +7,6 @@
   "production": {
     "branch": "main",
     "origin": "https://letsaimit.com",
-    "supabaseProjectRef": null
+    "supabaseProjectRef": "ktsrkjfysdqxangssrbf"
   }
 }

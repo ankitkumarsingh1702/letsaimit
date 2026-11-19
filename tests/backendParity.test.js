@@ -7,6 +7,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { buildBackendParity } from '../scripts/backendParity.js';
 
+// An explicit missing-production fixture keeps that gate independent of live setup.
 const targets={uat:{branch:'uat',origin:'https://uat.letsaimit.com',supabaseProjectRef:'aaaaaaaaaaaaaaaaaaaa'},production:{branch:'main',origin:'https://letsaimit.com',supabaseProjectRef:null}};
 async function fixture(t){
   const root=await mkdtemp(join(tmpdir(),'letsaimit-parity-'));t.after(()=>rm(root,{recursive:true,force:true}));
@@ -87,6 +88,18 @@ test('CLI emits JSON only, never reads secret env values, and leaves source file
   const file=new URL('../deployment/release-targets.json',import.meta.url),before=await readFile(file,'utf8');
   const result=spawnSync(process.execPath,[script,'--target','all'],{env:{...process.env,SMTP_PASSWORD:'private_smtp_test_marker',RAZORPAY_KEY_SECRET:'private_razorpay_test_marker'},encoding:'utf8'});
   assert.equal(result.status,0);const plan=JSON.parse(result.stdout);assert.equal(plan.targets.length,2);assert.equal(result.stderr,'');
+  const configuredTargets=JSON.parse(before);
+  assert.notEqual(configuredTargets.production.supabaseProjectRef,configuredTargets.uat.supabaseProjectRef);
+  for(const item of plan.targets){
+    const configured=configuredTargets[item.target];
+    assert.match(configured.supabaseProjectRef,/^[a-z0-9]{20}$/);
+    assert.deepEqual({branch:item.branch,origin:item.origin,supabaseProjectRef:item.supabaseProjectRef},configured);
+    assert.equal(item.status,'planned');assert.equal(item.code,'SOURCE_PLAN_AVAILABLE');
+    assert.equal(item.expectedUrls.supabase,`https://${configured.supabaseProjectRef}.supabase.co`);
+    assert.equal(item.expectedUrls.oauthCallback,`https://${configured.supabaseProjectRef}.supabase.co/auth/v1/callback`);
+    assert.equal(item.expectedUrls.admin,`${configured.origin}/admin/`);
+    assert.equal(item.appliedBackend,'not_verified');assert.equal(item.liveJourney,'not_verified');
+  }
   assert.ok(plan.requiredBackendSecrets.operatorProvided.includes('RAZORPAY_KEY_SECRET'));
   assert.doesNotMatch(result.stdout,/private_smtp_test_marker|private_razorpay_test_marker/);
   assert.equal(await readFile(file,'utf8'),before);

@@ -15,6 +15,21 @@
       "source": "/:path+/index.html",
       "destination": "/:path+/",
       "permanent": true
+    },
+    {
+      "source": "/privacy-policy",
+      "destination": "/privacy/",
+      "permanent": true
+    },
+    {
+      "source": "/terms-and-conditions",
+      "destination": "/terms/",
+      "permanent": true
+    },
+    {
+      "source": "/refund-policy",
+      "destination": "/refunds/",
+      "permanent": true
     }
   ],
   "headers": [
