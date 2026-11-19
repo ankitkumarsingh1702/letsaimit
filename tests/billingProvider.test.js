@@ -276,25 +276,25 @@ test("webhook verification uses exact raw bytes, not a reserialized object or in
   assert.equal(await verifyRazorpaySignature(new TextEncoder().encode('{"old":true,"order":1}'), signature, webhookSecret, webcrypto), false);
   assert.equal(await verifyRazorpaySignature(raw, "00".repeat(32), webhookSecret, webcrypto), false);
   assert.equal(await verifyRazorpaySignature(raw, "nothex", webhookSecret, webcrypto), false);
-  const handler = createBillingWebhookHandler({ secret: webhookSecret, crypto: webcrypto, rpc: async () => true });
+  const handler = createBillingWebhookHandler({ secret: webhookSecret, crypto: webcrypto, rpc: async () => ({ status: "accepted" }) });
   assert.equal((await handler(webhookRequest(event({ created_at: 1 })))).status, 200);
 });
 
 test("verified events durably persist only bounded routing identifiers and a payload hash", async () => {
   const calls = [], body = JSON.stringify(event());
-  const handler = createBillingWebhookHandler({ secret: webhookSecret, crypto: webcrypto, rpc: async (name, args) => { calls.push({ name, args }); return true; } });
+  const handler = createBillingWebhookHandler({ secret: webhookSecret, crypto: webcrypto, rpc: async (name, args) => { calls.push({ name, args }); return { status: "accepted" }; } });
   const result = await handler(webhookRequest(null, { raw: body }));
   assert.equal(result.status, 200); assert.deepEqual(await result.json(), { ok: true });
-  assert.deepEqual(calls, [{ name: "ingest_billing_webhook", args: { p_event_id: "event_synthetic_1", p_invoice_id: "inv_12345678901234", p_payment_id: "pay_12345678901234", p_event_type: "invoice.paid", p_payload_hash: createHash("sha256").update(body).digest("hex") } }]);
+  assert.deepEqual(calls, [{ name: "ingest_owned_billing_webhook", args: { p_event_id: "event_synthetic_1", p_invoice_id: "inv_12345678901234", p_payment_id: "pay_12345678901234", p_event_type: "invoice.paid", p_payload_hash: createHash("sha256").update(body).digest("hex"), p_billing_id: BILL_ID } }]);
   assert.equal(JSON.stringify(calls).includes("parent@example.test"), false);
 });
 
 test("webhook duplicate receipts are acknowledged, database failures and unconfirmed persistence are not", async () => {
-  for (const outcome of [true, false]) {
-    const handler = createBillingWebhookHandler({ secret: webhookSecret, rpc: async () => outcome, crypto: webcrypto });
+  for (const status of ["accepted", "duplicate", "foreign"]) {
+    const handler = createBillingWebhookHandler({ secret: webhookSecret, rpc: async () => ({ status }), crypto: webcrypto });
     assert.equal((await handler(webhookRequest())).status, 200);
   }
-  for (const rpc of [async () => { throw new Error("private db secret"); }, async () => null]) {
+  for (const rpc of [async () => { throw new Error("private db secret"); }, async () => null, async () => true, async () => false]) {
     const handler = createBillingWebhookHandler({ secret: webhookSecret, rpc, crypto: webcrypto });
     const response = await handler(webhookRequest()); assert.equal(response.status, 503); assert.equal((await response.text()).includes("private"), false);
   }
@@ -302,7 +302,7 @@ test("webhook duplicate receipts are acknowledged, database failures and unconfi
 
 test("webhook method, signature, event IDs and malformed payloads never reach database intake", async () => {
   const calls = [];
-  const handler = createBillingWebhookHandler({ secret: webhookSecret, rpc: async (...args) => { calls.push(args); return true; }, crypto: webcrypto });
+  const handler = createBillingWebhookHandler({ secret: webhookSecret, rpc: async (...args) => { calls.push(args); return { status: "accepted" }; }, crypto: webcrypto });
   const cases = [[webhookRequest(null, { method: "GET" }), 405], [webhookRequest(null, { signature: "00".repeat(32) }), 401], [webhookRequest(null, { eventId: null }), 400], [webhookRequest(null, { eventId: "a\"b" }), 400], [webhookRequest(null, { raw: "broken JSON" }), 400], [webhookRequest({}), 400], [webhookRequest(event({ payload: {} })), 400], [webhookRequest(event({ event: "arbitrary.operation" })), 400]];
   for (const [request, status] of cases) assert.equal((await handler(request)).status, status);
   assert.equal(calls.length, 0);
@@ -310,7 +310,7 @@ test("webhook method, signature, event IDs and malformed payloads never reach da
 
 test("webhook ignores advertised length when streaming and enforces the real body bound", async () => {
   let queried = false;
-  const handler = createBillingWebhookHandler({ secret: webhookSecret, rpc: async () => { queried = true; return true; }, maxBytes: 100, crypto: webcrypto });
+  const handler = createBillingWebhookHandler({ secret: webhookSecret, rpc: async () => { queried = true; return { status: "accepted" }; }, maxBytes: 100, crypto: webcrypto });
   assert.equal((await handler(webhookRequest(null, { raw: "x".repeat(101), headers: { "content-length": "1" } }))).status, 413);
   assert.equal((await handler(webhookRequest(null, { raw: "{}", headers: { "content-length": "101" } }))).status, 413);
   assert.equal(queried, false);
@@ -318,9 +318,175 @@ test("webhook ignores advertised length when streaming and enforces the real bod
 
 test("refund-only payloads route by payment ID; mismatched entity links are rejected", async () => {
   const calls = [];
-  const handler = createBillingWebhookHandler({ secret: webhookSecret, rpc: async (name, args) => { calls.push(args); return true; }, crypto: webcrypto });
+  const handler = createBillingWebhookHandler({ secret: webhookSecret, rpc: async (name, args) => { calls.push(args); return { status: "accepted" }; }, crypto: webcrypto });
   const refund = event({ event: "refund.processed", payload: { refund: { entity: { entity: "refund", id: "rfnd_12345678901234", payment_id: "pay_12345678901234" } } } });
   assert.equal((await handler(webhookRequest(refund))).status, 200); assert.equal(calls[0].p_invoice_id, null); assert.equal(calls[0].p_payment_id, "pay_12345678901234");
   const mismatch = event({ payload: { invoice: { entity: invoice() }, payment: { entity: payment({ invoice_id: "inv_99999999999999" }) } } });
   assert.equal((await handler(webhookRequest(mismatch))).status, 400); assert.equal(calls.length, 1);
+});
+
+const paymentEvent = overrides => event({ event: "payment.captured", payload: { payment: { entity: payment({ notes: [], ...overrides }) } } });
+const refundEvent = () => event({ event: "refund.processed", payload: { refund: { entity: { entity: "refund", id: "rfnd_12345678901234", payment_id: payment().id, notes: [] } } } });
+
+function ownershipFixture(replies, statuses) {
+  const provider = clientFixture(replies);
+  const intake = [];
+  const handler = createBillingWebhookHandler({ secret: webhookSecret, crypto: webcrypto,
+    resolveOwnership: (ids, options) => provider.client.resolveWebhookOwnership(ids, options),
+    rpc: async (name, args) => {
+      intake.push({ name, args });
+      assert.equal(name, "ingest_owned_billing_webhook");
+      const status = statuses.shift();
+      assert.ok(status, "Unexpected intake call");
+      return { status };
+    },
+  });
+  return { handler, intake, providerCalls: provider.calls };
+}
+
+test("signed local invoice intent and notes route early events without any provider lookup", async () => {
+  for (const entity of [invoice(), invoice({ notes: [] }), invoice({ receipt: null })]) {
+    const fixture = ownershipFixture([], ["accepted"]);
+    assert.equal((await fixture.handler(webhookRequest(event({ payload: { invoice: { entity } } })))).status, 200);
+    assert.equal(fixture.intake[0].args.p_billing_id, BILL_ID);
+    assert.equal(fixture.providerCalls.length, 0);
+  }
+  const mappedPayment = ownershipFixture([], ["accepted"]);
+  assert.equal((await mappedPayment.handler(webhookRequest(paymentEvent()))).status, 200);
+  assert.equal(mappedPayment.intake[0].args.p_billing_id, null);
+  assert.equal(mappedPayment.providerCalls.length, 0, "Known provider IDs need no extra read");
+});
+
+test("signed ownership conflicts are rejected before intake or provider requests", async () => {
+  for (const entity of [
+    invoice({ notes: { billing_id: "11111111-1111-1111-1111-111111111111" } }),
+    invoice({ receipt: "LAIbroken", notes: [] }),
+    invoice({ notes: { billing_id: "invalid" } }),
+  ]) {
+    const fixture = ownershipFixture([], []);
+    assert.equal((await fixture.handler(webhookRequest(event({ payload: { invoice: { entity } } })))).status, 400);
+    assert.equal(fixture.intake.length, 0);
+    assert.equal(fixture.providerCalls.length, 0);
+  }
+});
+
+test("unmapped payment uses one exact invoice GET and retains only its verified local identity", async () => {
+  const fixture = ownershipFixture([invoice({ customer_details: { email: "private-foreign-field@example.test" } })], ["unresolved", "accepted"]);
+  assert.equal((await fixture.handler(webhookRequest(paymentEvent()))).status, 200);
+  assert.deepEqual(fixture.providerCalls.map(({ url, options }) => [options.method, url]), [["GET", `https://api.razorpay.com/v1/invoices/${invoice().id}`]]);
+  assert.equal(fixture.intake.length, 2);
+  assert.equal(fixture.intake[0].args.p_billing_id, null);
+  assert.equal(fixture.intake[1].args.p_billing_id, BILL_ID);
+  assert.equal(fixture.intake[1].args.p_invoice_id, invoice().id);
+  assert.doesNotMatch(JSON.stringify(fixture.intake), /private-foreign-field|customer_details|order_id|amount|paid_paise/);
+});
+
+test("unmapped refund without invoice notes uses at most payment then invoice GET", async () => {
+  const fixture = ownershipFixture([payment(), invoice()], ["unresolved", "accepted"]);
+  assert.equal((await fixture.handler(webhookRequest(refundEvent()))).status, 200);
+  assert.deepEqual(fixture.providerCalls.map(({ url, options }) => [options.method, url]), [
+    ["GET", `https://api.razorpay.com/v1/payments/${payment().id}`],
+    ["GET", `https://api.razorpay.com/v1/invoices/${invoice().id}`],
+  ]);
+  assert.equal(fixture.intake[0].args.p_invoice_id, null);
+  assert.equal(fixture.intake[1].args.p_invoice_id, invoice().id);
+  assert.equal(fixture.intake[1].args.p_billing_id, BILL_ID);
+});
+
+test("foreign invoice UUIDs stop at the ownership gate without a persistence request or invoice scan", async () => {
+  const otherId = "11111111-1111-1111-1111-111111111111";
+  const foreignInvoice = invoice({ receipt: billingReceipt(otherId), notes: { billing_id: otherId } });
+  const signed = ownershipFixture([], ["foreign"]);
+  assert.equal((await signed.handler(webhookRequest(event({ payload: { invoice: { entity: foreignInvoice } } })))).status, 200);
+  assert.equal(signed.intake.length, 1);
+  assert.equal(signed.providerCalls.length, 0);
+
+  const fetched = ownershipFixture([foreignInvoice], ["unresolved", "foreign"]);
+  assert.equal((await fetched.handler(webhookRequest(paymentEvent()))).status, 200);
+  assert.equal(fetched.intake.length, 2);
+  assert.equal(fetched.intake[1].args.p_billing_id, otherId);
+  assert.equal(fetched.providerCalls.length, 1);
+  assert.ok(fetched.providerCalls.every(({ url, options }) => options.method === "GET" && !url.includes("?")));
+});
+
+test("explicit other-integration receipts are acknowledged without local persistence", async () => {
+  const direct = ownershipFixture([], ["unresolved"]);
+  assert.equal((await direct.handler(webhookRequest(event({ payload: { invoice: { entity: invoice({ receipt: "another-app", notes: [] }) } } })))).status, 200);
+  assert.equal(direct.intake.length, 1);
+  assert.equal(direct.providerCalls.length, 0);
+
+  const fetched = ownershipFixture([invoice({ receipt: "another-app", notes: [] })], ["unresolved"]);
+  assert.equal((await fetched.handler(webhookRequest(paymentEvent()))).status, 200);
+  assert.equal(fetched.intake.length, 1, "No candidate UUID is sent to persist a foreign integration event");
+  assert.equal(fetched.providerCalls.length, 1);
+
+});
+
+test("an absent provider invoice association remains retryable instead of declaring an early payment foreign", async () => {
+  for (const invoice_id of [null, undefined, ""]) {
+    const unresolved = ownershipFixture([payment({ invoice_id })], ["unresolved"]);
+    const response = await unresolved.handler(webhookRequest(refundEvent()));
+    assert.equal(response.status, 503);
+    assert.deepEqual(await response.json(), { ok: false, error: "ownership_unresolved" });
+    assert.equal(unresolved.intake.length, 1, "Ambiguous ownership must not reach a persistence request");
+    assert.equal(unresolved.providerCalls.length, 1, "Do not guess an invoice ID or scan the merchant account");
+  }
+});
+
+test("provider failures and missing or conflicting ownership are retriable without accepting an early event", async () => {
+  for (const reply of [
+    json({ error: "private error" }, 404), json({}, 429), json({}, 500), new Error("private connection failure"),
+    invoice({ receipt: null, notes: [] }), invoice({ id: "inv_99999999999999" }),
+    invoice({ notes: { billing_id: "11111111-1111-1111-1111-111111111111" } }),
+  ]) {
+    const fixture = ownershipFixture([reply], ["unresolved"]);
+    const response = await fixture.handler(webhookRequest(paymentEvent()));
+    assert.equal(response.status, 503);
+    assert.deepEqual(await response.json(), { ok: false, error: "ownership_unresolved" });
+    assert.equal(fixture.intake.length, 1, "No second intake until ownership is verified");
+    assert.equal(fixture.providerCalls.length, 1);
+  }
+  const invoiceWithoutIdentity = ownershipFixture([], ["unresolved"]);
+  assert.equal((await invoiceWithoutIdentity.handler(webhookRequest(event({ payload: { invoice: { entity: invoice({ receipt: null, notes: [] }) } } })))).status, 503);
+  assert.equal(invoiceWithoutIdentity.providerCalls.length, 0, "Only unresolved payment/refund events use the extra lookup");
+});
+
+test("a retry after durable ownership intake is deduplicated before another provider lookup", async () => {
+  const fixture = ownershipFixture([invoice()], ["unresolved", "accepted", "duplicate"]);
+  assert.equal((await fixture.handler(webhookRequest(paymentEvent()))).status, 200);
+  assert.equal((await fixture.handler(webhookRequest(paymentEvent()))).status, 200);
+  assert.equal(fixture.providerCalls.length, 1);
+  assert.equal(fixture.intake.length, 3);
+  assert.equal(fixture.intake[0].args.p_payload_hash, fixture.intake[2].args.p_payload_hash);
+});
+
+test("webhook's shared deadline aborts unresolved provider reads and stalled intake", { timeout: 1500 }, async () => {
+  let providerSignal;
+  const client = createRazorpayClient({ keyId: "rzp_live_synthetic", keySecret: "synthetic-provider-secret",
+    fetch: async (_url, options) => new Promise((_resolve, reject) => {
+      providerSignal = options.signal;
+      options.signal.addEventListener("abort", () => reject(new Error("private timeout")), { once: true });
+    }),
+  });
+  const handler = createBillingWebhookHandler({ secret: webhookSecret, crypto: webcrypto, maxDurationMs: 25,
+    rpc: async () => ({ status: "unresolved" }), resolveOwnership: (ids, options) => client.resolveWebhookOwnership(ids, options) });
+  assert.equal((await handler(webhookRequest(paymentEvent()))).status, 503);
+  assert.equal(providerSignal.aborted, true);
+
+  const stalled = createBillingWebhookHandler({ secret: webhookSecret, crypto: webcrypto, maxDurationMs: 25,
+    rpc: async () => new Promise(() => {}) });
+  assert.equal((await stalled(webhookRequest())).status, 503);
+});
+
+test("a stalled streamed-body cancellation cannot outlive the shared webhook deadline", { timeout: 1500 }, async () => {
+  let cancellations = 0;
+  const body = new ReadableStream({
+    start(controller) { controller.enqueue(new Uint8Array(11)); },
+    cancel() { cancellations += 1; return new Promise(() => {}); },
+  });
+  const request = new Request("https://synthetic.supabase.co/functions/v1/razorpay-webhook", { method: "POST", body, duplex: "half" });
+  const handler = createBillingWebhookHandler({ secret: webhookSecret, maxBytes: 10, maxDurationMs: 25,
+    rpc: async () => { assert.fail("Oversized input must never reach intake"); } });
+  assert.equal((await handler(request)).status, 503);
+  assert.equal(cancellations, 1);
 });

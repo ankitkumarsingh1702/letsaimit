@@ -27,7 +27,7 @@ test('fresh production acceptance checks the complete migration set without enab
     for(const [,name] of source.matchAll(/create table\s+([\w.]+)/gi))createdTables.push(name);
     await db.exec(source);
   }
-  assert.equal(files.length,18);
+  assert.equal(files.length,19);
   assert.equal(createdTables.length,25);
   for(const table of createdTables)assert.ok(acceptance.includes("'"+table+"'"),'Acceptance covers '+table);
   const bootstrap=await readFile(new URL('../supabase/bootstrap-owner.sql',import.meta.url),'utf8');
@@ -84,6 +84,9 @@ test('fresh production acceptance checks the complete migration set without enab
     await db.exec('grant execute on function public.claim_parent_attendance_email() to authenticated');
     await expectFailure('FRESH_BACKEND_SERVICE_RPC_GRANT');
     await db.exec('revoke execute on function public.claim_parent_attendance_email() from authenticated');
+    await db.exec('grant execute on function public.ingest_owned_billing_webhook(text,text,text,text,text,uuid) to anon');
+    await expectFailure('FRESH_BACKEND_SERVICE_RPC_GRANT');
+    await db.exec('revoke execute on function public.ingest_owned_billing_webhook(text,text,text,text,text,uuid) from anon');
   });
   await t.test('production workers cannot route into the UAT backend',async()=>{
     await db.query('update vault.decrypted_secrets set decrypted_secret=$1 where name=$2',[
