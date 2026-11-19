@@ -23,7 +23,7 @@
 }
 .students-workspace .adm-page-heading h1 { font-size: 28px; line-height: 1.25; font-weight: 700; }
 .students-workspace h2 { font-size: 18px; line-height: 1.4; font-weight: 650; }
-.students-heading { align-items: baseline; gap: 8px 20px; margin-block-end: 24px; }
+.students-workspace .students-heading { align-items: baseline; gap: 8px 20px; margin-block-end: 24px; }
 .students-roster-progress { margin: 0; color: var(--students-muted); font-size: 13px; }
 .students-toolbar {
   display: grid;
@@ -260,7 +260,7 @@
   .students-toolbar { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
   .students-toolbar .students-search { grid-column: 1 / -1; }
   .students-toolbar .adm-field :is(input, select) { font-size: 16px; }
-  .students-heading { align-items: start; flex-direction: column; gap: 6px; margin-block-end: 24px; }
+  .students-workspace .students-heading { align-items: start; flex-direction: column; gap: 6px; margin-block-end: 24px; }
   .students-workspace .adm-page-heading h1 { font-size: 26px; }
   .students-profile-nav { margin-block: 20px 24px; }
   .students-workspace .coaching-editor :is(input, textarea), .students-feedback-head input { font-size: 16px; }
