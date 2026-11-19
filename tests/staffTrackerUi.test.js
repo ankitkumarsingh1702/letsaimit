@@ -110,7 +110,7 @@ test("Students opens separately in Admin and groups attendance by society", asyn
 test("manual feedback starts from the saved draft, escapes content and cannot publish an empty update", () => withStaffUi(null, async (_, vite) => {
   const { FeedbackEditor, AssignmentEditor } = await vite.ssrLoadModule("/src/features/tracker/CoachingEditors.jsx");
   const blank = renderToStaticMarkup(React.createElement(FeedbackEditor, { child, weekStart: "2026-11-09", saved: undefined, auth, onSaved() {} }));
-  assert.match(blank, /<textarea required="" maxLength="1500"/);
+  assert.match(blank, /<textarea aria-label="Weekly update" required="" maxLength="1500"/);
   assert.match(blank, /disabled=""[^>]*>Publish feedback/);
   const saved = renderToStaticMarkup(React.createElement(FeedbackEditor, { child, weekStart: "2026-11-09", saved: { summary: "<script>bad()</script>", nextStep: "Practise passing.", revision: 3 }, auth, onSaved() {} }));
   assert.match(saved, /&lt;script&gt;bad\(\)&lt;\/script&gt;/);

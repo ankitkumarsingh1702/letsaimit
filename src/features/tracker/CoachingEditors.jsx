@@ -34,8 +34,8 @@ export function FeedbackEditor({ child, weekStart, saved, auth, onSaved, onDraft
     finally { lock.current = false; if (mounted.current) { setBusy(false); onDraftState?.({ dirty: saved ? false : dirty, busy: false }); } }
   }
   return <form className="coaching-editor" onSubmit={submit}>
-    <label>Weekly update<textarea required maxLength={1500} rows={3} value={draft.summary} onChange={event => changeDraft({ summary: event.target.value })} disabled={busy} /></label>
-    <label>Next step<textarea maxLength={500} rows={2} value={draft.nextStep} onChange={event => changeDraft({ nextStep: event.target.value })} disabled={busy} /></label>
+    <label>Weekly update<textarea aria-label="Weekly update" required maxLength={1500} rows={3} value={draft.summary} onChange={event => changeDraft({ summary: event.target.value })} disabled={busy} /></label>
+    <label>Next step<textarea aria-label="Next step" maxLength={500} rows={2} value={draft.nextStep} onChange={event => changeDraft({ nextStep: event.target.value })} disabled={busy} /></label>
     {dirty && <p className="coaching-draft">Unsaved changes</p>}
     {error && <p className="coaching-error" role="alert">{error}</p>}
     <div className="coaching-actions"><button className="adm-button adm-button-dark" disabled={busy || !draft.summary.trim()}>{busy ? 'Saving…' : 'Publish feedback'}</button><button type="button" className="adm-button adm-button-outline" disabled={busy} onClick={loadLatest}>Load latest</button></div>

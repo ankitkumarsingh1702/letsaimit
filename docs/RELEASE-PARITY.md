@@ -568,3 +568,13 @@ HTTPS homepage is still 200 / 39,957 bytes with SHA-256
 | UAT website | Source `f6f6eb2333f920bcefdb34900abeb78d3f32aaf7` deployed as Vercel `dpl_8vCPXEnvFnbW3N4ZBMKSRLY6JLeY`, READY on `uat.letsaimit.com`. The signed-in Admin saw both societies, Create invoice, Change monthly fee, Adjust outstanding on an overdue invoice and automatic attendance-email copy. Live verification was read-only. |
 | Local verification | All 439 tests passed. Mocked browser checks at 320, 390 and 1280 px exercised a ₹5,000 invoice, a lost-response retry with a single saved invoice, a ₹2,000 next-month fee and an unpaid adjustment with audit history. Provider and parent mail checks use synthetic records and mocks. |
 | Shared source | Source plan digest `ba8defc9e55b0376f038337d73925353f392c8d29c706c6480e795848e308cdc` includes 18 migrations and five functions. Production backend setup and promotion are pending. |
+
+## 19 November 2026 — Students layout and phone usability
+
+| Boundary | Evidence |
+| --- | --- |
+| Daily roster | Students follows Dashboard in Admin navigation. Search leads the toolbar, date and society share a phone row, and the heading shows the roster and saved attendance counts. Mobile student rows place the full name above equal Present and Absent controls. |
+| Profile | A shared profile width, typography and spacing align Overview, Training, feedback, Coach and Payments. Profile navigation stays on one scrollable strip. Training presets, timers, repetition controls, invoice actions and form fields use consistent touch targets. |
+| Mobile shell | All five Admin destinations fit at 320 px. The mobile shell uses normal document flow so short rosters keep the topbar beside navigation without empty grid space. |
+| Browser verification | Synthetic records in the actual Admin components passed at 1280, 768, 430, 390 and 320 px. Verified search, society filters, saved attendance across profile and roster, custom sprint, repetitions, balance, profile navigation and payment form cancellation. Console, framework overlays and page overflow checks passed. Local build, asset inventory and staff UI tests passed. |
+| Shared source | The backend source digest remains `ba8defc9e55b0376f038337d73925353f392c8d29c706c6480e795848e308cdc`, with the same 18 migrations and five functions. Production promotion and its backend setup remain pending. |

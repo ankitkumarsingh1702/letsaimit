@@ -253,22 +253,29 @@ export function StudentsPanel({ auth, scope, date, onDateChange, tracker, headin
       pending={pending[child.registrationId]} message={errors[child.registrationId]}
       disabled={!canMark(child)} onMark={(_, status) => markStudents([child], status)} showUnmarked={showUnmarked} />;
   }
+  const markedCount = children.filter(child => {
+    const status = recordFor(child.registrationId)?.status;
+    return status && status !== 'unmarked';
+  }).length;
 
   return <section className="students-workspace" aria-busy={tracker.loading}>
     {selected ? <StudentProfile key={selected.registrationId} auth={auth} scope={scope} date={date} student={selected}
       actions={actions(selected, true)} onClose={closeStudent} onOpenBilling={onOpenBilling}
       refreshRoster={tracker.refresh} navigationRef={profileNavigation} /> : <>
-      <div className="adm-page-heading"><h1 ref={headingRef} tabIndex={-1}>Students</h1></div>
+      <div className="adm-page-heading students-heading">
+        <h1 ref={headingRef} tabIndex={-1}>Students</h1>
+        {tracker.snapshot && <p className="students-roster-progress">{children.length} {children.length === 1 ? 'student' : 'students'} · {markedCount} marked</p>}
+      </div>
       {tracker.error && <div className="students-error" role="alert">{tracker.error} <button type="button" className="adm-text-button" onClick={tracker.refresh}>Try again</button></div>}
       {tracker.loading && !tracker.snapshot && <p className="students-empty" role="status">Loading students…</p>}
       {tracker.snapshot && <>
         <div className="students-toolbar">
+          <label className="adm-field students-search">Find a student<input type="search" value={query} placeholder="Name or society" onChange={event => setQuery(event.target.value)} /></label>
           <label className="adm-field">Session date · IST<input type="date" min={firstDate} max={today} value={date} disabled={Object.keys(pending).length > 0} onChange={event => chooseDate(event.target.value)} /></label>
-          <label className="adm-field">Society<select value={society} onChange={event => setSociety(event.target.value)}>
+          <label className="adm-field">Society<select aria-label="Society" value={society} onChange={event => setSociety(event.target.value)}>
             <option value="">All societies</option>
             {societies.map(group => <option key={group.id} value={group.id}>{group.society}</option>)}
           </select></label>
-          <label className="adm-field students-search">Find a student<input type="search" value={query} placeholder="Name or society" onChange={event => setQuery(event.target.value)} /></label>
         </div>
         <details className="students-session-tools" open={toolsOpen} onToggle={event => setToolsOpen(event.currentTarget.open)}>
           <summary>Attendance tools</summary>

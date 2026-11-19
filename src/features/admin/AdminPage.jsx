@@ -16,8 +16,8 @@ import StudentsWorkspace from "../tracker/StudentsWorkspace.jsx";
 
 const VIEWS = [
   { id: "overview", label: "Dashboard", icon: "overview" },
-  { id: "register", label: "Register", icon: "register" },
   { id: "students", label: "Students", icon: "team" },
+  { id: "register", label: "Register", icon: "register" },
   { id: "billing", label: "Billing", icon: "billing" },
   { id: "team", label: "Team", icon: "team" },
 ];

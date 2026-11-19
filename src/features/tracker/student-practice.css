@@ -1,47 +1,44 @@
 .practice-sections {
   display: grid;
-  gap: 14px;
+  gap: 20px;
+  min-inline-size: 0;
 }
 
 .practice-sections .practice-title {
-  font: 700 20px/1.3 var(--font-body, "Plus Jakarta Sans", Arial, sans-serif);
-  letter-spacing: -.025em;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.35;
 }
 
 .practice-card,
 .practice-extras {
-  min-width: 0;
+  min-inline-size: 0;
   border: 1px solid var(--students-line, #dfe8e1);
-  border-radius: 12px;
+  border-radius: var(--students-radius, 12px);
   background: #fff;
 }
 
 .practice-card {
   display: grid;
-  gap: 16px;
-  padding: clamp(16px, 3vw, 24px);
+  gap: 20px;
+  padding: 24px;
 }
 
-.practice-card h3 {
-  font: 700 18px/1.35 var(--font-body, "Plus Jakarta Sans", Arial, sans-serif);
-  letter-spacing: -.02em;
+.students-workspace .practice-card h3 {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.4;
 }
 
-.practice-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 15rem);
-  align-items: end;
-  gap: 16px 24px;
-}
-
+.practice-layout,
 .practice-options {
   display: grid;
-  gap: 12px;
-  min-width: 0;
+  gap: 20px;
+  min-inline-size: 0;
 }
 
 .practice-distance {
-  min-width: 0;
+  min-inline-size: 0;
   margin: 0;
   padding: 0;
   border: 0;
@@ -49,43 +46,52 @@
 
 .practice-distance legend,
 .practice-field > span {
-  margin-bottom: 6px;
   padding: 0;
   color: var(--students-muted, #53655b);
   font-size: 13px;
   font-weight: 600;
+  line-height: 1.5;
 }
 
-.practice-presets,
-.practice-actions,
-.practice-rep-controls {
+.practice-distance legend { margin-block-end: 8px; }
+
+.practice-presets {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  max-inline-size: 25rem;
+}
+
+.practice-presets .students-button {
+  min-inline-size: 0;
+  padding-inline: 6px;
+}
+
+.practice-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.practice-presets .students-button {
-  min-width: 54px;
-}
-
 .practice-field {
   display: grid;
-  width: min(100%, 12rem);
-  min-width: 0;
+  gap: 8px;
+  inline-size: min(100%, 15rem);
+  min-inline-size: 0;
 }
 
 .practice-field input {
   appearance: textfield;
   box-sizing: border-box;
-  width: 100%;
-  min-width: 0;
-  min-height: 44px;
-  border: 1px solid #d5e0d7;
-  border-radius: 6px;
+  inline-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 48px;
+  border: 1px solid var(--students-line, #dfe8e1);
+  border-radius: var(--students-control-radius, 8px);
   background: #fff;
   color: var(--students-ink, #253b30);
-  padding: 8px 10px;
-  font: 600 16px/1.3 var(--font-body, "Plus Jakarta Sans", Arial, sans-serif);
+  padding: 10px 12px;
+  font: 600 16px/1.4 var(--font-body, "Plus Jakarta Sans", Arial, sans-serif);
   font-variant-numeric: tabular-nums;
 }
 
@@ -95,87 +101,86 @@
   margin: 0;
 }
 
-.practice-field input[aria-invalid="true"] {
-  border-color: #a66055;
-}
+.practice-field input[aria-invalid="true"] { border-color: #a66055; }
 
 .practice-timing {
-  display: grid;
-  gap: 10px;
-  align-self: stretch;
-  justify-items: start;
-  align-content: end;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px 24px;
+  padding: 20px;
+  border-radius: var(--students-control-radius, 8px);
+  background: var(--students-wash, #f6f9f6);
 }
 
 .practice-stopwatch {
   color: var(--students-ink, #253b30);
-  font: 650 clamp(30px, 5vw, 38px)/1.1 var(--font-body, "Plus Jakarta Sans", Arial, sans-serif);
+  font: 650 clamp(32px, 5vw, 40px)/1.15 var(--font-body, "Plus Jakarta Sans", Arial, sans-serif);
   font-variant-numeric: tabular-nums;
-  letter-spacing: -.03em;
+  letter-spacing: -.035em;
   white-space: nowrap;
 }
 
-.practice-actions .students-primary {
-  min-width: 92px;
-}
+.practice-actions .students-button { min-inline-size: 100px; }
+.practice-set-save { padding-block-start: 4px; }
 
 .practice-rep-controls {
+  display: flex;
+  flex-wrap: wrap;
   align-items: end;
-  min-width: 0;
+  gap: 12px;
+  min-inline-size: 0;
 }
 
 .practice-counter {
   display: grid;
-  grid-template-columns: 44px minmax(40px, 76px) 44px;
+  grid-template-columns: 48px minmax(60px, 100px) 48px;
   align-items: end;
-  gap: 5px;
+  gap: 8px;
 }
 
-.practice-counter .students-button {
-  font-size: 22px;
-  line-height: 1;
+.practice-counter .students-button,
+.practice-rep-controls > .students-button {
+  min-block-size: 48px;
+  min-inline-size: 48px;
 }
 
-.practice-counter .practice-field {
-  width: 100%;
-  text-align: center;
-}
-
-.practice-counter input {
-  padding-inline: 3px;
-  text-align: center;
-}
-
-.practice-extras {
-  padding: 0 16px;
-}
+.practice-counter .students-button { font-size: 24px; font-weight: 500; line-height: 1; }
+.practice-counter .practice-field { inline-size: 100%; text-align: center; }
+.practice-counter input { padding-inline: 4px; text-align: center; font-size: 22px; line-height: 1.1; }
+.practice-extras { padding-inline: 24px; }
 
 .practice-extras > summary {
-  padding-block: 12px;
+  display: list-item;
+  min-block-size: 48px;
+  padding-block: 16px;
   cursor: pointer;
   color: var(--students-ink, #253b30);
-  font-weight: 600;
+  font-weight: 650;
 }
 
 .practice-extra-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  padding-bottom: 14px;
+  gap: 12px;
+  padding-block: 4px 20px;
 }
 
-.practice-extra-actions > div {
-  display: grid;
-  gap: 6px;
-  align-content: start;
-}
+.practice-extra-actions > div { display: grid; gap: 8px; align-content: start; }
+.practice-extra-actions .students-button { min-inline-size: 140px; }
 
-@media (max-width: 680px) {
-  .practice-layout {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .practice-card {
-    gap: 12px;
-  }
+@media (max-width: 560px) {
+  .practice-card { padding: 16px; }
+  .practice-sections { gap: 16px; }
+  .practice-card, .practice-layout, .practice-options { gap: 16px; }
+  .practice-timing { padding: 16px; gap: 16px; }
+  .practice-timing .practice-actions { inline-size: 100%; }
+  .practice-actions .students-button { flex: 1 1 0; min-inline-size: 0; }
+  .practice-rep-controls { gap: 8px; }
+  .practice-counter { grid-template-columns: 44px minmax(52px, 80px) 44px; gap: 6px; }
+  .practice-counter .students-button { min-inline-size: 44px; }
+  .practice-extras { padding-inline: 16px; }
+  .practice-extra-actions { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .practice-extra-actions .students-button { inline-size: 100%; min-inline-size: 0; }
 }
