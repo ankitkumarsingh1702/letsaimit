@@ -100,3 +100,24 @@ The project AGENTS.md and local release skill route ordinary merges to UAT. Prod
 3. Post-deploy verification checks real status, canonical, robots and response headers before any provider dispatch, satisfying the deployment trust boundary.
 4. An explicit production submission command uses provider credentials, host verification and content-type eligibility, satisfying requested deliverable 6 and provider permissions.
 5. Merge, push and verify the authorized UAT target, with production prerequisites and live provider receipts recorded separately.
+
+## Implementation and local verification
+
+Runnable source `91f5c9a` implements the six deliverables through the existing React/Vite prerenderer and the standalone post-deploy CLI. The first reviewed content baseline was generated after this source commit, then rebuilt for each target. Its ten hashes are independent of target origin; their source modification timestamp is `2026-11-19T17:07:45+00:00`.
+
+| Gate | Actual implementation evidence |
+| --- | --- |
+| Public coverage and orphans | Production-profile build covers all ten public routes, zero orphans and at least two contextual incoming links per non-home page. Future explicit nested routes are covered by regression fixtures |
+| Sitemap | Ten canonical production entries, XML namespace/UTF-8, valid timezone-bearing lastmod, no priority/changefreq. UAT and previews have zero indexable entries |
+| Metadata and graph | Initial HTML contains route title, description, canonical, OpenGraph, robots and one connected schema graph. Client navigation updates schema and Markdown discovery links |
+| LLM content | Both LLM files and all ten Markdown alternatives contain rendered public main content. Forms, dialogs, hidden decoration, navigation and private account routes are excluded |
+| Crawl controls | Named search/citation agents allowed on public pages; private pages excluded. Preview/UAT noindex, canonical alias redirects, error document and safe response headers configured |
+| Provider submissions | Thirteen HTTP-mocked Python tests cover production-only gates, changed URLs, partial failures, persistent receipts, pending key validation, rate limits and Google eligibility. No real notification was sent |
+| Automated checks | All 450 Node tests, 13 Python tests, production-profile build, asset verification and source parity plan pass. All 59 approved source assets remain unchanged |
+| Rendered checks | Chrome at 1280 px and 390 px: public content and photographs load, contextual navigation reaches Programme and Schools, one H1, correct canonical and no horizontal overflow. Related links retain 44 px touch targets; no app console errors observed |
+| Mobile lab performance | Lighthouse 13.6.0 on the local production-profile homepage: performance 98, accessibility 100, best practices 100, SEO 100; LCP 2.4 s, TBT 0 ms, CLS 0. The poster is 50% smaller at 960 px, and preload matches its actual resource URL |
+| Field performance | Search Console has no field CWV data. Lab TBT is not a measurement of real-user INP |
+
+The live production dry run exits 2 because the new discovery manifest, robots, sitemap and key are not deployed there, `/blogs/` still returns 404 and Google API authorization is absent. Provider dispatch is therefore pending. The requested Chrome account has verified Search Console access and its homepage inspection says “URL is on Google”; no access grants or credentials were changed.
+
+Production promotion remains pending. The shared backend source digest is unchanged at `ba8defc9e55b0376f038337d73925353f392c8d29c706c6480e795848e308cdc` (18 migrations and five functions), and the declared production Supabase target remains unconfigured. A UAT build does not establish production readiness or an indexing receipt.

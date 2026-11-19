@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "pages": [
+    {
+      "path": "/",
+      "contentHash": "7624e02b49f829b4fc66b04b79451a79adbd2bd001ebad5b292ec3758debee33",
+      "lastmod": "2026-11-19T17:07:45+00:00"
+    },
+    {
+      "path": "/blogs/",
+      "contentHash": "fe9f1f4fba44fc3d8f9594f8cb238d57119a9bf0b1a592152567aa21ecac72c7",
+      "lastmod": "2026-11-19T17:07:45+00:00"
+    },
+    {
+      "path": "/coach/",
+      "contentHash": "01a3a58286f5fffa54196a9e376a6ebb80c61d855863999fa81fb81712f0ef8e",
+      "lastmod": "2026-11-19T17:07:45+00:00"
+    },
+    {
+      "path": "/events/",
+      "contentHash": "0fe5d2157d48de5c5f18787f1325086e0c82c4abe73ab5a76946a31c486f6da9",
+      "lastmod": "2026-11-19T17:07:45+00:00"
+    },
+    {
+      "path": "/privacy/",
+      "contentHash": "93baf1254d487a7a6afb12a519cb87a295d2a6b37c058f37036eea1b1c735572",
+      "lastmod": "2026-11-19T17:07:45+00:00"
+    },
+    {
+      "path": "/programme/",
+      "contentHash": "48b8f29bd16ed49078e576be3bf6e430bdccf7c5f49c185e2ccf6f9c64bb58aa",
+      "lastmod": "2026-11-19T17:07:45+00:00"
+    },
+    {
+      "path": "/refunds/",
+      "contentHash": "62f1faa81053ee8c2c0774cca88889fb931690e7dfa7a93119070fea5f634f15",
+      "lastmod": "2026-11-19T17:07:45+00:00"
+    },
+    {
+      "path": "/schools/",
+      "contentHash": "520a98fdbe42f09e3b61de0eed7b0fd87ae9d194910fd213e77600ef06afe8c0",
+      "lastmod": "2026-11-19T17:07:45+00:00"
+    },
+    {
+      "path": "/societies/",
+      "contentHash": "58110cc5536c670001374a223424150e9e8d8d9c0531a6615082d1d1491d5d85",
+      "lastmod": "2026-11-19T17:07:45+00:00"
+    },
+    {
+      "path": "/terms/",
+      "contentHash": "ef06c6bbf4e8cd28b92f60397a17ae724f2fda2082eacb52398c11887df9afb5",
+      "lastmod": "2026-11-19T17:07:45+00:00"
+    }
+  ]
+}
