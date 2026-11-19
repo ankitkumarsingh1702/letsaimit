@@ -241,11 +241,12 @@
     justify-content: center;
     gap: 4px;
     min-width: 0;
-    min-height: 56px;
+    min-height: 64px;
     padding: 6px 2px;
     font-size: 10px;
     line-height: 1.4;
   }
+  .adm-app:not(.coaching-app) .adm-sidebar .adm-nav .adm-icon { margin-block-start: 8px; }
   .adm-app:not(.coaching-app) .adm-sidebar .adm-nav-count {
     position: absolute;
     inset-block-start: 3px;
