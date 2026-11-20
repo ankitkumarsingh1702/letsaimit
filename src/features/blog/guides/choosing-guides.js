@@ -100,7 +100,7 @@ export const choosingGuides = [
     image: {
       file: 'editorial-basketball-start.png',
       illustration: true,
-      alt: 'Illustration of a basketball, court markings and practice equipment',
+      alt: 'Illustrated first-session steps: meet the coach, try an activity and talk afterwards',
       caption: 'An editorial illustration for this guide, rather than a photograph of a LetsAimIt venue.',
     },
     intro: 'When comparing basketball coaching in Bengaluru, start with the group your child would join. A name, a photograph of a court or a list of achievements does not explain how a new player will learn. Ask who teaches the session, what the child will try and how the coach introduces unfamiliar movements. These checks help you assess a programme described as an academy as well as a community coaching group.',
@@ -185,7 +185,7 @@ export const choosingGuides = [
     image: {
       file: 'editorial-sport-choice.png',
       illustration: true,
-      alt: 'Illustration of a football and a basketball beside simple playing-area markings',
+      alt: 'Football and basketball with interest, group fit and a trial session as comparison points',
       caption: 'An editorial illustration of the two sports discussed in this guide.',
     },
     intro: 'If your child is curious about football and basketball, you do not need to predict which sport will suit them for years. Begin with what they want to try and the groups actually available to your family. A confirmed first visit can make the choice more concrete: your child meets the coach, tries an activity and has something real to talk about afterwards. This guide helps you compare those experiences without assigning a child a sport from a stereotype.',

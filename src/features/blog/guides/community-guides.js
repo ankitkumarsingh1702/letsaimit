@@ -77,7 +77,7 @@ export const communityGuides = [
     summary: 'What the saved records tell you, what a stopwatch cannot tell you, and what to ask the coach.',
     category: 'For parents', publishedAt: '2026-11-20', author: 'LetsAimIt team',
     queryIds: ['L177', 'L180'],
-    image: { file: 'editorial-practice-progress.png', illustration: true, alt: 'Illustration connecting attendance, individual practice attempts and shared coaching feedback', caption: 'An illustrated reading guide. No child’s records or performance benchmarks are shown.' },
+    image: { file: 'editorial-practice-progress.png', illustration: true, alt: 'Illustration showing attendance, separate practice attempts and a coaching conversation', caption: 'An illustrated reading guide. No child’s records or performance benchmarks are shown.' },
     intro: 'A tracker helps when it gives you a better question to ask, rather than another score to chase. LetsAimIt’s Parent Tracker brings together saved attendance, practice attempts and feedback shared by the coach for your own child. Read the date, exercise and context before comparing results. This guide explains the available records and the limits of interpreting them, including why one sprint time should not become a verdict about a child’s ability.',
     sections: [
       {

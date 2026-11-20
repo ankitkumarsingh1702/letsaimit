@@ -15,7 +15,7 @@ export const learningGuides = [
     image: {
       file: 'editorial-basketball-start.png',
       illustration: true,
-      alt: 'An illustrated basketball first-session checklist covering arrival, equipment and joining the group',
+      alt: 'Illustrated first-session steps: meet the coach, try an activity and talk afterwards',
       caption: 'An original LetsAimIt illustration for planning a first visit; it does not depict a particular coaching session.',
     },
     intro: 'For a child joining their first team activity, basketball can bring several new experiences at once: a ball that keeps moving, unfamiliar teammates and instructions called across a court. You can help by settling the practical details before the visit and leaving the teaching with the coach. The first session gives your family something concrete to discuss afterwards: how the group worked, what your child tried and what they would like to understand next.',
