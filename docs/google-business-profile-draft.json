@@ -1,10 +1,10 @@
 {
   "prepared_on": "2026-11-20",
-  "status": "draft_not_submitted",
-  "provider_profile_id": null,
+  "status": "created_verification_video_pending",
+  "provider_profile_id": "13563727347976792389",
   "provider_maps_url": null,
-  "provider_verification_status": "not_started",
-  "existing_profile_check": "owner_reports_none_signed_in_check_pending",
+  "provider_verification_status": "business_video_required_owner_deferred_site_visit",
+  "existing_profile_check": "Owner reported none; signed-in owner dashboard had no LetsAimIt entry before this creation. No independent public duplicate search receipt claimed.",
   "public_fields": {
     "name": "LetsAimIt",
     "website": "https://letsaimit.com/",
@@ -12,12 +12,53 @@
     "country": "IN",
     "description": "LetsAimIt offers football, basketball and fitness activities for children aged 5–14 at Nambiar Bellezea and Nambiar Ellegenza in Bengaluru. Founded by youth football coach Dhiraj Mishra, the programme brings together warm-ups, skill practice and playing as a group. Sessions run twice a week and last 45–60 minutes. Parents can contact the team to discuss their child's age, experience and preferred sport, and confirm the group, timing, meeting point and community entry arrangements before attending. Available for enquiries every day, 9 am–9 pm IST.",
     "category_id": null,
-    "location_model": null,
+    "location_model": "service_area_no_customer_facing_storefront",
     "business_address": null,
-    "show_business_address": null,
-    "service_areas": null,
-    "opening_hours": null,
-    "opening_date": null
+    "show_business_address": false,
+    "service_areas": [
+      "Narayanaghatta, Bommasandra, Karnataka, India",
+      "Gopasandra, Bengaluru, Karnataka, India"
+    ],
+    "opening_hours": [
+      {
+        "day": "MONDAY",
+        "opens": "09:00",
+        "closes": "21:00"
+      },
+      {
+        "day": "TUESDAY",
+        "opens": "09:00",
+        "closes": "21:00"
+      },
+      {
+        "day": "WEDNESDAY",
+        "opens": "09:00",
+        "closes": "21:00"
+      },
+      {
+        "day": "THURSDAY",
+        "opens": "09:00",
+        "closes": "21:00"
+      },
+      {
+        "day": "FRIDAY",
+        "opens": "09:00",
+        "closes": "21:00"
+      },
+      {
+        "day": "SATURDAY",
+        "opens": "09:00",
+        "closes": "21:00"
+      },
+      {
+        "day": "SUNDAY",
+        "opens": "09:00",
+        "closes": "21:00"
+      }
+    ],
+    "opening_date": null,
+    "category_label": "Sports school",
+    "whatsapp_url": "https://wa.me/918868886074"
   },
   "category_search_candidates_not_validated": [
     "Sports coaching",
@@ -29,13 +70,17 @@
       "name": "Children's football coaching",
       "description": "Football coaching for ages 5–14 at Nambiar Bellezea and Nambiar Ellegenza, with warm-up, skill practice and group play. Confirm the child's group and session arrangements before attending.",
       "price": null,
-      "website_reference": "https://letsaimit.com/bengaluru/football-coaching/"
+      "website_reference": "https://letsaimit.com/bengaluru/football-coaching/",
+      "provider_saved_name": "Children's football coaching",
+      "provider_description_saved": false
     },
     {
       "name": "Children's basketball coaching",
       "description": "Basketball coaching for ages 5–14 at Nambiar Bellezea and Nambiar Ellegenza, with fitness activities during sessions. Ask about the current group, timing and entry arrangements.",
       "price": null,
-      "website_reference": "https://letsaimit.com/bengaluru/basketball-coaching/"
+      "website_reference": "https://letsaimit.com/bengaluru/basketball-coaching/",
+      "provider_saved_name": "Basketball",
+      "provider_description_saved": false
     }
   ],
   "current_coaching_communities_not_business_addresses": [
@@ -43,13 +88,10 @@
     "Nambiar Ellegenza, Bengaluru"
   ],
   "required_operating_facts": [
-    "Actual operating base and whether customers visit it",
-    "Whether the confirmed daily 09:00–21:00 availability includes in-person customer service under the selected location model",
-    "Authority to operate or represent the recurring coaching location",
-    "Exact customer entrance and permanent LetsAimIt signage if claiming a storefront"
+    "Actual on-site continuous business-verification video showing location, printed business name and proof of management/equipment"
   ],
   "documentation": "docs/GOOGLE-BUSINESS-PROFILE.md",
-  "automation_note": "Preparation artifact only, not a Google API request body. No profile ID, category, address, service-area mode or provider verification has been inferred.",
+  "automation_note": "Actual Google setup record, not an API request body. Profile creation and saved core fields were observed in the owner UI; video verification and public publication remain pending. No public Maps URL is invented.",
   "owner_confirmed_availability": {
     "source": "Owner instruction on 20 November 2026",
     "timezone": "Asia/Kolkata",
@@ -64,6 +106,77 @@
     ],
     "opens": "09:00",
     "closes": "21:00",
-    "meaning": "Daily availability confirmed by owner; not a claim of all-day coaching classes. Match actual customer service and selected location model before publishing Google opening hours."
+    "meaning": "Saved to Google as owner-directed daily business availability. Coaching batch times remain separate and must be confirmed before a visit."
+  },
+  "owner_account_verified": "ankitkumarsingh97593@gmail.com",
+  "terms_acceptance": {
+    "approved_by_owner": true,
+    "action_completed": true,
+    "source": "Explicit in-chat approval at the displayed Google Terms step on 20 November 2026"
+  },
+  "google_setup_progress": {
+    "browser_access": "restored through direct Chrome tab; full surface inventory timed out",
+    "owner_account_confirmed": true,
+    "category_selected_from_google_dropdown": true,
+    "name_category_and_service_area_steps_completed": true,
+    "contact_step_submitted": true,
+    "profile_creation_confirmation_observed": true,
+    "customisation_progress_displayed": "100%",
+    "services_saved": [
+      "Basketball",
+      "Children's football coaching"
+    ],
+    "weekly_hours_submitted": true,
+    "description_submitted": true,
+    "owner_dashboard_readback": [
+      "LetsAimIt",
+      "Sports school",
+      "Gopasandra and Narayanaghatta service areas",
+      "09:00–21:00",
+      "business phone",
+      "https://letsaimit.com/",
+      "Not publicly visible"
+    ],
+    "hidden_verification_address_submitted": true,
+    "address_accepted_for_video_method_selection": true,
+    "hidden_address_persistent_readback_confirmed": false,
+    "available_verification_methods_observed": [
+      "Submit a business video"
+    ],
+    "more_options_observed": [
+      "Verify later"
+    ],
+    "video_recording_started": false,
+    "video_submitted": false,
+    "google_review_requested": false,
+    "user_next_action": "Owner chose to complete the on-site video later",
+    "handoff_tab_left_open": true
+  },
+  "provider_search_profile_id": "14308864416347416466",
+  "provider_management_url": "https://business.google.com/n/14308864416347416466/searchprofile",
+  "provider_verification_url": "https://business.google.com/verify/l/13563727347976792389",
+  "public_visibility": "Not publicly visible: verification required",
+  "service_copy_note": "Prepared service-description copy retained below; onboarding saved the two service names, not separate service descriptions or prices.",
+  "photos": {
+    "logo_upload_attempted": true,
+    "logo_uploaded": false,
+    "blocking_message": "ChatGPT Chrome extension requires Allow access to file URLs for fileChooser.setFiles",
+    "extension_security_settings_changed": false,
+    "shopfront_photo_skipped": "No customer-facing storefront asserted",
+    "other_photos_uploaded": false
+  },
+  "paid_addons": {
+    "google_ads_credit_skipped": true,
+    "workspace_trial_skipped": true,
+    "purchase_or_subscription_started": false
+  },
+  "verification_address_record": {
+    "owner_selected_base": "Nambiar Ellegenza, Bengaluru",
+    "postal_code": "560099",
+    "country": "IN",
+    "public_address_shown": false,
+    "address_note": "Owner-selected community base submitted to the hidden Google verification form. No residential unit from other browser content was used or stored. A fresh verification session asked for the address again; long-term persistence is not claimed.",
+    "locality_postcode_reference": "https://millenia.nambiarbuilders.com/",
+    "reference_limit": "Official developer reference corroborates Muthanallur village/Gopasandra560099 for a separate project; exact Ellegenza association was also visible in a BBMP primary search result whose full PDF could not be retrieved."
   }
 }

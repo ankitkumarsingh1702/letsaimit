@@ -1,8 +1,18 @@
 # LetsAimIt Google Business Profile setup pack
 
-Prepared: 20 November 2026. **Draft prepared; profile not created, claimed or verified.** The owner reports that there is no existing profile. A signed-in Google duplicate/profile check has not been completed because the Chrome connection is unavailable. This document is a preparation record, not a Google submission receipt.
+Updated: 20 November 2026. **Profile created; Google business-video verification pending.** Direct Chrome access recovered, and the owner account was verified in Google before creation. The owner subsequently chose to complete the on-site video later. The saved profile is not publicly visible yet.
 
-## Ready-to-enter business information
+## Actual Google result
+
+- Verification location reference: `13563727347976792389`.
+- Search-profile reference: `14308864416347416466`.
+- [Owner management page](https://business.google.com/n/14308864416347416466/searchprofile).
+- [Resume verification](https://business.google.com/verify/l/13563727347976792389).
+- Owner account: the account explicitly selected by the user and observed in the Google account control.
+- Google displayed **100%** profile customisation and then **Your edits will be visible once you're verified**. The owner dashboard read back LetsAimIt, Sports school, the two service localities, 09:00–21:00 availability, phone and website, with **Not publicly visible**.
+- No public Google Maps URL, completed verification, submitted video, review-queue receipt or ranking is claimed.
+
+## Saved business information and remaining fields
 
 | Field | Prepared value | Basis / status |
 | --- | --- | --- |
@@ -11,13 +21,14 @@ Prepared: 20 November 2026. **Draft prepared; profile not created, claimed or ve
 | Phone | **+91 88688 86074** (`+918868886074`) | Existing Footer, SocialDock, school contact and Organization schema agree. Phone verification has not been attempted. |
 | Language | English | Prepared copy below. |
 | Country | India | Current Bengaluru programme. |
-| Category to check first | **Sports coaching** | Search candidate only: availability, exact label and category ID have not been checked in Google's India dropdown. Select the most specific available category matching the actual coaching business; do not invent a category. |
+| Selected primary category | **Sports school** | Selected from Google's actual category dropdown; saved in the owner profile. |
 | Other category candidates | **Football coach**, **Basketball coach** | Check Google's actual dropdown and add only if available and accurate. Do not add venue/facility categories solely because classes use a society's court. |
 | Current coaching communities | Nambiar Bellezea; Nambiar Ellegenza, Bengaluru | Website programme and society pages. These are coaching locations, not automatically separate business addresses or eligible branches. |
-| Availability | **Every day, 9 am–9 pm IST (09:00–21:00)** | Explicitly confirmed by the owner on 20 November 2026. This is availability, not 12 hours of daily coaching. Match Google opening hours to actual customer service under the selected location model before submission. |
-| Business address / map pin | **Not yet established** | Requires the operating model and actual address below; do not use a society map-search pin or the Haridwar registered office by assumption. |
+| Availability | **Every day, 9 am–9 pm IST (09:00–21:00)** | Owner-directed hours saved for all seven days. The description separately explains that coaching batches run at confirmed times. |
+| Business address / map pin | **No public storefront address** | Service-area profile. The owner selected Nambiar Ellegenza as the hidden verification base; PIN 560099 was checked. No private villa/unit was inferred or entered from other browser content. |
 | Opening date | Leave unset | Incorporation date does not establish when this coaching business opened at a location. |
-| Appointment link | Not set | Do not claim a confirmed booking from a trial request. The website explains the request-and-confirm process. |
+| Appointment link | Not set | The website explains the request-and-confirm process. |
+| WhatsApp | `https://wa.me/918868886074` | Existing website business contact entered in Google's WhatsApp field. |
 
 Google requires the real-world business name and an accurate address/service area. Showing an address also requires permanent fixed business-name signage. Category labels must come from Google's available list. [Representation guidelines](https://support.google.com/business/answer/3038177), [category guidance](https://support.google.com/business/answer/7249669).
 
@@ -27,7 +38,11 @@ Google requires the real-world business name and an accurate address/service are
 
 This description contains no links, prices, ranking claims or promotions and is below Google's 750-character limit. [Description guidance](https://support.google.com/business/answer/3039617).
 
-### Services — ready to paste if Google offers service editing
+### Services — names saved; description copy retained
+
+Google onboarding saved the **Basketball** preset and the custom service
+**Children's football coaching**. The description copy below remains prepared
+copy; separate service descriptions and prices were not entered in that flow.
 
 | Service | Description | Relevant website page |
 | --- | --- | --- |
@@ -36,7 +51,27 @@ This description contains no links, prices, ranking claims or promotions and is 
 
 Leave service prices unset until the owner provides the actual agreed public fee. Fitness is part of the existing sessions; it is not presented as a separate bookable service. Dhiraj's U.S. Soccer credentials describe football coaching, not basketball certification.
 
-## Choose the actual location model before submission
+## Location model and verification address
+
+The actual creation flow selected **No** to a customer-facing shop/office and
+saved **Narayanaghatta, Bommasandra** and **Gopasandra, Bengaluru** as the two
+Google-supported service localities for the existing communities. This does not
+create two storefront branches or claim unrestricted citywide coverage.
+
+When Google required a hidden verification address, the owner explicitly chose
+**Nambiar Ellegenza, Bengaluru**. Its street/locality came from the official
+developer source, and **560099** was corroborated by the developer's separate
+[Muthanallur/Gopasandra site address](https://millenia.nambiarbuilders.com/).
+An indexed BBMP primary result also associated Ellegenza with that postcode;
+the full PDF could not be retrieved. The malformed five-digit postcode on the
+Ellegenza subsite was not copied. No other resident's villa or unit was used.
+
+The address was submitted and Google offered business-video verification.
+Starting a fresh verification page asked for the address again; long-term saved
+address persistence is not claimed. No precise private residential unit is
+recorded here or added to the public website.
+
+The following model guidance remains a reference for future changes:
 
 The website establishes coaching at two residential communities. It does **not** establish a staffed LetsAimIt office, signage, permission to represent the premises, a walk-in entrance or a private operational base. Those cannot be inferred from a society address or corporate registration.
 
@@ -49,7 +84,10 @@ The website establishes coaching at two residential communities. It does **not**
 
 Google excludes recurring classes at locations the business does not own or have authority to represent. Service-area businesses may have one profile for the area served, and should hide an address where customers are not served. [Eligibility guidance](https://support.google.com/business/answer/13763036), [service-area guidance](https://support.google.com/business/answer/9157481).
 
-**Minimum missing facts:** the actual Bengaluru operating base (kept out of Git if residential/private), whether customers visit it, whether the confirmed daily 09:00–21:00 availability includes in-person customer service under the chosen location model, and whether LetsAimIt has authority to operate/represent the recurring coaching location. If claiming a storefront, also establish the exact entrance and permanent LetsAimIt signage. The existing website already supplies name, phone, sports, ages and communities; the owner need not repeat those.
+**Remaining verification evidence:** Google requires an actual on-site continuous
+video showing the location, a printed business name and equipment/management
+proof. The owner chose to complete that at a later site visit. No separate
+document collection or storefront claim was added as an extra prerequisite.
 
 ### Community references — not business-address claims
 
@@ -66,9 +104,22 @@ These identify communities. They do not establish LetsAimIt's private base, entr
 | Actual Ellegenza coaching setting | `public/assets/image2.jpeg` | Existing website reference only; inspect suitability and publication rights before Google upload. |
 | Ellegenza match action | `public/assets/ellegenza-match-action.jpg` | Existing event reference only; not proof of a permanent LetsAimIt storefront. |
 
-No photo has been uploaded. Website publication does not establish permission for a new Google listing, especially for identifiable children. Prefer a current empty court, real branded equipment, and actual permitted signage for the initial location photos. Do not use Texas coaching photos as evidence of a Bengaluru location or generated images as verification evidence.
+The existing brand logo was inspected and its upload attempted. Chrome's
+ChatGPT extension blocked `fileChooser.setFiles` because **Allow access to file
+URLs** is disabled. No extension security setting was changed and no photo was
+uploaded. Shopfront photography was skipped because no storefront is asserted.
+The other photo candidates were not uploaded. Google Ads credit and the Google
+Workspace trial were also skipped; no paid add-on or subscription was started.
 
-## Provider steps once access and operating facts are available
+## Resume the existing profile
+
+Use the existing owner-management and verification links above. **Do not create
+another LetsAimIt profile.** The live verification page offers business video;
+the owner has deferred that on-site step. A fresh session may request the hidden
+address again before showing the video method.
+
+The following original setup checklist is retained as reference, not a request
+to repeat completed creation, Terms acceptance or saved fields:
 
 1. In the owner's existing Google session, open [Business Profile Manager](https://business.google.com/locations), verify the intended owner account and search for an existing LetsAimIt profile before creating anything. The owner has requested preparation/setup; a routine save does not require another approval question.
 2. Save the ready business fields and the confirmed location model, address visibility, hours and available category. Retain the owner as the business owner; do not create separate society profiles by default.
@@ -85,11 +136,17 @@ No full apartment address, directors' details or capital figures are copied into
 
 ## Submission record
 
-- Draft information and copy: **prepared**.
-- Signed-in duplicate check: **pending — Chrome connection unavailable**.
-- Daily availability: **9 am–9 pm IST, all seven days — confirmed by owner**; batch timings remain separate.
-- Operating base/model and venue authority: **not established by the website**. Google opening hours must match actual customer service under the chosen location model.
-- Google profile creation: **not attempted**.
-- Provider-returned profile ID / Maps URL: **none**.
-- Google verification: **not started**.
+- Owner account and actual category: **checked in the signed-in Google UI**.
+- Terms: **accepted only after the owner's explicit confirmation at that step**.
+- Name, category, two service areas, phone, website, WhatsApp, services,
+  description and seven-day hours: **submitted**.
+- Profile creation: **observed**, with the two Google references above.
+- Address: **owner-selected base submitted to the hidden verification flow**;
+  no public storefront address or inferred residential unit.
+- Google verification: **business video required**. More options offered only
+  Verify later; phone/SMS was not offered. No video was recorded or submitted.
+- Owner's decision: **complete the on-site step later**; the live verification
+  page was left open.
+- Public status: **Not publicly visible** until verification is completed.
+- Logo: **not uploaded**, due to the actual Chrome extension permission block.
 - Google local ranking or placement: **not measured; no first-place guarantee**. Google describes local results in terms of relevance, distance and prominence. [Local ranking guidance](https://support.google.com/business/answer/7091).

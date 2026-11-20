@@ -900,3 +900,44 @@ Sanitized evidence: [local search release](../deployment/release-evidence/2026-1
 A documentation-only descendant carries the publication state and this receipt;
 its final source/domain binding is checked without repeating unchanged runtime
 tests or search-engine notifications.
+
+## 20 November 2026 — Google Business Profile created; on-site verification deferred
+
+Direct Chrome access recovered through the owner's Ankit profile. The intended
+Google account was observed before creating a single LetsAimIt service-area
+profile. The actual Google Terms step was accepted after the owner's explicit
+action-time confirmation. No existing unrelated business was changed.
+
+Google verification-location reference `13563727347976792389` and search-profile
+reference `14308864416347416466` now identify the created profile. Sports school
+was selected from Google's category dropdown. Name, phone, website, WhatsApp,
+Narayanaghatta and Gopasandra service localities, Basketball and children's
+football service names, the factual programme description, and owner-directed
+09:00–21:00 hours for all seven days were submitted. Google displayed 100%
+customisation, followed by an owner dashboard showing **Not publicly visible**.
+
+The owner chose Nambiar Ellegenza as the hidden verification base. PIN560099
+was checked against primary-source locality information. No private residential
+unit from other browser content was used or stored. The submitted address
+reached the video-method selection; a fresh verification session asked for the
+address again, so permanent private-address persistence is not claimed.
+
+Google offered **Submit a business video** as the verification method; More
+options offered only Verify later. The required continuous on-site recording
+must show surroundings, the printed business name and equipment/management
+proof. The owner explicitly chose to do the site step later. No recording was
+started, video uploaded, review requested or completed verification claimed.
+The verification page was left open for the later visit.
+
+An attempted upload of the existing logo was blocked by the Chrome extension's
+disabled **Allow access to file URLs** permission. No extension security setting
+was changed and no photo was uploaded. Shopfront photography, Google Ads credit
+and the Workspace trial were skipped; no storefront, paid account or
+subscription was created.
+
+Current provider state and resume links are in the
+[Google Business Profile record](GOOGLE-BUSINESS-PROFILE.md) and
+[structured setup record](google-business-profile-draft.json). This is an actual
+provider-configuration record, independent of the earlier website release.
+No application code, database, credentials, website release or public Maps URL
+was changed or invented by this setup step.
