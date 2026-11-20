@@ -1,0 +1,441 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-20T12:27:00.031822+00:00",
+  "applicationSourceSha": "df470f71c0d82ab8e62da7097c3eb13fc582e536",
+  "featureCommit": "e370587",
+  "initialBaselineCommit": "34aadc7",
+  "finalAssetProvenanceCommit": "df470f7",
+  "sourceScope": "Nine substantive illustrated team guides, contextual links and exact query-to-section mapping; original four guides and attributed LinkedIn previews retained",
+  "authorization": "Owner explicitly requested publishing every missing-content answer; identical tested source advanced through UAT then production",
+  "publicPages": 28,
+  "articleInventory": {
+    "new": 9,
+    "total": 13,
+    "newPaths": [
+      "/blogs/balancing-sport-and-school/",
+      "/blogs/beginner-basketball-skills/",
+      "/blogs/beginner-football-rules-and-skills/",
+      "/blogs/choosing-basketball-coaching-bengaluru/",
+      "/blogs/choosing-football-coaching-bengaluru/",
+      "/blogs/first-basketball-session/",
+      "/blogs/football-or-basketball-for-beginners/",
+      "/blogs/society-sports-coaching-checklist/",
+      "/blogs/understanding-your-childs-practice-progress/"
+    ]
+  },
+  "sourceChecks": {
+    "fullNodeTests": 481,
+    "finalFocusedTests": 17,
+    "failed": 0,
+    "approvedAssets": 68,
+    "originalAssetsRetainedByteIdentically": 59,
+    "newIllustrations": 4,
+    "uatProfileBuild": "passed",
+    "productionProfileBuild": "passed",
+    "targetMaterialHashesAndDatesMatch": true,
+    "orphans": 0
+  },
+  "targets": {
+    "uat": {
+      "origin": "https://uat.letsaimit.com",
+      "branch": "uat",
+      "deploymentId": "dpl_CRwoB4TNshMaVnjMYwvZH9cxakgh",
+      "state": "READY",
+      "sourceSha": "df470f71c0d82ab8e62da7097c3eb13fc582e536",
+      "canonicalDomainAliasVerified": true,
+      "publicChecks": {
+        "passed": 1254,
+        "failed": 0,
+        "notApplicable": 165
+      },
+      "publicRequests": 180,
+      "editorialChecks": {
+        "passed": 787,
+        "failed": 0,
+        "articles": 13,
+        "resolvedQueryMappings": 31,
+        "uniqueImages": 48,
+        "requests": 61
+      },
+      "indexablePages": 0
+    },
+    "production": {
+      "origin": "https://letsaimit.com",
+      "branch": "main",
+      "deploymentId": "dpl_6r9DPm6g2k9X86KZMAHoboJNx4eg",
+      "state": "READY",
+      "sourceSha": "df470f71c0d82ab8e62da7097c3eb13fc582e536",
+      "canonicalDomainAliasVerified": true,
+      "publicChecks": {
+        "passed": 1185,
+        "failed": 0,
+        "notApplicable": 110
+      },
+      "publicRequests": 180,
+      "editorialChecks": {
+        "passed": 787,
+        "failed": 0,
+        "articles": 13,
+        "resolvedQueryMappings": 31,
+        "uniqueImages": 48,
+        "requests": 61
+      },
+      "indexablePages": 28,
+      "compiledBackendChecks": {
+        "passed": 8,
+        "failed": 0
+      }
+    }
+  },
+  "queryPlan": {
+    "count": 200,
+    "normalizedUnique": 200,
+    "resolvedContentGapMappings": 31,
+    "resolvedIds": [
+      "L002",
+      "L003",
+      "L004",
+      "L016",
+      "L022",
+      "L023",
+      "L035",
+      "L036",
+      "L037",
+      "L038",
+      "L039",
+      "L041",
+      "L042",
+      "L043",
+      "L044",
+      "L046",
+      "L059",
+      "L060",
+      "L069",
+      "L077",
+      "L104",
+      "L121",
+      "L129",
+      "L146",
+      "L156",
+      "L166",
+      "L177",
+      "L180",
+      "L181",
+      "L184",
+      "L185"
+    ],
+    "coverage": {
+      "supported": 143,
+      "gap": 0,
+      "access/availability-check": 57
+    },
+    "ownerSelectedP0": [
+      "L002",
+      "L003",
+      "L004"
+    ],
+    "exactQueriesWithSemrushIndiaEstimates": 8,
+    "rankingsMeasured": 0,
+    "publicationState": "All resolved answer targets and exact section anchors live; actual fees/times/access remain explicit checks"
+  },
+  "discovery": {
+    "paths": [
+      "/",
+      "/programme/",
+      "/coach/",
+      "/societies/",
+      "/schools/",
+      "/events/",
+      "/blogs/",
+      "/blogs/choosing-football-coaching-bengaluru/",
+      "/blogs/choosing-basketball-coaching-bengaluru/",
+      "/blogs/football-or-basketball-for-beginners/",
+      "/blogs/first-basketball-session/",
+      "/blogs/beginner-basketball-skills/",
+      "/blogs/beginner-football-rules-and-skills/",
+      "/blogs/society-sports-coaching-checklist/",
+      "/blogs/understanding-your-childs-practice-progress/",
+      "/blogs/balancing-sport-and-school/",
+      "/blogs/first-football-session/",
+      "/blogs/encouragement-without-pressure/",
+      "/blogs/questions-about-training-preparation/",
+      "/blogs/first-community-match/",
+      "/bengaluru/",
+      "/bengaluru/football-coaching/",
+      "/bengaluru/basketball-coaching/",
+      "/bengaluru/nambiar-bellezea/",
+      "/bengaluru/nambiar-ellegenza/",
+      "/privacy/",
+      "/terms/",
+      "/refunds/"
+    ],
+    "contentHashes": {
+      "/": "46ba4fd3e3f09a14ee2f8ce2a59020729e2daf74e19208e83e2287d4dd5882a0",
+      "/programme/": "03bcd3e1ada718ef771632817a981d7b6207d64243ec7bfcaec0d50bd6eb1000",
+      "/coach/": "01a3a58286f5fffa54196a9e376a6ebb80c61d855863999fa81fb81712f0ef8e",
+      "/societies/": "7fbed26b891998368ba1f07ddfcd3042d1d226b5bfaa7267976c35bed2114050",
+      "/schools/": "520a98fdbe42f09e3b61de0eed7b0fd87ae9d194910fd213e77600ef06afe8c0",
+      "/events/": "0fe5d2157d48de5c5f18787f1325086e0c82c4abe73ab5a76946a31c486f6da9",
+      "/blogs/": "79833d5992028a95a408e1963b848675a45615d7463ed33f6ac9d7838b671e25",
+      "/blogs/choosing-football-coaching-bengaluru/": "2e9be8de13710d6757f9861da24bce4c83cadbfb24c7e8e0849414d54a85ccae",
+      "/blogs/choosing-basketball-coaching-bengaluru/": "132f70975a9c0202150a82f169c5a564bf95353c5211519e7a9a637f3e2c1966",
+      "/blogs/football-or-basketball-for-beginners/": "1d98002b5732bfcc0fb374107b7511b461ecd598df91faf447e3faa24b1f1604",
+      "/blogs/first-basketball-session/": "079f7ff8474f3ca72347c4ba04909ba23d51b7d2fb989f4640c49af0ac3bde33",
+      "/blogs/beginner-basketball-skills/": "9c770fdb6fb99be4b00bf1c37043a439e46240f26817fe8b9af904dfa0522b06",
+      "/blogs/beginner-football-rules-and-skills/": "381d0a1398800d5f2b014974eeb5554473a3d2c2ad933b92aa321fc0844a0ce0",
+      "/blogs/society-sports-coaching-checklist/": "deef08a45eb6e92f0e99f51f060689c862ce34ff210d96681ee1161f76f8515b",
+      "/blogs/understanding-your-childs-practice-progress/": "b7562fac56aafe54d9ca8daef227807670d06cf7eaa1dc3158cdeadc5792e1b4",
+      "/blogs/balancing-sport-and-school/": "ed0b24dad36adb0618f45a7d270706887bdb6e37fdfb930c34386ee80fa7fe25",
+      "/blogs/first-football-session/": "70ff080131d3a71337a21a116e1c1c820940e1355a630be7081b3f91fa2bd73e",
+      "/blogs/encouragement-without-pressure/": "01076af10b851f5f3233049fd8fc209d03a5f2cc1995042b84c3ab8a4afde006",
+      "/blogs/questions-about-training-preparation/": "46b78d7945401c5b2d0d9055053228bd46fdb83226d7c5604490b5ca8bcada1c",
+      "/blogs/first-community-match/": "35da7f5c06664ace21a07faaf3b6076af845051e6f766e50ff0f28916f476f61",
+      "/bengaluru/": "041107c155f257320f996cbb8961129d1234330d791e29995df57ff373dd1d21",
+      "/bengaluru/football-coaching/": "bf850476de0cf50ee16221ae60c6f98f9a17eccdfad9646fa5443ee1c912088f",
+      "/bengaluru/basketball-coaching/": "51c5f7ed9a522949431fdf91442d7400e91c8f2f03699842d755d808b13352d6",
+      "/bengaluru/nambiar-bellezea/": "e40fc5b2c8e641ba294f0873c18fde131e70fb7595052ba075d18f92bf0a003d",
+      "/bengaluru/nambiar-ellegenza/": "9de62e62d97889a8059af01325108d134ca4b721862c63dec463cf5341ae45b9",
+      "/privacy/": "93baf1254d487a7a6afb12a519cb87a295d2a6b37c058f37036eea1b1c735572",
+      "/terms/": "ef06c6bbf4e8cd28b92f60397a17ae724f2fda2082eacb52398c11887df9afb5",
+      "/refunds/": "62f1faa81053ee8c2c0774cca88889fb931690e7dfa7a93119070fea5f634f15"
+    },
+    "lastmod": {
+      "/": "2026-11-20T09:19:04+00:00",
+      "/programme/": "2026-11-20T09:19:04+00:00",
+      "/coach/": "2026-11-19T17:07:45+00:00",
+      "/societies/": "2026-11-20T09:19:04+00:00",
+      "/schools/": "2026-11-19T17:07:45+00:00",
+      "/events/": "2026-11-19T17:07:45+00:00",
+      "/blogs/": "2026-11-20T12:14:36+00:00",
+      "/blogs/choosing-football-coaching-bengaluru/": "2026-11-20T12:07:27+00:00",
+      "/blogs/choosing-basketball-coaching-bengaluru/": "2026-11-20T12:14:36+00:00",
+      "/blogs/football-or-basketball-for-beginners/": "2026-11-20T12:14:36+00:00",
+      "/blogs/first-basketball-session/": "2026-11-20T12:14:36+00:00",
+      "/blogs/beginner-basketball-skills/": "2026-11-20T12:07:27+00:00",
+      "/blogs/beginner-football-rules-and-skills/": "2026-11-20T12:07:27+00:00",
+      "/blogs/society-sports-coaching-checklist/": "2026-11-20T12:07:27+00:00",
+      "/blogs/understanding-your-childs-practice-progress/": "2026-11-20T12:14:36+00:00",
+      "/blogs/balancing-sport-and-school/": "2026-11-20T12:07:27+00:00",
+      "/blogs/first-football-session/": "2026-11-20T08:27:27+00:00",
+      "/blogs/encouragement-without-pressure/": "2026-11-20T08:27:27+00:00",
+      "/blogs/questions-about-training-preparation/": "2026-11-20T08:27:27+00:00",
+      "/blogs/first-community-match/": "2026-11-20T08:27:27+00:00",
+      "/bengaluru/": "2026-11-20T09:19:04+00:00",
+      "/bengaluru/football-coaching/": "2026-11-20T09:19:04+00:00",
+      "/bengaluru/basketball-coaching/": "2026-11-20T09:19:04+00:00",
+      "/bengaluru/nambiar-bellezea/": "2026-11-20T09:19:04+00:00",
+      "/bengaluru/nambiar-ellegenza/": "2026-11-20T09:19:04+00:00",
+      "/privacy/": "2026-11-19T17:07:45+00:00",
+      "/terms/": "2026-11-19T17:07:45+00:00",
+      "/refunds/": "2026-11-19T17:07:45+00:00"
+    },
+    "changedUrls": 10,
+    "unchangedUrls": 18,
+    "datePolicy": "Nine new guides plus the blog hub materially changed; contextual-only service-page links do not reset material dates"
+  },
+  "browserChecks": {
+    "localMobileGuides": [
+      {
+        "path": "/blogs/choosing-football-coaching-bengaluru/",
+        "width": 390,
+        "documentWidth": 390,
+        "h1s": 1,
+        "fontPx": "17px",
+        "clientNavigationCanonicalVerified": true,
+        "tocTargetVerified": true
+      },
+      {
+        "documentWidth": 390,
+        "fontPx": "17px",
+        "h1s": 1,
+        "heroNaturalWidth": 350,
+        "path": "/blogs/beginner-basketball-skills/",
+        "width": 390
+      },
+      {
+        "documentWidth": 390,
+        "fontPx": "17px",
+        "h1s": 1,
+        "heroNaturalWidth": 350,
+        "path": "/blogs/choosing-basketball-coaching-bengaluru/",
+        "width": 390
+      },
+      {
+        "documentWidth": 390,
+        "fontPx": "17px",
+        "h1s": 1,
+        "heroNaturalWidth": 350,
+        "path": "/blogs/football-or-basketball-for-beginners/",
+        "width": 390
+      },
+      {
+        "documentWidth": 390,
+        "fontPx": "17px",
+        "h1s": 1,
+        "heroNaturalWidth": 350,
+        "path": "/blogs/first-basketball-session/",
+        "width": 390
+      },
+      {
+        "documentWidth": 390,
+        "fontPx": "17px",
+        "h1s": 1,
+        "heroNaturalWidth": 350,
+        "path": "/blogs/beginner-football-rules-and-skills/",
+        "width": 390
+      },
+      {
+        "documentWidth": 390,
+        "fontPx": "17px",
+        "h1s": 1,
+        "heroNaturalWidth": 350,
+        "path": "/blogs/society-sports-coaching-checklist/",
+        "width": 390
+      },
+      {
+        "documentWidth": 390,
+        "fontPx": "17px",
+        "h1s": 1,
+        "heroNaturalWidth": 350,
+        "path": "/blogs/understanding-your-childs-practice-progress/",
+        "width": 390
+      },
+      {
+        "documentWidth": 390,
+        "fontPx": "17px",
+        "h1s": 1,
+        "heroNaturalWidth": 350,
+        "path": "/blogs/balancing-sport-and-school/",
+        "width": 390
+      }
+    ],
+    "productionFootballGuide": {
+      "bodyFont": "18px",
+      "documentWidth": 390,
+      "h1s": 1,
+      "heroLoaded": true,
+      "width": 390
+    },
+    "desktopWidth": 1470,
+    "hubToPriorityGuideAndContentsAnchor": "passed",
+    "consoleErrorsObserved": 0,
+    "temporaryViewportReset": true,
+    "limitations": "Chrome responsive viewport checks; no claim of physical iOS/Android testing"
+  },
+  "indexNow": {
+    "liveVerified": true,
+    "changed": 10,
+    "unchanged": 18,
+    "accepted": 10,
+    "pending": 0,
+    "httpStatus": 200,
+    "receipts": {
+      "https://letsaimit.com/blogs/": {
+        "contentHash": "79833d5992028a95a408e1963b848675a45615d7463ed33f6ac9d7838b671e25",
+        "notifiedAt": "2026-11-20T12:23:13+00:00",
+        "status": 200
+      },
+      "https://letsaimit.com/blogs/balancing-sport-and-school/": {
+        "contentHash": "ed0b24dad36adb0618f45a7d270706887bdb6e37fdfb930c34386ee80fa7fe25",
+        "notifiedAt": "2026-11-20T12:23:13+00:00",
+        "status": 200
+      },
+      "https://letsaimit.com/blogs/beginner-basketball-skills/": {
+        "contentHash": "9c770fdb6fb99be4b00bf1c37043a439e46240f26817fe8b9af904dfa0522b06",
+        "notifiedAt": "2026-11-20T12:23:13+00:00",
+        "status": 200
+      },
+      "https://letsaimit.com/blogs/beginner-football-rules-and-skills/": {
+        "contentHash": "381d0a1398800d5f2b014974eeb5554473a3d2c2ad933b92aa321fc0844a0ce0",
+        "notifiedAt": "2026-11-20T12:23:13+00:00",
+        "status": 200
+      },
+      "https://letsaimit.com/blogs/choosing-basketball-coaching-bengaluru/": {
+        "contentHash": "132f70975a9c0202150a82f169c5a564bf95353c5211519e7a9a637f3e2c1966",
+        "notifiedAt": "2026-11-20T12:23:13+00:00",
+        "status": 200
+      },
+      "https://letsaimit.com/blogs/choosing-football-coaching-bengaluru/": {
+        "contentHash": "2e9be8de13710d6757f9861da24bce4c83cadbfb24c7e8e0849414d54a85ccae",
+        "notifiedAt": "2026-11-20T12:23:13+00:00",
+        "status": 200
+      },
+      "https://letsaimit.com/blogs/first-basketball-session/": {
+        "contentHash": "079f7ff8474f3ca72347c4ba04909ba23d51b7d2fb989f4640c49af0ac3bde33",
+        "notifiedAt": "2026-11-20T12:23:13+00:00",
+        "status": 200
+      },
+      "https://letsaimit.com/blogs/football-or-basketball-for-beginners/": {
+        "contentHash": "1d98002b5732bfcc0fb374107b7511b461ecd598df91faf447e3faa24b1f1604",
+        "notifiedAt": "2026-11-20T12:23:13+00:00",
+        "status": 200
+      },
+      "https://letsaimit.com/blogs/society-sports-coaching-checklist/": {
+        "contentHash": "deef08a45eb6e92f0e99f51f060689c862ce34ff210d96681ee1161f76f8515b",
+        "notifiedAt": "2026-11-20T12:23:13+00:00",
+        "status": 200
+      },
+      "https://letsaimit.com/blogs/understanding-your-childs-practice-progress/": {
+        "contentHash": "b7562fac56aafe54d9ca8daef227807670d06cf7eaa1dc3158cdeadc5792e1b4",
+        "notifiedAt": "2026-11-20T12:23:13+00:00",
+        "status": 200
+      }
+    },
+    "meaning": "Accepted notification, not search inclusion or position"
+  },
+  "google": {
+    "manualSearchConsole": {
+      "observedAt": "2026-11-20T12:26:34.371Z",
+      "property": "sc-domain:letsaimit.com",
+      "sitemap": {
+        "url": "https://letsaimit.com/sitemap.xml",
+        "submitted": true,
+        "confirmation": "Sitemap submitted successfully",
+        "discoveredPagesDisplayedAtSubmission": 14,
+        "servedUrls": 28
+      },
+      "requests": [
+        {
+          "url": "https://letsaimit.com/blogs/choosing-football-coaching-bengaluru/",
+          "confirmation": "Indexing requested",
+          "queue": "priority crawl queue",
+          "previousState": "Discovered – currently not indexed"
+        },
+        {
+          "url": "https://letsaimit.com/blogs/choosing-basketball-coaching-bengaluru/",
+          "confirmation": "Indexing requested",
+          "queue": "priority crawl queue",
+          "previousState": "URL is unknown to Google"
+        }
+      ]
+    },
+    "scriptedSitemapStatus": "No GOOGLE_ACCESS_TOKEN; separate native owner-UI submission succeeded",
+    "indexingApi": {
+      "eligible": 0,
+      "ineligible": 28,
+      "changed": 0,
+      "accepted": 0,
+      "eligibility": "JobPosting or live BroadcastEvent embedded in VideoObject"
+    },
+    "meaning": "Manual receipt and priority queue are not indexing or ranking; discovered-page count is the actual owner UI observation, not manifest inventory"
+  },
+  "backend": {
+    "sourceChanged": false,
+    "sourceDigest": "b6910b43f2c44804fb29eb24bded39f505710eab21e3e6fc39d5fcab8a582b1e",
+    "migrationInventory": 19,
+    "functionInventory": 5,
+    "migrationsAdded": 0,
+    "functionsChanged": 0,
+    "configurationSecretsChanged": false,
+    "productionBundleTargetsProductionBackend": true,
+    "emailsOrPaymentsTriggered": false,
+    "limitation": "No new authentication, financial, email or database journey claimed for this public-content release"
+  },
+  "businessProfile": {
+    "logoUploadStatus": "saved; reopened Google Photos gallery shows Logo and Change logo",
+    "asset": "Approved square runner SVG exported unchanged to512pxPNG",
+    "onSiteVideoVerification": "Owner explicitly deferred until physically at the society",
+    "publicVisibility": "Google shows not publicly visible until verification completes"
+  },
+  "evidenceCommitNote": "A documentation-only descendant records publication and receipts; final provider source/aliases and retained28materialhashes/dates are verified separately without re-notifying unchanged URLs"
+}

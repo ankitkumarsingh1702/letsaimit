@@ -4,7 +4,7 @@
     "prepared_on": "2026-11-20",
     "source_review_commit": "c223ed840296beaba52ad5a67d60d6dbfc7582fd",
     "scope": "200 local search targets mapped to five service destinations and first-party editorial guides; publication, indexing and rankings are separate states.",
-    "target_paths_state": "Five local service pages are live. Nine new first-party guides now cover all31 former content gaps in source and await the tested UAT/production release. Google indexing and query rankings remain unverified.",
+    "target_paths_state": "All five local service pages and nine new first-party guides are live on LetsAimIt, covering all31 former content gaps. The site now has28 public canonical pages. Google indexing and query rankings remain separate, unverified outcomes.",
     "not_200_ranked_queries": true,
     "not_200_new_pages": true,
     "ranking_verification": "No individual LetsAimIt Google ranking positions measured by this matrix. Keyword-research data is separate from domain rankings.",
@@ -126,8 +126,8 @@
       "L185"
     ],
     "new_guide_count": 9,
-    "content_release_state": "source_implemented_pending_production",
-    "content_release_source_sha": null
+    "content_release_state": "published",
+    "content_release_source_sha": "df470f71c0d82ab8e62da7097c3eb13fc582e536"
   },
   "summary": {
     "total_queries": 200,
@@ -210,7 +210,7 @@
       "service_path": "/bengaluru/football-coaching/",
       "answer_section": "check-the-coach",
       "answer_title": "Choosing football coaching in Bengaluru: what to check",
-      "content_status": "source_implemented",
+      "content_status": "published",
       "resolved_action": "Answer how to assess a coach using real qualifications, session format and trial questions; never state an unsupported best-in-city ranking."
     },
     {
@@ -229,7 +229,7 @@
       "service_path": "/bengaluru/football-coaching/",
       "answer_section": "academy-or-community-coaching",
       "answer_title": "Choosing football coaching in Bengaluru: what to check",
-      "content_status": "source_implemented",
+      "content_status": "published",
       "resolved_action": "Explain LetsAimIt's community-coaching format clearly; do not imply a professional academy or accredited academy status."
     },
     {
@@ -248,7 +248,7 @@
       "service_path": "/bengaluru/football-coaching/",
       "answer_section": "academy-or-community-coaching",
       "answer_title": "Choosing football coaching in Bengaluru: what to check",
-      "content_status": "source_implemented",
+      "content_status": "published",
       "resolved_action": "Publish an honest academy-versus-community-coaching comparison without awards or fabricated league affiliations."
     },
     {
@@ -494,7 +494,7 @@
       "service_path": "/bengaluru/basketball-coaching/",
       "answer_section": "ask-about-basketball-teaching",
       "answer_title": "Choosing basketball coaching in Bengaluru for a beginner",
-      "content_status": "source_implemented",
+      "content_status": "published",
       "resolved_action": "Provide factual selection criteria; do not claim an unverified citywide best ranking."
     },
     {
@@ -513,7 +513,7 @@
       "service_path": "/bengaluru/basketball-coaching/",
       "answer_section": "academy-or-local-programme",
       "answer_title": "Choosing basketball coaching in Bengaluru for a beginner",
-      "content_status": "source_implemented",
+      "content_status": "published",
       "resolved_action": "Describe LetsAimIt's actual coaching format and avoid implying a professional or accredited academy."
     },
     {
@@ -675,7 +675,7 @@
       "service_path": "/bengaluru/basketball-coaching/",
       "answer_section": "give-your-child-a-simple-picture",
       "answer_title": "Your child’s first basketball session in Bengaluru",
-      "content_status": "source_implemented",
+      "content_status": "published",
       "resolved_action": "Develop a basketball-specific first-session explanation; do not claim every group follows a particular drill plan."
     },
     {
@@ -694,7 +694,7 @@
       "service_path": "/bengaluru/basketball-coaching/",
       "answer_section": "dribbling-control-and-looking",
       "answer_title": "Beginner basketball skills: a parent’s guide to practice",
-      "content_status": "source_implemented",
+      "content_status": "published",
       "resolved_action": "Add coach-reviewed basketball learning content; the current site does not publish a drill progression."
     },
     {
@@ -713,7 +713,7 @@
       "service_path": "/bengaluru/basketball-coaching/",
       "answer_section": "passing-and-receiving",
       "answer_title": "Beginner basketball skills: a parent’s guide to practice",
-      "content_status": "source_implemented",
+      "content_status": "published",
       "resolved_action": "Publish an appropriate beginner learning guide with real coaching context, not invented curriculum milestones."
     },
     {
@@ -732,7 +732,7 @@
       "service_path": "/bengaluru/basketball-coaching/",
       "answer_section": "stopping-and-pivoting",
       "answer_title": "Beginner basketball skills: a parent’s guide to practice",
-      "content_status": "source_implemented",
+      "content_status": "published",
       "resolved_action": "Explain beginner footwork only after coaching review; do not claim an established specialist course."
     },
     {
@@ -751,7 +751,7 @@
       "service_path": "/bengaluru/basketball-coaching/",
       "answer_section": "shooting-a-manageable-attempt",
       "answer_title": "Beginner basketball skills: a parent’s guide to practice",
-      "content_status": "source_implemented",
+      "content_status": "published",
       "resolved_action": "Add basketball-specific teaching information without promising shooting improvements or measured results."
     },
     {
@@ -783,7 +783,7 @@
       "service_path": "/bengaluru/",
       "answer_section": "start-with-your-child",
       "answer_title": "Choosing football coaching in Bengaluru: what to check",
-      "content_status": "source_implemented",
+      "content_status": "published",
       "resolved_action": "Create a practical selection checklist using actual credentials, age fit, session structure and trial questions."
     },
     {
@@ -802,7 +802,7 @@
       "service_path": "/bengaluru/",
       "answer_section": "compare-after-the-visit",
       "answer_title": "Choosing basketball coaching in Bengaluru for a beginner",
-      "content_status": "source_implemented",
+      "content_status": "published",
       "resolved_action": "Explain what families can compare without fabricating competitors, prices or ratings."
     },
     {
@@ -821,7 +821,7 @@
       "service_path": "/bengaluru/",
       "answer_section": "compare-the-basic-actions",
       "answer_title": "Football or basketball? Choosing a first sport in Bengaluru",
-      "content_status": "source_implemented",
+      "content_status": "published",
       "resolved_action": "Publish a balanced sport-choice guide that encourages exploration and discusses actual availability."
     },
     {
@@ -840,7 +840,7 @@
       "service_path": "/bengaluru/",
       "answer_section": "academy-or-community-coaching",
       "answer_title": "Choosing football coaching in Bengaluru: what to check",
-      "content_status": "source_implemented",
+      "content_status": "published",
       "resolved_action": "Explain the difference in format without implying professional pathways or licensed academy status."
     },
     {
@@ -872,7 +872,7 @@
       "service_path": "/bengaluru/",
       "answer_section": "questions-before-you-join",
       "answer_title": "Choosing basketball coaching in Bengaluru for a beginner",
-      "content_status": "source_implemented",
+      "content_status": "published",
       "resolved_action": "Expand basketball-specific parent questions and connect them to the actual programme enquiry."
     },
     {
@@ -1047,7 +1047,7 @@
       "service_path": "/bengaluru/",
       "answer_section": "review-the-space-together",
       "answer_title": "A society checklist for starting children’s sports coaching",
-      "content_status": "source_implemented",
+      "content_status": "published",
       "resolved_action": "Add a practical venue/access checklist using real locations and independently confirmed arrangements."
     },
     {
@@ -1066,7 +1066,7 @@
       "service_path": "/bengaluru/",
       "answer_section": "academy-or-community-coaching",
       "answer_title": "Choosing football coaching in Bengaluru: what to check",
-      "content_status": "source_implemented",
+      "content_status": "published",
       "resolved_action": "Explain the current community programme and confirm whether private lessons exist before offering them."
     },
     {
@@ -1189,7 +1189,7 @@
       "service_path": "/bengaluru/",
       "answer_section": "what-learning-a-skill-can-mean",
       "answer_title": "Football rules and first skills: a guide for young beginners",
-      "content_status": "source_implemented",
+      "content_status": "published",
       "resolved_action": "Add a coach-reviewed example of actual session teaching rather than an invented fixed curriculum."
     },
     {
@@ -1299,7 +1299,7 @@
       "service_path": "/bengaluru/",
       "answer_section": "questions-after-the-first-class",
       "answer_title": "Your child’s first basketball session in Bengaluru",
-      "content_status": "source_implemented",
+      "content_status": "published",
       "resolved_action": "Add basketball-specific follow-up guidance while retaining the actual group-fit confirmation step."
     },
     {
@@ -1656,7 +1656,7 @@
       "service_path": "/bengaluru/nambiar-bellezea/",
       "answer_section": "compare-your-society-options",
       "answer_title": "Choosing football coaching in Bengaluru: what to check",
-      "content_status": "source_implemented",
+      "content_status": "published",
       "resolved_action": "Explain verified coaching credentials and trial criteria; do not invent a local best ranking."
     },
     {
@@ -1883,7 +1883,7 @@
       "service_path": "/bengaluru/nambiar-bellezea/",
       "answer_section": "questions-before-you-join",
       "answer_title": "Choosing basketball coaching in Bengaluru for a beginner",
-      "content_status": "source_implemented",
+      "content_status": "published",
       "resolved_action": "Publish factual programme, coach and trial-selection information; never assert an unverified society-wide best ranking."
     },
     {
@@ -1993,7 +1993,7 @@
       "service_path": "/bengaluru/nambiar-ellegenza/",
       "answer_section": "ask-about-basketball-teaching",
       "answer_title": "Choosing basketball coaching in Bengaluru for a beginner",
-      "content_status": "source_implemented",
+      "content_status": "published",
       "resolved_action": "Offer verifiable programme information without an unsupported best-coach claim or invented basketball certification."
     },
     {
@@ -2220,7 +2220,7 @@
       "service_path": "/bengaluru/nambiar-ellegenza/",
       "answer_section": "compare-your-society-options",
       "answer_title": "Choosing football coaching in Bengaluru: what to check",
-      "content_status": "source_implemented",
+      "content_status": "published",
       "resolved_action": "Show real coach credentials, session details and trial questions; do not invent local rankings, reviews or academy affiliations."
     },
     {
@@ -2356,7 +2356,7 @@
       "service_path": "/bengaluru/",
       "answer_section": "review-the-space-together",
       "answer_title": "A society checklist for starting children’s sports coaching",
-      "content_status": "source_implemented",
+      "content_status": "published",
       "resolved_action": "Prepare a coach-reviewed space-assessment checklist; avoid fabricated dimensions or safety guarantees."
     },
     {
@@ -2492,7 +2492,7 @@
       "service_path": "/bengaluru/",
       "answer_section": "introduce-the-programme",
       "answer_title": "A society checklist for starting children’s sports coaching",
-      "content_status": "source_implemented",
+      "content_status": "published",
       "resolved_action": "Prepare a practical parent-information checklist with verified programme facts and clear access arrangements."
     },
     {
@@ -2641,7 +2641,7 @@
       "service_path": "/bengaluru/",
       "answer_section": "open-your-childs-tracker",
       "answer_title": "Reading your child’s attendance and practice progress",
-      "content_status": "source_implemented",
+      "content_status": "published",
       "resolved_action": "Create a public explanation of the real parent tracker and progress flow, linking only to protected sign-in without exposing child records."
     },
     {
@@ -2686,7 +2686,7 @@
       "service_path": "/bengaluru/",
       "answer_section": "understand-sprint-times",
       "answer_title": "Reading your child’s attendance and practice progress",
-      "content_status": "source_implemented",
+      "content_status": "published",
       "resolved_action": "Create a reviewed explanation of measurement limits without invented age benchmarks or athletic promises."
     },
     {
@@ -2705,7 +2705,7 @@
       "service_path": "/bengaluru/",
       "answer_section": "talk-about-progress",
       "answer_title": "Beginner basketball skills: a parent’s guide to practice",
-      "content_status": "source_implemented",
+      "content_status": "published",
       "resolved_action": "Add basketball-specific progress guidance grounded in actual coaching practice."
     },
     {
@@ -2750,7 +2750,7 @@
       "service_path": "/bengaluru/",
       "answer_section": "start-with-confirmed-times",
       "answer_title": "Making room for sport alongside school",
-      "content_status": "source_implemented",
+      "content_status": "published",
       "resolved_action": "Create a practical routine-planning guide rather than promising after-school/weekend availability."
     },
     {
@@ -2769,7 +2769,7 @@
       "service_path": "/bengaluru/",
       "answer_section": "understand-common-restarts",
       "answer_title": "Football rules and first skills: a guide for young beginners",
-      "content_status": "source_implemented",
+      "content_status": "published",
       "resolved_action": "Publish a useful original beginner rules guide with current governing-body sources and real age-group context."
     },
     {

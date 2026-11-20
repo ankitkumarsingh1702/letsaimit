@@ -941,3 +941,62 @@ Current provider state and resume links are in the
 provider-configuration record, independent of the earlier website release.
 No application code, database, credentials, website release or public Maps URL
 was changed or invented by this setup step.
+
+## 20 November 2026 — Illustrated guides close the 31 content gaps
+
+The owner requested publishing every content-gap answer and promoted L002–L004
+to P0. Nine substantial LetsAimIt team guides are now live, alongside the four
+existing guides and attributed LinkedIn previews. They cover football and
+basketball selection, first sessions, beginner skills, sport choice, society
+planning, practice records and school routines. Each former gap maps to an
+actual article and exact answer section. The 200-query report now records 143
+supported targets, zero unfilled content gaps and 57 genuine access/availability
+checks. No rankings, academy accreditation, coach-review claims, unconfirmed
+fees/times or fabricated basketball-session photographs were added.
+
+Tested source `df470f71c0d82ab8e62da7097c3eb13fc582e536` passed 481 Node tests,
+17 final focused checks, all 68 asset checks and both target-profile builds.
+The 59 earlier assets remain byte-identical; four labelled original illustrations
+have editable sources, responsive derivatives and a provenance record.
+UAT deployment `dpl_CRwoB4TNshMaVnjMYwvZH9cxakgh` and production deployment
+`dpl_6r9DPm6g2k9X86KZMAHoboJNx4eg` were READY from that same source with the
+correct canonical aliases. UAT passed 1,254 strict public checks; production
+passed 1,185. Each target separately passed 787 article checks covering all 13
+articles, all 31 answer mappings and 48 unique responsive image URLs. There
+were zero failures. The redirect stubs retain 165 UAT / 110 production
+not-applicable header observations; final canonical HTML is strictly checked.
+Production passed eight compiled-backend checks and targets its own backend.
+
+All 28 public routes have canonical metadata, connected schema, sitemap/Markdown
+coverage and zero orphans. UAT remains noindex; production is technically
+indexable. The nine new guides passed Chrome responsive checks at 390 × 844.
+The actual production P0 guide was visually checked at 390 px with a loaded
+hero, one H1 and no horizontal overflow; the temporary viewport was reset.
+Hub-to-guide navigation and a contents link were exercised. This is responsive
+Chrome verification, not a physical-device or private parent-session test.
+
+IndexNow accepted the ten materially changed URLs (nine guides plus the blog
+hub) with HTTP 200; 18 unchanged pages retained their reviewed hashes and dates.
+Google Search Console, in the existing verified owner account, showed “Sitemap
+submitted successfully” for the refreshed 28-URL sitemap. The last displayed
+Google discovered-page count was 14, which is not replaced with our inventory
+count. Both selection guides received “Indexing requested” priority-crawl
+receipts. The football guide's previous inspection state was “Discovered –
+currently not indexed”; basketball was “URL is unknown to Google”. The script
+has no GOOGLE_ACCESS_TOKEN, so the native owner-UI sitemap receipt is recorded
+separately. All 28 ordinary pages remain ineligible for the restricted Google
+Indexing API. Submission receipts do not establish inclusion or ranking.
+
+The approved square LetsAimIt runner mark was exported unchanged and uploaded
+to Google Business Profile. Reopening the gallery showed Logo / “Change logo”.
+The owner explicitly deferred the required physical on-site verification video;
+Google still withholds public visibility until verification. No private unit
+address or invented storefront claim was used to complete the upload.
+
+Backend source remains unchanged at digest
+`b6910b43f2c44804fb29eb24bded39f505710eab21e3e6fc39d5fcab8a582b1e`
+(19 migrations, five functions). No backend configuration, secrets, email sender,
+payment operation or business records were changed by this content release.
+See the [sanitized release evidence](../deployment/release-evidence/2026-11-20-editorial-content-gaps.json).
+The publication/report receipts are a documentation-only descendant; its final
+provider source/aliases and unchanged material hashes/dates are checked separately.

@@ -65,18 +65,23 @@ Google Maps links search for the named society. They are explicitly labelled
 society locations, and do not pretend to be a verified LetsAimIt business pin.
 The public LetsAimIt contact remains `+91 88688 86074`.
 
-The user subsequently reported that there is no existing Business Profile and
+At the earlier local-page release, the user reported that there was no existing Business Profile and
 requested its setup. The independent owner-dashboard check could not run: the
 existing Chrome connection detached; a fresh runtime inventory then timed out.
-No Business Profile was created, claimed, renamed or modified. The user's report
+No Business Profile was created, claimed, renamed or modified during that release. The user's report
 is distinct from an independently completed duplicate/ownership check. The
 [Business Profile setup pack](GOOGLE-BUSINESS-PROFILE.md) records the prepared
 fields and remaining operational facts. Browser visual QA and a new manual
 Search Console submission receipt remain unavailable through that session.
 
-For the real Business Profile, the remaining facts to verify are duplicate listings
-and ownership, actual business model, exact meeting points, resident/non-resident
-access and customer-facing hours. A society's address does not prove that a coach
+The later authorized owner session completed the Business Profile setup, including
+the contact fields, approved daily 9 AM–9 PM availability, services and logo.
+The reopened Google Photos gallery shows the saved Logo and “Change logo”.
+Google still requires the physical on-site video; the owner explicitly deferred
+that step until at Nambiar Ellegenza. This supersedes the earlier browser blocker,
+not the need to confirm each coaching group's meeting point and venue access.
+See [the current profile record](GOOGLE-BUSINESS-PROFILE.md).
+A society's address does not prove that a coach
 operates a separately staffed, permanently signed storefront there. Google's
 [Business Profile guidelines](https://support.google.com/business/answer/3038177)
 govern that distinction. Retain the real name **LetsAimIt**; do not add “best”,
@@ -111,8 +116,10 @@ practical selection, learning, venue, school-routine and tracker explanations.
 
 The report now has143supported targets,0unfilled content gaps and57explicit
 access/availability checks. Each resolved query preserves its original service
-route and links to the article’s exact answer section. Content is implemented
-in source; publication and Google inclusion remain separate release gates.
+route and links to the article’s exact answer section. All nine new guides were
+subsequently published on UAT and production from tested source `df470f7`.
+Live checks passed for all 28 public pages, 13 articles, 31 mapped answer anchors
+and 48 unique responsive article-image URLs. Publication does not establish Google inclusion.
 Original baseline counts and Semrush estimates are retained.
 
 Four labelled original diagrams illustrate basketball, sport choice and reading
@@ -120,3 +127,10 @@ practice records. Existing Ellegenza photographs retain their real context.
 No real child’s tracker records, fabricated basketball-session photographs or
 new venue/staffing claims are published. Source details are in
 [the illustration record](EDITORIAL-ILLUSTRATIONS.md).
+
+Google Search Console accepted the refreshed sitemap submission and separate
+priority-crawl requests for both football-choice and basketball-choice guides.
+The owner UI's last displayed discovered-page count was still 14 at submission;
+the live sitemap serves 28 URLs. IndexNow accepted the 10 materially changed
+URLs with HTTP 200; the other 18 were retained. These receipts do not establish
+indexing or rankings. See [the release evidence](../deployment/release-evidence/2026-11-20-editorial-content-gaps.json).

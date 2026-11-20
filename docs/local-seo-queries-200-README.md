@@ -77,10 +77,12 @@ geography, priority, verification status and a concrete next action.
 Nine new original guides and the existing first-football-session guide cover the
 31 former gaps. Every resolved row preserves its original service destination in
 `service_path` and names a real `target_path`, `answer_section` and `answer_title`.
-The report links directly to the answer. New guides are currently source-implemented
-and awaiting the tested UAT/production release; `content_status` distinguishes
-that from publication. The original112/31/57 counts are retained in JSON metadata.
-The57 access/availability checks still require genuine current information.
+The report links directly to the answer. All nine new guides were published on
+UAT and production on 20 November 2026 from tested source `df470f7`; each resolved
+row now records `content_status: published`. All 13 articles, 31 answer anchors
+and 48 unique responsive image URLs passed live checks on both targets.
+The original 112/31/57 counts are retained in JSON metadata.
+The 57 access/availability checks still require genuine current information.
 
 The new guides use actual Ellegenza photographs or labelled original diagrams;
 no basketball-session photo, coach-review claim or academy accreditation is invented.
