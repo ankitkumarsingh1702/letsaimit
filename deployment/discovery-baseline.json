@@ -33,13 +33,43 @@
     },
     {
       "path": "/blogs/",
-      "contentHash": "08dbe71c7e2184cd65c1f2d641c812c57dd17fbe7660c2d8e3d0f44e4416a91f",
-      "lastmod": "2026-11-20T08:27:27+00:00"
+      "contentHash": "ec529e68bafc7e8fb2963602e902e74d520ce3fa4caf4a1ecbd7b6dffb3f40ee",
+      "lastmod": "2026-11-20T12:07:27+00:00"
+    },
+    {
+      "path": "/blogs/balancing-sport-and-school/",
+      "contentHash": "ed0b24dad36adb0618f45a7d270706887bdb6e37fdfb930c34386ee80fa7fe25",
+      "lastmod": "2026-11-20T12:07:27+00:00"
+    },
+    {
+      "path": "/blogs/beginner-basketball-skills/",
+      "contentHash": "9c770fdb6fb99be4b00bf1c37043a439e46240f26817fe8b9af904dfa0522b06",
+      "lastmod": "2026-11-20T12:07:27+00:00"
+    },
+    {
+      "path": "/blogs/beginner-football-rules-and-skills/",
+      "contentHash": "381d0a1398800d5f2b014974eeb5554473a3d2c2ad933b92aa321fc0844a0ce0",
+      "lastmod": "2026-11-20T12:07:27+00:00"
+    },
+    {
+      "path": "/blogs/choosing-basketball-coaching-bengaluru/",
+      "contentHash": "4376e662f9f2a6e280aa678fcb7b2832caea638c51581e14508b7fb95d3d47ee",
+      "lastmod": "2026-11-20T12:07:27+00:00"
+    },
+    {
+      "path": "/blogs/choosing-football-coaching-bengaluru/",
+      "contentHash": "2e9be8de13710d6757f9861da24bce4c83cadbfb24c7e8e0849414d54a85ccae",
+      "lastmod": "2026-11-20T12:07:27+00:00"
     },
     {
       "path": "/blogs/encouragement-without-pressure/",
       "contentHash": "01076af10b851f5f3233049fd8fc209d03a5f2cc1995042b84c3ab8a4afde006",
       "lastmod": "2026-11-20T08:27:27+00:00"
+    },
+    {
+      "path": "/blogs/first-basketball-session/",
+      "contentHash": "da99057ad398c0a56abceeb6d0aefddc5ac4225ff1b63a5ca89efd9df9f3d83c",
+      "lastmod": "2026-11-20T12:07:27+00:00"
     },
     {
       "path": "/blogs/first-community-match/",
@@ -52,9 +82,24 @@
       "lastmod": "2026-11-20T08:27:27+00:00"
     },
     {
+      "path": "/blogs/football-or-basketball-for-beginners/",
+      "contentHash": "7812a4c33ae5e733710f76b6343765607ba67c2283a93be4ea35e1f483db8cb9",
+      "lastmod": "2026-11-20T12:07:27+00:00"
+    },
+    {
       "path": "/blogs/questions-about-training-preparation/",
       "contentHash": "46b78d7945401c5b2d0d9055053228bd46fdb83226d7c5604490b5ca8bcada1c",
       "lastmod": "2026-11-20T08:27:27+00:00"
+    },
+    {
+      "path": "/blogs/society-sports-coaching-checklist/",
+      "contentHash": "deef08a45eb6e92f0e99f51f060689c862ce34ff210d96681ee1161f76f8515b",
+      "lastmod": "2026-11-20T12:07:27+00:00"
+    },
+    {
+      "path": "/blogs/understanding-your-childs-practice-progress/",
+      "contentHash": "c4c7b6fb1c1debea1bd2e5157a19c1dfce7da4127b49c9556067152e49a83512",
+      "lastmod": "2026-11-20T12:07:27+00:00"
     },
     {
       "path": "/coach/",
