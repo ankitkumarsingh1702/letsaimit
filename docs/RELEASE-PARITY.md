@@ -1000,3 +1000,37 @@ payment operation or business records were changed by this content release.
 See the [sanitized release evidence](../deployment/release-evidence/2026-11-20-editorial-content-gaps.json).
 The publication/report receipts are a documentation-only descendant; its final
 provider source/aliases and unchanged material hashes/dates are checked separately.
+
+## 20 November 2026 — Google visibility correction, not a release
+
+The owner challenged the earlier completion wording with two Google screenshots.
+The content-publication work was complete; the requested search-visibility
+outcome was not. The report now names that outcome incomplete, separates content
+availability from URL indexing and query visibility, and records exactly two
+observed query pages rather than implying a 200-query rank measurement.
+
+At approximately 12:46 UTC / 18:16 IST, the owner's existing signed-in Google
+pages for “best football coaching in bangalore” and “football coaching in
+Bengaluru for children” contained no LetsAimIt name/link in their populated
+loaded result regions or visible AI Overviews. The first had Top rated active;
+the second included Google's Bangalore-spelling results. No universal or numeric
+rank, full top-100 scan, traffic result or other198-query observation is inferred.
+
+A fresh Search Console inspection now shows the P0 football-choice guide
+**indexed**, successful smartphone fetch, crawling/indexing allowed and the
+inspected URL selected as canonical. Its last-crawl display was20Nov2026
+17:57:58. That supersedes its earlier pre-request discovery state. The separate
+football service page is **Discovered — currently not indexed**, with no last
+crawl displayed. Both URLs independently returned200 and their own canonical
+and index/follow directives. A single crawl request for that unindexed service
+page was accepted into the priority queue; the inspection remains not indexed
+at the recorded check.
+
+See [the correction record](GOOGLE-VISIBILITY-VERIFICATION.md) and
+[structured observations](../deployment/release-evidence/2026-11-20-google-visibility-verification.json).
+No public app/backend/configuration change or production deployment is claimed.
+The internal report passed generator integrity (200 rows, exact JSON embedding,
+200 Markdown query links) and JavaScript syntax checks. Local file-protocol
+browser preview was blocked; no workaround was attempted and no rendered-report
+QA is claimed. Fresh Google/Search Console observations are independent of that
+local preview. Owner screenshots stay in the ignored local evidence folder.

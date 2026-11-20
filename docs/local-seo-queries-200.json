@@ -4,7 +4,7 @@
     "prepared_on": "2026-11-20",
     "source_review_commit": "c223ed840296beaba52ad5a67d60d6dbfc7582fd",
     "scope": "200 local search targets mapped to five service destinations and first-party editorial guides; publication, indexing and rankings are separate states.",
-    "target_paths_state": "All five local service pages and nine new first-party guides are live on LetsAimIt, covering all31 former content gaps. The site now has28 public canonical pages. Google indexing and query rankings remain separate, unverified outcomes.",
+    "target_paths_state": "Five local service pages and nine new guides are published. Search visibility remains incomplete: the P0 football guide is indexed, the football service page is not indexed, and neither checked Google result page displayed LetsAimIt. Other query positions remain unmeasured.",
     "not_200_ranked_queries": true,
     "not_200_new_pages": true,
     "ranking_verification": "No individual LetsAimIt Google ranking positions measured by this matrix. Keyword-research data is separate from domain rankings.",
@@ -127,7 +127,62 @@
     ],
     "new_guide_count": 9,
     "content_release_state": "published",
-    "content_release_source_sha": "df470f71c0d82ab8e62da7097c3eb13fc582e536"
+    "content_release_source_sha": "df470f71c0d82ab8e62da7097c3eb13fc582e536",
+    "google_visibility_goal_status": "incomplete",
+    "google_url_index_observations": [
+      {
+        "path": "/blogs/choosing-football-coaching-bengaluru/",
+        "url": "https://letsaimit.com/blogs/choosing-football-coaching-bengaluru/",
+        "observedAt": "2026-11-20T12:47:14.489Z",
+        "status": "indexed",
+        "googleMessage": "URL is on Google",
+        "lastCrawlDisplayed": "20 Nov 2026, 17:57:58",
+        "crawler": "Googlebot smartphone",
+        "crawlAllowed": true,
+        "pageFetch": "Successful",
+        "indexingAllowed": true,
+        "userCanonical": "https://letsaimit.com/blogs/choosing-football-coaching-bengaluru/",
+        "googleCanonical": "Inspected URL"
+      },
+      {
+        "path": "/bengaluru/football-coaching/",
+        "url": "https://letsaimit.com/bengaluru/football-coaching/",
+        "observedAt": "2026-11-20T12:48:13.216Z",
+        "status": "not_indexed",
+        "googleMessage": "URL is not on Google",
+        "reason": "Discovered – currently not indexed",
+        "lastCrawlDisplayed": "N/A",
+        "sitemap": "https://letsaimit.com/sitemap.xml"
+      }
+    ],
+    "google_query_observations": [
+      {
+        "query": "best football coaching in bangalore",
+        "observedAt": "2026-11-20T12:46:50.052Z",
+        "shownInLoadedResults": false,
+        "aiOverviewCitationObserved": false,
+        "numericOrganicRank": null,
+        "scope": "Existing signed-in Google result page in Bengaluru; currently rendered content only; no numeric or universal rank measurement",
+        "renderedTextLengths": [
+          6837,
+          0
+        ],
+        "viewQualification": "Top rated filter active"
+      },
+      {
+        "query": "football coaching in Bengaluru for children",
+        "observedAt": "2026-11-20T12:46:50.079Z",
+        "shownInLoadedResults": false,
+        "aiOverviewCitationObserved": false,
+        "numericOrganicRank": null,
+        "scope": "Existing signed-in Google result page in Bengaluru; currently rendered content only; no numeric or universal rank measurement",
+        "renderedTextLengths": [
+          6495
+        ],
+        "viewQualification": "Google included Bangalore-spelling results"
+      }
+    ],
+    "visibility_verification_note": "Two current signed-in Bengaluru Google result pages were checked. Neither displayed LetsAimIt in the loaded results or visible AI Overview. The P0 football guide is indexed; the football service page is discovered but not indexed. The other198 query positions have not been checked. Content completion is not search-outcome completion."
   },
   "summary": {
     "total_queries": 200,
@@ -191,7 +246,7 @@
       "target_path": "/bengaluru/football-coaching/",
       "coverage": "supported",
       "priority": "P1",
-      "verification": "Target candidate; LetsAimIt Google position not measured.",
+      "verification": "Current signed-in Bengaluru Google result page checked on20November2026: no LetsAimIt name/link in the loaded result area or visible AI Overview. Numeric organic rank is not measured. URL indexing is recorded separately in metadata.google_url_index_observations. Target-URL indexing check on20November2026: discovered, currently not indexed. URL status does not establish this query’s rank.",
       "next_action": "Describe the actual children's programme and link both confirmed societies; avoid citywide venue claims."
     },
     {
@@ -204,7 +259,7 @@
       "target_path": "/blogs/choosing-football-coaching-bengaluru/",
       "coverage": "supported",
       "priority": "P0",
-      "verification": "Exact keyword returned by Semrush India; LetsAimIt Google position not measured. First-party guide content answers this topic; Google indexing/ranking remains unverified.",
+      "verification": "Current signed-in Bengaluru Google result page checked on20November2026: no LetsAimIt name/link in the loaded result area or visible AI Overview. Numeric organic rank is not measured. URL indexing is recorded separately in metadata.google_url_index_observations. Target-URL indexing check on20November2026: indexed. URL status does not establish this query’s rank.",
       "next_action": "Read the linked guide section and use its practical checklist. Confirm individual group, timing and access arrangements with the coach where relevant.",
       "previous_coverage": "gap",
       "service_path": "/bengaluru/football-coaching/",
@@ -223,7 +278,7 @@
       "target_path": "/blogs/choosing-football-coaching-bengaluru/",
       "coverage": "supported",
       "priority": "P0",
-      "verification": "Exact keyword returned by Semrush India; LetsAimIt Google position not measured. First-party guide content answers this topic; Google indexing/ranking remains unverified.",
+      "verification": "Exact keyword returned by Semrush India; LetsAimIt Google position not measured. First-party guide content answers this topic; Target-URL indexing check on20November2026: indexed. URL status does not establish this query’s rank.",
       "next_action": "Read the linked guide section and use its practical checklist. Confirm individual group, timing and access arrangements with the coach where relevant.",
       "previous_coverage": "gap",
       "service_path": "/bengaluru/football-coaching/",
@@ -242,7 +297,7 @@
       "target_path": "/blogs/choosing-football-coaching-bengaluru/",
       "coverage": "supported",
       "priority": "P0",
-      "verification": "Exact keyword returned by Semrush India; LetsAimIt Google position not measured. First-party guide content answers this topic; Google indexing/ranking remains unverified.",
+      "verification": "Exact keyword returned by Semrush India; LetsAimIt Google position not measured. First-party guide content answers this topic; Target-URL indexing check on20November2026: indexed. URL status does not establish this query’s rank.",
       "next_action": "Read the linked guide section and use its practical checklist. Confirm individual group, timing and access arrangements with the coach where relevant.",
       "previous_coverage": "gap",
       "service_path": "/bengaluru/football-coaching/",
@@ -261,7 +316,7 @@
       "target_path": "/bengaluru/football-coaching/",
       "coverage": "supported",
       "priority": "P1",
-      "verification": "Target candidate; LetsAimIt Google position not measured.",
+      "verification": "Target candidate; LetsAimIt Google position not measured. Target-URL indexing check on20November2026: discovered, currently not indexed. URL status does not establish this query’s rank.",
       "next_action": "State beginner group matching and how to request a confirmed trial at the named communities."
     },
     {
@@ -274,7 +329,7 @@
       "target_path": "/bengaluru/football-coaching/",
       "coverage": "supported",
       "priority": "P1",
-      "verification": "Target candidate; LetsAimIt Google position not measured.",
+      "verification": "Target candidate; LetsAimIt Google position not measured. Target-URL indexing check on20November2026: discovered, currently not indexed. URL status does not establish this query’s rank.",
       "next_action": "Use soccer as a natural synonym once within substantive football content, with real age eligibility."
     },
     {
@@ -287,7 +342,7 @@
       "target_path": "/bengaluru/football-coaching/",
       "coverage": "supported",
       "priority": "P1",
-      "verification": "Target candidate; LetsAimIt Google position not measured.",
+      "verification": "Target candidate; LetsAimIt Google position not measured. Target-URL indexing check on20November2026: discovered, currently not indexed. URL status does not establish this query’s rank.",
       "next_action": "Show the verified 5–14 programme range and explain that the coach confirms group fit."
     },
     {
@@ -300,7 +355,7 @@
       "target_path": "/bengaluru/football-coaching/",
       "coverage": "supported",
       "priority": "P1",
-      "verification": "Target candidate; LetsAimIt Google position not measured.",
+      "verification": "Target candidate; LetsAimIt Google position not measured. Target-URL indexing check on20November2026: discovered, currently not indexed. URL status does not establish this query’s rank.",
       "next_action": "Explain community-based sessions and identify the two active societies."
     },
     {
@@ -313,7 +368,7 @@
       "target_path": "/bengaluru/football-coaching/",
       "coverage": "supported",
       "priority": "P1",
-      "verification": "Target candidate; LetsAimIt Google position not measured.",
+      "verification": "Target candidate; LetsAimIt Google position not measured. Target-URL indexing check on20November2026: discovered, currently not indexed. URL status does not establish this query’s rank.",
       "next_action": "Link Dhiraj's actual displayed U.S. Soccer credentials; do not imply endorsement of LetsAimIt by U.S. Soccer."
     },
     {
@@ -326,7 +381,7 @@
       "target_path": "/bengaluru/football-coaching/",
       "coverage": "supported",
       "priority": "P1",
-      "verification": "Target candidate; LetsAimIt Google position not measured.",
+      "verification": "Target candidate; LetsAimIt Google position not measured. Target-URL indexing check on20November2026: discovered, currently not indexed. URL status does not establish this query’s rank.",
       "next_action": "Connect the close-to-home programme to its two actual society venues, without a universal travel-time promise."
     },
     {
@@ -339,7 +394,7 @@
       "target_path": "/bengaluru/football-coaching/",
       "coverage": "supported",
       "priority": "P1",
-      "verification": "Target candidate; LetsAimIt Google position not measured.",
+      "verification": "Target candidate; LetsAimIt Google position not measured. Target-URL indexing check on20November2026: discovered, currently not indexed. URL status does not establish this query’s rank.",
       "next_action": "Explain the first-session-free request and confirmation process."
     },
     {
@@ -352,7 +407,7 @@
       "target_path": "/bengaluru/football-coaching/",
       "coverage": "supported",
       "priority": "P1",
-      "verification": "Target candidate; LetsAimIt Google position not measured.",
+      "verification": "Target candidate; LetsAimIt Google position not measured. Target-URL indexing check on20November2026: discovered, currently not indexed. URL status does not establish this query’s rank.",
       "next_action": "Describe fitness activities as part of coaching, without promising medical or performance outcomes."
     },
     {
@@ -365,7 +420,7 @@
       "target_path": "/bengaluru/football-coaching/",
       "coverage": "access/availability-check",
       "priority": "P1",
-      "verification": "Target candidate; LetsAimIt Google position not measured.",
+      "verification": "Target candidate; LetsAimIt Google position not measured. Target-URL indexing check on20November2026: discovered, currently not indexed. URL status does not establish this query’s rank.",
       "next_action": "Confirm current group sizes before promising a small-group service or a maximum coach-to-player ratio."
     },
     {
@@ -378,7 +433,7 @@
       "target_path": "/bengaluru/football-coaching/",
       "coverage": "access/availability-check",
       "priority": "P1",
-      "verification": "Target candidate; LetsAimIt Google position not measured.",
+      "verification": "Target candidate; LetsAimIt Google position not measured. Target-URL indexing check on20November2026: discovered, currently not indexed. URL status does not establish this query’s rank.",
       "next_action": "Show real Bengaluru venues and ask the family to confirm suitability and access; proximity depends on the searcher's location."
     },
     {
@@ -391,7 +446,7 @@
       "target_path": "/bengaluru/football-coaching/",
       "coverage": "access/availability-check",
       "priority": "P1",
-      "verification": "Target candidate; LetsAimIt Google position not measured.",
+      "verification": "Target candidate; LetsAimIt Google position not measured. Target-URL indexing check on20November2026: discovered, currently not indexed. URL status does not establish this query’s rank.",
       "next_action": "Link verified beginner support and venue choices; do not assert these are the nearest sessions for every user."
     },
     {
@@ -423,7 +478,7 @@
       "target_path": "/bengaluru/football-coaching/",
       "coverage": "supported",
       "priority": "P1",
-      "verification": "Target candidate; LetsAimIt Google position not measured.",
+      "verification": "Target candidate; LetsAimIt Google position not measured. Target-URL indexing check on20November2026: discovered, currently not indexed. URL status does not establish this query’s rank.",
       "next_action": "Use the published play-together session structure and relevant parent guide, rather than unmeasured outcome claims."
     },
     {
@@ -436,7 +491,7 @@
       "target_path": "/bengaluru/football-coaching/",
       "coverage": "supported",
       "priority": "P1",
-      "verification": "Target candidate; LetsAimIt Google position not measured.",
+      "verification": "Target candidate; LetsAimIt Google position not measured. Target-URL indexing check on20November2026: discovered, currently not indexed. URL status does not establish this query’s rank.",
       "next_action": "Make the trial confirmation steps and sport/community selection clear."
     },
     {
@@ -449,7 +504,7 @@
       "target_path": "/bengaluru/football-coaching/",
       "coverage": "supported",
       "priority": "P1",
-      "verification": "Target candidate; LetsAimIt Google position not measured.",
+      "verification": "Target candidate; LetsAimIt Google position not measured. Target-URL indexing check on20November2026: discovered, currently not indexed. URL status does not establish this query’s rank.",
       "next_action": "Attribute Dhiraj's former Texas role accurately and distinguish it from his current Bengaluru venues."
     },
     {
@@ -462,7 +517,7 @@
       "target_path": "/bengaluru/football-coaching/",
       "coverage": "supported",
       "priority": "P1",
-      "verification": "Target candidate; LetsAimIt Google position not measured.",
+      "verification": "Target candidate; LetsAimIt Google position not measured. Target-URL indexing check on20November2026: discovered, currently not indexed. URL status does not establish this query’s rank.",
       "next_action": "Present ages, session frequency, duration, communities and the quote/confirmation route together."
     },
     {
@@ -777,7 +832,7 @@
       "target_path": "/blogs/choosing-football-coaching-bengaluru/",
       "coverage": "supported",
       "priority": "P1",
-      "verification": "Target candidate; LetsAimIt Google position not measured. First-party guide content answers this topic; Google indexing/ranking remains unverified.",
+      "verification": "Target candidate; LetsAimIt Google position not measured. First-party guide content answers this topic; Target-URL indexing check on20November2026: indexed. URL status does not establish this query’s rank.",
       "next_action": "Read the linked guide section and use its practical checklist. Confirm individual group, timing and access arrangements with the coach where relevant.",
       "previous_coverage": "gap",
       "service_path": "/bengaluru/",
@@ -834,7 +889,7 @@
       "target_path": "/blogs/choosing-football-coaching-bengaluru/",
       "coverage": "supported",
       "priority": "P1",
-      "verification": "Target candidate; LetsAimIt Google position not measured. First-party guide content answers this topic; Google indexing/ranking remains unverified.",
+      "verification": "Target candidate; LetsAimIt Google position not measured. First-party guide content answers this topic; Target-URL indexing check on20November2026: indexed. URL status does not establish this query’s rank.",
       "next_action": "Read the linked guide section and use its practical checklist. Confirm individual group, timing and access arrangements with the coach where relevant.",
       "previous_coverage": "gap",
       "service_path": "/bengaluru/",
@@ -1060,7 +1115,7 @@
       "target_path": "/blogs/choosing-football-coaching-bengaluru/",
       "coverage": "supported",
       "priority": "P1",
-      "verification": "Target candidate; LetsAimIt Google position not measured. First-party guide content answers this topic; Google indexing/ranking remains unverified.",
+      "verification": "Target candidate; LetsAimIt Google position not measured. First-party guide content answers this topic; Target-URL indexing check on20November2026: indexed. URL status does not establish this query’s rank.",
       "next_action": "Read the linked guide section and use its practical checklist. Confirm individual group, timing and access arrangements with the coach where relevant.",
       "previous_coverage": "gap",
       "service_path": "/bengaluru/",
@@ -1650,7 +1705,7 @@
       "target_path": "/blogs/choosing-football-coaching-bengaluru/",
       "coverage": "supported",
       "priority": "P1",
-      "verification": "Target candidate; LetsAimIt Google position not measured. First-party guide content answers this topic; Google indexing/ranking remains unverified.",
+      "verification": "Target candidate; LetsAimIt Google position not measured. First-party guide content answers this topic; Target-URL indexing check on20November2026: indexed. URL status does not establish this query’s rank.",
       "next_action": "Read the linked guide section and use its practical checklist. Confirm individual group, timing and access arrangements with the coach where relevant.",
       "previous_coverage": "gap",
       "service_path": "/bengaluru/nambiar-bellezea/",
@@ -2214,7 +2269,7 @@
       "target_path": "/blogs/choosing-football-coaching-bengaluru/",
       "coverage": "supported",
       "priority": "P1",
-      "verification": "Target candidate; LetsAimIt Google position not measured. First-party guide content answers this topic; Google indexing/ranking remains unverified.",
+      "verification": "Target candidate; LetsAimIt Google position not measured. First-party guide content answers this topic; Target-URL indexing check on20November2026: indexed. URL status does not establish this query’s rank.",
       "next_action": "Read the linked guide section and use its practical checklist. Confirm individual group, timing and access arrangements with the coach where relevant.",
       "previous_coverage": "gap",
       "service_path": "/bengaluru/nambiar-ellegenza/",

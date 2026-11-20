@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "overallGoalStatus": "incomplete",
+  "verifiedHttp": [
+    {
+      "url": "https://letsaimit.com/blogs/choosing-football-coaching-bengaluru/",
+      "status": 200,
+      "canonical": [
+        "https://letsaimit.com/blogs/choosing-football-coaching-bengaluru/"
+      ],
+      "robots": [
+        "index, follow, max-image-preview:large"
+      ],
+      "observedAt": "2026-11-20T12:46:26.312162+00:00"
+    },
+    {
+      "url": "https://letsaimit.com/bengaluru/football-coaching/",
+      "status": 200,
+      "canonical": [
+        "https://letsaimit.com/bengaluru/football-coaching/"
+      ],
+      "robots": [
+        "index, follow, max-image-preview:large"
+      ],
+      "observedAt": "2026-11-20T12:46:26.821803+00:00"
+    }
+  ],
+  "googleUrlIndexing": [
+    {
+      "path": "/blogs/choosing-football-coaching-bengaluru/",
+      "url": "https://letsaimit.com/blogs/choosing-football-coaching-bengaluru/",
+      "observedAt": "2026-11-20T12:47:14.489Z",
+      "status": "indexed",
+      "googleMessage": "URL is on Google",
+      "lastCrawlDisplayed": "20 Nov 2026, 17:57:58",
+      "crawler": "Googlebot smartphone",
+      "crawlAllowed": true,
+      "pageFetch": "Successful",
+      "indexingAllowed": true,
+      "userCanonical": "https://letsaimit.com/blogs/choosing-football-coaching-bengaluru/",
+      "googleCanonical": "Inspected URL"
+    },
+    {
+      "path": "/bengaluru/football-coaching/",
+      "url": "https://letsaimit.com/bengaluru/football-coaching/",
+      "observedAt": "2026-11-20T12:48:13.216Z",
+      "status": "not_indexed",
+      "googleMessage": "URL is not on Google",
+      "reason": "Discovered – currently not indexed",
+      "lastCrawlDisplayed": "N/A",
+      "sitemap": "https://letsaimit.com/sitemap.xml"
+    }
+  ],
+  "googleSearchObservations": [
+    {
+      "query": "best football coaching in bangalore",
+      "observedAt": "2026-11-20T12:46:50.052Z",
+      "shownInLoadedResults": false,
+      "aiOverviewCitationObserved": false,
+      "numericOrganicRank": null,
+      "scope": "Existing signed-in Google result page in Bengaluru; currently rendered content only; no numeric or universal rank measurement",
+      "renderedTextLengths": [
+        6837,
+        0
+      ],
+      "viewQualification": "Top rated filter active"
+    },
+    {
+      "query": "football coaching in Bengaluru for children",
+      "observedAt": "2026-11-20T12:46:50.079Z",
+      "shownInLoadedResults": false,
+      "aiOverviewCitationObserved": false,
+      "numericOrganicRank": null,
+      "scope": "Existing signed-in Google result page in Bengaluru; currently rendered content only; no numeric or universal rank measurement",
+      "renderedTextLengths": [
+        6495
+      ],
+      "viewQualification": "Google included Bangalore-spelling results"
+    }
+  ],
+  "limitations": [
+    "Two exact searches only; no claim of absence from every result, every location, every user or all200queries.",
+    "Google URL indexing does not establish query ranking or AI Overview citation.",
+    "No scripted rank, Search Console query-performance measurement or zero-traffic claim is inferred from these views."
+  ],
+  "supersedes": "Earlier completion phrasing referred to content publication; the requested Google visibility outcome was not achieved by those implementation checks.",
+  "servicePageCrawlRequest": {
+    "url": "https://letsaimit.com/bengaluru/football-coaching/",
+    "observedAt": "2026-11-20T12:49:43.363Z",
+    "status": "Indexing requested",
+    "queue": "priority crawl queue",
+    "meaning": "Request accepted; URL still reported not indexed at inspection"
+  }
+}

@@ -4,6 +4,14 @@ This plan contains **exactly 200 distinct query candidates**, mapped to five
 published local service pages and substantive first-party guides. It is not a claim of 200 Google rankings, 200 new
 pages, 200 measured search volumes or guaranteed first position.
 
+**The Google visibility goal is not complete.** Publishing content, getting a URL
+indexed and appearing for a particular query are separate outcomes. The two
+checked search pages did not show LetsAimIt. An indexed URL alone does not
+establish a query ranking or an AI Overview citation. The latest URL-specific
+indexing states and scoped search observations belong in the
+[dated search-verification record](GOOGLE-VISIBILITY-VERIFICATION.md), separately
+from this content plan.
+
 - [CSV](local-seo-queries-200.csv): one query per row.
 - [JSON](local-seo-queries-200.json): metadata, counts and the same 200 records.
 - [Keyword-research receipt](local-seo-queries-200-research.json): actual Semrush
@@ -17,10 +25,10 @@ The original planning source and published source are saved in the JSON metadata
 
 ## Coverage and scope
 
-| Label | Queries | Meaning |
+| Content label | Queries | Meaning |
 | --- | ---: | --- |
-| `supported` | 143 | Programme facts or an original guide answer the mapped topic; guide publication status is recorded separately. |
-| `gap` | 0 | All31 former content gaps now have substantive source content and exact section mappings. |
+| Content answer available (`supported`) | 143 | Programme facts or an original guide answer the mapped topic. This is a content count, not a count of indexed URLs, ranking queries or AI Overview citations. |
+| Unwritten answer topics (`gap`) | 0 | The 31 former content gaps now have substantive source content and exact section mappings. This does not complete the Google visibility goal. |
 | `access/availability-check` | 57 | Venue entry, proximity, timing, fees, places or arrangements need confirmation. |
 
 There are 150 city-level candidates, 25 for Nambiar Bellezea and 25 for Nambiar
@@ -91,7 +99,10 @@ Regenerate HTML/Markdown after editing the structured plan with
 `python3 scripts/build-local-query-report.py`. CSV contains the same200 rows
 and their additional answer/service mappings.
 
-No individual LetsAimIt Google position is measured by this artifact. The five
+This artifact's content totals do not measure individual LetsAimIt Google
+positions. Scoped query observations and URL-specific indexing checks are recorded
+separately in the [search-verification record](GOOGLE-VISIBILITY-VERIFICATION.md).
+The five
 pages were released separately through UAT and production; see the
 [release ledger](RELEASE-PARITY.md). This report does not create a Business Profile
 or change backend, email or provider settings.
