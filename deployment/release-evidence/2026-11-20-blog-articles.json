@@ -1,0 +1,279 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-20T08:41:57.745072+00:00",
+  "applicationSourceSha": "c2743379511e35a45a40f894135d58cc29039a54",
+  "featureCommit": "59133d7",
+  "baselineCommit": "c274337",
+  "sourceScope": "Four original LetsAimIt team guides, blog introduction, factual schema and complete public discovery; no backend/runtime processing added",
+  "targets": {
+    "uat": {
+      "origin": "https://uat.letsaimit.com",
+      "branch": "uat",
+      "deploymentId": "dpl_5vkSihYv147W9q5fFRb5z8NFjGXp",
+      "state": "READY",
+      "publicChecks": {
+        "passed": 666,
+        "failed": 0,
+        "notApplicable": 81
+      },
+      "publicRequests": 96,
+      "articleChecks": {
+        "passed": 35,
+        "failed": 0
+      },
+      "indexablePages": 0
+    },
+    "production": {
+      "origin": "https://letsaimit.com",
+      "branch": "main",
+      "deploymentId": "dpl_3bJGYJeS1Mxw7LarUy4Yd75xqe1Y",
+      "state": "READY",
+      "publicChecks": {
+        "passed": 625,
+        "failed": 0,
+        "notApplicable": 54
+      },
+      "publicRequests": 96,
+      "articleChecks": {
+        "passed": 35,
+        "failed": 0
+      },
+      "compiledBackendChecks": {
+        "passed": 8,
+        "failed": 0
+      },
+      "indexablePages": 14
+    }
+  },
+  "sourceChecks": {
+    "nodeTests": 479,
+    "failures": 0,
+    "approvedAssets": 59,
+    "productionProfileBuild": "passed",
+    "uatProfileBuild": "passed",
+    "materialHashesAndDatesMatch": true,
+    "publicPages": 14,
+    "orphans": 0
+  },
+  "browserChecks": {
+    "localDesktopWidth": 1470,
+    "phoneWidth": 390,
+    "phoneDocumentWidth": 390,
+    "articleBodyFontPx": 17,
+    "originalBrandFont": "Plus Jakarta Sans",
+    "hubToArticle": true,
+    "relatedArticle": true,
+    "contentsAnchor": true,
+    "linkedinFilters": true,
+    "nonArticleMetadataCleanup": true,
+    "appConsoleErrorsObserved": 0,
+    "productionPhoneVerified": true,
+    "temporaryViewportReset": true,
+    "limitations": "Chrome responsive viewport, not native iOS/Android browsers."
+  },
+  "articles": [
+    {
+      "path": "/blogs/first-football-session/",
+      "status": 200,
+      "bodyWords": 525,
+      "graphType": "Article"
+    },
+    {
+      "path": "/blogs/encouragement-without-pressure/",
+      "status": 200,
+      "bodyWords": 596,
+      "graphType": "Article"
+    },
+    {
+      "path": "/blogs/questions-about-training-preparation/",
+      "status": 200,
+      "bodyWords": 553,
+      "graphType": "Article"
+    },
+    {
+      "path": "/blogs/first-community-match/",
+      "status": 200,
+      "bodyWords": 601,
+      "graphType": "Article"
+    }
+  ],
+  "backend": {
+    "sourceChanged": false,
+    "migrationsAdded": 0,
+    "functionsChanged": 0,
+    "sourceDigest": "b6910b43f2c44804fb29eb24bded39f505710eab21e3e6fc39d5fcab8a582b1e",
+    "migrationInventory": 19,
+    "functionInventory": 5,
+    "productionBundleTargetsProductionBackend": true,
+    "configurationSecretsChanged": false,
+    "emailsOrPaymentsTriggered": false,
+    "limitation": "Public configuration and unchanged source checks; authenticated journeys were not repeated in this public-content release."
+  },
+  "google": {
+    "source": "Visible Google Search Console UI in verified sc-domain:letsaimit.com owner property; no browser tokens extracted",
+    "blogsStoredIndex": {
+      "status": "URL is on Google, but has issues",
+      "pageIndexing": "Page is indexed",
+      "lastCrawlDisplayed": "20 Nov 2026, 13:33:26",
+      "crawledAs": "Googlebot smartphone",
+      "fetch": "Successful",
+      "indexingAllowed": true,
+      "googleSelectedCanonical": "Inspected URL",
+      "userCanonical": "https://letsaimit.com/blogs/",
+      "oldRichResultIssues": 3,
+      "limitation": "Stored crawl predates this article/schema release; not proof that its refreshed content or four new guides are already indexed."
+    },
+    "blogsLiveTest": {
+      "displayedTime": "20 Nov 2026, 14:04",
+      "status": "URL is available to Google",
+      "pageAvailability": "Page can be indexed",
+      "breadcrumbsValid": 1,
+      "invalidDiscussionForumItemsDetected": 0,
+      "warningsDisplayed": false
+    },
+    "firstGuideLiveTest": {
+      "url": "https://letsaimit.com/blogs/first-football-session/",
+      "displayedTime": "20 Nov 2026, 14:06",
+      "status": "URL is available to Google",
+      "pageAvailability": "Page can be indexed",
+      "breadcrumbsValid": 1,
+      "warningsDisplayed": false,
+      "limitation": "No Article enhancement count was displayed; source/live HTTP tests separately validate Article graph properties."
+    },
+    "postReleaseIndexingRequests": [
+      {
+        "url": "https://letsaimit.com/blogs/",
+        "observedConfirmation": "Indexing requested",
+        "queue": "priority crawl queue",
+        "attemptsThisRelease": 1
+      },
+      {
+        "url": "https://letsaimit.com/blogs/first-football-session/",
+        "observedConfirmation": "Indexing requested",
+        "queue": "priority crawl queue",
+        "attemptsThisRelease": 1
+      },
+      {
+        "url": "https://letsaimit.com/blogs/encouragement-without-pressure/",
+        "observedConfirmation": "Indexing requested",
+        "queue": "priority crawl queue",
+        "attemptsThisRelease": 1
+      },
+      {
+        "url": "https://letsaimit.com/blogs/questions-about-training-preparation/",
+        "observedConfirmation": "Indexing requested",
+        "queue": "priority crawl queue",
+        "attemptsThisRelease": 1
+      },
+      {
+        "url": "https://letsaimit.com/blogs/first-community-match/",
+        "observedConfirmation": "Indexing requested",
+        "queue": "priority crawl queue",
+        "attemptsThisRelease": 1
+      }
+    ],
+    "preRequestNewGuideStates": {
+      "first-football-session": "URL is unknown to Google",
+      "encouragement-without-pressure": "Discovered – currently not indexed",
+      "questions-about-training-preparation": "Discovered – currently not indexed",
+      "first-community-match": "Discovered – currently not indexed"
+    },
+    "sitemap": {
+      "url": "https://letsaimit.com/sitemap.xml",
+      "submissionConfirmation": "Sitemap submitted successfully",
+      "tableStatus": "Success",
+      "discoveredPages": 14,
+      "discoveredVideos": 0,
+      "dateDisplayed": "20 Nov 2026"
+    },
+    "scriptedApiStatus": "No GOOGLE_ACCESS_TOKEN configured; sitemap submission completed via authorized native UI instead. Google Indexing API correctly excludes all14 ordinary content URLs.",
+    "limitation": "Live eligibility, a processed sitemap and accepted crawl requests do not guarantee indexing, ranking or AI Overview updates."
+  },
+  "indexNow": {
+    "liveVerified": true,
+    "changed": 5,
+    "accepted": 5,
+    "httpStatus": 200,
+    "unchanged": 9,
+    "pending": 0,
+    "receipts": {
+      "https://letsaimit.com/blogs/": {
+        "contentHash": "08dbe71c7e2184cd65c1f2d641c812c57dd17fbe7660c2d8e3d0f44e4416a91f",
+        "notifiedAt": "2026-11-20T08:35:04+00:00",
+        "status": 200
+      },
+      "https://letsaimit.com/blogs/first-football-session/": {
+        "contentHash": "70ff080131d3a71337a21a116e1c1c820940e1355a630be7081b3f91fa2bd73e",
+        "notifiedAt": "2026-11-20T08:35:04+00:00",
+        "status": 200
+      },
+      "https://letsaimit.com/blogs/encouragement-without-pressure/": {
+        "contentHash": "01076af10b851f5f3233049fd8fc209d03a5f2cc1995042b84c3ab8a4afde006",
+        "notifiedAt": "2026-11-20T08:35:04+00:00",
+        "status": 200
+      },
+      "https://letsaimit.com/blogs/questions-about-training-preparation/": {
+        "contentHash": "46b78d7945401c5b2d0d9055053228bd46fdb83226d7c5604490b5ca8bcada1c",
+        "notifiedAt": "2026-11-20T08:35:04+00:00",
+        "status": 200
+      },
+      "https://letsaimit.com/blogs/first-community-match/": {
+        "contentHash": "35da7f5c06664ace21a07faaf3b6076af845051e6f766e50ff0f28916f476f61",
+        "notifiedAt": "2026-11-20T08:35:04+00:00",
+        "status": 200
+      }
+    }
+  },
+  "discovery": {
+    "paths": [
+      "/",
+      "/programme/",
+      "/coach/",
+      "/societies/",
+      "/schools/",
+      "/events/",
+      "/blogs/",
+      "/blogs/first-football-session/",
+      "/blogs/encouragement-without-pressure/",
+      "/blogs/questions-about-training-preparation/",
+      "/blogs/first-community-match/",
+      "/privacy/",
+      "/terms/",
+      "/refunds/"
+    ],
+    "contentHashes": {
+      "/": "7624e02b49f829b4fc66b04b79451a79adbd2bd001ebad5b292ec3758debee33",
+      "/programme/": "48b8f29bd16ed49078e576be3bf6e430bdccf7c5f49c185e2ccf6f9c64bb58aa",
+      "/coach/": "01a3a58286f5fffa54196a9e376a6ebb80c61d855863999fa81fb81712f0ef8e",
+      "/societies/": "58110cc5536c670001374a223424150e9e8d8d9c0531a6615082d1d1491d5d85",
+      "/schools/": "520a98fdbe42f09e3b61de0eed7b0fd87ae9d194910fd213e77600ef06afe8c0",
+      "/events/": "0fe5d2157d48de5c5f18787f1325086e0c82c4abe73ab5a76946a31c486f6da9",
+      "/blogs/": "08dbe71c7e2184cd65c1f2d641c812c57dd17fbe7660c2d8e3d0f44e4416a91f",
+      "/blogs/first-football-session/": "70ff080131d3a71337a21a116e1c1c820940e1355a630be7081b3f91fa2bd73e",
+      "/blogs/encouragement-without-pressure/": "01076af10b851f5f3233049fd8fc209d03a5f2cc1995042b84c3ab8a4afde006",
+      "/blogs/questions-about-training-preparation/": "46b78d7945401c5b2d0d9055053228bd46fdb83226d7c5604490b5ca8bcada1c",
+      "/blogs/first-community-match/": "35da7f5c06664ace21a07faaf3b6076af845051e6f766e50ff0f28916f476f61",
+      "/privacy/": "93baf1254d487a7a6afb12a519cb87a295d2a6b37c058f37036eea1b1c735572",
+      "/terms/": "ef06c6bbf4e8cd28b92f60397a17ae724f2fda2082eacb52398c11887df9afb5",
+      "/refunds/": "62f1faa81053ee8c2c0774cca88889fb931690e7dfa7a93119070fea5f634f15"
+    },
+    "lastmod": {
+      "/": "2026-11-19T17:07:45+00:00",
+      "/programme/": "2026-11-19T17:07:45+00:00",
+      "/coach/": "2026-11-19T17:07:45+00:00",
+      "/societies/": "2026-11-19T17:07:45+00:00",
+      "/schools/": "2026-11-19T17:07:45+00:00",
+      "/events/": "2026-11-19T17:07:45+00:00",
+      "/blogs/": "2026-11-20T08:27:27+00:00",
+      "/blogs/first-football-session/": "2026-11-20T08:27:27+00:00",
+      "/blogs/encouragement-without-pressure/": "2026-11-20T08:27:27+00:00",
+      "/blogs/questions-about-training-preparation/": "2026-11-20T08:27:27+00:00",
+      "/blogs/first-community-match/": "2026-11-20T08:27:27+00:00",
+      "/privacy/": "2026-11-19T17:07:45+00:00",
+      "/terms/": "2026-11-19T17:07:45+00:00",
+      "/refunds/": "2026-11-19T17:07:45+00:00"
+    }
+  },
+  "historicalEvidenceNote": "Original120-query matrix and13:32 audit remain snapshots of aae92e9 before this release. They are not120 current ranked queries.",
+  "evidenceCommitNote": "A later documentation-only descendant may carry this receipt without changing the tested runtime or material content hashes."
+}

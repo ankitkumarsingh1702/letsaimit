@@ -766,3 +766,66 @@ the five original functions and stored secret digests remained unchanged.
 No additional recipient or unrelated test email was introduced. The corrected
 subject is **Coach Dhiraj’s reading list | LetsAimIt**. One Gmail receipt is
 observed; SMTP acceptance is the verified boundary for the other recipients.
+
+## 20 November 2026 — First-party articles and corrected blog schema
+
+Following the user's request to complete the visibility-audit actions, published
+four original **LetsAimIt team** guides. These cover a first football session,
+encouragement without pressure, training-preparation questions and a first
+community match. The hub now states the publication model clearly; Dhiraj's
+five attributed LinkedIn previews retain their original links and known dates.
+No new guide is represented as written or reviewed by Dhiraj. Undated off-site
+works are WebPage references rather than incomplete SocialMediaPosting rich
+results. The original Markdown label/date separator is also corrected.
+
+Application source `59133d7`, with reviewed discovery baseline
+`c2743379511e35a45a40f894135d58cc29039a54`, passed 479 Node tests and verification
+of all 59 approved assets. Both target-profile builds cover 14 public pages,
+zero orphans, matching material hashes/dates, production-only indexing and
+complete metadata, graph, sitemap and Markdown output. Modification dates derive
+from the committed source; the nine unchanged public pages keep their old dates.
+
+The same tested source was fast-forwarded through `uat` and `main`, under the
+user's prior explicit UAT-and-production approval for this SEO work. UAT
+deployment `dpl_5vkSihYv147W9q5fFRb5z8NFjGXp` and production deployment
+`dpl_3bJGYJeS1Mxw7LarUy4Yd75xqe1Y` were READY on their canonical domains.
+GET-only checks passed: UAT 666 public +35 article checks; production 625 public
++35 article +8 compiled-backend configuration checks. All canonical, content,
+schema, provenance and final-response checks stay strict. The 81/54 nonapplicable
+header observations concern Vercel-generated redirect stubs, not HTML documents.
+
+Chrome checks at 1470 and 390 px verified hub-to-article reading, contents anchors,
+related guides, retained LinkedIn filters and correct metadata after navigation.
+Production phone-width reading has 17 px left-aligned body copy, loaded images,
+one H1 and no horizontal overflow. No application console errors were observed.
+This is responsive Chrome evidence, not native iOS/Android testing.
+
+Google's stored Blogs inspection now reports **Page is indexed**, with Googlebot
+smartphone's successful crawl at 13:33:26 and the inspected URL selected as
+canonical. That crawl predates this release and still carries the former three
+warnings. The **fresh 14:04 live test of the corrected hub has no such warnings**
+and one valid breadcrumb. The first new guide's 14:06 live test is also available
+to Google with a valid breadcrumb and no displayed warnings. All four new guides
+pass the separate full-body/Article/author/date/image/breadcrumb HTTP checks.
+
+Search Console confirmed one post-release priority crawl request for each of the
+changed hub and four new guides. The resubmitted sitemap shows **Success · 14
+discovered pages**. IndexNow returned HTTP 200 for the five changed URLs; nine
+unchanged URLs were retained without resubmission. The scripted Google-token path
+is still unconfigured; its supported sitemap operation was completed through
+the verified owner UI, without extracting browser tokens. All 14 ordinary URLs
+remain ineligible for Google's restricted JobPosting/livestream Indexing API.
+These receipts do not establish new-article indexing, rankings or an updated
+AI Overview. The original 120-query matrix remains the pre-release baseline.
+
+The backend source digest remains
+`b6910b43f2c44804fb29eb24bded39f505710eab21e3e6fc39d5fcab8a582b1e`
+(19 migrations, five functions). No migration, credential, sender, worker,
+registration, payment or authentication setting changed. Production's rebuilt
+public bundle independently targets its own backend. No email or payment was
+triggered; authenticated journeys were not repeated for this public-content edit.
+
+Sanitized evidence: [blog article release](../deployment/release-evidence/2026-11-20-blog-articles.json).
+A documentation-only descendant can carry this receipt while preserving the
+tested runtime and discovery hashes; final domain/source binding is checked
+separately after that evidence commit.
