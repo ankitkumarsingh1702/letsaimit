@@ -829,3 +829,74 @@ Sanitized evidence: [blog article release](../deployment/release-evidence/2026-1
 A documentation-only descendant can carry this receipt while preserving the
 tested runtime and discovery hashes; final domain/source binding is checked
 separately after that evidence commit.
+
+## 20 November 2026 — Bengaluru and society search destinations
+
+Added five distinct public destinations: a Bengaluru hub, football and basketball
+pages, and one page each for Nambiar Bellezea and Nambiar Ellegenza. Their
+location references use the developer's public society information; coaching
+arrival, batch timing, fees and visitor entry remain matters to confirm with the
+coach. Society map-search links are labelled as society locations rather than
+verified LetsAimIt pins. The connected graph describes Services and real Places,
+without fabricated branches, coordinates, opening hours, reviews or rankings.
+Home, Programme, Societies and contextual links expose all five pages.
+
+The separate 200-query matrix covers 150 Bengaluru and 25 queries per society.
+It retains 112 supported facts/guides, 31 content gaps and 57 access/availability
+checks as planning classifications. Eight exact phrases have actual Semrush
+India estimates; the other 192 have no measured volume. No query-level LetsAimIt
+Google position was measured, and publication does not turn these into 200
+ranked queries. The searchable report, Markdown, CSV and JSON are in `docs/`.
+
+Feature source `0f5533e` and reviewed baseline
+`e367793c2220877ee244af01e58bcf44d0cffbb6` were tested on UAT and then promoted
+from the same source to production under the user's earlier explicit instruction
+for both targets. The implementation passed 480 Node tests; the final content
+adjustment passed 16 focused discovery/schema/routing tests. All 59 approved
+assets and both target-profile builds passed. Both inventories contain 19 public
+pages, zero orphans and matching material hashes/dates. Eleven unchanged public
+pages retain their previous dates; eight pages have changed content.
+
+UAT deployment `dpl_9uYF39WnMFv4ZuBKkA3zyata7GyE` and production deployment
+`dpl_6qZCdmVPhzThmtkRvtGumVX7njSi` were READY on their canonical domains at
+the tested source. GET-only checks passed: UAT 876 public +49 local-page checks;
+production 825 public +49 local-page +8 compiled-backend checks. The 111/74
+not-applicable header observations concern Vercel-generated redirect stubs;
+canonical HTML, redirect destinations, real 404s, content, schema and target
+robots checks remain strict. All five full page bodies and visible FAQs are
+present in the server-generated HTML. UAT remains noindex; production permits
+indexing for all 19 public canonical URLs.
+
+IndexNow returned HTTP 200 for the eight changed URLs and retained 11 unchanged
+receipts. The existing Google sitemap URL now serves the complete 19-page
+inventory. A fresh Google Search Console submission, local-page inspection or
+crawl-request receipt was not observed: Chrome detached and the fresh browser
+inventory failed, including after a runtime reset. The script reports the
+missing Google API access token explicitly. All 19 ordinary content pages remain
+ineligible for Google's restricted JobPosting/livestream Indexing API. The
+previous 14-page Google sitemap receipt remains historical evidence, not proof
+that Google has processed the new five pages. No new rendered desktop/phone
+journey is claimed while browser access is unavailable.
+
+The user reports no existing Google Business Profile and requested preparation.
+The [setup pack](GOOGLE-BUSINESS-PROFILE.md) and structured draft are ready, with
+the true public name, phone, website, description and service copy. No listing
+has been created or verified. The owner subsequently confirmed availability every day, 09:00–21:00 IST;
+that is saved in the draft separately from coaching batch times. Actual
+operating-base/model, in-person availability and authority for recurring classes
+are not established by the website; those facts and a working owner session
+remain pending. The supplied third-party corporate record
+does not establish a Bengaluru venue, so its Haridwar registered office was not
+used as a coaching address or added to public Organization schema.
+
+The backend source digest remains
+`b6910b43f2c44804fb29eb24bded39f505710eab21e3e6fc39d5fcab8a582b1e`
+(19 migrations, five functions). No backend code, migration, credential, sender,
+worker, payment or Auth configuration changed. Production's rebuilt browser
+bundle independently targets its own backend. No email or payment was triggered;
+authenticated journeys were not repeated for this public-content release.
+
+Sanitized evidence: [local search release](../deployment/release-evidence/2026-11-20-bengaluru-local-search.json).
+A documentation-only descendant carries the publication state and this receipt;
+its final source/domain binding is checked without repeating unchanged runtime
+tests or search-engine notifications.

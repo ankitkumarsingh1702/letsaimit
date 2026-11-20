@@ -1,7 +1,7 @@
 # 200 Bengaluru and society search targets
 
 This plan contains **exactly 200 distinct query candidates**, mapped to five
-proposed local landing pages. It is not a claim of 200 Google rankings, 200 new
+published local landing pages. It is not a claim of 200 Google rankings, 200 new
 pages, 200 measured search volumes or guaranteed first position.
 
 - [CSV](local-seo-queries-200.csv): one query per row.
@@ -9,11 +9,11 @@ pages, 200 measured search volumes or guaranteed first position.
 - [Keyword-research receipt](local-seo-queries-200-research.json): actual Semrush
   responses for two focused India-database keyword seeds.
 
-The proposed target paths are `/bengaluru/`, its football and basketball pages,
-and dedicated Nambiar Bellezea and Nambiar Ellegenza pages. These paths were
-**planned at preparation time**. The release must independently establish their
-publication, eligibility and indexed state. The original source commit is saved
-in the JSON metadata.
+The target paths are `/bengaluru/`, its football and basketball pages,
+and dedicated Nambiar Bellezea and Nambiar Ellegenza pages. These paths passed production HTTP, content and discovery checks on **20 November
+2026**, from tested source `e367793`. The planning classifications below retain
+their baseline meaning; publication does not establish Google indexing or rankings.
+The original planning source and published source are saved in the JSON metadata.
 
 ## Coverage and scope
 
@@ -69,8 +69,10 @@ volume. Irrelevant club, ticket and competitor-name results were excluded.
 The JSON and CSV contain 200 matching rows with sequential `L001`–`L200` IDs.
 All queries are unique after Unicode normalization, case folding, punctuation
 removal and whitespace collapse. Every target belongs to the five explicit
-planned routes, every coverage value is valid, and every row identifies intent,
+published routes, every coverage value is valid, and every row identifies intent,
 geography, priority, verification status and a concrete next action.
 
-No individual LetsAimIt Google position is measured by this artifact. No runtime
-code, deployment, Business Profile, backend, email or provider setting was changed.
+No individual LetsAimIt Google position is measured by this artifact. The five
+pages were released separately through UAT and production; see the
+[release ledger](RELEASE-PARITY.md). This report does not create a Business Profile
+or change backend, email or provider settings.

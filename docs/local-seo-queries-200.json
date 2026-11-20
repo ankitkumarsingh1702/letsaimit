@@ -4,7 +4,7 @@
     "prepared_on": "2026-11-20",
     "source_review_commit": "c223ed840296beaba52ad5a67d60d6dbfc7582fd",
     "scope": "Editorial local-search and content-coverage plan, not observed Google positions or ranking guarantees.",
-    "target_paths_state": "Five proposed local landing-page paths; planned at preparation, publication and index state must be verified separately by the release.",
+    "target_paths_state": "All five destination pages were published and passed production HTTP/content/discovery checks on 20 November 2026, from tested source e367793. Google indexing and query rankings remain unverified.",
     "not_200_ranked_queries": true,
     "not_200_new_pages": true,
     "ranking_verification": "No individual LetsAimIt Google ranking positions measured by this matrix. Keyword-research data is separate from domain rankings.",
@@ -84,7 +84,9 @@
         "report": "phrase_related",
         "not_a_domain_ranking": true
       }
-    ]
+    ],
+    "publication_state": "published",
+    "published_source_sha": "e367793c2220877ee244af01e58bcf44d0cffbb6"
   },
   "summary": {
     "total_queries": 200,

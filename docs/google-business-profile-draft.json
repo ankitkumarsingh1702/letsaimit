@@ -1,0 +1,69 @@
+{
+  "prepared_on": "2026-11-20",
+  "status": "draft_not_submitted",
+  "provider_profile_id": null,
+  "provider_maps_url": null,
+  "provider_verification_status": "not_started",
+  "existing_profile_check": "owner_reports_none_signed_in_check_pending",
+  "public_fields": {
+    "name": "LetsAimIt",
+    "website": "https://letsaimit.com/",
+    "phone": "+918868886074",
+    "country": "IN",
+    "description": "LetsAimIt offers football, basketball and fitness activities for children aged 5–14 at Nambiar Bellezea and Nambiar Ellegenza in Bengaluru. Founded by youth football coach Dhiraj Mishra, the programme brings together warm-ups, skill practice and playing as a group. Sessions run twice a week and last 45–60 minutes. Parents can contact the team to discuss their child's age, experience and preferred sport, and confirm the group, timing, meeting point and community entry arrangements before attending. Available for enquiries every day, 9 am–9 pm IST.",
+    "category_id": null,
+    "location_model": null,
+    "business_address": null,
+    "show_business_address": null,
+    "service_areas": null,
+    "opening_hours": null,
+    "opening_date": null
+  },
+  "category_search_candidates_not_validated": [
+    "Sports coaching",
+    "Football coach",
+    "Basketball coach"
+  ],
+  "services": [
+    {
+      "name": "Children's football coaching",
+      "description": "Football coaching for ages 5–14 at Nambiar Bellezea and Nambiar Ellegenza, with warm-up, skill practice and group play. Confirm the child's group and session arrangements before attending.",
+      "price": null,
+      "website_reference": "https://letsaimit.com/bengaluru/football-coaching/"
+    },
+    {
+      "name": "Children's basketball coaching",
+      "description": "Basketball coaching for ages 5–14 at Nambiar Bellezea and Nambiar Ellegenza, with fitness activities during sessions. Ask about the current group, timing and entry arrangements.",
+      "price": null,
+      "website_reference": "https://letsaimit.com/bengaluru/basketball-coaching/"
+    }
+  ],
+  "current_coaching_communities_not_business_addresses": [
+    "Nambiar Bellezea, Bengaluru",
+    "Nambiar Ellegenza, Bengaluru"
+  ],
+  "required_operating_facts": [
+    "Actual operating base and whether customers visit it",
+    "Whether the confirmed daily 09:00–21:00 availability includes in-person customer service under the selected location model",
+    "Authority to operate or represent the recurring coaching location",
+    "Exact customer entrance and permanent LetsAimIt signage if claiming a storefront"
+  ],
+  "documentation": "docs/GOOGLE-BUSINESS-PROFILE.md",
+  "automation_note": "Preparation artifact only, not a Google API request body. No profile ID, category, address, service-area mode or provider verification has been inferred.",
+  "owner_confirmed_availability": {
+    "source": "Owner instruction on 20 November 2026",
+    "timezone": "Asia/Kolkata",
+    "days": [
+      "MONDAY",
+      "TUESDAY",
+      "WEDNESDAY",
+      "THURSDAY",
+      "FRIDAY",
+      "SATURDAY",
+      "SUNDAY"
+    ],
+    "opens": "09:00",
+    "closes": "21:00",
+    "meaning": "Daily availability confirmed by owner; not a claim of all-day coaching classes. Match actual customer service and selected location model before publishing Google opening hours."
+  }
+}

@@ -65,13 +65,16 @@ Google Maps links search for the named society. They are explicitly labelled
 society locations, and do not pretend to be a verified LetsAimIt business pin.
 The public LetsAimIt contact remains `+91 88688 86074`.
 
-The owner-dashboard check could not run: the existing Chrome connection detached;
-a fresh runtime inventory then timed out. No Business Profile was created,
-claimed, renamed or modified. This is **unverified ownership/access**, not evidence
-that LetsAimIt has no profile. Browser visual QA and a new manual Search Console
-submission receipt also remain unavailable through that disconnected session.
+The user subsequently reported that there is no existing Business Profile and
+requested its setup. The independent owner-dashboard check could not run: the
+existing Chrome connection detached; a fresh runtime inventory then timed out.
+No Business Profile was created, claimed, renamed or modified. The user's report
+is distinct from an independently completed duplicate/ownership check. The
+[Business Profile setup pack](GOOGLE-BUSINESS-PROFILE.md) records the prepared
+fields and remaining operational facts. Browser visual QA and a new manual
+Search Console submission receipt remain unavailable through that session.
 
-For the real Business Profile, the remaining facts to verify are its existing URL
+For the real Business Profile, the remaining facts to verify are duplicate listings
 and ownership, actual business model, exact meeting points, resident/non-resident
 access and customer-facing hours. A society's address does not prove that a coach
 operates a separately staffed, permanently signed storefront there. Google's
@@ -83,3 +86,15 @@ established name. No permission or listing was changed to bypass verification.
 Source, build, deployed HTTP checks and provider receipts are recorded separately
 in [the release ledger](RELEASE-PARITY.md). A successful technical release does
 not establish an indexed local page, a Google Maps position or a ranking gain.
+
+## Publication receipt
+
+On 20 November 2026, tested source `e367793` was released to UAT and production.
+Both serve all five pages and the complete 19-page discovery inventory. UAT
+remains noindex. Production passed 825 public-response checks, 49 local-page
+checks and eight compiled-backend checks, with zero failures. All 19 production
+URLs are technically indexable; IndexNow accepted the eight changed URLs with
+HTTP 200, while 11 unchanged URLs were retained. The existing Google sitemap URL
+now serves 19 pages, but no fresh Google processing or local-page indexing
+receipt was observed. See the
+[sanitized release evidence](../deployment/release-evidence/2026-11-20-bengaluru-local-search.json).

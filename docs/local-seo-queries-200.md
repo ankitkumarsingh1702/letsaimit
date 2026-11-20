@@ -2,13 +2,13 @@
 
 Prepared 20 November 2026. These are exactly 200 distinct target queries, not 200 proven rankings or 200 new pages. No LetsAimIt #1 position has been measured or promised.
 
-Five proposed local landing-page paths; planned at preparation, publication and index state must be verified separately by the release.
+All five destination pages were published and passed production HTTP/content/discovery checks on 20 November 2026, from tested source e367793. Google indexing and query rankings remain unverified.
 
 [Searchable report](local-seo-queries-200.html) · [CSV](local-seo-queries-200.csv) · [Scope notes](local-seo-queries-200-README.md) · [Keyword research](local-seo-queries-200-research.json)
 
 **Coverage:** supported facts do not prove publication or ranking; gaps need accurate content; access/availability checks need real confirmation. “Best” is searcher intent, not a proven award or market position.
 
-| ID | Search query — click to check Google | Target page — planned until release | Coverage |
+| ID | Search query — click to check Google | Target page | Coverage |
 | --- | --- | --- | --- |
 | L001 | [football coaching in Bengaluru for children](https://www.google.com/search?q=football%20coaching%20in%20Bengaluru%20for%20children) | [/bengaluru/football-coaching/](https://letsaimit.com/bengaluru/football-coaching/) | supported |
 | L002 | [best football coaching in bangalore](https://www.google.com/search?q=best%20football%20coaching%20in%20bangalore) | [/bengaluru/football-coaching/](https://letsaimit.com/bengaluru/football-coaching/) | gap |

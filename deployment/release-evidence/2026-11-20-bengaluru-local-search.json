@@ -1,0 +1,307 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-20T09:28:42.031648+00:00",
+  "applicationSourceSha": "e367793c2220877ee244af01e58bcf44d0cffbb6",
+  "featureCommit": "0f5533e",
+  "baselineCommit": "e367793",
+  "sourceScope": "Five distinct Bengaluru/sport/society coaching pages, contextual links, factual Service/Place graph and 200-query research plan; existing React/Vite/Supabase flows preserved",
+  "authorization": "Ongoing SEO work under the user's earlier explicit UAT-and-production instruction; identical tested source advanced through uat then main",
+  "publicPages": 19,
+  "newLocalPages": [
+    {
+      "path": "/bengaluru/",
+      "status": 200,
+      "mainWords": 495,
+      "serviceAreas": [
+        "Nambiar Bellezea",
+        "Nambiar Ellegenza"
+      ]
+    },
+    {
+      "path": "/bengaluru/football-coaching/",
+      "status": 200,
+      "mainWords": 602,
+      "serviceAreas": [
+        "Nambiar Bellezea",
+        "Nambiar Ellegenza"
+      ]
+    },
+    {
+      "path": "/bengaluru/basketball-coaching/",
+      "status": 200,
+      "mainWords": 596,
+      "serviceAreas": [
+        "Nambiar Bellezea",
+        "Nambiar Ellegenza"
+      ]
+    },
+    {
+      "path": "/bengaluru/nambiar-bellezea/",
+      "status": 200,
+      "mainWords": 460,
+      "serviceAreas": [
+        "Nambiar Bellezea"
+      ]
+    },
+    {
+      "path": "/bengaluru/nambiar-ellegenza/",
+      "status": 200,
+      "mainWords": 480,
+      "serviceAreas": [
+        "Nambiar Ellegenza"
+      ]
+    }
+  ],
+  "sourceChecks": {
+    "fullNodeTests": 480,
+    "finalFocusedTests": 16,
+    "failed": 0,
+    "approvedAssets": 59,
+    "uatProfileBuild": "passed",
+    "productionProfileBuild": "passed",
+    "materialHashesAndDatesMatch": true,
+    "orphans": 0,
+    "minimumContextualInboundLinks": 2
+  },
+  "targets": {
+    "uat": {
+      "origin": "https://uat.letsaimit.com",
+      "branch": "uat",
+      "deploymentId": "dpl_9uYF39WnMFv4ZuBKkA3zyata7GyE",
+      "state": "READY",
+      "publicChecks": {
+        "passed": 876,
+        "failed": 0,
+        "notApplicable": 111
+      },
+      "publicRequests": 126,
+      "localPageChecks": {
+        "passed": 49,
+        "failed": 0
+      },
+      "localPageRequests": 5,
+      "indexablePages": 0
+    },
+    "production": {
+      "origin": "https://letsaimit.com",
+      "branch": "main",
+      "deploymentId": "dpl_6qZCdmVPhzThmtkRvtGumVX7njSi",
+      "state": "READY",
+      "publicChecks": {
+        "passed": 825,
+        "failed": 0,
+        "notApplicable": 74
+      },
+      "publicRequests": 126,
+      "localPageChecks": {
+        "passed": 49,
+        "failed": 0
+      },
+      "localPageRequests": 5,
+      "indexablePages": 19,
+      "compiledBackendChecks": {
+        "passed": 8,
+        "failed": 0
+      }
+    }
+  },
+  "queryPlan": {
+    "count": 200,
+    "normalizedUnique": 200,
+    "geography": {
+      "Bengaluru": 150,
+      "Nambiar Bellezea": 25,
+      "Nambiar Ellegenza": 25
+    },
+    "coverage": {
+      "supported": 112,
+      "gap": 31,
+      "access/availability-check": 57
+    },
+    "exactQueriesWithSemrushIndiaEstimates": 8,
+    "remainingQueriesWithNoMeasuredVolume": 192,
+    "rankingsMeasured": 0,
+    "publicationState": "Five destination pages published; baseline query classifications retained; no indexing or rank guarantee"
+  },
+  "discovery": {
+    "paths": [
+      "/",
+      "/programme/",
+      "/coach/",
+      "/societies/",
+      "/schools/",
+      "/events/",
+      "/blogs/",
+      "/blogs/first-football-session/",
+      "/blogs/encouragement-without-pressure/",
+      "/blogs/questions-about-training-preparation/",
+      "/blogs/first-community-match/",
+      "/bengaluru/",
+      "/bengaluru/football-coaching/",
+      "/bengaluru/basketball-coaching/",
+      "/bengaluru/nambiar-bellezea/",
+      "/bengaluru/nambiar-ellegenza/",
+      "/privacy/",
+      "/terms/",
+      "/refunds/"
+    ],
+    "contentHashes": {
+      "/": "46ba4fd3e3f09a14ee2f8ce2a59020729e2daf74e19208e83e2287d4dd5882a0",
+      "/programme/": "03bcd3e1ada718ef771632817a981d7b6207d64243ec7bfcaec0d50bd6eb1000",
+      "/coach/": "01a3a58286f5fffa54196a9e376a6ebb80c61d855863999fa81fb81712f0ef8e",
+      "/societies/": "7fbed26b891998368ba1f07ddfcd3042d1d226b5bfaa7267976c35bed2114050",
+      "/schools/": "520a98fdbe42f09e3b61de0eed7b0fd87ae9d194910fd213e77600ef06afe8c0",
+      "/events/": "0fe5d2157d48de5c5f18787f1325086e0c82c4abe73ab5a76946a31c486f6da9",
+      "/blogs/": "08dbe71c7e2184cd65c1f2d641c812c57dd17fbe7660c2d8e3d0f44e4416a91f",
+      "/blogs/first-football-session/": "70ff080131d3a71337a21a116e1c1c820940e1355a630be7081b3f91fa2bd73e",
+      "/blogs/encouragement-without-pressure/": "01076af10b851f5f3233049fd8fc209d03a5f2cc1995042b84c3ab8a4afde006",
+      "/blogs/questions-about-training-preparation/": "46b78d7945401c5b2d0d9055053228bd46fdb83226d7c5604490b5ca8bcada1c",
+      "/blogs/first-community-match/": "35da7f5c06664ace21a07faaf3b6076af845051e6f766e50ff0f28916f476f61",
+      "/bengaluru/": "041107c155f257320f996cbb8961129d1234330d791e29995df57ff373dd1d21",
+      "/bengaluru/football-coaching/": "bf850476de0cf50ee16221ae60c6f98f9a17eccdfad9646fa5443ee1c912088f",
+      "/bengaluru/basketball-coaching/": "51c5f7ed9a522949431fdf91442d7400e91c8f2f03699842d755d808b13352d6",
+      "/bengaluru/nambiar-bellezea/": "e40fc5b2c8e641ba294f0873c18fde131e70fb7595052ba075d18f92bf0a003d",
+      "/bengaluru/nambiar-ellegenza/": "9de62e62d97889a8059af01325108d134ca4b721862c63dec463cf5341ae45b9",
+      "/privacy/": "93baf1254d487a7a6afb12a519cb87a295d2a6b37c058f37036eea1b1c735572",
+      "/terms/": "ef06c6bbf4e8cd28b92f60397a17ae724f2fda2082eacb52398c11887df9afb5",
+      "/refunds/": "62f1faa81053ee8c2c0774cca88889fb931690e7dfa7a93119070fea5f634f15"
+    },
+    "lastmod": {
+      "/": "2026-11-20T09:19:04+00:00",
+      "/programme/": "2026-11-20T09:19:04+00:00",
+      "/coach/": "2026-11-19T17:07:45+00:00",
+      "/societies/": "2026-11-20T09:19:04+00:00",
+      "/schools/": "2026-11-19T17:07:45+00:00",
+      "/events/": "2026-11-19T17:07:45+00:00",
+      "/blogs/": "2026-11-20T08:27:27+00:00",
+      "/blogs/first-football-session/": "2026-11-20T08:27:27+00:00",
+      "/blogs/encouragement-without-pressure/": "2026-11-20T08:27:27+00:00",
+      "/blogs/questions-about-training-preparation/": "2026-11-20T08:27:27+00:00",
+      "/blogs/first-community-match/": "2026-11-20T08:27:27+00:00",
+      "/bengaluru/": "2026-11-20T09:19:04+00:00",
+      "/bengaluru/football-coaching/": "2026-11-20T09:19:04+00:00",
+      "/bengaluru/basketball-coaching/": "2026-11-20T09:19:04+00:00",
+      "/bengaluru/nambiar-bellezea/": "2026-11-20T09:19:04+00:00",
+      "/bengaluru/nambiar-ellegenza/": "2026-11-20T09:19:04+00:00",
+      "/privacy/": "2026-11-19T17:07:45+00:00",
+      "/terms/": "2026-11-19T17:07:45+00:00",
+      "/refunds/": "2026-11-19T17:07:45+00:00"
+    },
+    "changedUrls": [
+      "https://letsaimit.com/",
+      "https://letsaimit.com/programme/",
+      "https://letsaimit.com/societies/",
+      "https://letsaimit.com/bengaluru/",
+      "https://letsaimit.com/bengaluru/football-coaching/",
+      "https://letsaimit.com/bengaluru/basketball-coaching/",
+      "https://letsaimit.com/bengaluru/nambiar-bellezea/",
+      "https://letsaimit.com/bengaluru/nambiar-ellegenza/"
+    ],
+    "unchangedUrls": 11,
+    "productionIndexable": 19,
+    "uatIndexable": 0
+  },
+  "indexNow": {
+    "liveVerified": true,
+    "changed": 8,
+    "unchanged": 11,
+    "accepted": 8,
+    "pending": 0,
+    "httpStatus": 200,
+    "receipts": {
+      "https://letsaimit.com/": {
+        "contentHash": "46ba4fd3e3f09a14ee2f8ce2a59020729e2daf74e19208e83e2287d4dd5882a0",
+        "notifiedAt": "2026-11-20T09:26:58+00:00",
+        "status": 200
+      },
+      "https://letsaimit.com/programme/": {
+        "contentHash": "03bcd3e1ada718ef771632817a981d7b6207d64243ec7bfcaec0d50bd6eb1000",
+        "notifiedAt": "2026-11-20T09:26:58+00:00",
+        "status": 200
+      },
+      "https://letsaimit.com/societies/": {
+        "contentHash": "7fbed26b891998368ba1f07ddfcd3042d1d226b5bfaa7267976c35bed2114050",
+        "notifiedAt": "2026-11-20T09:26:58+00:00",
+        "status": 200
+      },
+      "https://letsaimit.com/bengaluru/": {
+        "contentHash": "041107c155f257320f996cbb8961129d1234330d791e29995df57ff373dd1d21",
+        "notifiedAt": "2026-11-20T09:26:58+00:00",
+        "status": 200
+      },
+      "https://letsaimit.com/bengaluru/football-coaching/": {
+        "contentHash": "bf850476de0cf50ee16221ae60c6f98f9a17eccdfad9646fa5443ee1c912088f",
+        "notifiedAt": "2026-11-20T09:26:58+00:00",
+        "status": 200
+      },
+      "https://letsaimit.com/bengaluru/basketball-coaching/": {
+        "contentHash": "51c5f7ed9a522949431fdf91442d7400e91c8f2f03699842d755d808b13352d6",
+        "notifiedAt": "2026-11-20T09:26:58+00:00",
+        "status": 200
+      },
+      "https://letsaimit.com/bengaluru/nambiar-bellezea/": {
+        "contentHash": "e40fc5b2c8e641ba294f0873c18fde131e70fb7595052ba075d18f92bf0a003d",
+        "notifiedAt": "2026-11-20T09:26:58+00:00",
+        "status": 200
+      },
+      "https://letsaimit.com/bengaluru/nambiar-ellegenza/": {
+        "contentHash": "9de62e62d97889a8059af01325108d134ca4b721862c63dec463cf5341ae45b9",
+        "notifiedAt": "2026-11-20T09:26:58+00:00",
+        "status": 200
+      }
+    },
+    "limitation": "Notification receipt only; no search engine inclusion or ranking result measured"
+  },
+  "google": {
+    "scriptedIssue": "google_access_token_missing",
+    "sitemapServesPublicUrls": 19,
+    "freshSearchConsoleSubmissionObserved": false,
+    "priorProcessedSitemapPages": 14,
+    "priorReceipt": "2026-11-20-blog-articles.json",
+    "indexingApi": {
+      "eligible": 0,
+      "ineligible": 19,
+      "changed": 0,
+      "accepted": 0,
+      "eligibility": "JobPosting or live BroadcastEvent embedded in VideoObject"
+    },
+    "limitation": "Existing Search Console sitemap URL now serves 19 pages; no new Google processing receipt, local-page inspection or crawl request was observed while Chrome was disconnected"
+  },
+  "businessProfile": {
+    "userReportsExistingProfile": false,
+    "created": false,
+    "providerDashboardAccessible": false,
+    "setupPack": "docs/GOOGLE-BUSINESS-PROFILE.md",
+    "pending": [
+      "Actual Bengaluru operating base and customer-facing/service-area model",
+      "Society operating authority and in-person availability under the selected model",
+      "Working Google owner session and provider-selected verification"
+    ],
+    "corporateAddressUsedAsCoachingVenue": false,
+    "ownerConfirmedAvailability": {
+      "timezone": "Asia/Kolkata",
+      "days": "Monday–Sunday",
+      "opens": "09:00",
+      "closes": "21:00",
+      "coachingBatchScheduleConfirmed": false
+    }
+  },
+  "browserChecks": {
+    "completed": false,
+    "reason": "Chrome command detached; fresh surface inventory aborted/timed out, including after runtime reset",
+    "limitation": "CSS/source and live HTTP content verified; no new desktop/mobile rendered journey claimed for these local pages"
+  },
+  "backend": {
+    "sourceChanged": false,
+    "sourceDigest": "b6910b43f2c44804fb29eb24bded39f505710eab21e3e6fc39d5fcab8a582b1e",
+    "migrationInventory": 19,
+    "functionInventory": 5,
+    "migrationsAdded": 0,
+    "functionsChanged": 0,
+    "configurationSecretsChanged": false,
+    "productionBundleTargetsProductionBackend": true,
+    "emailsOrPaymentsTriggered": false,
+    "limitation": "Public compiled routing and unchanged source checks; authenticated, payment and mail journeys were not repeated"
+  },
+  "evidenceCommitNote": "A documentation-only descendant can carry this receipt and updated planning/setup artifacts without changing tested runtime/material content; final domain/source binding is verified separately"
+}
