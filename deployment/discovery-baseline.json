@@ -8,8 +8,28 @@
     },
     {
       "path": "/blogs/",
-      "contentHash": "fe9f1f4fba44fc3d8f9594f8cb238d57119a9bf0b1a592152567aa21ecac72c7",
-      "lastmod": "2026-11-19T17:07:45+00:00"
+      "contentHash": "08dbe71c7e2184cd65c1f2d641c812c57dd17fbe7660c2d8e3d0f44e4416a91f",
+      "lastmod": "2026-11-20T08:27:27+00:00"
+    },
+    {
+      "path": "/blogs/encouragement-without-pressure/",
+      "contentHash": "01076af10b851f5f3233049fd8fc209d03a5f2cc1995042b84c3ab8a4afde006",
+      "lastmod": "2026-11-20T08:27:27+00:00"
+    },
+    {
+      "path": "/blogs/first-community-match/",
+      "contentHash": "35da7f5c06664ace21a07faaf3b6076af845051e6f766e50ff0f28916f476f61",
+      "lastmod": "2026-11-20T08:27:27+00:00"
+    },
+    {
+      "path": "/blogs/first-football-session/",
+      "contentHash": "70ff080131d3a71337a21a116e1c1c820940e1355a630be7081b3f91fa2bd73e",
+      "lastmod": "2026-11-20T08:27:27+00:00"
+    },
+    {
+      "path": "/blogs/questions-about-training-preparation/",
+      "contentHash": "46b78d7945401c5b2d0d9055053228bd46fdb83226d7c5604490b5ca8bcada1c",
+      "lastmod": "2026-11-20T08:27:27+00:00"
     },
     {
       "path": "/coach/",
