@@ -65,6 +65,10 @@ function Footer() {
             <a href="/">Home</a>
             <a href="/programme/">Programme</a>
             <a href="/bengaluru/">Bengaluru coaching</a>
+            <a href="/bengaluru/football-coaching/">Football in Bangalore</a>
+            <a href="/bengaluru/basketball-coaching/">Basketball in Bangalore</a>
+            <a href="/bengaluru/nambiar-bellezea/">Nambiar Bellezea</a>
+            <a href="/bengaluru/nambiar-ellegenza/">Nambiar Ellegenza</a>
             <a href="/coach/">Meet the coach</a>
             <a href="/societies/">For societies</a>
             <a href="/schools/">For schools</a>
@@ -83,7 +87,7 @@ function Footer() {
               WhatsApp the coach
             </a>
             <address className="footer-address">
-              Nambiar Ellegenza, Bengaluru
+              Nambiar Ellegenza &amp; Bellezea, Bengaluru
             </address>
           </div>
           <div className="footer-col">

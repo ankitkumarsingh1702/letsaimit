@@ -38,16 +38,24 @@ Google requires the real-world business name and an accurate address/service are
 
 This description contains no links, prices, ranking claims or promotions and is below Google's 750-character limit. [Description guidance](https://support.google.com/business/answer/3039617).
 
-### Services — names saved; description copy retained
+### Services — names and descriptions saved (20 November 2026, ~20:31 IST)
 
-Google onboarding saved the **Basketball** preset and the custom service
-**Children's football coaching**. The description copy below remains prepared
-copy; separate service descriptions and prices were not entered in that flow.
+Google onboarding initially saved the **Basketball** preset and the custom service
+**Children's football coaching** without descriptions (`0/300`). On 20 November 2026
+(~20:31–20:33 IST), both service descriptions below were saved in the verified owner
+session and confirmed on a fresh reload readback. Prices remain unset.
+
+A live check of Google's India GBP **Add another category** dropdown confirmed that
+`Football coach`, `Basketball coach`, `Soccer coach` and `Sports coaching` do not
+exist in Google's category taxonomy (available matches are facility/club/shop labels
+such as `Football club`, `Basketball club`, `Basket Ball Coaching Center`, `Football pitch`
+and `Basketball court`). Primary category remains **`Sports school`** alone to avoid
+inaccurate club or venue labels before verification.
 
 | Service | Description | Relevant website page |
 | --- | --- | --- |
 | Children's football coaching | Football coaching for ages 5–14 at Nambiar Bellezea and Nambiar Ellegenza, with warm-up, skill practice and group play. Confirm the child's group and session arrangements before attending. | [Football](https://letsaimit.com/bengaluru/football-coaching/) |
-| Children's basketball coaching | Basketball coaching for ages 5–14 at Nambiar Bellezea and Nambiar Ellegenza, with fitness activities during sessions. Ask about the current group, timing and entry arrangements. | [Basketball](https://letsaimit.com/bengaluru/basketball-coaching/) |
+| Basketball | Basketball coaching for ages 5–14 at Nambiar Bellezea and Nambiar Ellegenza, with fitness activities during sessions. Ask about the current group, timing and entry arrangements. | [Basketball](https://letsaimit.com/bengaluru/basketball-coaching/) |
 
 Leave service prices unset until the owner provides the actual agreed public fee. Fitness is part of the existing sessions; it is not presented as a separate bookable service. Dhiraj's U.S. Soccer credentials describe football coaching, not basketball certification.
 

@@ -5,9 +5,9 @@ export const choosingGuides = [
     id: 'choosing-football-coaching-bengaluru',
     page: 'blog-choosing-football-coaching-bengaluru',
     path: '/blogs/choosing-football-coaching-bengaluru/',
-    title: 'Choosing football coaching in Bengaluru: what to check',
-    description: 'Comparing football coaching or academies in Bangalore? Check the coach, group, session format, society access and trial arrangements with this parent checklist.',
-    summary: 'A practical way to compare a coach, an academy and a community group before your child joins.',
+    title: 'Choosing a Football Academy or Coaching in Bangalore',
+    description: 'Comparing the best football academies and kids’ coaching in Bangalore (Bengaluru)? Check coach credentials, groups, society venues and free trial steps.',
+    summary: 'How to compare a football academy, community coaching like LetsAimIt, and private lessons in Bangalore before joining.',
     category: 'Choosing coaching',
     publishedAt: '2026-11-20',
     author: 'LetsAimIt team',
@@ -17,40 +17,49 @@ export const choosingGuides = [
       alt: 'Coach speaking with young football players during a Nambiar Ellegenza community event',
       caption: 'A coaching conversation at a Nambiar Ellegenza community football event.',
     },
-    intro: 'A search for the best football coaching in Bangalore gives you names, photographs and confident descriptions. The useful next step is to work out what your child would actually join. Who leads the group? What happens during practice? Can your family reach the venue and manage the confirmed timetable? This guide helps you compare those details, including what a football academy label tells you and how LetsAimIt’s community programme works.',
+    intro: 'Comparing the best football academy and kids’ football coaching options in Bangalore (Bengaluru) starts with what your child will actually join: the coach, the group, the session format and the venue. LetsAimIt is a community football, basketball and fitness coaching programme for ages 5–14 in Bengaluru, founded by former Frisco Soccer Association head coach Dhiraj Mishra at Nambiar Bellezea and Nambiar Ellegenza, with a confirmed free first session.',
     sections: [
       {
         id: 'start-with-your-child',
-        heading: 'Start with the child and the practical arrangements',
+        heading: 'How should parents start comparing football coaching in Bangalore?',
         paragraphs: [
-          'Write down your child’s age, previous experience and what they want to try. A complete beginner may want to learn what to do with the ball and join a group activity. Another child may already play regularly and have a particular question about their game. Share that starting point with each provider rather than assuming an age label describes everyone in a batch.',
-          'Then check the ordinary details that determine whether attending is realistic: the exact venue, travel, community entry and collection arrangements. Ask for the current group’s days and times. An attractive programme that your family cannot attend consistently is a difficult choice, however strong its advertising sounds.',
+          'Start with your child’s age, previous experience and practical weekly routine rather than marketing labels. A complete beginner in Bangalore may want to learn ball control, passing and team play in an encouraging group, while an experienced child may have specific goals. Share that honest starting point with each football academy or coaching programme instead of assuming an age bracket fits every child equally.',
+          'Then verify the everyday logistics that decide whether your child can attend consistently: the exact Bengaluru locality, commute time, society or ground entry rules, confirmed batch days and collection arrangements. A football coaching programme that fits your family’s actual schedule is far easier to sustain than a distant academy that becomes difficult to reach twice a week.',
         ],
       },
       {
         id: 'check-the-coach',
-        heading: 'Look at the coach’s evidence and ask who teaches the group',
+        heading: 'What coach credentials should you check at a Bangalore football academy?',
         paragraphs: [
-          'Ask the name of the person who will lead your child’s sessions and how to contact them about the group. Look for information you can inspect: a coaching background, the sport and level covered by a qualification, and an explanation of working with beginners. Ask how instructions are demonstrated and what a child can do when they do not understand.',
-          'LetsAimIt’s coach page describes founder Dhiraj Mishra’s earlier youth-football work at Frisco Soccer Association in Texas. It displays U.S. Soccer grassroots 4v4, 9v9 and 11v11 credentials and a Safe Soccer certificate. Read the documents and ask how that experience relates to your child’s current group; a certificate alone does not describe every session or establish a citywide ranking.',
-          'U.S. Soccer’s age-group guidance asks coaches to consider individuals when choosing activities. That gives parents a useful question: how does the coach make an activity understandable and achievable for the children in this particular group?',
+          'Always ask who will actually teach your child’s batch—not only who founded the academy—and inspect verifiable coaching qualifications. Look for clear coaching history, the specific sport and age level covered by any licence, how beginners are introduced, and how parents communicate with the coach about progress or concerns.',
+          'At LetsAimIt in Bengaluru (Bangalore), founder Dhiraj Mishra’s coach page details his background as former Head Coach at Frisco Soccer Association in Texas and displays his U.S. Soccer Grassroots 4v4, 9v9 and 11v11 licences alongside his Safe Soccer Cleared certificate. Reading real credentials and watching how a coach demonstrates activities during a trial gives parents concrete evidence rather than relying on an unverified citywide ranking.',
+          'U.S. Soccer’s age-group guidance asks coaches to consider individuals when choosing activities. That gives parents a useful question for any football coach in Bangalore: how does the coach make an activity understandable and achievable for the children in this specific group?',
         ],
       },
       {
         id: 'academy-or-community-coaching',
-        heading: 'Football academy, community group or individual lesson?',
+        heading: 'Football academy vs. community coaching in Bangalore: what is the difference?',
         paragraphs: [
-          'When you search for a football academy in Bangalore, ask what sits behind the name. Providers may use academy to describe different kinds of programmes. Find out whether a particular offer involves open beginner groups, selected teams, competitions or another arrangement. If accreditation, a league relationship or a player pathway matters to you, ask for the specific evidence and what participation actually includes.',
-          'Community coaching describes sessions arranged around a local group and venue. LetsAimIt’s published programme offers football, basketball and fitness activities for ages 5–14 at Nambiar Bellezea and Nambiar Ellegenza. Sessions are twice a week, last 45–60 minutes and include warming up, learning a skill and playing together. These are the current public programme facts to use in your comparison.',
-          'One-to-one instruction gives an individual child the lesson’s attention; a group gives children opportunities to practise and play with others. Ask any provider what the lesson would cover and how it relates to your child’s needs. LetsAimIt’s public programme describes community coaching. Confirm whether a separate private-lesson option exists before planning or paying for one.',
+          'When parents search for a football academy in Bangalore or the best football coaching in Bengaluru, they encounter three distinct formats: multi-branch competitive academies, community coaching programmes like LetsAimIt, and private one-to-one training. Providers use the word “academy” broadly, so always ask whether a programme runs open beginner groups, selected league squads, or formal competition pathways—and verify any claimed accreditation.',
+          'LetsAimIt is a residential community sports coaching programme rather than a multi-branch competitive academy. LetsAimIt offers football, basketball and fitness coaching for children aged 5–14 at Nambiar Bellezea (Narayanaghatta) and Nambiar Ellegenza (Muthanallur / Gopasandra, off Sarjapur Road) in Bengaluru. Sessions run twice a week for 45–60 minutes—structured around warm-up, learning a skill and playing together—with a parent dashboard for attendance, practice records and weekly coaching feedback.',
+          'Private one-to-one football lessons focus on a single player’s individual drills, whereas group community coaching lets children practise passing, positioning and teamwork with peers. Confirm whether any private-lesson option exists before planning for one; LetsAimIt’s published programme is group community coaching.',
         ],
+        table: {
+          caption: 'Comparing kids’ football coaching formats in Bangalore (Bengaluru)',
+          headers: ['Format', 'Typical structure', 'Well suited for', 'What parents should verify'],
+          rows: [
+            ['Community coaching (e.g., LetsAimIt)', 'Twice-weekly 45–60 min sessions for ages 5–14 at Nambiar Bellezea & Nambiar Ellegenza; warm-up, skill learning, fitness & group play', 'Beginners and kids aged 5–14 wanting structured football close to home with coach Dhiraj Mishra', 'Confirmed batch days/times, community entry rules, group fit and agreed monthly fee'],
+            ['Competitive / multi-branch football academy', 'Multi-venue curriculum, sometimes with selected squads, league fixtures or academy tiers across Bangalore', 'Players specifically seeking competitive league squads or formal academy pathways', 'Who actually leads your child’s batch, group size, accreditation proof and commute'],
+            ['Private 1-on-1 football lessons', 'Individual skill sessions focused on one child at a time', 'Targeted individual work outside or alongside a regular team programme', 'Coach background, playing surface, session plan and per-session cost'],
+          ],
+        },
       },
       {
         id: 'observe-a-trial',
-        heading: 'Use a trial to observe the experience',
+        heading: 'What should you look for during a free football trial session?',
         paragraphs: [
-          'During a confirmed visit, notice how children enter the activity, hear a demonstration and get another opportunity after a mistake. Look at whether your child understands where to go and whom to ask for help. You are gathering practical observations, rather than expecting a beginner to prove their ability in one session.',
-          'Ask the coach one or two questions afterwards. A specific question produces a more useful conversation than a broad verdict about talent. Give your child a chance to describe what they enjoyed or found unclear before deciding what to do next.',
+          'Use a confirmed trial session to observe the real coaching environment. Notice how children join the warm-up, whether instructions are demonstrated clearly, how beginners are supported after a mistake, and whether every child gets meaningful time on the ball. You are checking whether the group environment suits your child—not expecting a beginner to pass a tryout on day one.',
+          'After the visit, ask the coach one or two specific questions and listen to your child’s own impression before committing to paid enrolment. Concrete observations after a real session tell you far more than star ratings or broad advertising claims.',
         ],
         bullets: [
           'Which group would my child join, and why does it fit their starting point?',
@@ -60,24 +69,42 @@ export const choosingGuides = [
       },
       {
         id: 'compare-your-society-options',
-        heading: 'Check Bellezea and Ellegenza arrangements separately',
+        heading: 'How do Nambiar Bellezea and Nambiar Ellegenza football arrangements work?',
         image: { file: 'ellegenza-young-players.jpg', alt: 'Young football players at a Nambiar Ellegenza community event', caption: 'Players at a Nambiar Ellegenza football event. Confirm your own coaching group and arrival arrangements.' },
         paragraphs: [
-          'For Nambiar Bellezea or Nambiar Ellegenza, confirm the coaching meeting point and permission to enter the community. A society’s general Maps location does not identify your group’s entrance or playing area. Ask about the surface, appropriate footwear, where parents wait and how arrival and collection work.',
-          'Confirm the agreed fee, what it covers, the payment arrangement and how session changes are communicated. Avoid assuming that one community’s timetable or access rules apply to the other. Use the society pages below to start with the right location, then settle the details with the coach.',
+          'For LetsAimIt sessions at Nambiar Bellezea (Narayanaghatta, Chandapura–Dommasandra Road) or Nambiar Ellegenza (Muthanallur Road, Gopasandra, off Sarjapur Road), confirm the coaching meeting point and community entry permission with the coach before travelling. A general society map pin does not show your group’s exact court entrance or arrival point.',
+          'Confirm the playing surface, suitable football footwear, shin guards, parent waiting area, batch timetable and agreed monthly fee for your specific community. Avoid assuming one society’s schedule or visitor-entry rules automatically apply to the other.',
         ],
       },
       {
         id: 'make-your-choice',
-        heading: 'Choose from the answers you can verify',
+        heading: 'How do you make the final decision with confidence?',
         paragraphs: [
-          'Keep a short note for each option: coach, group, confirmed timetable, venue access, cost and your child’s response to the visit. That gives your family a useful comparison without relying on an unsupported best-in-city claim.',
-          'LetsAimIt’s first session is free after the request is confirmed. Choose football and your preferred community, share your child’s age and experience, and wait for the session details before attending. The purpose of that first visit is to understand the group and decide whether it works for your child.',
+          'Keep a simple checklist for each Bangalore football coaching option you visit: lead coach, visible credentials, group age/experience fit, confirmed timetable, venue access, transparent fee terms and your child’s reaction after the trial. Comparing verified answers helps your family choose confidently without relying on unsupported citywide superlatives.',
+          'LetsAimIt’s first session is free once your trial request is confirmed. Choose football and your preferred Bengaluru community (Nambiar Bellezea or Nambiar Ellegenza), share your child’s age and experience, and wait for session confirmation before arriving.',
         ],
       },
     ],
+    faq: [
+      {
+        question: 'What should parents check when searching for the best football academy in Bangalore?',
+        answer: 'Check who directly coaches your child’s batch, verify real coaching credentials, confirm age and beginner group fit, review the playing surface and community access, clarify monthly fee and cancellation terms, and observe a trial session before enrolling.',
+      },
+      {
+        question: 'Is LetsAimIt a football academy or a community coaching programme in Bangalore?',
+        answer: 'LetsAimIt is a community sports coaching programme in Bengaluru (Bangalore) for children aged 5–14, offering football, basketball and fitness at Nambiar Bellezea and Nambiar Ellegenza. It focuses on regular twice-weekly skill learning and team play close to home rather than operating as a multi-branch competitive league academy.',
+      },
+      {
+        question: 'Who leads football coaching at LetsAimIt in Bengaluru?',
+        answer: 'LetsAimIt was founded by Coach Dhiraj Mishra, former Head Coach at Frisco Soccer Association in Texas. His public coach profile displays U.S. Soccer Grassroots 4v4, 9v9 and 11v11 licences and a Safe Soccer Cleared certificate.',
+      },
+      {
+        question: 'Can my child try LetsAimIt football in Bangalore before enrolling?',
+        answer: 'Yes. The first session is free after confirmation. Submit a trial request with your child’s age, experience, chosen sport and Bengaluru community (Nambiar Bellezea or Nambiar Ellegenza), then wait for the coach to confirm your group, meeting point and timing.',
+      },
+    ],
     reading: [
-      { label: 'Football coaching in Bengaluru and the trial request', url: '/bengaluru/football-coaching/' },
+      { label: 'Kids’ football coaching in Bangalore (Bengaluru) and trial request', url: '/bengaluru/football-coaching/' },
       { label: 'Meet Coach Dhiraj and inspect the displayed credentials', url: '/coach/' },
       { label: 'The current LetsAimIt programme', url: '/programme/' },
       { label: 'Nambiar Bellezea coaching and location details', url: '/bengaluru/nambiar-bellezea/' },
@@ -90,9 +117,9 @@ export const choosingGuides = [
     id: 'choosing-basketball-coaching-bengaluru',
     page: 'blog-choosing-basketball-coaching-bengaluru',
     path: '/blogs/choosing-basketball-coaching-bengaluru/',
-    title: 'Choosing basketball coaching in Bengaluru for a beginner',
-    description: 'Compare basketball coaching in Bengaluru using a practical checklist for the coach, beginner group, equipment, trial visit and community arrangements.',
-    summary: 'What to ask about a beginner basketball group before choosing a programme or academy.',
+    title: 'Choosing a Basketball Academy or Coaching in Bangalore',
+    description: 'Comparing kids’ basketball academies and coaching in Bangalore (Bengaluru)? Check the coach, beginner groups, equipment, society access and free trial steps.',
+    summary: 'What to ask about a beginner basketball group, coaching format and trial visit in Bangalore before joining.',
     category: 'Choosing coaching',
     publishedAt: '2026-11-20',
     author: 'LetsAimIt team',
@@ -103,11 +130,11 @@ export const choosingGuides = [
       alt: 'Illustrated first-session steps: meet the coach, try an activity and talk afterwards',
       caption: 'An editorial illustration for this guide, rather than a photograph of a LetsAimIt venue.',
     },
-    intro: 'When comparing basketball coaching in Bengaluru, start with the group your child would join. A name, a photograph of a court or a list of achievements does not explain how a new player will learn. Ask who teaches the session, what the child will try and how the coach introduces unfamiliar movements. These checks help you assess a programme described as an academy as well as a community coaching group.',
+    intro: 'Comparing kids’ basketball academy and coaching options in Bangalore (Bengaluru) starts with the group your child will actually join. LetsAimIt offers community basketball, football and fitness coaching for children aged 5–14 at Nambiar Bellezea and Nambiar Ellegenza in Bengaluru, running twice a week for 45–60 minutes with a confirmed free first session.',
     sections: [
       {
         id: 'describe-the-starting-point',
-        heading: 'Tell the coach what your child has tried',
+        heading: 'How should parents explain a beginner’s starting point to the coach?',
         paragraphs: [
           'A beginner might have bounced a ball at home, played at school or never joined a team activity. Describe that experience without turning it into a rating. Share your child’s age and any practical question they want answered. Ask which current group the coach suggests and how a child joins when other players already know one another.',
           'Ask how instructions are introduced: can the coach show an action, explain it in manageable steps and check that a new child understands? Find out what a child can do if they lose their place or need another demonstration. A clear answer tells you more about the first visit than a promise of rapid improvement.',
@@ -115,7 +142,7 @@ export const choosingGuides = [
       },
       {
         id: 'ask-about-basketball-teaching',
-        heading: 'Ask about basketball experience specifically',
+        heading: 'What should you ask about basketball coaching experience specifically?',
         paragraphs: [
           'Confirm who will lead the basketball group and ask about that person’s experience teaching the sport to children. Discuss how they choose activities, respond to mistakes and manage the group. If a qualification or affiliation is presented, check what it covers and ask to see the relevant details.',
           'LetsAimIt’s coach page displays Dhiraj Mishra’s football coaching background and U.S. Soccer credentials. Those describe football experience; they do not establish a basketball coaching qualification. Ask directly about the person teaching your child’s basketball batch and their approach to beginners. Keep the answer with your other programme notes.',
@@ -123,7 +150,7 @@ export const choosingGuides = [
       },
       {
         id: 'look-at-the-learning',
-        heading: 'Look for understandable learning opportunities',
+        heading: 'What does healthy beginner basketball learning look like?',
         paragraphs: [
           'Jr. NBA’s Rookie resources focus on enjoyable activity and basic basketball skills, including ball handling, passing and footwork. Parents can use that as a starting point for questions about a beginner group. This reference does not imply a LetsAimIt affiliation with Jr. NBA or adoption of its practice plans.',
           'During a visit, notice whether your child gets opportunities to handle a ball, listen to a demonstration and try again. Ask how the coach adjusts the ball, the task and the target for the group. Court equipment that suits one age or experience level may need a different approach for another; confirm what is actually available at your chosen venue.',
@@ -132,15 +159,24 @@ export const choosingGuides = [
       },
       {
         id: 'academy-or-local-programme',
-        heading: 'Check the offer behind the academy name',
+        heading: 'Basketball academy vs. community coaching in Bangalore: what to check',
         paragraphs: [
-          'A search for a basketball academy in Bangalore can bring up different programme formats. Ask whether a specific offer is a beginner class, a selected team, an individual lesson or another arrangement. Ask separately about competitions, selection requirements and any claimed affiliation. The academy label alone does not confirm those details.',
-          'LetsAimIt’s current public offer is community coaching at Nambiar Bellezea and Nambiar Ellegenza. Football, basketball and fitness activities are offered for ages 5–14. The programme has two sessions a week, each lasting 45–60 minutes. Confirm the current basketball group, coach, days and times before deciding whether it works for your family.',
+          'A search for a basketball academy in Bangalore can bring up different programme formats: multi-branch competitive academies, local community coaching programmes like LetsAimIt, and private skill sessions. Ask whether a specific offer is a beginner class, a selected team, an individual lesson or another arrangement, and verify any claimed affiliation or competition pathway.',
+          'LetsAimIt’s current public offer is community coaching at Nambiar Bellezea and Nambiar Ellegenza in Bengaluru (Bangalore). Basketball, football and fitness activities are offered for ages 5–14, with two 45–60 minute sessions each week. Confirm the current basketball group, coach, days, times and community access before deciding whether it fits your family.',
         ],
+        table: {
+          caption: 'Comparing kids’ basketball coaching options in Bangalore (Bengaluru)',
+          headers: ['Format', 'Typical structure', 'Well suited for', 'What parents should verify'],
+          rows: [
+            ['Community basketball coaching (e.g., LetsAimIt)', 'Twice-weekly 45–60 min sessions for ages 5–14 at Nambiar Bellezea & Nambiar Ellegenza, with fitness activities included', 'Beginners and children aged 5–14 looking for structured basketball close to home', 'Batch instructor, confirmed days/times, ball/kit needed, society entry and agreed fee'],
+            ['Competitive basketball academy', 'Dedicated court centres, age-tiered drills and often inter-club or league competition paths across Bangalore', 'Players targeting formal competitive squads or intensive multi-day academy training', 'Batch coach experience, player-to-coach ratio, court access and travel commitment'],
+            ['Private 1-on-1 basketball training', 'Individual shooting, dribbling and footwork sessions for one player', 'Focused mechanical work outside a team environment', 'Coach credentials, court booking cost and clear learning objectives'],
+          ],
+        },
       },
       {
         id: 'questions-before-you-join',
-        heading: 'Ask these questions before joining',
+        heading: 'Which questions should parents ask before joining basketball coaching?',
         paragraphs: [
           'Keep your questions tied to the session you would attend. You can send them before a trial so the coach has the context for your child and community. Ask for clarification when an answer is broad or an arrangement is still being decided.',
         ],
@@ -154,15 +190,29 @@ export const choosingGuides = [
       },
       {
         id: 'compare-after-the-visit',
-        heading: 'Compare the answers after a confirmed visit',
+        heading: 'How should you compare basketball options after a confirmed trial?',
         paragraphs: [
           'Ask your child which activity they remember and whether anything was difficult to follow. Then ask the coach what the group was learning and what they suggest for the next visit. Write down the answers alongside practical details such as travel, timing and access. Your comparison can stay specific without awarding any provider an unsupported citywide best ranking.',
           'For either Nambiar Bellezea or Nambiar Ellegenza, confirm the coaching meeting point and community entry before arriving. LetsAimIt’s first session is free after confirmation: choose basketball and your preferred community when requesting it. A request is the beginning of that conversation, rather than a confirmed place in a particular batch.',
         ],
       },
     ],
+    faq: [
+      {
+        question: 'Where does LetsAimIt offer kids’ basketball coaching in Bangalore?',
+        answer: 'LetsAimIt offers basketball coaching for ages 5–14 at Nambiar Bellezea (Narayanaghatta) and Nambiar Ellegenza (Muthanallur / Gopasandra, off Sarjapur Road) in Bengaluru (Bangalore).',
+      },
+      {
+        question: 'How is community basketball coaching different from a competitive basketball academy in Bangalore?',
+        answer: 'Community coaching runs inside residential communities with twice-weekly 45–60 minute sessions focused on beginner fundamentals, fitness and group play close to home, whereas competitive academies typically run at central courts with formal squad or tournament pathways.',
+      },
+      {
+        question: 'Can a complete beginner try basketball at LetsAimIt?',
+        answer: 'Yes. Share your child’s age, experience and preferred community when requesting a free first session, and confirm the suitable group, timing and equipment with the team before arriving.',
+      },
+    ],
     reading: [
-      { label: 'Basketball coaching in Bengaluru and the trial request', url: '/bengaluru/basketball-coaching/' },
+      { label: 'Kids’ basketball coaching in Bangalore (Bengaluru) and trial request', url: '/bengaluru/basketball-coaching/' },
       { label: 'The current LetsAimIt programme', url: '/programme/' },
       { label: 'Coach Dhiraj’s published background and football credentials', url: '/coach/' },
       { label: 'Nambiar Bellezea coaching and location details', url: '/bengaluru/nambiar-bellezea/' },

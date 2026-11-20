@@ -53,12 +53,29 @@ export function BlogArticle({ article }) {
           <h2 id={section.id}>{section.heading}</h2>
           {section.paragraphs.map((paragraph, index) => <p key={index}>{paragraph}</p>)}
           {section.bullets?.length > 0 && <ul>{section.bullets.map(item => <li key={item}>{item}</li>)}</ul>}
+          {section.table && <div className="blog-table-wrap" role="region" aria-label={section.table.caption} tabIndex={0}>
+            <table className="blog-table">
+              <caption>{section.table.caption}</caption>
+              <thead><tr>{section.table.headers.map(header => <th scope="col" key={header}>{header}</th>)}</tr></thead>
+              <tbody>{section.table.rows.map((row, rowIndex) => <tr key={rowIndex}>
+                {row.map((cell, cellIndex) => cellIndex === 0 ? <th scope="row" key={cellIndex}>{cell}</th> : <td key={cellIndex}>{cell}</td>)}
+              </tr>)}</tbody>
+            </table>
+          </div>}
           {section.image && <figure className="blog-article-section-figure">
             <img {...mediaProps(section.image.file, '(max-width: 700px) calc(100vw - 40px), 680px')}
               alt={section.image.alt} loading="lazy" />
             <figcaption>{section.image.caption}</figcaption>
           </figure>}
         </section>)}
+
+        {article.faq?.length > 0 && <section className="blog-article-faq" aria-labelledby="article-faq-title">
+          <h2 id="article-faq-title">Common parent questions</h2>
+          {article.faq.map(item => <details key={item.question}>
+            <summary>{item.question}<span aria-hidden="true">+</span></summary>
+            <p>{item.answer}</p>
+          </details>)}
+        </section>}
 
         {article.reading.length > 0 && <section className="blog-further-reading" aria-labelledby="further-reading-title">
           <h2 id="further-reading-title">Further reading</h2>

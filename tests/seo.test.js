@@ -119,8 +119,22 @@ test("local articles carry their complete public bodies and real publisher attri
     for (const section of article.sections) {
       assert.ok(story.articleBody.includes(section.heading));
       for (const paragraph of [...section.paragraphs, ...(section.bullets ?? [])]) assert.ok(story.articleBody.includes(paragraph));
+      if (section.table) {
+        assert.ok(story.articleBody.includes(section.table.caption));
+        for (const row of section.table.rows) assert.ok(story.articleBody.includes(row.join(" | ")));
+      }
       if (section.image) assert.ok(story.articleBody.includes(section.image.caption));
     }
+    if (article.faq?.length) {
+      const faq = graph.find(node => hasType(node, "FAQPage"));
+      assert.ok(faq, article.page + " with visible FAQ must include FAQPage");
+      assert.deepEqual(faq.mainEntity.map(item => [item.name, item.acceptedAnswer.text]), article.faq.map(item => [item.question, item.answer]));
+    }
+    const org = graph.find(node => hasType(node, "Organization"));
+    assert.equal(org.areaServed.alternateName, "Bangalore");
+    const coach = graph.find(node => hasType(node, "Person"));
+    assert.equal(coach.hasCredential.length, 4);
+    assert.ok(page.speakable?.cssSelector?.includes("h1"));
     assert.deepEqual(story.citation, article.reading.map(reference => new URL(reference.url, origin).href));
     const breadcrumbs = graph.find(node => hasType(node, "BreadcrumbList"));
     assert.deepEqual(breadcrumbs.itemListElement.map(item => item.item), [origin + "/", origin + "/blogs/", story.url]);

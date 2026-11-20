@@ -52,6 +52,19 @@ export function LocalCoaching({ content }) {
     </section>}
 
     <div className="local-reading">
+      {content.table && <section className="local-section local-table-section" aria-labelledby="local-table-title">
+        <h2 id="local-table-title">{content.table.heading}</h2>
+        <div className="local-table-wrap" role="region" aria-label={content.table.caption} tabIndex={0}>
+          <table className="local-table">
+            <caption>{content.table.caption}</caption>
+            <thead><tr>{content.table.headers.map(header => <th scope="col" key={header}>{header}</th>)}</tr></thead>
+            <tbody>{content.table.rows.map((row, rowIndex) => <tr key={rowIndex}>
+              {row.map((cell, cellIndex) => cellIndex === 0 ? <th scope="row" key={cellIndex}>{cell}</th> : <td key={cellIndex}>{cell}</td>)}
+            </tr>)}</tbody>
+          </table>
+        </div>
+      </section>}
+
       {content.sections.map(section => <section className="local-section" key={section.id} aria-labelledby={section.id}>
         <h2 id={section.id}>{section.heading}</h2>
         {section.paragraphs.map((paragraph, index) => <p key={index}>{paragraph}</p>)}

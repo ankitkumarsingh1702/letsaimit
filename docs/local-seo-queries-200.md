@@ -4,7 +4,7 @@ Prepared 20 November 2026. These are exactly 200 distinct target queries, not 20
 
 **Google visibility goal is not complete.** Content publication, Google indexing and query ranking are separate. The 200 targets are not 200 ranked results; the two checked search pages did not show LetsAimIt. An indexed URL alone does not establish a query position or an AI Overview citation. See the [dated search-verification record](GOOGLE-VISIBILITY-VERIFICATION.md).
 
-Five local service pages and nine new guides are published. Search visibility remains incomplete: the P0 football guide is indexed, the football service page is not indexed, and neither checked Google result page displayed LetsAimIt. Other query positions remain unmeasured.
+Five local service pages and nine new guides are published. Search Console reports 28 discovered sitemap pages and 7 newly indexed URLs (including /bengaluru/, /bengaluru/football-coaching/ and both choosing guides), plus 2 pending priority crawl requests. Search visibility remains incomplete: neither checked Google result page displayed LetsAimIt, and other query positions remain unmeasured.
 
 [Searchable report](local-seo-queries-200.html) · [CSV](local-seo-queries-200.csv) · [Scope notes](local-seo-queries-200-README.md) · [Keyword research](local-seo-queries-200-research.json)
 

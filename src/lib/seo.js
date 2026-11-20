@@ -8,8 +8,8 @@ import { PUBLIC_BRAND } from "./publicBrand.js";
 export const SITE_ORIGIN = (import.meta.env?.VITE_SITE_ORIGIN || PUBLIC_BRAND.origin).replace(/\/$/, "");
 
 export const PAGE_META = {
-  home: { path: "/", title: "Football & Basketball for Kids in Bengaluru", description: "Football and basketball for ages 5–14. Build fitness, confidence and friendships at Nambiar Ellegenza and Nambiar Bellezea, Bengaluru. First session free.", indexable: true, kind: "content" },
-  programme: { path: "/programme/", title: "Kids’ Football & Basketball Coaching Programme", description: "Football, basketball and fitness for ages 5–14 in Bengaluru. Two 45–60 minute sessions each week at Nambiar Ellegenza and Bellezea. First session free.", indexable: true, kind: "content" },
+  home: { path: "/", title: "Football & Basketball for Kids in Bengaluru (Bangalore)", description: "LetsAimIt offers kids’ football, basketball and fitness coaching in Bengaluru (Bangalore) for ages 5–14 at Nambiar Ellegenza and Bellezea. First session free.", indexable: true, kind: "content" },
+  programme: { path: "/programme/", title: "Kids’ Football & Basketball Coaching Programme", description: "Football, basketball and fitness for ages 5–14 in Bengaluru (Bangalore). Two 45–60 minute sessions each week at Nambiar Ellegenza and Bellezea. First session free.", indexable: true, kind: "content" },
   coach: { path: "/coach/", title: "Dhiraj Mishra, Youth Football Coach in Bengaluru", description: "Meet Dhiraj, former head coach at Frisco Soccer Association, Texas, and founder of LetsAimIt in Bengaluru. Explore his coaching story and credentials.", indexable: true, kind: "content" },
   societies: { path: "/societies/", title: "Football & Basketball Coaching for Societies", description: "Bring football, basketball and active play to your Bengaluru community. LetsAimIt works with society committees to plan safe, age-appropriate coaching.", indexable: true, kind: "content" },
   schools: { path: "/schools/", title: "School PE & Fitness Consultancy in Bengaluru", description: "Practical guidance for your school's PE team in Bengaluru, with curriculum advice, fitness assessment, coach development and programme support from LetsAimIt.", indexable: true, kind: "content" },
@@ -151,6 +151,12 @@ export function buildPageGraph(page, { origin = SITE_ORIGIN, datePublished, date
     isPartOf: { "@id": websiteId },
     about: { "@id": organizationId },
     breadcrumb: { "@id": breadcrumbId },
+    ...(meta.indexable ? {
+      speakable: {
+        "@type": "SpeakableSpecification",
+        cssSelector: ["h1", ".local-intro", ".blog-article-intro", ".hero-intro-copy"],
+      },
+    } : {}),
     ...(article?.publishedAt || datePublished ? { datePublished: schemaDate(article?.publishedAt || datePublished) } : {}),
     ...(dateModified ? { dateModified: schemaDate(dateModified) } : {}),
   };
@@ -159,12 +165,28 @@ export function buildPageGraph(page, { origin = SITE_ORIGIN, datePublished, date
       "@type": "Organization",
       "@id": organizationId,
       name: PUBLIC_BRAND.name,
+      alternateName: "LetsAimIt Coaching",
       url: origin + "/",
       logo: { "@id": logo["@id"] },
-      description: "Football, basketball and fitness coaching for children aged 5–14 at Nambiar Ellegenza and Nambiar Bellezea, Bengaluru.",
+      description: "Community football, basketball and fitness coaching for children aged 5–14 at Nambiar Ellegenza and Nambiar Bellezea in Bengaluru (Bangalore).",
       founder: { "@id": personId },
       telephone: "+918868886074",
+      contactPoint: {
+        "@type": "ContactPoint",
+        telephone: "+918868886074",
+        contactType: "customer service",
+        areaServed: "IN",
+        availableLanguage: "English",
+      },
       address: { "@type": "PostalAddress", addressLocality: "Bengaluru", addressRegion: "Karnataka", addressCountry: "IN" },
+      areaServed: { "@type": "City", name: "Bengaluru", alternateName: "Bangalore", containedInPlace: { "@type": "Country", name: "India" } },
+      knowsAbout: [
+        "Children's football coaching",
+        "Youth soccer coaching",
+        "Children's basketball coaching",
+        "Youth fitness activities",
+        "Community sports coaching in Bengaluru",
+      ],
       sameAs: ["https://www.instagram.com/lets_aimit/"],
     },
     logo,
@@ -176,6 +198,17 @@ export function buildPageGraph(page, { origin = SITE_ORIGIN, datePublished, date
       jobTitle: "Youth football coach",
       description: "Founder of LetsAimIt and former Head Coach at Frisco Soccer Association, Texas.",
       worksFor: { "@id": organizationId },
+      knowsAbout: [
+        "Youth football coaching",
+        "Grassroots soccer coaching",
+        "Children's sports coaching in Bengaluru",
+      ],
+      hasCredential: [
+        { "@type": "EducationalOccupationalCredential", name: "U.S. Soccer Grassroots 4v4 License" },
+        { "@type": "EducationalOccupationalCredential", name: "U.S. Soccer Grassroots 9v9 License" },
+        { "@type": "EducationalOccupationalCredential", name: "U.S. Soccer Grassroots 11v11 License" },
+        { "@type": "EducationalOccupationalCredential", name: "U.S. Soccer Safe Soccer Cleared Certificate" },
+      ],
       sameAs: [coachProfile],
     },
     {
@@ -316,8 +349,13 @@ export function buildPageGraph(page, { origin = SITE_ORIGIN, datePublished, date
     webpage.citation = works.map(work => ({ "@id": work["@id"] }));
   }
   if (article) {
-    const body = [article.intro, ...article.sections.flatMap(section => [section.heading, ...section.paragraphs,
-      ...(section.bullets ?? []), ...(section.image ? [section.image.caption] : [])])].join("\n\n");
+    const body = [article.intro, ...article.sections.flatMap(section => [
+      section.heading,
+      ...section.paragraphs,
+      ...(section.bullets ?? []),
+      ...(section.table ? [section.table.caption, section.table.headers.join(" | "), ...section.table.rows.map(row => row.join(" | "))] : []),
+      ...(section.image ? [section.image.caption] : []),
+    ]), ...(article.faq ?? []).flatMap(item => [item.question, item.answer])].join("\n\n");
     const articleNode = {
       "@type": "Article",
       "@id": url + "#article",
@@ -345,6 +383,16 @@ export function buildPageGraph(page, { origin = SITE_ORIGIN, datePublished, date
       isPartOf: { "@id": websiteId },
     }, articleNode);
     webpage.mainEntity = { "@id": articleNode["@id"] };
+    if (article.faq?.length) {
+      const faq = {
+        "@type": "FAQPage",
+        "@id": url + "#article-faq",
+        isPartOf: { "@id": pageId },
+        mainEntity: article.faq.map(({ question, answer }) => ({ "@type": "Question", name: question, acceptedAnswer: { "@type": "Answer", text: answer } })),
+      };
+      graph.push(faq);
+      webpage.hasPart = [{ "@id": faq["@id"] }];
+    }
   }
   if (key === "home" || key === "programme") {
     const video = {

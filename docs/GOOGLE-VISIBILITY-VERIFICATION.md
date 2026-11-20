@@ -21,22 +21,26 @@ organic position, a complete top-100 scan, absence from every result or a
 
 ## URL indexing actually checked
 
-Fresh Search Console inspections used the existing verified domain property.
+Fresh Search Console inspections used the existing verified domain property (`sc-domain:letsaimit.com`, updated at ~20:12–20:28 IST on 20 November 2026). The sitemap (`https://letsaimit.com/sitemap.xml`) now reports **Success**, last read **20 November 2026**, **28 discovered pages** (up from 14 earlier in the day), with zero manual actions, zero security issues and valid breadcrumbs (`1 valid item detected`) on every crawled page.
 
 | URL | Google-reported index status | Evidence |
 | --- | --- | --- |
-| [P0 football-choice guide](https://letsaimit.com/blogs/choosing-football-coaching-bengaluru/) | **URL is on Google; Page is indexed** | Last crawl displayed 20 Nov 2026, 17:57:58; Googlebot smartphone; successful fetch; crawl/indexing allowed; Google-selected canonical is the inspected URL |
-| [Football coaching service page](https://letsaimit.com/bengaluru/football-coaching/) | **URL is not on Google; Discovered — currently not indexed** | Sitemap discovered; last crawl N/A at inspection |
+| [Bengaluru hub](https://letsaimit.com/bengaluru/) | **URL is on Google; Page is indexed** | Last crawl 20 Nov 2026, 17:07:17 IST (`Googlebot smartphone`); self-canonical; 1 valid breadcrumb |
+| [Football coaching service page](https://letsaimit.com/bengaluru/football-coaching/) | **URL is on Google; Page is indexed** | Last crawl 20 Nov 2026, 18:19:01 IST (`Googlebot smartphone`); self-canonical; 1 valid breadcrumb (supersedes earlier 18:18 IST not-indexed check) |
+| [P0 football-choice guide](https://letsaimit.com/blogs/choosing-football-coaching-bengaluru/) | **URL is on Google; Page is indexed** | Last crawl 20 Nov 2026, 17:57:58 IST (`Googlebot smartphone`); self-canonical; 1 valid breadcrumb |
+| [Basketball-choice guide](https://letsaimit.com/blogs/choosing-basketball-coaching-bengaluru/) | **URL is on Google; Page is indexed** | Last crawl 20 Nov 2026, 17:58:01 IST (`Googlebot smartphone`); self-canonical; 1 valid breadcrumb |
+| [Beginner football rules & skills](https://letsaimit.com/blogs/beginner-football-rules-and-skills/) | **URL is on Google; Page is indexed** | Last crawl 20 Nov 2026, 18:27:45 IST (`Googlebot smartphone`); organically crawled from sitemap |
+| [Society coaching checklist](https://letsaimit.com/blogs/society-sports-coaching-checklist/) | **URL is on Google; Page is indexed** | Last crawl 20 Nov 2026, 18:30:29 IST (`Googlebot smartphone`); organically crawled from sitemap |
+| [Practice progress guide](https://letsaimit.com/blogs/understanding-your-childs-practice-progress/) | **URL is on Google; Page is indexed** | Last crawl 20 Nov 2026, 18:49:49 IST (`Googlebot smartphone`); organically crawled from sitemap |
+| [Basketball coaching service page](https://letsaimit.com/bengaluru/basketball-coaching/) | **URL is not on Google; URL is unknown to Google** | **Indexing requested** (~20:17 IST; added to priority crawl queue) |
+| [Nambiar Bellezea page](https://letsaimit.com/bengaluru/nambiar-bellezea/) | **URL is not on Google; URL is unknown to Google** | **Indexing requested** (~20:18 IST; added to priority crawl queue) |
+| [Nambiar Ellegenza page](https://letsaimit.com/bengaluru/nambiar-ellegenza/) | **URL is not on Google; Discovered — currently not indexed** | Sitemap discovered; daily Search Console Request Indexing quota hit (~20:19 IST) — retry next quota window if not crawled organically |
+| [Football or basketball guide](https://letsaimit.com/blogs/football-or-basketball-for-beginners/) | **URL is not on Google; Discovered — currently not indexed** | Sitemap discovered; inspect-only due to daily quota limit |
+| [First basketball session guide](https://letsaimit.com/blogs/first-basketball-session/) | **URL is not on Google; Discovered — currently not indexed** | Sitemap discovered; inspect-only due to daily quota limit |
+| [Beginner basketball skills guide](https://letsaimit.com/blogs/beginner-basketball-skills/) | **URL is not on Google; Discovered — currently not indexed** | Sitemap discovered; inspect-only due to daily quota limit |
+| [Balancing sport and school guide](https://letsaimit.com/blogs/balancing-sport-and-school/) | **Transient GSC inspection error** | Search Console displayed `"Something went wrong"`; recheck in next window |
 
-Both URLs separately returned HTTP 200, their own canonical and an index/follow
-robots directive at 12:46 UTC. That confirms published technical accessibility,
-not Google indexing by itself. The P0 guide's fresh indexed result supersedes
-its earlier pre-request state; it does not establish a position for L002–L004.
-
-A single indexing request for the unindexed football service page was then
-accepted into Google's priority crawl queue. The receipt says “Indexing
-requested”. Its index status remains **not indexed at the observed inspection**;
-request acceptance does not change that recorded fact.
+Seven newly inspected local and guide URLs are now confirmed **Page is indexed**, and two additional local service URLs received confirmed priority-crawl requests before Search Console's daily quota was reached cleanly. Indexing alone still does **not** establish query-level rankings or AI Overview citations for competitive queries such as `best football academy in bangalore` or `best football coaching in bangalore`. Bing Webmaster Tools (`bing.com/webmasters`) was checked read-only and is not yet signed in.
 
 ## Reporting correction
 

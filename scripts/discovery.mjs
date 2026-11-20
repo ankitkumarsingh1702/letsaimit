@@ -5,7 +5,7 @@ import { readFile } from 'node:fs/promises';
 export const PRODUCTION_ORIGIN = 'https://letsaimit.com';
 const sitemapNamespace = 'http://www.sitemaps.org/schemas/sitemap/0.9';
 const privatePaths = ['/admin/', '/parent/', '/coach-dashboard/', '/sign-in/', '/register/', '/404/'];
-const crawlerNames = ['*', 'Googlebot', 'Bingbot', 'OAI-SearchBot', 'ChatGPT-User', 'Claude-SearchBot', 'Claude-User', 'PerplexityBot', 'Perplexity-User', 'Applebot', 'DuckAssistBot'];
+const crawlerNames = ['*', 'Googlebot', 'Bingbot', 'Applebot', 'OAI-SearchBot', 'ChatGPT-User', 'Claude-SearchBot', 'Claude-User', 'PerplexityBot', 'Perplexity-User', 'DuckAssistBot', 'GPTBot', 'ClaudeBot', 'Google-Extended', 'Applebot-Extended'];
 const voidTags = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr']);
 const omittedTags = new Set(['script', 'style', 'nav', 'footer', 'form', 'dialog', 'button', 'input', 'select', 'textarea', 'noscript', 'svg', 'template']);
 const entities = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', ndash: '–', mdash: '—', hellip: '…', lsquo: '‘', rsquo: '’', ldquo: '“', rdquo: '”', copy: '©' };
@@ -331,9 +331,29 @@ export function validatePublicDocuments({ pages, documents, origin }) {
 
 export function buildDiscovery({ pages, documents, origin }) {
   const coverage = validatePublicDocuments({ pages, documents, origin });
-  const summary = 'LetsAimIt provides football, basketball and fitness coaching for children aged 5–14 at Nambiar Ellegenza and Nambiar Bellezea in Bengaluru.';
-  const list = kind => pages.filter(page => page.kind === kind).map(page => `- [${page.title}](${page.url}): ${page.description}`).join('\n');
-  const llms = `# LetsAimIt\n\n> ${summary}\n\nSessions run twice a week for 45–60 minutes. Coach Dhiraj Mishra leads the programme. The first session is free; coaching fees are confirmed during enrolment.\n\n## Coaching and community pages\n\n${list('content')}\n\n## Policies\n\n${list('policy')}\n\n## Full public content\n\n- [Full website text](${origin}/llms-full.txt): Public page content in Markdown, with canonical sources and content modification dates.\n`;
+  const summary = 'LetsAimIt is a community football, basketball and fitness coaching programme for children aged 5–14 in Bengaluru (Bangalore), active at Nambiar Ellegenza and Nambiar Bellezea.';
+  const listItems = subset => subset.map(page => `- [${page.title}](${page.url}): ${page.description}`).join('\n');
+  const localContent = pages.filter(page => page.kind === 'content' && page.path.startsWith('/bengaluru/'));
+  const guideContent = pages.filter(page => page.kind === 'content' && page.path.startsWith('/blogs/') && page.path !== '/blogs/');
+  const coreContent = pages.filter(page => page.kind === 'content' && !page.path.startsWith('/bengaluru/') && !(page.path.startsWith('/blogs/') && page.path !== '/blogs/'));
+  const policyContent = pages.filter(page => page.kind === 'policy');
+  const llms = [
+    '# LetsAimIt',
+    '',
+    `> ${summary}`,
+    '',
+    'Founded by youth football coach Dhiraj Mishra (former Head Coach, Frisco Soccer Association, Texas; U.S. Soccer Grassroots 4v4, 9v9, 11v11 and Safe Soccer Cleared). Sessions run twice a week for 45–60 minutes at Nambiar Bellezea (Narayanaghatta, Chandapura–Dommasandra Road, Bengaluru 560099) and Nambiar Ellegenza (Muthanallur Road, Gopasandra, off Sarjapur Road, Bengaluru). The first session is free after confirmation; monthly coaching fees are confirmed during enrolment.',
+    '',
+    ...(localContent.length ? ['## Bengaluru (Bangalore) coaching locations & sports', '', listItems(localContent), ''] : []),
+    ...(guideContent.length ? ['## Parent guides & academy comparisons', '', listItems(guideContent), ''] : []),
+    ...(coreContent.length ? ['## Core programme & community pages', '', listItems(coreContent), ''] : []),
+    ...(policyContent.length ? ['## Policies', '', listItems(policyContent), ''] : []),
+    '## Full public content & agentic discovery',
+    '',
+    `- [Full website text](${origin}/llms-full.txt): Complete public page content in Markdown, with canonical sources and content modification dates.`,
+    `- [AI discovery catalog](${origin}/.well-known/ai-catalog.json): Machine-readable index of public routes, Markdown alternatives and sitemap metadata.`,
+    '',
+  ].join('\n');
   const full = '# LetsAimIt public page content\n\n> ' + summary + '\n\n' + pages.map(page => {
     const body = page.markdown.replace(/^(#{1,5}) /gm, '##$1 ');
     return `---\n\n## ${page.title}\n\nCanonical source: ${page.url}\n\nLast content modification: ${page.lastmod}\n\n${body}`;
@@ -341,5 +361,17 @@ export function buildDiscovery({ pages, documents, origin }) {
   const markdownFiles = pages.map(page => ({ path: page.markdownPath, content: `Source: ${page.url}\n\nLast content modification: ${page.lastmod}\n\n${page.markdown}` }));
   const manifest = { schemaVersion: 1, origin, productionOrigin: PRODUCTION_ORIGIN, sitemapUrl: origin + '/sitemap.xml', coverage,
     pages: pages.map(({ page, path, url, title, description, contentHash, lastmod, indexable, markdownPath }) => ({ page, path, url, title, description, contentHash, lastmod, indexable, markdownPath, indexingType: 'general' })) };
-  return { sitemap: buildSitemap(pages), robots: buildRobots(origin), llms, full, markdownFiles, manifest };
+  const aiCatalog = {
+    schemaVersion: 1,
+    name: 'LetsAimIt',
+    origin,
+    description: summary,
+    llmsTxt: `${origin}/llms.txt`,
+    llmsFullTxt: `${origin}/llms-full.txt`,
+    sitemap: `${origin}/sitemap.xml`,
+    contact: { telephone: '+918868886074', whatsapp: 'https://wa.me/918868886074', instagram: 'https://www.instagram.com/lets_aimit/' },
+    locations: ['Nambiar Bellezea, Narayanaghatta, Bengaluru 560099', 'Nambiar Ellegenza, Muthanallur Road, Gopasandra, off Sarjapur Road, Bengaluru'],
+    pages: pages.map(({ path, url, title, description, kind, lastmod, markdownPath }) => ({ path, url, markdownUrl: origin + markdownPath, title, description, kind, lastmod })),
+  };
+  return { sitemap: buildSitemap(pages), robots: buildRobots(origin), llms, full, markdownFiles, manifest, aiCatalog };
 }

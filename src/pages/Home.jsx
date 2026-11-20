@@ -86,7 +86,7 @@ function Home() {
           </div>
           <div className="home-intro">
             <div className="hero-intro-copy">
-              <p>Football, basketball and fitness for children aged 5–14 in Bengaluru.</p>
+              <p>Football, basketball and fitness coaching for children aged 5–14 in Bengaluru (Bangalore).</p>
               <ul
                 className="hero-activities"
                 role="list"

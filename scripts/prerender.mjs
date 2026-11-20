@@ -105,6 +105,7 @@ try {
   const files = [
     ['sitemap.xml', discovery.sitemap], ['robots.txt', discovery.robots],
     ['llms.txt', discovery.llms], ['llms-full.txt', discovery.full],
+    ['.well-known/ai-catalog.json', JSON.stringify(discovery.aiCatalog, null, 2) + '\n'],
     ['discovery-manifest.json', JSON.stringify(discovery.manifest, null, 2) + '\n'],
     ...discovery.markdownFiles.map(file => [file.path.slice(1), file.content]),
     ['route-manifest.json', JSON.stringify({ origin: SITE_ORIGIN, routes }, null, 2) + '\n'],

@@ -139,6 +139,22 @@
 .blog-article-section p + p { margin-block-start: 18px; }
 .blog-article-section ul { margin: 20px 0 0; padding-inline-start: 24px; }
 .blog-article-section li + li { margin-block-start: 12px; }
+.blog-table-wrap { margin-block-start: 24px; overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
+.blog-table { width: 100%; min-width: 520px; border-collapse: collapse; font-size: 15px; line-height: 1.6; text-align: left; }
+.blog-table caption { padding: 14px 16px; font-size: 14px; font-weight: 600; color: var(--muted); text-align: left; border-bottom: 1px solid var(--line); background: var(--soft); }
+.blog-table th, .blog-table td { padding: 14px 16px; vertical-align: top; border-bottom: 1px solid var(--line); }
+.blog-table thead th { font-size: 13px; font-weight: 650; color: var(--green); background: var(--soft); }
+.blog-table tbody th { font-weight: 650; color: var(--green); }
+.blog-table tbody tr:last-child :is(th, td) { border-bottom: 0; }
+.blog-article-faq { margin-block-start: 44px; }
+.blog-article-page .blog-article-faq h2 { margin-block-end: 20px; font-size: clamp(25px, 2.3vw, 31px); line-height: 1.35; font-weight: 650; }
+.blog-article-faq details { border-top: 1px solid var(--line); }
+.blog-article-faq details:last-child { border-bottom: 1px solid var(--line); }
+.blog-article-faq summary { display: flex; justify-content: space-between; align-items: center; gap: 20px; min-height: 56px; padding-block: 16px; cursor: pointer; list-style: none; font-size: 17px; line-height: 1.6; font-weight: 600; }
+.blog-article-faq summary::-webkit-details-marker { display: none; }
+.blog-article-faq summary span { flex: 0 0 18px; font-size: 23px; font-weight: 400; line-height: 1; }
+.blog-article-faq details[open] summary span { transform: rotate(45deg); }
+.blog-article-page .blog-article-faq details p { margin-block: 0 20px; padding-inline-end: 32px; font-size: 16px; line-height: 1.75; color: #405b50; }
 .blog-article-section-figure { margin: 28px 0 0; }
 .blog-article-section-figure img { display: block; width: 100%; height: auto; border-radius: 12px; }
 .blog-article-section-figure figcaption { margin-block-start: 12px; font-size: 14px; line-height: 1.65; color: var(--muted); }

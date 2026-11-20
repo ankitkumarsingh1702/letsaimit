@@ -41,6 +41,13 @@
 .local-section p + p { margin-block-start: 18px; }
 .local-section ul { margin: 20px 0 0; padding-inline-start: 24px; }
 .local-section li + li { margin-block-start: 10px; }
+.local-table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
+.local-table { width: 100%; min-width: 500px; border-collapse: collapse; font-size: 15px; line-height: 1.6; text-align: left; }
+.local-table caption { padding: 14px 16px; font-size: 14px; font-weight: 600; color: var(--muted); text-align: left; border-bottom: 1px solid var(--line); background: var(--soft); }
+.local-table th, .local-table td { padding: 14px 16px; vertical-align: top; border-bottom: 1px solid var(--line); }
+.local-table thead th { font-size: 13px; font-weight: 650; color: var(--green); background: var(--soft); }
+.local-table tbody th { font-weight: 650; color: var(--green); }
+.local-table tbody tr:last-child :is(th, td) { border-bottom: 0; }
 .local-faq { margin-block-start: 48px; }
 .local-faq details { border-top: 1px solid var(--line); }
 .local-faq details:last-child { border-bottom: 1px solid var(--line); }

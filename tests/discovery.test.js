@@ -217,8 +217,18 @@ test('the real public route inventory produces complete Markdown and keeps priva
       assert.doesNotMatch(page.markdown, /#1|Bengaluru.s best|rated 5|guaranteed results/i);
     }
     assert.doesNotMatch(discovery.full, /Sign in with Google|Keep exploring|Checking your Google account/);
+    assert.equal(discovery.aiCatalog.pages.length, 28);
+    assert.equal(discovery.aiCatalog.pages.some(page => /\/(?:admin|parent|coach-dashboard|sign-in|register|404)\//.test(page.path)), false);
+    assert.ok(discovery.llms.includes('Bangalore'));
+    assert.ok(discovery.llms.includes('/.well-known/ai-catalog.json'));
+    const footballGuide = pages.find(page => page.page === 'blog-choosing-football-coaching-bengaluru');
+    assert.match(footballGuide.markdown, /\| Format \| Typical structure \|/);
+    assert.match(footballGuide.markdown, /What should parents check when searching for the best football academy in Bangalore\?/);
+    const footballLocal = pages.find(page => page.page === 'local-football');
+    assert.match(footballLocal.markdown, /\| Programme detail \| Verified LetsAimIt information \|/);
+    assert.ok(discovery.manifest.coverage.contextualIncoming['/bengaluru/football-coaching/'] >= 5);
     const robots = buildRobots(origin);
-    for (const name of ['Googlebot', 'Bingbot', 'OAI-SearchBot', 'ChatGPT-User', 'Claude-SearchBot', 'PerplexityBot']) assert.ok(robots.includes('User-agent: ' + name));
+    for (const name of ['Googlebot', 'Bingbot', 'Applebot', 'OAI-SearchBot', 'ChatGPT-User', 'Claude-SearchBot', 'Claude-User', 'PerplexityBot', 'Perplexity-User', 'DuckAssistBot', 'GPTBot', 'ClaudeBot', 'Google-Extended', 'Applebot-Extended']) assert.ok(robots.includes('User-agent: ' + name));
     for (const path of ['/admin/', '/parent/', '/coach-dashboard/', '/sign-in/', '/register/', '/404/']) assert.ok(robots.includes('Disallow: ' + path));
   } finally { await vite.close(); }
 });

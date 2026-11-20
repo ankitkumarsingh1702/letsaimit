@@ -25,7 +25,43 @@
       "observedAt": "2026-11-20T12:46:26.821803+00:00"
     }
   ],
+  "sitemapObservation": {
+    "url": "https://letsaimit.com/sitemap.xml",
+    "observedAt": "2026-11-20T14:43:00Z",
+    "status": "Success",
+    "lastRead": "20 Nov 2026",
+    "discoveredPages": 28,
+    "discoveredVideos": 0
+  },
   "googleUrlIndexing": [
+    {
+      "path": "/bengaluru/",
+      "url": "https://letsaimit.com/bengaluru/",
+      "observedAt": "2026-11-20T14:46:00Z",
+      "status": "indexed",
+      "googleMessage": "URL is on Google",
+      "lastCrawlDisplayed": "20 Nov 2026, 17:07:17",
+      "crawler": "Googlebot smartphone",
+      "crawlAllowed": true,
+      "pageFetch": "Successful",
+      "indexingAllowed": true,
+      "userCanonical": "https://letsaimit.com/bengaluru/",
+      "googleCanonical": "Inspected URL"
+    },
+    {
+      "path": "/bengaluru/football-coaching/",
+      "url": "https://letsaimit.com/bengaluru/football-coaching/",
+      "observedAt": "2026-11-20T14:46:30Z",
+      "status": "indexed",
+      "googleMessage": "URL is on Google",
+      "lastCrawlDisplayed": "20 Nov 2026, 18:19:01",
+      "crawler": "Googlebot smartphone",
+      "crawlAllowed": true,
+      "pageFetch": "Successful",
+      "indexingAllowed": true,
+      "userCanonical": "https://letsaimit.com/bengaluru/football-coaching/",
+      "googleCanonical": "Inspected URL"
+    },
     {
       "path": "/blogs/choosing-football-coaching-bengaluru/",
       "url": "https://letsaimit.com/blogs/choosing-football-coaching-bengaluru/",
@@ -41,9 +77,116 @@
       "googleCanonical": "Inspected URL"
     },
     {
-      "path": "/bengaluru/football-coaching/",
-      "url": "https://letsaimit.com/bengaluru/football-coaching/",
-      "observedAt": "2026-11-20T12:48:13.216Z",
+      "path": "/blogs/choosing-basketball-coaching-bengaluru/",
+      "url": "https://letsaimit.com/blogs/choosing-basketball-coaching-bengaluru/",
+      "observedAt": "2026-11-20T14:49:30Z",
+      "status": "indexed",
+      "googleMessage": "URL is on Google",
+      "lastCrawlDisplayed": "20 Nov 2026, 17:58:01",
+      "crawler": "Googlebot smartphone",
+      "crawlAllowed": true,
+      "pageFetch": "Successful",
+      "indexingAllowed": true,
+      "userCanonical": "https://letsaimit.com/blogs/choosing-basketball-coaching-bengaluru/",
+      "googleCanonical": "Inspected URL"
+    },
+    {
+      "path": "/blogs/beginner-football-rules-and-skills/",
+      "url": "https://letsaimit.com/blogs/beginner-football-rules-and-skills/",
+      "observedAt": "2026-11-20T14:53:00Z",
+      "status": "indexed",
+      "googleMessage": "URL is on Google",
+      "lastCrawlDisplayed": "20 Nov 2026, 18:27:45",
+      "crawler": "Googlebot smartphone",
+      "crawlAllowed": true,
+      "pageFetch": "Successful",
+      "indexingAllowed": true,
+      "userCanonical": "https://letsaimit.com/blogs/beginner-football-rules-and-skills/",
+      "googleCanonical": "Inspected URL"
+    },
+    {
+      "path": "/blogs/society-sports-coaching-checklist/",
+      "url": "https://letsaimit.com/blogs/society-sports-coaching-checklist/",
+      "observedAt": "2026-11-20T14:54:00Z",
+      "status": "indexed",
+      "googleMessage": "URL is on Google",
+      "lastCrawlDisplayed": "20 Nov 2026, 18:30:29",
+      "crawler": "Googlebot smartphone",
+      "crawlAllowed": true,
+      "pageFetch": "Successful",
+      "indexingAllowed": true,
+      "userCanonical": "https://letsaimit.com/blogs/society-sports-coaching-checklist/",
+      "googleCanonical": "Inspected URL"
+    },
+    {
+      "path": "/blogs/understanding-your-childs-practice-progress/",
+      "url": "https://letsaimit.com/blogs/understanding-your-childs-practice-progress/",
+      "observedAt": "2026-11-20T14:55:00Z",
+      "status": "indexed",
+      "googleMessage": "URL is on Google",
+      "lastCrawlDisplayed": "20 Nov 2026, 18:49:49",
+      "crawler": "Googlebot smartphone",
+      "crawlAllowed": true,
+      "pageFetch": "Successful",
+      "indexingAllowed": true,
+      "userCanonical": "https://letsaimit.com/blogs/understanding-your-childs-practice-progress/",
+      "googleCanonical": "Inspected URL"
+    },
+    {
+      "path": "/bengaluru/basketball-coaching/",
+      "url": "https://letsaimit.com/bengaluru/basketball-coaching/",
+      "observedAt": "2026-11-20T14:47:30Z",
+      "status": "not_indexed",
+      "googleMessage": "URL is not on Google",
+      "reason": "URL is unknown to Google",
+      "crawlRequestStatus": "Indexing requested (priority crawl queue)",
+      "lastCrawlDisplayed": "N/A"
+    },
+    {
+      "path": "/bengaluru/nambiar-bellezea/",
+      "url": "https://letsaimit.com/bengaluru/nambiar-bellezea/",
+      "observedAt": "2026-11-20T14:48:24Z",
+      "status": "not_indexed",
+      "googleMessage": "URL is not on Google",
+      "reason": "URL is unknown to Google",
+      "crawlRequestStatus": "Indexing requested (priority crawl queue)",
+      "lastCrawlDisplayed": "N/A"
+    },
+    {
+      "path": "/bengaluru/nambiar-ellegenza/",
+      "url": "https://letsaimit.com/bengaluru/nambiar-ellegenza/",
+      "observedAt": "2026-11-20T14:49:03Z",
+      "status": "not_indexed",
+      "googleMessage": "URL is not on Google",
+      "reason": "Discovered – currently not indexed",
+      "crawlRequestStatus": "Quota exceeded (daily GSC quota reached)",
+      "lastCrawlDisplayed": "N/A",
+      "sitemap": "https://letsaimit.com/sitemap.xml"
+    },
+    {
+      "path": "/blogs/football-or-basketball-for-beginners/",
+      "url": "https://letsaimit.com/blogs/football-or-basketball-for-beginners/",
+      "observedAt": "2026-11-20T14:51:00Z",
+      "status": "not_indexed",
+      "googleMessage": "URL is not on Google",
+      "reason": "Discovered – currently not indexed",
+      "lastCrawlDisplayed": "N/A",
+      "sitemap": "https://letsaimit.com/sitemap.xml"
+    },
+    {
+      "path": "/blogs/first-basketball-session/",
+      "url": "https://letsaimit.com/blogs/first-basketball-session/",
+      "observedAt": "2026-11-20T14:51:30Z",
+      "status": "not_indexed",
+      "googleMessage": "URL is not on Google",
+      "reason": "Discovered – currently not indexed",
+      "lastCrawlDisplayed": "N/A",
+      "sitemap": "https://letsaimit.com/sitemap.xml"
+    },
+    {
+      "path": "/blogs/beginner-basketball-skills/",
+      "url": "https://letsaimit.com/blogs/beginner-basketball-skills/",
+      "observedAt": "2026-11-20T14:52:00Z",
       "status": "not_indexed",
       "googleMessage": "URL is not on Google",
       "reason": "Discovered – currently not indexed",
