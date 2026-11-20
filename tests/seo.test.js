@@ -4,6 +4,7 @@ import { PAGE_META, PUBLIC_PAGES, buildPageGraph, isIndexablePage, robotsForPage
 import { programmeFaqs } from "../src/data/programmeFaqs.js";
 import { blogPosts } from "../src/features/blog/blog-posts.js";
 import { articles } from "../src/features/blog/articles.js";
+import { localPages } from "../src/features/locations/local-pages.js";
 import { syncPageMeta } from "../src/lib/routes.js";
 
 const origin = "https://letsaimit.com";
@@ -16,6 +17,8 @@ test("the public inventory is explicit and search permission belongs to producti
     "/events/", "/blogs/",
     "/blogs/first-football-session/", "/blogs/encouragement-without-pressure/",
     "/blogs/questions-about-training-preparation/", "/blogs/first-community-match/",
+    "/bengaluru/", "/bengaluru/football-coaching/", "/bengaluru/basketball-coaching/",
+    "/bengaluru/nambiar-bellezea/", "/bengaluru/nambiar-ellegenza/",
     "/privacy/", "/terms/", "/refunds/",
   ]);
   for (const page of PUBLIC_PAGES) {
@@ -144,6 +147,35 @@ test("schema dates are supplied provenance and JSON-LD is safe inside an HTML sc
   const serialized = serializeJsonLd(hostile);
   assert.doesNotMatch(serialized, /<|>|&|\u2028|\u2029/);
   assert.deepEqual(JSON.parse(serialized), hostile);
+});
+
+test("local coaching represents the two real societies as service areas without inventing branches or reputation", () => {
+  assert.equal(localPages.length, 5);
+  const societies = ['Nambiar Bellezea', 'Nambiar Ellegenza'];
+  for (const local of localPages) {
+    const graph = buildPageGraph(local.page, { origin })['@graph'];
+    const service = graph.find(node => hasType(node, 'Service'));
+    const page = graph.find(node => node['@id'] === origin + local.path + '#webpage');
+    assert.equal(service.url, origin + local.path);
+    assert.equal(service.provider['@id'], origin + '/#organization');
+    assert.equal(page.mainEntity['@id'], service['@id']);
+    const places = service.areaServed.map(reference => graph.find(node => node['@id'] === reference['@id']));
+    assert.deepEqual(places.map(place => place.name).sort(), (local.society ? [local.society] : societies).slice().sort());
+    for (const place of places) {
+      assert.equal(place['@type'], 'Place');
+      const source = localPages.find(content => content.society === place.name);
+      assert.equal(place.address, source.location.address);
+      assert.equal(place.subjectOf.url, source.location.sourceUrl);
+      assert.equal(place.containedInPlace['@id'], origin + '/bengaluru/#city');
+    }
+    const faq = graph.find(node => hasType(node, 'FAQPage'));
+    assert.deepEqual(faq.mainEntity.map(item => [item.name, item.acceptedAnswer.text]), local.faq.map(item => [item.question, item.answer]));
+    assert.deepEqual(graph.find(node => hasType(node, 'BreadcrumbList')).itemListElement.map(item => item.item), local.page === 'local-bengaluru' ? [origin + '/', service.url] : [origin + '/', origin + '/bengaluru/', service.url]);
+    assert.ok(!graph.some(node => ['LocalBusiness', 'Review', 'AggregateRating', 'GeoCoordinates', 'Offer', 'Product', 'Article'].some(type => hasType(node, type))));
+    assert.doesNotMatch(JSON.stringify(graph), /openingHours|ratingValue|priceRange|latitude|longitude/);
+    assert.ok(!Object.hasOwn(page, 'datePublished'));
+    assert.equal(isIndexablePage(local.page, 'https://uat.letsaimit.com'), false);
+  }
 });
 
 test("client navigation replaces page schema and metadata without carrying another page's dates", () => {

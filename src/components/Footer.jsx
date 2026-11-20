@@ -64,6 +64,7 @@ function Footer() {
             <h2>Explore</h2>
             <a href="/">Home</a>
             <a href="/programme/">Programme</a>
+            <a href="/bengaluru/">Bengaluru coaching</a>
             <a href="/coach/">Meet the coach</a>
             <a href="/societies/">For societies</a>
             <a href="/schools/">For schools</a>

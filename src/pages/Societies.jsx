@@ -111,8 +111,8 @@ function Societies() {
               role="list"
               aria-label="Active communities"
             >
-              <li>Nambiar Ellegenza</li>
-              <li>Nambiar Bellezea</li>
+              <li><a href="/bengaluru/nambiar-ellegenza/">Nambiar Ellegenza</a></li>
+              <li><a href="/bengaluru/nambiar-bellezea/">Nambiar Bellezea</a></li>
             </ul>
             <a className="text-link" href="/programme/">
               {"Explore the programme "}

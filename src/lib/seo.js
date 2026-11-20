@@ -2,6 +2,7 @@ import media from "../data/media-manifest.json" with { type: "json" };
 import { programmeFaqs } from "../data/programmeFaqs.js";
 import { blogPosts } from "../features/blog/blog-posts.js";
 import { articles } from "../features/blog/articles.js";
+import { localPages } from "../features/locations/local-pages.js";
 import { PUBLIC_BRAND } from "./publicBrand.js";
 
 export const SITE_ORIGIN = (import.meta.env?.VITE_SITE_ORIGIN || PUBLIC_BRAND.origin).replace(/\/$/, "");
@@ -21,6 +22,14 @@ export const PAGE_META = {
     indexable: true,
     kind: "content",
     sources: ["src/features/blog/articles.js", "src/pages/BlogArticle.jsx"],
+  }])),
+  ...Object.fromEntries(localPages.map(content => [content.page, {
+    path: content.path,
+    title: content.title,
+    description: content.description,
+    indexable: true,
+    kind: "content",
+    sources: ["src/features/locations/local-pages.js", "src/features/locations/LocalCoaching.jsx"],
   }])),
   privacy: { path: "/privacy/", title: "Privacy Policy for Parents & Guardians", description: "Read how LetsAimIt handles parent and child details, Google sign-in, payment records, photo consent and privacy requests for its community coaching programme.", indexable: true, kind: "policy" },
   terms: { path: "/terms/", title: "Sports Coaching Programme Terms for Parents", description: "Read LetsAimIt coaching terms for enrolment, free trials, monthly payments, safe participation, session changes and parent rights before joining the programme.", indexable: true, kind: "policy" },
@@ -52,6 +61,7 @@ export function robotsForPage(page, origin = SITE_ORIGIN) {
 
 const coachProfile = "https://www.linkedin.com/in/dhiraj-mishra-20274717/";
 const articlesByPage = new Map(articles.map(article => [article.page, article]));
+const localPagesByPage = new Map(localPages.map(content => [content.page, content]));
 const heroImages = {
   home: ["football-film-poster.jpg", "Children practising football in the stock film"],
   programme: ["Initial_days_of_kids_training.jpg", "Children running together during Coach Dhiraj’s football training"],
@@ -120,6 +130,7 @@ export function buildPageGraph(page, { origin = SITE_ORIGIN, datePublished, date
   }
   const key = Object.hasOwn(PAGE_META, page) ? page : "notfound";
   const article = articlesByPage.get(key);
+  const local = localPagesByPage.get(key);
   const meta = PAGE_META[key];
   const url = origin + meta.path;
   const organizationId = origin + "/#organization";
@@ -182,12 +193,15 @@ export function buildPageGraph(page, { origin = SITE_ORIGIN, datePublished, date
         ...(article ? [
           { "@type": "ListItem", position: 2, name: "Blogs", item: origin + "/blogs/" },
           { "@type": "ListItem", position: 3, name: meta.title, item: url },
+        ] : local && key !== "local-bengaluru" ? [
+          { "@type": "ListItem", position: 2, name: "Bengaluru coaching", item: origin + "/bengaluru/" },
+          { "@type": "ListItem", position: 3, name: meta.title, item: url },
         ] : key === "home" ? [] : [{ "@type": "ListItem", position: 2, name: meta.title, item: url }]),
       ],
     },
   ];
-  if (article || heroImages[key]) {
-    const [filename, caption] = article ? [article.image.file, article.image.caption] : heroImages[key];
+  if (article || local?.image || heroImages[key]) {
+    const [filename, caption] = article ? [article.image.file, article.image.caption] : local?.image ? [local.image.file, local.image.caption] : heroImages[key];
     const image = schemaImage(filename, origin, url + "#primary-image", caption);
     graph.push(image);
     webpage.primaryImageOfPage = { "@id": image["@id"] };
@@ -224,6 +238,42 @@ export function buildPageGraph(page, { origin = SITE_ORIGIN, datePublished, date
     };
     graph.push(faq);
     webpage.hasPart = [{ "@id": faq["@id"] }];
+  }
+  if (local) {
+    const cityId = origin + "/bengaluru/#city";
+    const communities = localPages.filter(content => content.society && (!local.society || local.society === content.society));
+    const places = communities.map(content => ({
+      "@type": "Place",
+      "@id": origin + content.path + "#society",
+      name: content.society,
+      containedInPlace: { "@id": cityId },
+      ...(content.location?.address ? { address: content.location.address } : {}),
+      ...(content.location?.sourceUrl ? { subjectOf: { "@type": "WebPage", url: content.location.sourceUrl } } : {}),
+    }));
+    const service = {
+      "@type": "Service",
+      "@id": url + "#service",
+      name: local.heading,
+      serviceType: local.sport ? `${local.sport} coaching for children` : "Children’s football and basketball coaching",
+      description: local.description,
+      url,
+      provider: { "@id": organizationId },
+      mainEntityOfPage: { "@id": pageId },
+      areaServed: places.map(place => ({ "@id": place["@id"] })),
+      audience: { "@type": "PeopleAudience", suggestedMinAge: 5, suggestedMaxAge: 14 },
+    };
+    graph.push({ "@type": "City", "@id": cityId, name: "Bengaluru", alternateName: "Bangalore", containedInPlace: { "@type": "Country", name: "India" } }, ...places, service);
+    webpage.mainEntity = { "@id": service["@id"] };
+    if (local.faq?.length) {
+      const faq = {
+        "@type": "FAQPage",
+        "@id": url + "#local-faq",
+        isPartOf: { "@id": pageId },
+        mainEntity: local.faq.map(({ question, answer }) => ({ "@type": "Question", name: question, acceptedAnswer: { "@type": "Answer", text: answer } })),
+      };
+      graph.push(faq);
+      webpage.hasPart = [{ "@id": faq["@id"] }];
+    }
   }
   if (key === "blogs") {
     // These are links to incomplete, off-site previews, not social posts hosted

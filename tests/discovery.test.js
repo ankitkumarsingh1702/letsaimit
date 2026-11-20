@@ -146,7 +146,7 @@ test('the real public route inventory produces complete Markdown and keeps priva
   const vite = await createServer({ server: { middlewareMode: true, hmr: false }, appType: 'custom', logLevel: 'error' });
   try {
     const { PUBLIC_PAGES, render, buildPageGraph, isIndexablePage } = await vite.ssrLoadModule('/src/entry-server.jsx');
-    assert.equal(PUBLIC_PAGES.length, 14);
+    assert.equal(PUBLIC_PAGES.length, 19);
     assert.equal(PUBLIC_PAGES.some(page => /\/(?:admin|parent|coach-dashboard|sign-in|register|404)\//.test(page.path)), false);
     const documents = new Map();
     const pages = PUBLIC_PAGES.map(details => {
@@ -160,9 +160,9 @@ test('the real public route inventory produces complete Markdown and keeps priva
         markdownPath: markdownPath(details.path), indexable: isIndexablePage(details.page, origin) };
     });
     const discovery = buildDiscovery({ pages, documents, origin });
-    assert.equal(discovery.manifest.coverage.publicCount, 14);
-    assert.equal(discovery.manifest.coverage.indexableCount, 14);
-    assert.equal(discovery.markdownFiles.length, 14);
+    assert.equal(discovery.manifest.coverage.publicCount, 19);
+    assert.equal(discovery.manifest.coverage.indexableCount, 19);
+    assert.equal(discovery.markdownFiles.length, 19);
     for (const page of pages) {
       assert.match(page.markdown, /(?:^|\n)# /);
       assert.ok(discovery.full.includes(page.markdown.trim().replace(/^(#{1,5}) /gm, '##$1 ')));
@@ -195,6 +195,25 @@ test('the real public route inventory produces complete Markdown and keeps priva
       const story = schema.find(node => node['@type'] === 'Article');
       assert.ok(story);
       for (const section of article.sections) for (const paragraph of section.paragraphs) assert.ok(story.articleBody.includes(paragraph));
+    }
+    const { localPages } = await vite.ssrLoadModule('/src/features/locations/local-pages.js');
+    for (const content of localPages) {
+      const page = pages.find(page => page.page === content.page);
+      assert.ok(page.markdown.includes(content.heading));
+      assert.ok(page.markdown.includes(content.intro));
+      for (const section of content.sections) for (const paragraph of [...section.paragraphs, ...(section.bullets ?? [])]) assert.ok(page.markdown.includes(paragraph));
+      for (const question of content.faq) {
+        assert.ok(page.markdown.includes(question.question));
+        assert.ok(page.markdown.includes(question.answer));
+      }
+      if (content.location) {
+        assert.ok(page.markdown.includes(content.location.address));
+        assert.ok(page.markdown.includes(content.location.mapUrl));
+        assert.ok(page.markdown.includes(content.location.sourceUrl));
+      }
+      assert.ok(discovery.sitemap.includes(page.url));
+      assert.ok(discovery.manifest.coverage.contextualIncoming[content.path] >= 2);
+      assert.doesNotMatch(page.markdown, /#1|Bengaluru.s best|rated 5|guaranteed results/i);
     }
     assert.doesNotMatch(discovery.full, /Sign in with Google|Keep exploring|Checking your Google account/);
     const robots = buildRobots(origin);

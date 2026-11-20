@@ -160,8 +160,8 @@ function Home() {
                 <circle cx="20" cy="18" r="5" />
               </svg>
               <dd>
-                <span className="fact-location">Nambiar Ellegenza</span>
-                <span className="fact-location">Nambiar Bellezea</span>
+                <a className="fact-location" href="/bengaluru/nambiar-ellegenza/">Nambiar Ellegenza</a>
+                <a className="fact-location" href="/bengaluru/nambiar-bellezea/">Nambiar Bellezea</a>
                 <span className="fact-city fact-label">Bengaluru</span>
               </dd>
             </div>

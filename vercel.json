@@ -66,6 +66,31 @@
       "permanent": true
     },
     {
+      "source": "/bengaluru",
+      "destination": "/bengaluru/",
+      "permanent": true
+    },
+    {
+      "source": "/bengaluru/football-coaching",
+      "destination": "/bengaluru/football-coaching/",
+      "permanent": true
+    },
+    {
+      "source": "/bengaluru/basketball-coaching",
+      "destination": "/bengaluru/basketball-coaching/",
+      "permanent": true
+    },
+    {
+      "source": "/bengaluru/nambiar-bellezea",
+      "destination": "/bengaluru/nambiar-bellezea/",
+      "permanent": true
+    },
+    {
+      "source": "/bengaluru/nambiar-ellegenza",
+      "destination": "/bengaluru/nambiar-ellegenza/",
+      "permanent": true
+    },
+    {
       "source": "/privacy",
       "destination": "/privacy/",
       "permanent": true

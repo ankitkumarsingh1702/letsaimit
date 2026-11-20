@@ -1,0 +1,31 @@
+{
+  "prepared_on": "2026-11-20",
+  "provider": "Semrush",
+  "database": "in",
+  "method": "keyword_research → get_report_schema(phrase_related) → execute_report; two focused seed reports, no Google query grid",
+  "limitation": "Provider estimates, not LetsAimIt ranking data or a Bengaluru-only near-me search count. Unrelated competitor/ticket terms were excluded from the target plan.",
+  "receipts": {
+    "local_keywords_semrush": {
+      "data": "Keyword;Search Volume;Related Relevance;Intent\nfootball academy in bangalore;1300;0.8;0\nbest football academy in bangalore;390;0.75;0\nbest football coaching in bangalore;110;0.65;0\nbest football club in bangalore;140;0.55;0\nbangalore soccer academy;140;0.5;1\nfootball club bangalore;110;0.5;0\nbyfl bangalore;170;0.45;2\nbangalore football;590;0.35;1\nbangalore youth football league;170;0.35;2\nbengal football academy;320;0.35;1\nbengaluru fc academy;210;0.35;2\nbengaluru football;140;0.3;1,3\nbengaluru fc soccer schools;480;0.25;2\nbfc football academy;140;0.25;2\nfc football club;210;0.25;1\nyouth football academy;260;0.25;0\nbangalore city fc;880;0.2;1\nbangalore football club;2400;0.2;1\nbengaluru fc academy fees;170;0.2;1\nfc bangalore;480;0.2;1,3\nfc club;210;0.2;0\nfootball coaching for kids;170;0.2;0\nfootball school;260;0.2;0\nfootball training center;140;0.2;0\nnational football academy;260;0.2;0\nsoccer academy near me;170;0.2;3\nbcfc bangalore;210;0.15;1,3\nbengaluru fc;60500;0.15;1\nbengaluru fc logo;210;0.15;1\nbengaluru fc match tickets;110;0.15;0\n",
+      "metadata": {
+        "format": "csv",
+        "pagination": {
+          "limit": 30,
+          "sort": "relevance_desc"
+        },
+        "url": "https://www.semrush.com/analytics/keywordmagic/?db=in&display_limit=30&display_sort=relevance_desc&export_columns=keyword%2Cvolume%2Crelevance%2Cintent&q=football+coaching+in+bangalore"
+      }
+    },
+    "local_keywords_basketball_semrush": {
+      "data": "Keyword;Search Volume;Related Relevance;Intent\nbasketball academy bangalore;140;0.6;0\nbasketball academy in bangalore;140;0.55;0\nbasketball clubs in bangalore;110;0.3;0\npitch basketball academy;1000;0.25;0\nbest basketball coaching near me;170;0.2;3\nappayya basketball court;1300;0.15;1,3\nbasketball club;480;0.15;1\nbasketball coaching near me;8100;0.15;3\nbasketball courts in bangalore;210;0.15;0\nakanksha singh basketball;590;0.1;2\nakanksha singh basketball academy;880;0.1;2\nakansha singh basketball;210;0.1;2\nbasketball academy;1600;0.1;0\nbasketball academy near me;8100;0.1;3\nbasketball area;110;0.1;1\nbasketball arena;390;0.1;1\nbasketball ball court near me;110;0.1;3\nbasketball classes near me;1600;0.1;3\nbasketball clubs near me;1000;0.1;3\nbasketball coach;1000;0.1;1\n",
+      "metadata": {
+        "format": "csv",
+        "pagination": {
+          "limit": 20,
+          "sort": "relevance_desc"
+        },
+        "url": "https://www.semrush.com/analytics/keywordmagic/?db=in&display_limit=20&display_sort=relevance_desc&export_columns=keyword%2Cvolume%2Crelevance%2Cintent&q=basketball+coaching+in+bangalore"
+      }
+    }
+  }
+}

@@ -1,4 +1,21 @@
 /* Use the established menu before the additional destinations crowd the header. */
+.fact-place .fact-location,
+.pg-community-list a,
+.so-community-list a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.fact-place .fact-location { display: flex; }
+.fact-place .fact-location:focus-visible,
+.pg-community-list a:focus-visible,
+.so-community-list a:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+}
+
 @media (min-width: 701px) and (max-width: 1320px) {
   .site-header .desktop-nav {
     display: none;

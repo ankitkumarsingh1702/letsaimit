@@ -5,6 +5,8 @@ import { Coach } from "./pages/Coach.jsx";
 import { Blogs } from "./pages/Blogs.jsx";
 import { BlogArticle } from "./pages/BlogArticle.jsx";
 import { articles } from "./features/blog/articles.js";
+import { LocalCoaching } from "./features/locations/LocalCoaching.jsx";
+import { localPages } from "./features/locations/local-pages.js";
 import { Societies } from "./pages/Societies.jsx";
 import SchoolsPage from "./features/schools/SchoolsPage.js";
 import EventsPage from "./features/events/EventsPage.js";
@@ -27,12 +29,14 @@ import { ContactDialog } from "./components/ContactDialog.jsx";
 import { MediaDialog } from "./components/MediaDialog.jsx";
 import RegistrationNotice from "./features/registration/RegistrationNotice.jsx";
 const articlesByPage = new Map(articles.map(article => [article.page, article]));
+const localPagesByPage = new Map(localPages.map(content => [content.page, content]));
 var pages = {
   home: Home,
   programme: Programme,
   coach: Coach,
   blogs: Blogs,
   ...Object.fromEntries(articles.map(article => [article.page, BlogArticle])),
+  ...Object.fromEntries(localPages.map(content => [content.page, LocalCoaching])),
   societies: Societies,
   schools: SchoolsPage,
   events: EventsPage,
@@ -150,7 +154,7 @@ function App({ initialPage = "home" } = {}) {
     <SiteActionsProvider value={actions}>
       {!workspace && <Header page={page} onSkipToContent={skipToContent} />}
       <main id="main" ref={mainRef} tabIndex={-1}>
-        <Page article={articlesByPage.get(page)} />
+        <Page article={articlesByPage.get(page)} content={localPagesByPage.get(page)} />
         <RelatedPages page={page} />
       </main>
       {!workspace && page !== "register" && <Footer />}

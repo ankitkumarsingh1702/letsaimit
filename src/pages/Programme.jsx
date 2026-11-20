@@ -107,8 +107,8 @@ function Programme() {
             role="list"
             aria-label="Active communities"
           >
-            <li>Nambiar Ellegenza</li>
-            <li>Nambiar Bellezea</li>
+            <li><a href="/bengaluru/nambiar-ellegenza/">Nambiar Ellegenza</a></li>
+            <li><a href="/bengaluru/nambiar-bellezea/">Nambiar Bellezea</a></li>
           </ul>
           <p className="pg-community-note">
             Football and basketball at both.
