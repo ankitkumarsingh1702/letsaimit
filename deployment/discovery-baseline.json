@@ -3,8 +3,33 @@
   "pages": [
     {
       "path": "/",
-      "contentHash": "7624e02b49f829b4fc66b04b79451a79adbd2bd001ebad5b292ec3758debee33",
-      "lastmod": "2026-11-19T17:07:45+00:00"
+      "contentHash": "46ba4fd3e3f09a14ee2f8ce2a59020729e2daf74e19208e83e2287d4dd5882a0",
+      "lastmod": "2026-11-20T09:19:04+00:00"
+    },
+    {
+      "path": "/bengaluru/",
+      "contentHash": "041107c155f257320f996cbb8961129d1234330d791e29995df57ff373dd1d21",
+      "lastmod": "2026-11-20T09:19:04+00:00"
+    },
+    {
+      "path": "/bengaluru/basketball-coaching/",
+      "contentHash": "51c5f7ed9a522949431fdf91442d7400e91c8f2f03699842d755d808b13352d6",
+      "lastmod": "2026-11-20T09:19:04+00:00"
+    },
+    {
+      "path": "/bengaluru/football-coaching/",
+      "contentHash": "bf850476de0cf50ee16221ae60c6f98f9a17eccdfad9646fa5443ee1c912088f",
+      "lastmod": "2026-11-20T09:19:04+00:00"
+    },
+    {
+      "path": "/bengaluru/nambiar-bellezea/",
+      "contentHash": "e40fc5b2c8e641ba294f0873c18fde131e70fb7595052ba075d18f92bf0a003d",
+      "lastmod": "2026-11-20T09:19:04+00:00"
+    },
+    {
+      "path": "/bengaluru/nambiar-ellegenza/",
+      "contentHash": "9de62e62d97889a8059af01325108d134ca4b721862c63dec463cf5341ae45b9",
+      "lastmod": "2026-11-20T09:19:04+00:00"
     },
     {
       "path": "/blogs/",
@@ -48,8 +73,8 @@
     },
     {
       "path": "/programme/",
-      "contentHash": "48b8f29bd16ed49078e576be3bf6e430bdccf7c5f49c185e2ccf6f9c64bb58aa",
-      "lastmod": "2026-11-19T17:07:45+00:00"
+      "contentHash": "03bcd3e1ada718ef771632817a981d7b6207d64243ec7bfcaec0d50bd6eb1000",
+      "lastmod": "2026-11-20T09:19:04+00:00"
     },
     {
       "path": "/refunds/",
@@ -63,8 +88,8 @@
     },
     {
       "path": "/societies/",
-      "contentHash": "58110cc5536c670001374a223424150e9e8d8d9c0531a6615082d1d1491d5d85",
-      "lastmod": "2026-11-19T17:07:45+00:00"
+      "contentHash": "7fbed26b891998368ba1f07ddfcd3042d1d226b5bfaa7267976c35bed2114050",
+      "lastmod": "2026-11-20T09:19:04+00:00"
     },
     {
       "path": "/terms/",
