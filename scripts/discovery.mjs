@@ -19,7 +19,7 @@ export const PAGE_CONTENT_SOURCES = {
   societies: ['src/pages/Societies.jsx'],
   schools: ['src/features/schools/SchoolsPage.js'],
   events: ['src/features/events/EventsPage.js'],
-  blogs: ['src/pages/Blogs.jsx', 'src/features/blog/blog-posts.js'],
+  blogs: ['src/pages/Blogs.jsx', 'src/features/blog/blog-posts.js', 'src/features/blog/articles.js'],
   privacy: ['src/pages/Legal.jsx'],
   terms: ['src/pages/Legal.jsx'],
   refunds: ['src/pages/Legal.jsx'],

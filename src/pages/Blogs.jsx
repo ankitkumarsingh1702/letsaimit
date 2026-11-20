@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Arrow } from '../components/ui.jsx';
 import { mediaProps } from '../lib/media.js';
 import { blogPosts } from '../features/blog/blog-posts.js';
+import { articles } from '../features/blog/articles.js';
 import '../features/blog/blogs.css';
 
 const profileUrl = 'https://www.linkedin.com/in/dhiraj-mishra-20274717/';
@@ -37,7 +38,7 @@ function SourceLink({ href, children = 'Read on LinkedIn' }) {
 function StoryMeta({ post }) {
   return <p className="blog-story-meta">
     <span>{post.type === 'article' ? 'Article' : 'Post'}</span>
-    {post.publishedAt && <><span aria-hidden="true"> · </span><time dateTime={post.publishedAt}>{date.format(new Date(post.publishedAt))}</time></>}
+    {post.publishedAt && <><span> · </span><time dateTime={post.publishedAt}>{date.format(new Date(post.publishedAt))}</time></>}
   </p>;
 }
 
@@ -56,29 +57,61 @@ function StoryPreview({ post }) {
   </article>;
 }
 
+function GuidePreview({ article }) {
+  return <article className="blog-guide" aria-labelledby={`guide-${article.id}`}>
+    <img className="blog-guide-image"
+      {...mediaProps(article.image.file, '(max-width: 700px) calc(100vw - 40px), (max-width: 1100px) calc((100vw - 88px) / 2), 560px')}
+      alt={article.image.alt} loading="lazy" />
+    <div className="blog-guide-copy">
+      <p className="blog-story-meta">{article.category} · LetsAimIt team</p>
+      <h3 id={`guide-${article.id}`}><a href={article.path}>{article.title}</a></h3>
+      <p>{article.summary}</p>
+      <a className="blog-source-link" href={article.path}>Read the guide<Arrow /></a>
+    </div>
+  </article>;
+}
+
 export function Blogs() {
   const [filter, setFilter] = useState('all');
   const visible = stories.filter(post => filter === 'all' || post.type === filter);
 
   return <div className="blogs-page wrap">
-    <section className="blog-hero" aria-labelledby="blogs-title">
-      <div className="blog-hero-intro">
-        <h1 id="blogs-title">Blogs</h1>
-        <p>By <a href={profileUrl} target="_blank" rel="noopener noreferrer">Dhiraj Mishra<span className="blog-sr-only"> on LinkedIn, opens in a new tab</span></a></p>
+    <header className="blog-hero-intro">
+      <p className="blog-eyebrow">The LetsAimIt journal</p>
+      <h1 id="blogs-title">Coaching guides &amp; Dhiraj’s reading list.</h1>
+      <p className="blog-introduction">Practical guides from the LetsAimIt team for parents and young players, alongside selected writing by <a href="/coach/">Coach Dhiraj Mishra</a>. Read our guides here, or follow the previews below to Dhiraj’s original LinkedIn posts and articles.</p>
+    </header>
+
+    <section className="blog-guides" aria-labelledby="blog-guides-title">
+      <div className="blog-collection-heading">
+        <h2 id="blog-guides-title">For the next session.</h2>
+        <p>Original guides from the LetsAimIt team.</p>
       </div>
+      <div className="blog-guides-grid">
+        {articles.map(article => <GuidePreview key={article.id} article={article} />)}
+      </div>
+    </section>
+
+    <section className="blog-reading" aria-labelledby="blog-reading-title">
+      <header className="blog-reading-heading">
+        <p className="blog-eyebrow">From Coach Dhiraj</p>
+        <h2 id="blog-reading-title">A coach’s reading list.</h2>
+        <p>Short previews of <a href={profileUrl} target="_blank" rel="noopener noreferrer">Dhiraj Mishra’s writing<span className="blog-sr-only"> on LinkedIn, opens in a new tab</span></a>. The complete posts and articles are published on LinkedIn.</p>
+      </header>
+      <div className="blog-hero">
       <img className="blog-hero-image"
         {...mediaProps('Coach_Goalie_conversation_before_the_game.jpg', '(max-width: 700px) calc(100vw - 32px), calc(100vw - 96px)')}
         alt="Coach Dhiraj talking with a young goalkeeper before a game in Frisco, Texas"
-        fetchPriority="high" />
+        loading="lazy" />
       <article className="blog-featured" aria-labelledby="blog-featured-title">
         <p className="blog-story-meta">Coaching · Post</p>
-        <h2 id="blog-featured-title">{featured.title}</h2>
+        <h3 id="blog-featured-title">{featured.title}</h3>
         <p>{featured.summary}</p>
         <SourceLink href={featured.url} />
       </article>
-    </section>
+      </div>
 
-    <section className="blog-collection" aria-labelledby="blog-collection-title">
+      <div className="blog-collection" role="region" aria-labelledby="blog-collection-title">
       <div className="blog-collection-heading">
         <h2 id="blog-collection-title">Posts and articles</h2>
         <div className="blog-filters" role="group" aria-label="Filter posts and articles">
@@ -92,6 +125,7 @@ export function Blogs() {
       </div>
       <div className="blog-more">
         <SourceLink href={profileUrl + 'recent-activity/all/'}>More from Dhiraj on LinkedIn</SourceLink>
+      </div>
       </div>
     </section>
   </div>;

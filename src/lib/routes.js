@@ -1,4 +1,4 @@
-import { PAGE_META, SITE_ORIGIN, robotsForPage, buildPageGraph, serializeJsonLd } from "./seo.js";
+import { PAGE_META, SITE_ORIGIN, robotsForPage, buildPageGraph, serializeJsonLd, pageSocialMeta } from "./seo.js";
 export { PAGE_META, SITE_ORIGIN, PUBLIC_PAGES, INDEXABLE_PAGES, isProductionOrigin, isIndexablePage, robotsForPage } from "./seo.js";
 
 export const PAGE_TITLES = Object.fromEntries(Object.entries(PAGE_META).map(([key, value]) => [key, value.title]));
@@ -18,17 +18,54 @@ export function readRoute(location) {
 export function syncPageMeta(page) {
   const meta = PAGE_META[page] || PAGE_META.notfound;
   const title = `${meta.title} — LetsAimIt`;
+  let schema = document.getElementById("site-schema");
+  const dates = {};
+  if (schema?.textContent) {
+    try {
+      const existing = JSON.parse(schema.textContent)["@graph"]?.find(node => node["@id"] === SITE_ORIGIN + meta.path + "#webpage");
+      if (existing?.datePublished) dates.datePublished = existing.datePublished;
+      if (existing?.dateModified) dates.dateModified = existing.dateModified;
+    } catch {
+      // A stale or malformed graph is replaced from the current public route.
+    }
+  }
+  const social = pageSocialMeta(page, { dateModified: dates.dateModified });
   document.title = title;
   const values = {
     'meta[name="description"]': meta.description,
     'meta[property="og:title"]': title,
     'meta[property="og:description"]': meta.description,
     'meta[property="og:url"]': SITE_ORIGIN + meta.path,
+    'meta[property="og:type"]': social.type,
+    'meta[property="og:image"]': social.image.url,
+    'meta[property="og:image:type"]': social.image.type,
+    'meta[property="og:image:width"]': social.image.width,
+    'meta[property="og:image:height"]': social.image.height,
+    'meta[property="og:image:alt"]': social.image.alt,
     'meta[name="twitter:title"]': title,
     'meta[name="twitter:description"]': meta.description,
+    'meta[name="twitter:image"]': social.image.url,
+    'meta[name="twitter:image:alt"]': social.image.alt,
     'meta[name="robots"]': robotsForPage(page),
   };
   for (const [selector, value] of Object.entries(values)) document.querySelector(selector)?.setAttribute("content", value);
+  for (const [property, value] of Object.entries({
+    "article:published_time": social.article?.publishedTime,
+    "article:modified_time": social.article?.modifiedTime,
+    "article:author": social.article?.author,
+  })) {
+    let node = document.querySelector(`meta[property="${property}"]`);
+    if (!value) {
+      node?.remove();
+      continue;
+    }
+    if (!node) {
+      node = document.createElement("meta");
+      node.setAttribute("property", property);
+      document.head.append(node);
+    }
+    node.setAttribute("content", value);
+  }
   document.querySelector('link[rel="canonical"]')?.setAttribute("href", SITE_ORIGIN + meta.path);
   const publicPage = PAGE_META[page]?.indexable === true;
   const markdownPath = meta.path === "/" ? "/index.md" : meta.path.slice(0, -1) + ".md";
@@ -48,17 +85,6 @@ export function syncPageMeta(page) {
       document.head.append(link);
     }
     link.setAttribute("href", href);
-  }
-  let schema = document.getElementById("site-schema");
-  const dates = {};
-  if (schema?.textContent) {
-    try {
-      const existing = JSON.parse(schema.textContent)["@graph"]?.find(node => node["@id"] === SITE_ORIGIN + meta.path + "#webpage");
-      if (existing?.datePublished) dates.datePublished = existing.datePublished;
-      if (existing?.dateModified) dates.dateModified = existing.dateModified;
-    } catch {
-      // A stale or malformed graph is replaced from the current public route.
-    }
   }
   if (!schema) {
     schema = document.createElement("script");

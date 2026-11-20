@@ -106,7 +106,7 @@ function Header({ page, onSkipToContent }) {
   }
   function renderNavLink(item) {
     return <React.Fragment key={item.page}>
-      <a href={item.href} data-route={item.page} aria-current={page === item.page ? "page" : undefined} onClick={closeMenu}>
+      <a href={item.href} data-route={item.page} aria-current={page === item.page ? "page" : item.page === "blogs" && page.startsWith("blog-") ? "location" : undefined} onClick={closeMenu}>
         {item.page === "parent" && user?.isGoogle ? "My requests" : item.label}
       </a>
       {item.page === "parent" && phase === "authorized" &&

@@ -146,7 +146,7 @@ test('the real public route inventory produces complete Markdown and keeps priva
   const vite = await createServer({ server: { middlewareMode: true, hmr: false }, appType: 'custom', logLevel: 'error' });
   try {
     const { PUBLIC_PAGES, render, buildPageGraph, isIndexablePage } = await vite.ssrLoadModule('/src/entry-server.jsx');
-    assert.equal(PUBLIC_PAGES.length, 10);
+    assert.equal(PUBLIC_PAGES.length, 14);
     assert.equal(PUBLIC_PAGES.some(page => /\/(?:admin|parent|coach-dashboard|sign-in|register|404)\//.test(page.path)), false);
     const documents = new Map();
     const pages = PUBLIC_PAGES.map(details => {
@@ -160,9 +160,9 @@ test('the real public route inventory produces complete Markdown and keeps priva
         markdownPath: markdownPath(details.path), indexable: isIndexablePage(details.page, origin) };
     });
     const discovery = buildDiscovery({ pages, documents, origin });
-    assert.equal(discovery.manifest.coverage.publicCount, 10);
-    assert.equal(discovery.manifest.coverage.indexableCount, 10);
-    assert.equal(discovery.markdownFiles.length, 10);
+    assert.equal(discovery.manifest.coverage.publicCount, 14);
+    assert.equal(discovery.manifest.coverage.indexableCount, 14);
+    assert.equal(discovery.markdownFiles.length, 14);
     for (const page of pages) {
       assert.match(page.markdown, /(?:^|\n)# /);
       assert.ok(discovery.full.includes(page.markdown.trim().replace(/^(#{1,5}) /gm, '##$1 ')));
@@ -175,6 +175,27 @@ test('the real public route inventory produces complete Markdown and keeps priva
     const blogs = pages.find(page => page.page === 'blogs');
     assert.match(blogs.markdown, /question-doctor-asked-every-sports-parent/);
     assert.match(blogs.markdown, /21 May 2026/);
+    assert.doesNotMatch(blogs.markdown, /Article21|Article6 May/);
+    const { articles } = await vite.ssrLoadModule('/src/features/blog/articles.js');
+    for (const article of articles) {
+      const page = pages.find(page => page.page === article.page);
+      assert.equal(page.url, origin + article.path);
+      assert.ok(page.markdown.includes(article.intro));
+      assert.match(page.markdown, /By LetsAimIt team/);
+      assert.match(page.markdown, /20 November 2026/);
+      for (const section of article.sections) {
+        assert.ok(page.markdown.includes(section.heading));
+        for (const paragraph of [...section.paragraphs, ...(section.bullets ?? [])]) assert.ok(page.markdown.includes(paragraph));
+      }
+      assert.ok(blogs.markdown.includes(article.path));
+      assert.ok(discovery.sitemap.includes(page.url));
+      assert.ok(discovery.full.includes(page.markdown.trim().replace(/^(#{1,5}) /gm, '##$1 ')));
+      assert.ok(discovery.manifest.coverage.contextualIncoming[article.path] >= 2);
+      const schema = buildPageGraph(article.page, { origin })['@graph'];
+      const story = schema.find(node => node['@type'] === 'Article');
+      assert.ok(story);
+      for (const section of article.sections) for (const paragraph of section.paragraphs) assert.ok(story.articleBody.includes(paragraph));
+    }
     assert.doesNotMatch(discovery.full, /Sign in with Google|Keep exploring|Checking your Google account/);
     const robots = buildRobots(origin);
     for (const name of ['Googlebot', 'Bingbot', 'OAI-SearchBot', 'ChatGPT-User', 'Claude-SearchBot', 'PerplexityBot']) assert.ok(robots.includes('User-agent: ' + name));

@@ -1,4 +1,5 @@
 import { ArrowLink } from './ui.jsx';
+import { articles } from '../features/blog/articles.js';
 import './related-pages.css';
 
 export const relatedPages = {
@@ -12,6 +13,9 @@ export const relatedPages = {
   privacy: [['/terms/', 'Terms of service'], ['/refunds/', 'Cancellations and refunds']],
   terms: [['/privacy/', 'Privacy policy'], ['/refunds/', 'Cancellations and refunds'], ['/programme/', 'Our programme']],
   refunds: [['/terms/', 'Terms of service'], ['/privacy/', 'Privacy policy'], ['/programme/', 'Our programme']],
+  ...Object.fromEntries(articles.map(article => [article.page, [
+    ['/blogs/', 'All coaching guides'], ['/programme/', 'Our programme'], ['/coach/', 'Meet Coach Dhiraj'],
+  ]])),
 };
 
 export function RelatedPages({ page }) {

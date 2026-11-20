@@ -16,7 +16,7 @@ try {
     configFile: resolve(root, 'vite.config.js'),
     build: { ssr: 'src/entry-server.jsx', outDir: serverOutput, emptyOutDir: true, copyPublicDir: false },
   });
-  const { render, PAGE_META, SITE_ORIGIN, PUBLIC_PAGES, isIndexablePage, robotsForPage, buildPageGraph, serializeJsonLd } = await import(pathToFileURL(resolve(serverOutput, 'entry-server.js')).href);
+  const { render, PAGE_META, SITE_ORIGIN, PUBLIC_PAGES, isIndexablePage, robotsForPage, buildPageGraph, serializeJsonLd, pageSocialMeta } = await import(pathToFileURL(resolve(serverOutput, 'entry-server.js')).href);
   validateOrigin(SITE_ORIGIN);
   const template = await readFile(resolve(output, 'index.html'), 'utf8');
   const headMarker = /<!-- SITE_META_START -->[\s\S]*?<!-- SITE_META_END -->/;
@@ -35,14 +35,12 @@ try {
     return { ...details, url, markdown, contentHash: hash, lastmod, markdownPath: markdownPath(details.path), indexable: isIndexablePage(details.page, SITE_ORIGIN) };
   });
   const publicByPage = new Map(publicPages.map(page => [page.page, page]));
-  const shareImage = `${SITE_ORIGIN}/assets/share-letsaimit-1200x630.png`;
-  const imageAlt = 'LetsAimIt. Sport, close to home. Football, basketball and fitness. First session free.';
-
   function metadata(page, details) {
     const title = `${details.title} — LetsAimIt`;
     const url = SITE_ORIGIN + details.path;
     const publicPage = publicByPage.get(page);
     const graph = buildPageGraph(page, { origin: SITE_ORIGIN, dateModified: publicPage?.lastmod });
+    const social = pageSocialMeta(page, { origin: SITE_ORIGIN, dateModified: publicPage?.lastmod });
     const poster = page === 'home' ? findElements(parseHtml(rendered.get(page)), node => node.tag === 'video')[0]?.attributes.poster : null;
     // Match the rendered poster request on aliases and local previews too.
     const homePoster = poster || null;
@@ -52,22 +50,27 @@ try {
       `<meta name="description" content="${escapeXml(details.description)}" />`,
       `<link rel="canonical" href="${escapeXml(url)}" />`,
       `<meta name="robots" content="${robotsForPage(page, SITE_ORIGIN)}" />`,
-      '<meta property="og:type" content="website" />',
+      `<meta property="og:type" content="${social.type}" />`,
       '<meta property="og:site_name" content="LetsAimIt" />',
       '<meta property="og:locale" content="en_IN" />',
       `<meta property="og:title" content="${escapeXml(title)}" />`,
       `<meta property="og:description" content="${escapeXml(details.description)}" />`,
       `<meta property="og:url" content="${escapeXml(url)}" />`,
-      `<meta property="og:image" content="${escapeXml(shareImage)}" />`,
-      '<meta property="og:image:type" content="image/png" />',
-      '<meta property="og:image:width" content="1200" />',
-      '<meta property="og:image:height" content="630" />',
-      `<meta property="og:image:alt" content="${escapeXml(imageAlt)}" />`,
+      `<meta property="og:image" content="${escapeXml(social.image.url)}" />`,
+      `<meta property="og:image:type" content="${social.image.type}" />`,
+      `<meta property="og:image:width" content="${social.image.width}" />`,
+      `<meta property="og:image:height" content="${social.image.height}" />`,
+      `<meta property="og:image:alt" content="${escapeXml(social.image.alt)}" />`,
+      ...(social.article ? [
+        `<meta property="article:published_time" content="${social.article.publishedTime}" />`,
+        ...(social.article.modifiedTime ? [`<meta property="article:modified_time" content="${social.article.modifiedTime}" />`] : []),
+        `<meta property="article:author" content="${escapeXml(social.article.author)}" />`,
+      ] : []),
       '<meta name="twitter:card" content="summary_large_image" />',
       `<meta name="twitter:title" content="${escapeXml(title)}" />`,
       `<meta name="twitter:description" content="${escapeXml(details.description)}" />`,
-      `<meta name="twitter:image" content="${escapeXml(shareImage)}" />`,
-      `<meta name="twitter:image:alt" content="${escapeXml(imageAlt)}" />`,
+      `<meta name="twitter:image" content="${escapeXml(social.image.url)}" />`,
+      `<meta name="twitter:image:alt" content="${escapeXml(social.image.alt)}" />`,
       ...(publicPage ? [
         `<link rel="alternate" type="text/markdown" href="${escapeXml(SITE_ORIGIN + publicPage.markdownPath)}" />`,
         `<link rel="describedby" type="text/plain" href="${SITE_ORIGIN}/llms.txt" />`,

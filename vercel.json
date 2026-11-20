@@ -46,6 +46,26 @@
       "permanent": true
     },
     {
+      "source": "/blogs/first-football-session",
+      "destination": "/blogs/first-football-session/",
+      "permanent": true
+    },
+    {
+      "source": "/blogs/encouragement-without-pressure",
+      "destination": "/blogs/encouragement-without-pressure/",
+      "permanent": true
+    },
+    {
+      "source": "/blogs/questions-about-training-preparation",
+      "destination": "/blogs/questions-about-training-preparation/",
+      "permanent": true
+    },
+    {
+      "source": "/blogs/first-community-match",
+      "destination": "/blogs/first-community-match/",
+      "permanent": true
+    },
+    {
       "source": "/privacy",
       "destination": "/privacy/",
       "permanent": true
