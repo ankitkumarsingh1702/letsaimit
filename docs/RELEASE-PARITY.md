@@ -676,3 +676,93 @@ Private credential values, private credential-source paths, owner email and
 temporary transport tokens are intentionally excluded from this record.
 
 The sanitized release receipt is [deployment/release-evidence/2026-11-20-production.json](../deployment/release-evidence/2026-11-20-production.json). The evidence-only commit can be a descendant of the verified application release; it changes no runtime source or material content dates.
+
+## 20 November 2026 — Matching approved admin access
+
+At the user's explicit request, added the three missing UAT-approved identities
+to production as regular admins. Independent reads now confirm the same four
+approved identities on both targets. The existing protected production Owner
+and every pre-existing membership field are preserved; UAT owner flags were
+not copied to production.
+
+Nine post-change checks passed: exact membership-set equality, three added
+non-owners, preserved prior memberships and sole protected Owner, unchanged UAT
+memberships, unchanged Google/current-membership authorization functions, RLS,
+policies, triggers and grants, and unchanged Auth/business/outbox counts.
+No Auth identity, registration or financial record was copied or fabricated.
+No email, worker drain or payment was triggered. This was a target configuration
+update; no schema migration or application deployment was required. Other
+accounts' actual sign-in is not claimed: each uses its own real Google login.
+Private admin identities are omitted from this maintenance record.
+
+## 20 November 2026 — Requested four-blog email
+
+The user explicitly requested the four public blog cards be emailed to all
+users and admins. The production-only audience contained one active confirmed
+Auth user, no saved guardian registrations and four approved admins. Removing
+the duplicate owner/admin occurrence produced four unique recipient addresses.
+Deleted accounts and existing exclusions were checked; no UAT test contacts
+were included. No registration privacy consent was relabeled as newsletter
+consent.
+
+Used the supplied React Email skill to create a reusable isolated template,
+with the four existing titles/summaries/original links, table layout, public PNG
+icon, brand palette, font fallback and plain-text alternative. Final HTML was
+12,950 bytes; desktop and 390 px previews passed. The template and independent
+content review matched all four source cards. HTML SHA-256:
+`e8692008e38d7db517e61eef6a18a84e1a0db3f7f01a71bab743701d21090d99`.
+
+The connected Gmail and available browser mailbox were different accounts
+from the approved sender, so neither was used to send. A fixed, authenticated,
+expiring one-off production operation used the existing LetsAimIt SMTP sender
+without exporting its password. It accepted only the fixed four recipients and
+reviewed HTML/plain text. A durable local state marked every recipient in-flight
+before its single attempt and blocked blind retries. Guard/malformed-input,
+fixed-content, expiry, state and frozen Deno checks passed before sending.
+
+All four messages were SMTP-accepted once with zero uncertain or unattempted
+recipients. Each message contained one recipient, protecting the others'
+addresses. The temporary endpoint and its private workspace were removed.
+All five original function fingerprints and all stored secret digests were
+unchanged. No permanent mailer, schema, worker, schedule or application release
+was added. SMTP acceptance does not establish inbox placement or reading.
+Private recipient addresses are omitted from this record.
+
+## 20 November 2026 — Corrected email spacing and requested resend
+
+The user reported poor narrow-screen spacing and explicitly requested a resend.
+The original received Gmail message was inspected: its body used 15/25 px;
+the screenshot alone did not establish justified word stretching as the cause.
+Reduced the gutters and section padding, removed label tracking/non-breaking
+separators and the forced headline break, and used stable Arial/Helvetica email
+typography. Body copy is now 16/24 px and title links 19/25 px. Every visible
+text element and TD has explicit left alignment and zero word/letter spacing;
+the fluid container has no fixed minimum width or horizontal outer padding.
+
+The receiving-host regression initially exposed that React Email placed some
+Section typography on its table while its TD retained host styles. The renderer
+now repeats only the intended seven typography defaults on TDs, preserving all
+padding, non-style attributes, links, images and the four original previews.
+The head-stripped fixture, inheriting justification and expanded spacing,
+passed at 320, 375, 390 and 414 px with 30 visible text nodes checked at each
+width and zero horizontal overflow. Independent content/normalization review
+passed. Final HTML is 21,102 bytes, SHA-256
+`28bc3369f1576fae1d88b4c43dd7e2e389c1fce369a16682fa0c33f80a108722`.
+
+The production audience was refreshed and matched exactly the previous four
+recipient hashes. A distinct corrected campaign/state was created. One of
+those four received its single correction first; its actual Gmail message
+matched all four titles, summaries and original links, with Arial 16/24 px,
+left alignment and zero expanded word spacing. A 490 px Gmail pop-out also
+kept the measured content inside the viewport. This is actual received Gmail
+web evidence plus separate phone-width fixture evidence, not a native Android
+or iOS Gmail-app test. The remaining three were sent only after that receiving
+check, with one corrected attempt per recipient and separate receipts from the
+original campaign.
+
+All four corrected sends were SMTP-accepted, with zero uncertain or unattempted
+recipients. Both temporary sending endpoints were removed after their phases;
+the five original functions and stored secret digests remained unchanged.
+No additional recipient or unrelated test email was introduced. The corrected
+subject is **Coach Dhiraj’s reading list | LetsAimIt**. One Gmail receipt is
+observed; SMTP acceptance is the verified boundary for the other recipients.

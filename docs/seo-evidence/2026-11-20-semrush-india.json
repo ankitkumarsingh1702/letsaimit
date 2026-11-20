@@ -1,0 +1,25 @@
+{
+  "observed_date": "2026-11-20",
+  "provider": "Semrush",
+  "report": "resource_organic",
+  "parameters": {
+    "target": "letsaimit.com",
+    "database": "in",
+    "display_limit": 50,
+    "display_sort": "position_asc",
+    "export_columns": [
+      "keyword",
+      "position",
+      "url",
+      "timestamp"
+    ]
+  },
+  "response": {
+    "code": "no_data",
+    "message": "No data found for this request. Verify your parameters are correct. If parameters are valid, try a different date range or target.",
+    "retryable": false,
+    "hint": "Semrush has no data for this request; this is the final answer for it. Do not retry the same request and do not look for the data another way: no other reports, discovery tools, parameter variations, or data sources.\nInform the user concisely and factually that Semrush has no data for these parameters, and do not fill the gap with figures from general knowledge or any source other than Semrush.\nIf this request covers only part of the user's task, continue with the other parts and report the missing data separately; do not merge this notice with other tool results.",
+    "trace_id": "c6a1bdce9bfcb53d211dec2329ae37a8"
+  },
+  "limitation": "No data in this Semrush database is not proof of zero Google rankings."
+}

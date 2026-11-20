@@ -1,0 +1,86 @@
+{
+  "observed_date": "2026-11-20",
+  "source": "Google Search Console visible UI, verified domain property sc-domain:letsaimit.com",
+  "scope": "Public production SEO audit; no authentication credentials or private customer records included",
+  "sitemap": {
+    "url": "https://letsaimit.com/sitemap.xml",
+    "last_read": "2026-11-20",
+    "status": "Sitemap processed successfully",
+    "discovered_pages": 10,
+    "discovered_videos": 0
+  },
+  "blogs_indexed_inspection": {
+    "url": "https://letsaimit.com/blogs/",
+    "status": "URL is not on Google",
+    "reason": "Discovered – currently not indexed",
+    "sitemap": "https://letsaimit.com/sitemap.xml",
+    "referring_page": "None detected",
+    "last_crawl": null,
+    "crawled_as": null,
+    "crawl_allowed": null,
+    "page_fetch": null,
+    "indexing_allowed": null,
+    "user_declared_canonical": null,
+    "google_selected_canonical": null,
+    "null_meaning": "The indexed inspection displayed N/A; it does not mean that the live page lacks these properties",
+    "screenshot": "2026-11-20-blogs-index-status.png"
+  },
+  "blogs_live_test": {
+    "displayed_time": "20 Nov 2026, 13:32:07",
+    "status": "URL is available to Google, but has issues",
+    "availability": "Page can be indexed",
+    "crawled_as": "Google Inspection Tool smartphone",
+    "crawl_allowed": true,
+    "page_fetch": "Successful",
+    "indexing_allowed": true,
+    "user_declared_canonical": "https://letsaimit.com/blogs/",
+    "google_selected_canonical": "Only determined after indexing",
+    "breadcrumbs_valid_items": 1,
+    "discussion_forum_invalid_items": 3,
+    "expanded_issue": {
+      "item": "Why I started coaching",
+      "type": "SocialMediaPosting",
+      "critical_issue": "Missing field 'datePublished'"
+    },
+    "limitation": "Live test establishes current fetch/index eligibility, not inclusion in the index or a ranking. Rich-result issues are not an indexing block."
+  },
+  "indexing_request": {
+    "url": "https://letsaimit.com/blogs/",
+    "requests_this_audit": 1,
+    "observed_confirmation": "Indexing requested",
+    "observed_detail": "URL was added to a priority crawl queue",
+    "indexed_after_request": "Not established",
+    "screenshot": "2026-11-20-blogs-indexing-requested.png"
+  },
+  "performance_report": {
+    "selected_range": "3 months",
+    "search_type": "Web (text)",
+    "displayed_last_update": "3 hours ago",
+    "chart_start": "2026-11-08",
+    "chart_end": "2026-11-18",
+    "total_clicks": 3,
+    "total_impressions": 12,
+    "average_ctr_percent": 25,
+    "average_position": 3.1,
+    "visible_query_rows": [
+      {"query": "letspostit - private soccer practice", "clicks": 0, "impressions": 1}
+    ],
+    "query_pagination": "1-1 of 1",
+    "limitation": "Aggregate average position is not the rank of any proposed target query. This report does not substantiate 120 currently ranking queries. Page table inspected only first 10 of 11 rows."
+  },
+  "sitewide_indexing_report": {
+    "last_update": "2026-11-16",
+    "indexed": 14,
+    "not_indexed": 7,
+    "reasons": {"Not found (404)": 3, "Page with redirect": 2, "Alternative page with proper canonical tag": 1, "Duplicate, Google chose different canonical than user": 1},
+    "limitation": "This aggregate report predates the current release and is not evidence that all ten current public routes are indexed."
+  },
+  "focused_google_serp_check": {
+    "query": "blogs from coach dhiraj from letsaimit",
+    "displayed_organic_pages": ["https://letsaimit.com/", "https://letsaimit.com/coach/"],
+    "blogs_in_displayed_results": false,
+    "ai_overview_observation": "Said that no published blogs or articles from Coach Dhiraj appear in search results for LetsAimIt",
+    "limitation": "One personalized signed-in India search at the observation time; not a universal position report and not evidence about all 120 candidates.",
+    "screenshot": "2026-11-20-google-query.png"
+  }
+}

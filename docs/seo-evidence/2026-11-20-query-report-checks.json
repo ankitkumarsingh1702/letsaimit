@@ -1,0 +1,39 @@
+{
+  "date": "2026-11-20",
+  "scope": "Local audit artifacts only; no application runtime or deployment changed",
+  "data_checks": {
+    "queries": 120,
+    "normalized_unique_queries": 120,
+    "sequential_unique_ids": true,
+    "csv_json_html_rows_match": true,
+    "markdown_google_query_links": 120,
+    "existing": 36,
+    "preview": 13,
+    "gap": 71,
+    "all_target_urls_are_real_public_hubs": true,
+    "proposed_paths_only_on_gap_rows": true,
+    "inline_javascript_syntax_check": "passed",
+    "evidence_json_parsing": "passed",
+    "git_diff_whitespace_check": "passed"
+  },
+  "rendered_checks": {
+    "browser": "Chrome",
+    "mobile_viewport_width": 390,
+    "mobile_document_width": 390,
+    "default_viewport_width": 1470,
+    "default_document_width": 1470,
+    "all_queries_visible_with_clear_filters": 120,
+    "google_query_links": 120,
+    "preview_filter_count": 13,
+    "school_category_count": 10,
+    "exact_user_query_search_count": 1,
+    "no_matching_query_count": 0,
+    "filters_reset_count": 120,
+    "temporary_viewport_reset": true
+  },
+  "limitations": [
+    "These checks validate the local list and report, not Google rankings.",
+    "Only the exact user query received one focused live Google search observation.",
+    "No source implementation or deployment is included in this query/report task."
+  ]
+}

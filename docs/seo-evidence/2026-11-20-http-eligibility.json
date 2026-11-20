@@ -1,0 +1,347 @@
+{
+  "schemaVersion": 1,
+  "auditDate": "2026-11-20",
+  "origin": "https://letsaimit.com",
+  "scope": "Fresh public HTTP eligibility observations only; not Google indexing or ranking evidence.",
+  "startedAt": "2026-11-20T08:07:44.024Z",
+  "finishedAt": "2026-11-20T08:07:44.827Z",
+  "requestCount": 11,
+  "maxParallelRequests": 4,
+  "discoveryManifest": {
+    "url": "https://letsaimit.com/discovery-manifest.json",
+    "status": 200,
+    "sha256": "10a708ee58077af7bd36a854739ffa4ca258704095a4f8667bd0fc09b877bfda",
+    "publicCount": 10
+  },
+  "rows": [
+    {
+      "path": "/",
+      "url": "https://letsaimit.com/",
+      "observedAt": "2026-11-20T08:07:44.405Z",
+      "method": "GET",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "canonical": [
+        "https://letsaimit.com/"
+      ],
+      "metaRobots": [
+        "index, follow, max-image-preview:large"
+      ],
+      "responseRobots": null,
+      "checks": {
+        "direct200": true,
+        "htmlMIME": true,
+        "uniqueSelfCanonical": true,
+        "indexingNotProhibitedByRobotsDirectives": true
+      }
+    },
+    {
+      "path": "/programme/",
+      "url": "https://letsaimit.com/programme/",
+      "observedAt": "2026-11-20T08:07:44.598Z",
+      "method": "GET",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "canonical": [
+        "https://letsaimit.com/programme/"
+      ],
+      "metaRobots": [
+        "index, follow, max-image-preview:large"
+      ],
+      "responseRobots": null,
+      "checks": {
+        "direct200": true,
+        "htmlMIME": true,
+        "uniqueSelfCanonical": true,
+        "indexingNotProhibitedByRobotsDirectives": true
+      }
+    },
+    {
+      "path": "/coach/",
+      "url": "https://letsaimit.com/coach/",
+      "observedAt": "2026-11-20T08:07:44.527Z",
+      "method": "GET",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "canonical": [
+        "https://letsaimit.com/coach/"
+      ],
+      "metaRobots": [
+        "index, follow, max-image-preview:large"
+      ],
+      "responseRobots": null,
+      "checks": {
+        "direct200": true,
+        "htmlMIME": true,
+        "uniqueSelfCanonical": true,
+        "indexingNotProhibitedByRobotsDirectives": true
+      }
+    },
+    {
+      "path": "/societies/",
+      "url": "https://letsaimit.com/societies/",
+      "observedAt": "2026-11-20T08:07:44.533Z",
+      "method": "GET",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "canonical": [
+        "https://letsaimit.com/societies/"
+      ],
+      "metaRobots": [
+        "index, follow, max-image-preview:large"
+      ],
+      "responseRobots": null,
+      "checks": {
+        "direct200": true,
+        "htmlMIME": true,
+        "uniqueSelfCanonical": true,
+        "indexingNotProhibitedByRobotsDirectives": true
+      }
+    },
+    {
+      "path": "/schools/",
+      "url": "https://letsaimit.com/schools/",
+      "observedAt": "2026-11-20T08:07:44.665Z",
+      "method": "GET",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "canonical": [
+        "https://letsaimit.com/schools/"
+      ],
+      "metaRobots": [
+        "index, follow, max-image-preview:large"
+      ],
+      "responseRobots": null,
+      "checks": {
+        "direct200": true,
+        "htmlMIME": true,
+        "uniqueSelfCanonical": true,
+        "indexingNotProhibitedByRobotsDirectives": true
+      }
+    },
+    {
+      "path": "/events/",
+      "url": "https://letsaimit.com/events/",
+      "observedAt": "2026-11-20T08:07:44.670Z",
+      "method": "GET",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "canonical": [
+        "https://letsaimit.com/events/"
+      ],
+      "metaRobots": [
+        "index, follow, max-image-preview:large"
+      ],
+      "responseRobots": null,
+      "checks": {
+        "direct200": true,
+        "htmlMIME": true,
+        "uniqueSelfCanonical": true,
+        "indexingNotProhibitedByRobotsDirectives": true
+      }
+    },
+    {
+      "path": "/blogs/",
+      "url": "https://letsaimit.com/blogs/",
+      "observedAt": "2026-11-20T08:07:44.698Z",
+      "method": "GET",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "canonical": [
+        "https://letsaimit.com/blogs/"
+      ],
+      "metaRobots": [
+        "index, follow, max-image-preview:large"
+      ],
+      "responseRobots": null,
+      "checks": {
+        "direct200": true,
+        "htmlMIME": true,
+        "uniqueSelfCanonical": true,
+        "indexingNotProhibitedByRobotsDirectives": true
+      }
+    },
+    {
+      "path": "/privacy/",
+      "url": "https://letsaimit.com/privacy/",
+      "observedAt": "2026-11-20T08:07:44.682Z",
+      "method": "GET",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "canonical": [
+        "https://letsaimit.com/privacy/"
+      ],
+      "metaRobots": [
+        "index, follow, max-image-preview:large"
+      ],
+      "responseRobots": null,
+      "checks": {
+        "direct200": true,
+        "htmlMIME": true,
+        "uniqueSelfCanonical": true,
+        "indexingNotProhibitedByRobotsDirectives": true
+      }
+    },
+    {
+      "path": "/terms/",
+      "url": "https://letsaimit.com/terms/",
+      "observedAt": "2026-11-20T08:07:44.827Z",
+      "method": "GET",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "canonical": [
+        "https://letsaimit.com/terms/"
+      ],
+      "metaRobots": [
+        "index, follow, max-image-preview:large"
+      ],
+      "responseRobots": null,
+      "checks": {
+        "direct200": true,
+        "htmlMIME": true,
+        "uniqueSelfCanonical": true,
+        "indexingNotProhibitedByRobotsDirectives": true
+      }
+    },
+    {
+      "path": "/refunds/",
+      "url": "https://letsaimit.com/refunds/",
+      "observedAt": "2026-11-20T08:07:44.781Z",
+      "method": "GET",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "canonical": [
+        "https://letsaimit.com/refunds/"
+      ],
+      "metaRobots": [
+        "index, follow, max-image-preview:large"
+      ],
+      "responseRobots": null,
+      "checks": {
+        "direct200": true,
+        "htmlMIME": true,
+        "uniqueSelfCanonical": true,
+        "indexingNotProhibitedByRobotsDirectives": true
+      }
+    }
+  ],
+  "summary": {
+    "publicPages": 10,
+    "passed": 10,
+    "failed": 0
+  },
+  "limitations": [
+    "No authenticated data or private record endpoints requested.",
+    "Only /blogs/ was separately inspected in current Google Search Console evidence.",
+    "HTTP200/canonical/index permissions do not establish Google crawl, index inclusion, ranking or AIcitation."
+  ],
+  "supplementalPublicEndpoints": {
+    "scope": "Fresh endpoint delivery and limited structural observations; not a repeat of the historical full discovery suite.",
+    "startedAt": "2026-11-20T08:09:51.982Z",
+    "finishedAt": "2026-11-20T08:09:52.327Z",
+    "requestCount": 4,
+    "maxParallelRequests": 4,
+    "rows": [
+      {
+        "path": "/robots.txt",
+        "url": "https://letsaimit.com/robots.txt",
+        "observedAt": "2026-11-20T08:09:51.982Z",
+        "method": "GET",
+        "status": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 436,
+        "sha256": "96be60628faa2772755ea184827f61947551bc569b1cf1a2e0c4de2436f93b4b",
+        "directives": [
+          "User-agent: *",
+          "User-agent: Googlebot",
+          "User-agent: Bingbot",
+          "User-agent: OAI-SearchBot",
+          "User-agent: ChatGPT-User",
+          "User-agent: Claude-SearchBot",
+          "User-agent: Claude-User",
+          "User-agent: PerplexityBot",
+          "User-agent: Perplexity-User",
+          "User-agent: Applebot",
+          "User-agent: DuckAssistBot",
+          "Allow: /",
+          "Disallow: /admin/",
+          "Disallow: /parent/",
+          "Disallow: /coach-dashboard/",
+          "Disallow: /sign-in/",
+          "Disallow: /register/",
+          "Disallow: /404/",
+          "",
+          "Sitemap: https://letsaimit.com/sitemap.xml"
+        ]
+      },
+      {
+        "path": "/sitemap.xml",
+        "url": "https://letsaimit.com/sitemap.xml",
+        "observedAt": "2026-11-20T08:09:51.986Z",
+        "method": "GET",
+        "status": 200,
+        "contentType": "application/xml; charset=utf-8",
+        "bytes": 1089,
+        "sha256": "3016906bb8aa605139005b403fc77889c21f3ef12567923c90de5cfaafae57b6",
+        "canonicalURLs": [
+          "https://letsaimit.com/",
+          "https://letsaimit.com/programme/",
+          "https://letsaimit.com/coach/",
+          "https://letsaimit.com/societies/",
+          "https://letsaimit.com/schools/",
+          "https://letsaimit.com/events/",
+          "https://letsaimit.com/blogs/",
+          "https://letsaimit.com/privacy/",
+          "https://letsaimit.com/terms/",
+          "https://letsaimit.com/refunds/"
+        ],
+        "lastmod": [
+          "2026-11-19T17:07:45+00:00",
+          "2026-11-19T17:07:45+00:00",
+          "2026-11-19T17:07:45+00:00",
+          "2026-11-19T17:07:45+00:00",
+          "2026-11-19T17:07:45+00:00",
+          "2026-11-19T17:07:45+00:00",
+          "2026-11-19T17:07:45+00:00",
+          "2026-11-19T17:07:45+00:00",
+          "2026-11-19T17:07:45+00:00",
+          "2026-11-19T17:07:45+00:00"
+        ],
+        "checks": {
+          "exactTenCanonicalURLs": true,
+          "allLastmodISO": true
+        }
+      },
+      {
+        "path": "/llms.txt",
+        "url": "https://letsaimit.com/llms.txt",
+        "observedAt": "2026-11-20T08:09:51.986Z",
+        "method": "GET",
+        "status": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 2927,
+        "sha256": "2b40fa79a78258559de4d75ba0c492e9c9ca04e35fe4f31ad527fd95fa7a1542",
+        "checks": {
+          "markdownHeading": true,
+          "includesBlogs": true,
+          "privateChildDataNotRequested": true
+        }
+      },
+      {
+        "path": "/llms-full.txt",
+        "url": "https://letsaimit.com/llms-full.txt",
+        "observedAt": "2026-11-20T08:09:52.326Z",
+        "method": "GET",
+        "status": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 24949,
+        "sha256": "afca14e55eb8b2c52581079c9a41d7a525e963991f4247cc28190890e8888ca0",
+        "checks": {
+          "markdownHeading": true,
+          "includesBlogs": true,
+          "privateChildDataNotRequested": true
+        }
+      }
+    ]
+  }
+}
