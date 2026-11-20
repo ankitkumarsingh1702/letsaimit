@@ -159,6 +159,51 @@
       "source": "/refund-policy/",
       "destination": "/refunds/",
       "permanent": true
+    },
+    {
+      "source": "/blogs/choosing-football-coaching-bengaluru",
+      "destination": "/blogs/choosing-football-coaching-bengaluru/",
+      "permanent": true
+    },
+    {
+      "source": "/blogs/choosing-basketball-coaching-bengaluru",
+      "destination": "/blogs/choosing-basketball-coaching-bengaluru/",
+      "permanent": true
+    },
+    {
+      "source": "/blogs/football-or-basketball-for-beginners",
+      "destination": "/blogs/football-or-basketball-for-beginners/",
+      "permanent": true
+    },
+    {
+      "source": "/blogs/first-basketball-session",
+      "destination": "/blogs/first-basketball-session/",
+      "permanent": true
+    },
+    {
+      "source": "/blogs/beginner-basketball-skills",
+      "destination": "/blogs/beginner-basketball-skills/",
+      "permanent": true
+    },
+    {
+      "source": "/blogs/beginner-football-rules-and-skills",
+      "destination": "/blogs/beginner-football-rules-and-skills/",
+      "permanent": true
+    },
+    {
+      "source": "/blogs/society-sports-coaching-checklist",
+      "destination": "/blogs/society-sports-coaching-checklist/",
+      "permanent": true
+    },
+    {
+      "source": "/blogs/understanding-your-childs-practice-progress",
+      "destination": "/blogs/understanding-your-childs-practice-progress/",
+      "permanent": true
+    },
+    {
+      "source": "/blogs/balancing-sport-and-school",
+      "destination": "/blogs/balancing-sport-and-school/",
+      "permanent": true
     }
   ],
   "headers": [

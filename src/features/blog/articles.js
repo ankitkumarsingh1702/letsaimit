@@ -1,6 +1,16 @@
 // Original LetsAimIt editorial guides. These are separate from the attributed
 // LinkedIn previews in blog-posts.js and do not imply Dhiraj's authorship/review.
-export const articles = [
+import { choosingGuides } from './guides/choosing-guides.js';
+import { learningGuides } from './guides/learning-guides.js';
+import { communityGuides } from './guides/community-guides.js';
+
+const sourcedGuides = [
+  ...choosingGuides.map(article => ({ ...article, contentSource: 'src/features/blog/guides/choosing-guides.js' })),
+  ...learningGuides.map(article => ({ ...article, contentSource: 'src/features/blog/guides/learning-guides.js' })),
+  ...communityGuides.map(article => ({ ...article, contentSource: 'src/features/blog/guides/community-guides.js' })),
+];
+
+const originalArticles = [
   {
     id: 'first-football-session',
     page: 'blog-first-football-session',
@@ -273,3 +283,6 @@ export const articles = [
     related: ['encouragement-without-pressure', 'questions-about-training-preparation'],
   },
 ];
+
+// Put the requested coaching-selection guides first in the public journal.
+export const articles = [...sourcedGuides, ...originalArticles];

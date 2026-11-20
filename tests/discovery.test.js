@@ -146,7 +146,7 @@ test('the real public route inventory produces complete Markdown and keeps priva
   const vite = await createServer({ server: { middlewareMode: true, hmr: false }, appType: 'custom', logLevel: 'error' });
   try {
     const { PUBLIC_PAGES, render, buildPageGraph, isIndexablePage } = await vite.ssrLoadModule('/src/entry-server.jsx');
-    assert.equal(PUBLIC_PAGES.length, 19);
+    assert.equal(PUBLIC_PAGES.length, 28);
     assert.equal(PUBLIC_PAGES.some(page => /\/(?:admin|parent|coach-dashboard|sign-in|register|404)\//.test(page.path)), false);
     const documents = new Map();
     const pages = PUBLIC_PAGES.map(details => {
@@ -160,9 +160,9 @@ test('the real public route inventory produces complete Markdown and keeps priva
         markdownPath: markdownPath(details.path), indexable: isIndexablePage(details.page, origin) };
     });
     const discovery = buildDiscovery({ pages, documents, origin });
-    assert.equal(discovery.manifest.coverage.publicCount, 19);
-    assert.equal(discovery.manifest.coverage.indexableCount, 19);
-    assert.equal(discovery.markdownFiles.length, 19);
+    assert.equal(discovery.manifest.coverage.publicCount, 28);
+    assert.equal(discovery.manifest.coverage.indexableCount, 28);
+    assert.equal(discovery.markdownFiles.length, 28);
     for (const page of pages) {
       assert.match(page.markdown, /(?:^|\n)# /);
       assert.ok(discovery.full.includes(page.markdown.trim().replace(/^(#{1,5}) /gm, '##$1 ')));
@@ -186,6 +186,7 @@ test('the real public route inventory produces complete Markdown and keeps priva
       for (const section of article.sections) {
         assert.ok(page.markdown.includes(section.heading));
         for (const paragraph of [...section.paragraphs, ...(section.bullets ?? [])]) assert.ok(page.markdown.includes(paragraph));
+        if (section.image) assert.ok(page.markdown.includes(section.image.caption));
       }
       assert.ok(blogs.markdown.includes(article.path));
       assert.ok(discovery.sitemap.includes(page.url));

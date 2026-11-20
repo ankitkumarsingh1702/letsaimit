@@ -1,7 +1,7 @@
 # 200 Bengaluru and society search targets
 
 This plan contains **exactly 200 distinct query candidates**, mapped to five
-published local landing pages. It is not a claim of 200 Google rankings, 200 new
+published local service pages and substantive first-party guides. It is not a claim of 200 Google rankings, 200 new
 pages, 200 measured search volumes or guaranteed first position.
 
 - [CSV](local-seo-queries-200.csv): one query per row.
@@ -11,23 +11,23 @@ pages, 200 measured search volumes or guaranteed first position.
 
 The target paths are `/bengaluru/`, its football and basketball pages,
 and dedicated Nambiar Bellezea and Nambiar Ellegenza pages. These paths passed production HTTP, content and discovery checks on **20 November
-2026**, from tested source `e367793`. The planning classifications below retain
-their baseline meaning; publication does not establish Google indexing or rankings.
+2026**, from tested source `e367793`. The original classifications were reassessed after the owner prioritised all content gaps.
+Publication does not establish Google indexing or rankings.
 The original planning source and published source are saved in the JSON metadata.
 
 ## Coverage and scope
 
 | Label | Queries | Meaning |
 | --- | ---: | --- |
-| `supported` | 112 | Existing public source supports the programme fact or guide. |
-| `gap` | 31 | A useful comparison or substantive answer needs accurate content. |
+| `supported` | 143 | Programme facts or an original guide answer the mapped topic; guide publication status is recorded separately. |
+| `gap` | 0 | All31 former content gaps now have substantive source content and exact section mappings. |
 | `access/availability-check` | 57 | Venue entry, proximity, timing, fees, places or arrangements need confirmation. |
 
 There are 150 city-level candidates, 25 for Nambiar Bellezea and 25 for Nambiar
 Ellegenza. Ten clusters cover discovery, choosing a programme, first sessions,
 practical details, the two communities, society partnerships, parent learning
-and enrolment. Editorial priorities are not estimated difficulty or predicted
-rankings.
+and enrolment. L002–L004 are P0 at the owner’s request. Editorial priorities are not estimated
+difficulty or predicted rankings.
 
 “Best” is a real searcher comparison intent. It does not license an unsupported
 best-in-city claim, fake ratings, awards, reviews, competitor facts or basketball
@@ -68,9 +68,26 @@ volume. Irrelevant club, ticket and competitor-name results were excluded.
 
 The JSON and CSV contain 200 matching rows with sequential `L001`–`L200` IDs.
 All queries are unique after Unicode normalization, case folding, punctuation
-removal and whitespace collapse. Every target belongs to the five explicit
-published routes, every coverage value is valid, and every row identifies intent,
+removal and whitespace collapse. Every target belongs to an explicit
+public service or guide route, every coverage value is valid, and every row identifies intent,
 geography, priority, verification status and a concrete next action.
+
+## Content-gap follow-up
+
+Nine new original guides and the existing first-football-session guide cover the
+31 former gaps. Every resolved row preserves its original service destination in
+`service_path` and names a real `target_path`, `answer_section` and `answer_title`.
+The report links directly to the answer. New guides are currently source-implemented
+and awaiting the tested UAT/production release; `content_status` distinguishes
+that from publication. The original112/31/57 counts are retained in JSON metadata.
+The57 access/availability checks still require genuine current information.
+
+The new guides use actual Ellegenza photographs or labelled original diagrams;
+no basketball-session photo, coach-review claim or academy accreditation is invented.
+
+Regenerate HTML/Markdown after editing the structured plan with
+`python3 scripts/build-local-query-report.py`. CSV contains the same200 rows
+and their additional answer/service mappings.
 
 No individual LetsAimIt Google position is measured by this artifact. The five
 pages were released separately through UAT and production; see the

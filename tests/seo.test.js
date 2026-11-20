@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { PAGE_META, PUBLIC_PAGES, buildPageGraph, isIndexablePage, robotsForPage, serializeJsonLd, pageSocialMeta } from "../src/lib/seo.js";
 import { programmeFaqs } from "../src/data/programmeFaqs.js";
 import { blogPosts } from "../src/features/blog/blog-posts.js";
@@ -15,6 +16,11 @@ test("the public inventory is explicit and search permission belongs to producti
   assert.deepEqual(PUBLIC_PAGES.map(page => page.path), [
     "/", "/programme/", "/coach/", "/societies/", "/schools/",
     "/events/", "/blogs/",
+    "/blogs/choosing-football-coaching-bengaluru/", "/blogs/choosing-basketball-coaching-bengaluru/",
+    "/blogs/football-or-basketball-for-beginners/", "/blogs/first-basketball-session/",
+    "/blogs/beginner-basketball-skills/", "/blogs/beginner-football-rules-and-skills/",
+    "/blogs/society-sports-coaching-checklist/", "/blogs/understanding-your-childs-practice-progress/",
+    "/blogs/balancing-sport-and-school/",
     "/blogs/first-football-session/", "/blogs/encouragement-without-pressure/",
     "/blogs/questions-about-training-preparation/", "/blogs/first-community-match/",
     "/bengaluru/", "/bengaluru/football-coaching/", "/bengaluru/basketball-coaching/",
@@ -87,7 +93,7 @@ test("FAQ and external reading references reflect visible content without claimi
 });
 
 test("local articles carry their complete public bodies and real publisher attribution", () => {
-  assert.equal(articles.length, 4);
+  assert.equal(articles.length, 13);
   for (const article of articles) {
     const meta = PAGE_META[article.page];
     assert.equal(meta.path, article.path);
@@ -113,6 +119,7 @@ test("local articles carry their complete public bodies and real publisher attri
     for (const section of article.sections) {
       assert.ok(story.articleBody.includes(section.heading));
       for (const paragraph of [...section.paragraphs, ...(section.bullets ?? [])]) assert.ok(story.articleBody.includes(paragraph));
+      if (section.image) assert.ok(story.articleBody.includes(section.image.caption));
     }
     assert.deepEqual(story.citation, article.reading.map(reference => new URL(reference.url, origin).href));
     const breadcrumbs = graph.find(node => hasType(node, "BreadcrumbList"));
@@ -127,6 +134,34 @@ test("local articles carry their complete public bodies and real publisher attri
   }
   assert.equal(pageSocialMeta("programme", { origin }).type, "website");
   assert.ok(!Object.hasOwn(pageSocialMeta("programme", { origin }), "article"));
+});
+
+test("all 31 requested content gaps map to substantive public guide sections", () => {
+  const plan = JSON.parse(readFileSync(new URL("../docs/local-seo-queries-200.json", import.meta.url), "utf8"));
+  const expected = ["L002", "L003", "L004", "L016", "L022", "L023", "L035", "L036", "L037", "L038", "L039", "L041", "L042", "L043", "L044", "L046", "L059", "L060", "L069", "L077", "L104", "L121", "L129", "L146", "L156", "L166", "L177", "L180", "L181", "L184", "L185"];
+  const resolved = plan.queries.filter(query => query.previous_coverage === "gap");
+  assert.equal(plan.queries.length, 200);
+  assert.deepEqual(resolved.map(query => query.id), expected);
+  assert.equal(plan.queries.filter(query => query.coverage === "gap").length, 0);
+  assert.equal(plan.queries.filter(query => query.coverage === "access/availability-check").length, 57);
+  assert.equal(articles[0].id, "choosing-football-coaching-bengaluru");
+  for (const query of resolved) {
+    const article = articles.find(item => item.path === query.target_path);
+    assert.ok(article, query.id + " needs a real public article");
+    assert.ok(PUBLIC_PAGES.some(page => page.path === article.path));
+    const section = article.sections.find(item => item.id === query.answer_section);
+    assert.ok(section?.paragraphs.length, query.id + " needs a visible answer section");
+    assert.ok(["source_implemented", "published"].includes(query.content_status));
+    assert.equal(query.coverage, "supported");
+    assert.ok(query.service_path.startsWith("/bengaluru/"));
+    if (query.id !== "L016") assert.ok(article.queryIds.includes(query.id));
+    if (["L002", "L003", "L004"].includes(query.id)) assert.equal(query.priority, "P0");
+    const story = buildPageGraph(article.page, { origin })["@graph"].find(node => hasType(node, "Article"));
+    assert.ok(story.articleBody.includes(section.paragraphs[0]));
+    assert.ok(story.wordCount >= 500);
+    assert.match(pageSocialMeta(article.page, { origin }).image.url, /\/assets\/optimised\/.+\.webp$/);
+    assert.equal(article.author, "LetsAimIt team");
+  }
 });
 
 test("schema dates are supplied provenance and JSON-LD is safe inside an HTML script", () => {

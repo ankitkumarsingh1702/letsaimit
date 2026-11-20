@@ -65,6 +65,9 @@ export const localPages = [
       { question: 'Can another society enquire about coaching?', answer: 'Yes. Society committees can use the society enquiry to share their location, suitable space and interest. LetsAimIt discusses the space and timing before a programme is agreed.' },
     ],
     links: [
+      { path: '/blogs/choosing-football-coaching-bengaluru/', label: 'How to choose football coaching' },
+      { path: '/blogs/choosing-basketball-coaching-bengaluru/', label: 'How to compare basketball coaching' },
+      { path: '/blogs/football-or-basketball-for-beginners/', label: 'Football or basketball for a beginner?' },
       { path: paths.bellezea, label: 'Coaching at Nambiar Bellezea' },
       { path: paths.ellegenza, label: 'Coaching at Nambiar Ellegenza' },
       { path: paths.football, label: 'Football coaching in Bengaluru' },
@@ -130,6 +133,8 @@ export const localPages = [
       { question: 'What should my child bring for football?', answer: 'Bring comfortable sports clothes, trainers and water. For football, bring shin guards and footwear suited to the playing surface. Ask the coach if you are unsure about the surface or kit.' },
     ],
     links: [
+      { path: '/blogs/choosing-football-coaching-bengaluru/', label: 'Coaching, academies and trial questions: the parent checklist' },
+      { path: '/blogs/beginner-football-rules-and-skills/', label: 'A beginner’s guide to football rules and learning' },
       { path: paths.bellezea, label: 'Football at Nambiar Bellezea' },
       { path: paths.ellegenza, label: 'Football at Nambiar Ellegenza' },
       { path: '/blogs/first-football-session/', label: 'A parent’s guide to the first football session' },
@@ -191,6 +196,9 @@ export const localPages = [
       { question: 'What is the basketball coaching schedule?', answer: 'The programme runs twice each week, with 45–60 minute sessions for ages 5–14. Days and times vary by community and age group; your batch timing is confirmed before you join.' },
     ],
     links: [
+      { path: '/blogs/choosing-basketball-coaching-bengaluru/', label: 'Choosing basketball coaching: what to compare' },
+      { path: '/blogs/first-basketball-session/', label: 'Before and after a first basketball session' },
+      { path: '/blogs/beginner-basketball-skills/', label: 'Dribbling, passing, footwork and shooting explained' },
       { path: paths.bellezea, label: 'Basketball at Nambiar Bellezea' },
       { path: paths.ellegenza, label: 'Basketball at Nambiar Ellegenza' },
       { path: '/blogs/questions-about-training-preparation/', label: 'Questions to ask before a child’s sports session' },
@@ -250,6 +258,9 @@ export const localPages = [
       { question: 'Are the Bellezea batch timings published?', answer: 'Days and times vary by age group. Ask about the current Bellezea batch when requesting a trial; the coach confirms your session before you arrive.' },
     ],
     links: [
+      { path: '/blogs/choosing-football-coaching-bengaluru/#compare-your-society-options', label: 'What to check before joining society football' },
+      { path: '/blogs/choosing-basketball-coaching-bengaluru/', label: 'Questions to ask about basketball coaching' },
+      { path: '/blogs/society-sports-coaching-checklist/', label: 'Venue and parent-information checklist' },
       { path: paths.football, label: 'Football coaching and the kit checklist' },
       { path: paths.basketball, label: 'Basketball coaching and first-visit questions' },
       { path: '/coach/', label: 'Meet Coach Dhiraj' },
@@ -313,6 +324,9 @@ export const localPages = [
       { question: 'Where can I see Ellegenza Match Day photographs?', answer: 'The LetsAimIt Events page includes Ellegenza Match Day photographs. Check future event details with the organiser before making plans to attend.' },
     ],
     links: [
+      { path: '/blogs/choosing-football-coaching-bengaluru/#compare-your-society-options', label: 'What to check before joining society football' },
+      { path: '/blogs/choosing-basketball-coaching-bengaluru/', label: 'Questions to ask about basketball coaching' },
+      { path: '/blogs/society-sports-coaching-checklist/', label: 'Venue and parent-information checklist' },
       { path: paths.football, label: 'Football coaching and first-session preparation' },
       { path: paths.basketball, label: 'Basketball coaching and first-visit questions' },
       { path: '/events/', label: 'Ellegenza Match Day photographs' },

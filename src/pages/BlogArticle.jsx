@@ -33,7 +33,7 @@ export function BlogArticle({ article }) {
         </p>
       </header>
 
-      <figure className="blog-article-figure">
+      <figure className={`blog-article-figure${article.image.illustration ? ' blog-article-figure-illustration' : ''}`}>
         <img {...mediaProps(article.image.file, '(max-width: 700px) calc(100vw - 40px), (max-width: 1100px) calc(100vw - 64px), 1040px')}
           alt={article.image.alt} fetchPriority="high" />
         <figcaption>{article.image.caption}</figcaption>
@@ -53,6 +53,11 @@ export function BlogArticle({ article }) {
           <h2 id={section.id}>{section.heading}</h2>
           {section.paragraphs.map((paragraph, index) => <p key={index}>{paragraph}</p>)}
           {section.bullets?.length > 0 && <ul>{section.bullets.map(item => <li key={item}>{item}</li>)}</ul>}
+          {section.image && <figure className="blog-article-section-figure">
+            <img {...mediaProps(section.image.file, '(max-width: 700px) calc(100vw - 40px), 680px')}
+              alt={section.image.alt} loading="lazy" />
+            <figcaption>{section.image.caption}</figcaption>
+          </figure>}
         </section>)}
 
         {article.reading.length > 0 && <section className="blog-further-reading" aria-labelledby="further-reading-title">

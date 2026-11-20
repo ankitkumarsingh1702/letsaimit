@@ -59,7 +59,7 @@ function StoryPreview({ post }) {
 
 function GuidePreview({ article }) {
   return <article className="blog-guide" aria-labelledby={`guide-${article.id}`}>
-    <img className="blog-guide-image"
+    <img className={`blog-guide-image${article.image.illustration ? ' blog-guide-image--illustration' : ''}`}
       {...mediaProps(article.image.file, '(max-width: 700px) calc(100vw - 40px), (max-width: 1100px) calc((100vw - 88px) / 2), 560px')}
       alt={article.image.alt} loading="lazy" />
     <div className="blog-guide-copy">

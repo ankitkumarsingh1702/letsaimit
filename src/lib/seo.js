@@ -21,7 +21,9 @@ export const PAGE_META = {
     description: article.description,
     indexable: true,
     kind: "content",
-    sources: ["src/features/blog/articles.js", "src/pages/BlogArticle.jsx"],
+    sources: ["src/features/blog/articles.js", ...(article.contentSource ? [article.contentSource] : []),
+      "src/pages/BlogArticle.jsx", `public/assets/${article.image.file}`,
+      ...article.sections.flatMap(section => section.image ? [`public/assets/${section.image.file}`] : [])],
   }])),
   ...Object.fromEntries(localPages.map(content => [content.page, {
     path: content.path,
@@ -314,7 +316,8 @@ export function buildPageGraph(page, { origin = SITE_ORIGIN, datePublished, date
     webpage.citation = works.map(work => ({ "@id": work["@id"] }));
   }
   if (article) {
-    const body = [article.intro, ...article.sections.flatMap(section => [section.heading, ...section.paragraphs, ...(section.bullets ?? [])])].join("\n\n");
+    const body = [article.intro, ...article.sections.flatMap(section => [section.heading, ...section.paragraphs,
+      ...(section.bullets ?? []), ...(section.image ? [section.image.caption] : [])])].join("\n\n");
     const articleNode = {
       "@type": "Article",
       "@id": url + "#article",

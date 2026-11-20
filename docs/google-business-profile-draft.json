@@ -159,11 +159,24 @@
   "service_copy_note": "Prepared service-description copy retained below; onboarding saved the two service names, not separate service descriptions or prices.",
   "photos": {
     "logo_upload_attempted": true,
-    "logo_uploaded": false,
-    "blocking_message": "ChatGPT Chrome extension requires Allow access to file URLs for fileChooser.setFiles",
+    "logo_uploaded": true,
+    "blocking_message": null,
     "extension_security_settings_changed": false,
     "shopfront_photo_skipped": "No customer-facing storefront asserted",
-    "other_photos_uploaded": false
+    "other_photos_uploaded": false,
+    "logo_saved": true,
+    "initial_upload_block": "File-URL access was disabled during the first attempt; user subsequently enabled it.",
+    "file_permission_working_observed": true,
+    "logo_source": "public/assets/favicon.svg",
+    "logo_export": "Existing approved square vector brand mark exported to512×512PNG; no new logo artwork",
+    "logo_source_sha256": "bdd861ae70a9058e8dba86b7c4699ef3f9e726980e83f723bd880f077527c5fb",
+    "logo_upload_sha256": "fc396fa0d2cc1c21cfe856c32a9258ae70d042f533cceb7238e187a2f16a88f1",
+    "logo_google_readback": [
+      "Upload complete",
+      "Logo gridcell",
+      "Change logo"
+    ],
+    "logo_visibility": "Google states photos are hidden until business verification"
   },
   "paid_addons": {
     "google_ads_credit_skipped": true,

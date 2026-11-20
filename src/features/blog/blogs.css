@@ -126,6 +126,7 @@
 .blog-article-figure { max-width: 1040px; margin: 0 auto 40px; }
 .blog-article-figure img { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 16px; }
 .blog-article-figure figcaption { max-width: 76ch; margin-block-start: 12px; font-size: 13px; line-height: 1.6; color: var(--muted); }
+.blog-article-figure-illustration img { aspect-ratio: auto; object-fit: contain; }
 .blog-article-body { max-width: 68ch; margin-inline: auto; text-align: left; font-size: 17px; line-height: 1.75; letter-spacing: 0; word-spacing: normal; }
 .blog-article-page .blog-article-intro { font-size: 19px; line-height: 1.7; }
 .blog-article-contents { margin-block: 32px 44px; padding-block: 18px; border-block: 1px solid var(--line); }
@@ -138,6 +139,9 @@
 .blog-article-section p + p { margin-block-start: 18px; }
 .blog-article-section ul { margin: 20px 0 0; padding-inline-start: 24px; }
 .blog-article-section li + li { margin-block-start: 12px; }
+.blog-article-section-figure { margin: 28px 0 0; }
+.blog-article-section-figure img { display: block; width: 100%; height: auto; border-radius: 12px; }
+.blog-article-section-figure figcaption { margin-block-start: 12px; font-size: 14px; line-height: 1.65; color: var(--muted); }
 .blog-further-reading { margin-block: 44px 16px; padding-block-start: 28px; border-top: 1px solid var(--line); }
 .blog-further-reading ul { list-style: none; padding: 0; margin: 0; }
 .blog-further-reading li + li { margin-block-start: 8px; }
@@ -188,9 +192,11 @@
   .blog-article-page .blog-article-description, .blog-article-page .blog-article-intro { font-size: 18px; }
   .blog-article-figure { margin-block-end: 28px; }
   .blog-article-figure img { aspect-ratio: 4 / 3; border-radius: 12px; }
+  .blog-article-figure-illustration img { aspect-ratio: auto; }
   .blog-article-body { font-size: 17px; line-height: 1.75; }
   .blog-article-section { margin-block: 32px; }
   .blog-article-contents { margin-block: 24px 32px; }
   .blog-article-related { margin-block-start: 36px; padding-block-start: 24px; }
   .blog-article-related ul { grid-template-columns: minmax(0, 1fr); gap: 4px; }
 }
+.blog-guide-image--illustration { object-fit: contain; background: #f6f8f3; }

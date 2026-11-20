@@ -1356,6 +1356,178 @@
         "bytes": 4584,
         "sha256": "b2c1dd12e04c999fb8ef0e8a2eac0e72f4e6382aa87c95c8bd7b733f1db5c150"
       }
+    },
+    "editorial-basketball-start.png": {
+      "source_sha256": "a3ef51b42f9cb08c494933f4c0172b302a4e515d43994fb9f65cef0269dedaca",
+      "original_bytes": 143594,
+      "width": 1400,
+      "height": 1050,
+      "variants": [
+        {
+          "src": "optimised/editorial-basketball-start-a3ef51b4-320.webp",
+          "width": 320,
+          "height": 240,
+          "bytes": 9474,
+          "sha256": "49a764bc7d73c6670ee1ad9172a7944036790c54c93b36df70319bb16a864899"
+        },
+        {
+          "src": "optimised/editorial-basketball-start-a3ef51b4-640.webp",
+          "width": 640,
+          "height": 480,
+          "bytes": 23328,
+          "sha256": "af05464ff430347c707af500b9005bce2d8528f914609e2581dfcc4726c8a4eb"
+        },
+        {
+          "src": "optimised/editorial-basketball-start-a3ef51b4-960.webp",
+          "width": 960,
+          "height": 720,
+          "bytes": 36924,
+          "sha256": "f8012ef8aa611900d0e5b04606d61860f5a3b9b52ea656e78e41dd56e08f7a23"
+        },
+        {
+          "src": "optimised/editorial-basketball-start-a3ef51b4-1400.webp",
+          "width": 1400,
+          "height": 1050,
+          "bytes": 54864,
+          "sha256": "724d2dac3d6df7455eb73a6a4a285042dc916944945207af655211e76cc13e3b"
+        }
+      ],
+      "thumbnail": {
+        "src": "optimised/editorial-basketball-start-a3ef51b4-thumb.webp",
+        "width": 160,
+        "height": 120,
+        "bytes": 3524,
+        "sha256": "bb0e52cfec3ce4347c26fe81d23b43c63012427f170a2aa7b8bce2e204572aac"
+      }
+    },
+    "editorial-basketball-skills.png": {
+      "source_sha256": "ddee39587f4d6db5565d6ddeeab552dbb911255c9ca272af4d2656c7129a5308",
+      "original_bytes": 124949,
+      "width": 1400,
+      "height": 1050,
+      "variants": [
+        {
+          "src": "optimised/editorial-basketball-skills-ddee3958-320.webp",
+          "width": 320,
+          "height": 240,
+          "bytes": 8354,
+          "sha256": "df1c7cecf59a060bedaaa3424f0cf0f646bf3d68e0d0c61ca9d5ab2947c812b3"
+        },
+        {
+          "src": "optimised/editorial-basketball-skills-ddee3958-640.webp",
+          "width": 640,
+          "height": 480,
+          "bytes": 20316,
+          "sha256": "9abae3216d91fd94b6ca7a52a7c92f51ac4c21f7ad58b053c4d0ce953b50caa7"
+        },
+        {
+          "src": "optimised/editorial-basketball-skills-ddee3958-960.webp",
+          "width": 960,
+          "height": 720,
+          "bytes": 31766,
+          "sha256": "5c8b34477d5177fd2345b0a179e9d6266c4170a586e9d7a03abde2a156894431"
+        },
+        {
+          "src": "optimised/editorial-basketball-skills-ddee3958-1400.webp",
+          "width": 1400,
+          "height": 1050,
+          "bytes": 46704,
+          "sha256": "ca5927ce5cb1a1b2d53e196ce4ea942f92bc57e4f8a1557256931fdaf518ef2b"
+        }
+      ],
+      "thumbnail": {
+        "src": "optimised/editorial-basketball-skills-ddee3958-thumb.webp",
+        "width": 160,
+        "height": 120,
+        "bytes": 3294,
+        "sha256": "d7b5449a769b0a64255923dad794489f9772b51801d85be1afa852da26e75586"
+      }
+    },
+    "editorial-sport-choice.png": {
+      "source_sha256": "0ad19a3d3d8d2ec71f2698726567033576497d934558fcc9aca5c07bf4b7a193",
+      "original_bytes": 118861,
+      "width": 1400,
+      "height": 1050,
+      "variants": [
+        {
+          "src": "optimised/editorial-sport-choice-0ad19a3d-320.webp",
+          "width": 320,
+          "height": 240,
+          "bytes": 8474,
+          "sha256": "fff6fddba5c9a4396f70269657d1e452dfb884e182e27a8342bb21691cdcb619"
+        },
+        {
+          "src": "optimised/editorial-sport-choice-0ad19a3d-640.webp",
+          "width": 640,
+          "height": 480,
+          "bytes": 20136,
+          "sha256": "483d88af536a8693881137e078644dbda577e7c80630e4a14ed6991694199688"
+        },
+        {
+          "src": "optimised/editorial-sport-choice-0ad19a3d-960.webp",
+          "width": 960,
+          "height": 720,
+          "bytes": 31974,
+          "sha256": "e2d24c6fd7b4dfcaee2cd54733852adb2d366c57268d6bff080542c26f2ec0b1"
+        },
+        {
+          "src": "optimised/editorial-sport-choice-0ad19a3d-1400.webp",
+          "width": 1400,
+          "height": 1050,
+          "bytes": 46652,
+          "sha256": "db93cbf2b36cc25338c9b78ff332d12049766f201fe916cb0f131f00845b355f"
+        }
+      ],
+      "thumbnail": {
+        "src": "optimised/editorial-sport-choice-0ad19a3d-thumb.webp",
+        "width": 160,
+        "height": 120,
+        "bytes": 3270,
+        "sha256": "cb3776749a9f87c25353c1ff6ded8a8736614b76b8c5b74ae5f28fc3c2e928dd"
+      }
+    },
+    "editorial-practice-progress.png": {
+      "source_sha256": "29627ec648e8272c0e97efc27752f198493d7d0665d7c6982fe9d02e0c33fbb8",
+      "original_bytes": 149439,
+      "width": 1400,
+      "height": 1050,
+      "variants": [
+        {
+          "src": "optimised/editorial-practice-progress-29627ec6-320.webp",
+          "width": 320,
+          "height": 240,
+          "bytes": 9756,
+          "sha256": "0f539e163df111386d5a90d555b7f5ed202e58787a04d11f0fbe01d6ce488451"
+        },
+        {
+          "src": "optimised/editorial-practice-progress-29627ec6-640.webp",
+          "width": 640,
+          "height": 480,
+          "bytes": 23870,
+          "sha256": "001d7a0fcda81714cce2b29e138edaae812eb30f51e3981287c6ae88189b9714"
+        },
+        {
+          "src": "optimised/editorial-practice-progress-29627ec6-960.webp",
+          "width": 960,
+          "height": 720,
+          "bytes": 38646,
+          "sha256": "a90b144aeee4a0a0d48857a5ea098dd51fe7a66d5f17e3e4ebd68c1fc28979d8"
+        },
+        {
+          "src": "optimised/editorial-practice-progress-29627ec6-1400.webp",
+          "width": 1400,
+          "height": 1050,
+          "bytes": 56096,
+          "sha256": "b16d9ef2fda3c2bb3e1ee8471ea4ccab2ed47a9b8c9bb1e41b23526fe2afa69a"
+        }
+      ],
+      "thumbnail": {
+        "src": "optimised/editorial-practice-progress-29627ec6-thumb.webp",
+        "width": 160,
+        "height": 120,
+        "bytes": 3446,
+        "sha256": "5e471c9eaa986cf1285f15e7cd6aa611a45aef90220f3362232ce997bc18c2c3"
+      }
     }
   },
   "videos": {

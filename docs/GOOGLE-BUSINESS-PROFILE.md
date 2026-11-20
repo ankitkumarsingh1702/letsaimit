@@ -104,10 +104,14 @@ These identify communities. They do not establish LetsAimIt's private base, entr
 | Actual Ellegenza coaching setting | `public/assets/image2.jpeg` | Existing website reference only; inspect suitability and publication rights before Google upload. |
 | Ellegenza match action | `public/assets/ellegenza-match-action.jpg` | Existing event reference only; not proof of a permanent LetsAimIt storefront. |
 
-The existing brand logo was inspected and its upload attempted. Chrome's
-ChatGPT extension blocked `fileChooser.setFiles` because **Allow access to file
-URLs** is disabled. No extension security setting was changed and no photo was
-uploaded. Shopfront photography was skipped because no storefront is asserted.
+The first upload attempt was blocked by the Chrome extension’s file-URL
+permission. The owner subsequently enabled it, and a new upload completed.
+The existing approved square runner brand mark from `public/assets/favicon.svg`
+was exported to512×512PNG and saved through Google’s Add logo flow. Its full
+0–100% crop bounds preserved the entire mark. Reopening Photos read back a
+**Logo** tile and **Change logo**. No new logo artwork was drawn, and the agent
+changed no extension security settings. Google states the photo remains hidden
+until business verification. Shopfront photography was skipped because no storefront is asserted.
 The other photo candidates were not uploaded. Google Ads credit and the Google
 Workspace trial were also skipped; no paid add-on or subscription was started.
 
@@ -148,5 +152,5 @@ No full apartment address, directors' details or capital figures are copied into
 - Owner's decision: **complete the on-site step later**; the live verification
   page was left open.
 - Public status: **Not publicly visible** until verification is completed.
-- Logo: **not uploaded**, due to the actual Chrome extension permission block.
+- Logo: **uploaded and saved**; the owner gallery readback shows Logo / Change logo. Public display awaits verification.
 - Google local ranking or placement: **not measured; no first-place guarantee**. Google describes local results in terms of relevance, distance and prominence. [Local ranking guidance](https://support.google.com/business/answer/7091).
