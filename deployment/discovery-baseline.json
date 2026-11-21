@@ -3,143 +3,173 @@
   "pages": [
     {
       "path": "/",
-      "contentHash": "725b22cd0ac57c8693006e2a4249c13e649ba2d6034304d558f8a53f44c2a22a",
-      "lastmod": "2026-11-20T15:20:56+00:00"
+      "contentHash": "32c7c289e1cfc682ca2df64a8c4a0906a3812ba6b00c0510ca3e1fd1efe3f4a6",
+      "lastmod": "2026-11-21T07:27:27+00:00"
     },
     {
       "path": "/bengaluru/",
-      "contentHash": "c4905d23f0a6b94d943571c096e0ee7c703cf025473632de4b08a1131e1b89a3",
-      "lastmod": "2026-11-20T15:20:56+00:00"
+      "contentHash": "81e87cf39f20826261c8bc386683d92a1450ea0edbf89551c4a9148c1cda390b",
+      "lastmod": "2026-11-21T07:27:27+00:00"
     },
     {
       "path": "/bengaluru/basketball-coaching/",
-      "contentHash": "bf42d365a8ef2d80fc1e1ac4624c67a2407249f8d7d077832a7e67284678c308",
-      "lastmod": "2026-11-20T15:20:56+00:00"
+      "contentHash": "4f0ccfa99111ef5348a15447f6d2ba16aab64d67fff00f03b4225e5ddb5baa47",
+      "lastmod": "2026-11-21T07:27:27+00:00"
     },
     {
       "path": "/bengaluru/football-coaching/",
-      "contentHash": "31e34b4d865a6130b5626117bb8f5515b8b6f35839e88bbeb18d094e2d83c038",
-      "lastmod": "2026-11-20T15:20:56+00:00"
+      "contentHash": "248ede81364de6d50e72cf03acd8bca57d64d89216c4f21738e7934d1d7a55fa",
+      "lastmod": "2026-11-21T07:27:27+00:00"
     },
     {
       "path": "/bengaluru/nambiar-bellezea/",
-      "contentHash": "3355d684cecd4937a99992a91923cc600ef7e75b2e4b19319588d7ef16d15688",
-      "lastmod": "2026-11-20T15:20:56+00:00"
+      "contentHash": "b7fe4bed632a12d425d707e87b3979230a4453ce6a4686e614153b588af325a2",
+      "lastmod": "2026-11-21T07:27:27+00:00"
     },
     {
       "path": "/bengaluru/nambiar-ellegenza/",
-      "contentHash": "5f35859fb63ecc689844f738ca8174ca39c4d73b6428083d858b5501f713fbfa",
-      "lastmod": "2026-11-20T15:20:56+00:00"
+      "contentHash": "e756be52993dd240eeb4ca301bb3b53989118332a1985c38fdab86f25a184366",
+      "lastmod": "2026-11-21T07:27:27+00:00"
     },
     {
       "path": "/blogs/",
-      "contentHash": "15fef9720ce6430e2c10a08824a25c3d0d2450e8653b2bf6b7bfd9a53598b4b2",
-      "lastmod": "2026-11-21T05:45:17+00:00"
+      "contentHash": "54dd728795db9757807d1e1fb26980184681b14427a26bb0864fabcc05024491",
+      "lastmod": "2026-11-21T07:27:27+00:00"
     },
     {
       "path": "/blogs/balancing-sport-and-school/",
-      "contentHash": "3e66116633b90d94da6947429cc891ae33fb9ac6217c615126ca7f009861cdd6",
-      "lastmod": "2026-11-21T05:45:17+00:00"
+      "contentHash": "1d48c7e3c8f297accfea5c11310d56f4440737f83e87d4e57edcf3712b3de370",
+      "lastmod": "2026-11-21T07:27:27+00:00"
     },
     {
       "path": "/blogs/beginner-basketball-skills/",
-      "contentHash": "3c3ebc736821f38f5511b48ce0d75461fd8f51e7d2b28efa618ea978987147c6",
-      "lastmod": "2026-11-21T05:45:17+00:00"
+      "contentHash": "dacd118c8da70dfe90d55e13e5e11fdaf5431eb01a5b328c912d61572de49d83",
+      "lastmod": "2026-11-21T07:27:27+00:00"
     },
     {
       "path": "/blogs/beginner-football-rules-and-skills/",
-      "contentHash": "0f64f1db9d574eb80a76bcc572441676c8844e9545626513b54da94043ad41a3",
-      "lastmod": "2026-11-21T05:45:17+00:00"
+      "contentHash": "c2819224bb1dc297f000957b70e4556a692378bba5989e341017a7f99cee40d2",
+      "lastmod": "2026-11-21T07:27:27+00:00"
     },
     {
       "path": "/blogs/choosing-basketball-coaching-bengaluru/",
-      "contentHash": "6582f2ecd60d4576aa2e28f93af2672215f8c2e5b306a12e197eab8ff2d26585",
-      "lastmod": "2026-11-21T05:45:17+00:00"
+      "contentHash": "80da1caeb67cd30871d89efec3557f0852bffda45687fcc05d1dc260d677a9ae",
+      "lastmod": "2026-11-21T07:27:27+00:00"
     },
     {
       "path": "/blogs/choosing-football-coaching-bengaluru/",
-      "contentHash": "3f9f33fb41b83c8ad41c1994809a5d63a4ad7e0b6e54bbb384b3a4542954684b",
-      "lastmod": "2026-11-21T05:45:17+00:00"
+      "contentHash": "93a2ab330df54382968c489182f4233a4b6c404c3a8a8bfb8865e2423ba77212",
+      "lastmod": "2026-11-21T07:27:27+00:00"
     },
     {
       "path": "/blogs/encouragement-without-pressure/",
-      "contentHash": "88528d4a93252c3ffe8093916d7e5f7e8d4977aee054551689e02bac36936779",
-      "lastmod": "2026-11-21T05:45:17+00:00"
+      "contentHash": "9c36314145d675fa855462f5d5bd2edcaa8388fa8d2376f1340b756a4cc4dd4d",
+      "lastmod": "2026-11-21T07:27:27+00:00"
     },
     {
       "path": "/blogs/first-basketball-session/",
-      "contentHash": "446cc9724c5f370f825c8db67b653f2a3a8736cb9463fc0166e95b3e1a155478",
-      "lastmod": "2026-11-21T05:45:17+00:00"
+      "contentHash": "2e7255c40e47846d16cdab7a6d5ca439f5a80f2397b65557b9eb848c8382bafb",
+      "lastmod": "2026-11-21T07:27:27+00:00"
     },
     {
       "path": "/blogs/first-community-match/",
-      "contentHash": "6472355b8c439c8669d37ab473e426b2c431c03b9f9cd2e892eba58e369b19ed",
-      "lastmod": "2026-11-21T05:45:17+00:00"
+      "contentHash": "60fe02d10428f1b6312a68df0078c1fe8044c38102d2edccac63c618b751cd66",
+      "lastmod": "2026-11-21T07:27:27+00:00"
     },
     {
       "path": "/blogs/first-football-session/",
-      "contentHash": "0ed228d4ac669c345b847f197be98fff339dc9ef19761f99c2ce70475b1ea1d8",
-      "lastmod": "2026-11-21T05:45:17+00:00"
+      "contentHash": "cec6ce0860b01018fd4feb6969d71cb47ab5f9ef35e5f876baa5e098e9249c92",
+      "lastmod": "2026-11-21T07:27:27+00:00"
+    },
+    {
+      "path": "/blogs/football-coaching-by-age-5-to-14-bangalore/",
+      "contentHash": "3e017674a724bed809a6bf57ef717b1a3e57e4dcaecc93a42120cdb577f284c3",
+      "lastmod": "2026-11-21T07:27:27+00:00"
+    },
+    {
+      "path": "/blogs/football-coaching-sarjapur-road-chandapura-bangalore/",
+      "contentHash": "225aef5c5480d5f019153bb70b0e6ac9792c62ec11112b502d546cf3a9f6882d",
+      "lastmod": "2026-11-21T07:27:27+00:00"
+    },
+    {
+      "path": "/blogs/football-dribbling-drills-for-kids/",
+      "contentHash": "0f1dface2e7945aae99d92e003c9414a63800299b246986cf0b1966bf509932a",
+      "lastmod": "2026-11-21T07:27:27+00:00"
     },
     {
       "path": "/blogs/football-or-basketball-for-beginners/",
-      "contentHash": "793027d918c3ae40e97c2db6712991808be0c77964a22f3de6b8e598a68bbb0a",
-      "lastmod": "2026-11-21T05:45:17+00:00"
+      "contentHash": "2b80b421ad84f14ae640fd0164c00445efe3493935842b36a26a1195c781d13b",
+      "lastmod": "2026-11-21T07:27:27+00:00"
+    },
+    {
+      "path": "/blogs/girls-football-coaching-bangalore/",
+      "contentHash": "f9b81bdda9328ebd125f548158e834b466837ec72ca426bffcbc5d6b8afceade",
+      "lastmod": "2026-11-21T07:27:27+00:00"
+    },
+    {
+      "path": "/blogs/kids-fitness-programmes-bangalore/",
+      "contentHash": "947500400f422ff7776af786077d97574dbe0a68e1bdbed1a436f001ea614066",
+      "lastmod": "2026-11-21T07:27:27+00:00"
+    },
+    {
+      "path": "/blogs/letsaimit-parent-reviews-and-feedback/",
+      "contentHash": "940b3bd1bea82e0ec1bec6613dfe80b3e968387a1bc5e366804d8d5893dd09e9",
+      "lastmod": "2026-11-21T07:27:27+00:00"
     },
     {
       "path": "/blogs/questions-about-training-preparation/",
-      "contentHash": "d891496a4c89c56ebf24703e340618437cadb638d7cfb9a2a43034e1d3f25741",
-      "lastmod": "2026-11-21T05:45:17+00:00"
+      "contentHash": "f06ea24d60319b6745d3044ca0d145ef14ec5466f31e24e2474c8c56b3cd5818",
+      "lastmod": "2026-11-21T07:27:27+00:00"
     },
     {
       "path": "/blogs/society-sports-coaching-checklist/",
-      "contentHash": "088945131a752f546b4662dddf559099834b970d79ae6ed682c5abca54710588",
-      "lastmod": "2026-11-21T05:45:17+00:00"
+      "contentHash": "bf6f6aecda6c37cb21a060470939a5661fd87f8df79392f5aed5647c99d1fad4",
+      "lastmod": "2026-11-21T07:27:27+00:00"
     },
     {
       "path": "/blogs/understanding-your-childs-practice-progress/",
-      "contentHash": "345fcc48801d8d8f445673efda08402114b43bee89983144105f205a5fcf34ca",
-      "lastmod": "2026-11-21T05:45:17+00:00"
+      "contentHash": "52fa60900d0cbf22a5b9037785b45664832947714d87d1092eda6c80e961fbb8",
+      "lastmod": "2026-11-21T07:27:27+00:00"
     },
     {
       "path": "/coach/",
-      "contentHash": "c480cbca73d34af2ccb618609ee255f72fd97520ea05b83a9e666a8578ed74d6",
-      "lastmod": "2026-11-20T15:20:56+00:00"
+      "contentHash": "c59412d639b756ab42635e13b15962571d238f15b3440b33ceef0cb26aa1c8ef",
+      "lastmod": "2026-11-21T07:27:27+00:00"
     },
     {
       "path": "/events/",
-      "contentHash": "419e351ce6b2978cf3e66c51904f99f78ec904e5fd103bc3f3e850848bff6748",
-      "lastmod": "2026-11-20T15:20:56+00:00"
+      "contentHash": "ead7bb215986fec29c371b36a2c685ba5636a59f9d0891e69d81e3dcec8b1828",
+      "lastmod": "2026-11-21T07:27:27+00:00"
     },
     {
       "path": "/privacy/",
-      "contentHash": "3e643e33a395b24065bbb7adf28d550ba8e85a2029bd5e8cf319b8b4b8902c98",
-      "lastmod": "2026-11-20T15:20:56+00:00"
+      "contentHash": "2e3cdc375278db78430672301c209d405d8f132980ceb08ec3efd2f8a728f90b",
+      "lastmod": "2026-11-21T07:27:27+00:00"
     },
     {
       "path": "/programme/",
-      "contentHash": "c98a59e1953e058303eb965fbc87564a3f535b02ae23606bbd84a008cdb9cc81",
-      "lastmod": "2026-11-20T15:20:56+00:00"
+      "contentHash": "b9fff3d576988f863e5a6b533f4f0b4bf10af359feaba7ee73fb9cb9e33a5e36",
+      "lastmod": "2026-11-21T07:27:27+00:00"
     },
     {
       "path": "/refunds/",
-      "contentHash": "db9f9fe7063d7f58375e010140eaab322ada31284dd5fe4ef2d40dfe4afb7f7e",
-      "lastmod": "2026-11-20T15:20:56+00:00"
+      "contentHash": "8c70bf76ddc8327312ebd9595a33a807ed6d5dfb5da479ec7ff5df687689e0c3",
+      "lastmod": "2026-11-21T07:27:27+00:00"
     },
     {
       "path": "/schools/",
-      "contentHash": "78e63c579bde69120c6ab2132546db6e7438e36e7af9e431fcb0fcd2dc6d4643",
-      "lastmod": "2026-11-20T15:20:56+00:00"
+      "contentHash": "70f4447d4c089c46a7ad73817b6d5c6441a1581d8cd3bca54e6182c4df2424fe",
+      "lastmod": "2026-11-21T07:27:27+00:00"
     },
     {
       "path": "/societies/",
-      "contentHash": "962ebd85981a87d34d7cc8b058c4d67583e6955f835dcbd9cae2ad760c8701e6",
-      "lastmod": "2026-11-20T15:20:56+00:00"
+      "contentHash": "089af2313546925f09659f988be8af3bb12bd3b9fb217f1c26071d0bd50ef148",
+      "lastmod": "2026-11-21T07:27:27+00:00"
     },
     {
       "path": "/terms/",
-      "contentHash": "e8762fe6305de02f20264181b81cffcd5cdbda38999230b6d3143e3a86bebe21",
-      "lastmod": "2026-11-20T15:20:56+00:00"
+      "contentHash": "3627138f6a2b107a4e4fa4e057d80e978ab07992be9318d989431e563f173f68",
+      "lastmod": "2026-11-21T07:27:27+00:00"
     }
   ]
 }
