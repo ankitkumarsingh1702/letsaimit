@@ -11,8 +11,8 @@ export const PAGE_META = {
   home: { path: "/", title: "Football & Basketball for Kids in Bengaluru (Bangalore)", description: "LetsAimIt offers kids’ football, basketball and fitness coaching in Bengaluru (Bangalore) for ages 5–14 at Nambiar Ellegenza and Bellezea. First session free.", indexable: true, kind: "content" },
   programme: { path: "/programme/", title: "Kids’ Football & Basketball Coaching Programme", description: "Football, basketball and fitness for ages 5–14 in Bengaluru (Bangalore). Two 45–60 minute sessions each week at Nambiar Ellegenza and Bellezea. First session free.", indexable: true, kind: "content" },
   coach: { path: "/coach/", title: "Dhiraj Mishra, Youth Football Coach in Bengaluru", description: "Meet Dhiraj, former head coach at Frisco Soccer Association, Texas, and founder of LetsAimIt in Bengaluru. Explore his coaching story and credentials.", indexable: true, kind: "content" },
-  societies: { path: "/societies/", title: "Football & Basketball Coaching for Societies", description: "Bring football, basketball and active play to your Bengaluru community. LetsAimIt works with society committees to plan safe, age-appropriate coaching.", indexable: true, kind: "content" },
-  schools: { path: "/schools/", title: "School PE & Fitness Consultancy in Bengaluru", description: "Practical guidance for your school's PE team in Bengaluru, with curriculum advice, fitness assessment, coach development and programme support from LetsAimIt.", indexable: true, kind: "content" },
+  societies: { path: "/societies/", title: "Football Coaching in Gated Communities in Bangalore", description: "Bring structured kids’ football, basketball and fitness coaching to your gated community or residential society in Bangalore (Bengaluru) with LetsAimIt.", indexable: true, kind: "content" },
+  schools: { path: "/schools/", title: "School Football & PE Programme Consultancy in Bangalore", description: "LetsAimIt advises schools in Bangalore (Bengaluru) on PE curriculum, kids’ fitness assessments, coach development, school football and after-school sports.", indexable: true, kind: "content" },
   events: { path: "/events/", title: "Kids’ Football Events & Match Days in Bengaluru", description: "Community games, friendlies and tournaments with LetsAimIt in Bengaluru. See Ellegenza Match Day photos and the football match day planned for 3 December 2026.", indexable: true, kind: "content" },
   blogs: { path: "/blogs/", title: "Coaching Guides & Coach Dhiraj’s Reading List", description: "Read practical LetsAimIt guides for sports parents and new players, alongside Coach Dhiraj Mishra’s selected articles and reflections on LinkedIn.", indexable: true, kind: "content" },
   ...Object.fromEntries(articles.map(article => [article.page, {
@@ -22,6 +22,7 @@ export const PAGE_META = {
     indexable: true,
     kind: "content",
     sources: ["src/features/blog/articles.js", ...(article.contentSource ? [article.contentSource] : []),
+      ...(article.id === "letsaimit-parent-reviews-and-feedback" ? ["src/features/stories/testimonials.js"] : []),
       "src/pages/BlogArticle.jsx", `public/assets/${article.image.file}`,
       ...article.sections.flatMap(section => section.image ? [`public/assets/${section.image.file}`] : [])],
   }])),
@@ -183,8 +184,12 @@ export function buildPageGraph(page, { origin = SITE_ORIGIN, datePublished, date
       knowsAbout: [
         "Children's football coaching",
         "Youth soccer coaching",
+        "Girls' youth football coaching",
         "Children's basketball coaching",
-        "Youth fitness activities",
+        "Kids' physical fitness programs",
+        "Football coaching in gated communities",
+        "School PE and football programme consultancy",
+        "Youth football coaching near Sarjapur Road and Chandapura",
         "Community sports coaching in Bengaluru",
       ],
       sameAs: ["https://www.instagram.com/lets_aimit/"],
@@ -246,15 +251,15 @@ export function buildPageGraph(page, { origin = SITE_ORIGIN, datePublished, date
     const service = {
       "@type": "Service",
       "@id": url + "#service",
-      name: key === "schools" ? "School PE and fitness consultancy" : "Children’s football, basketball and fitness coaching",
-      serviceType: key === "schools" ? "School PE consultancy" : "Community sports coaching",
+      name: key === "schools" ? "School football, PE and fitness consultancy" : "Children’s football, basketball and fitness coaching",
+      serviceType: key === "schools" ? "School PE and football programme consultancy" : "Community sports coaching in gated communities",
       description: meta.description,
       url,
       provider: { "@id": organizationId },
       mainEntityOfPage: { "@id": pageId },
+      areaServed: { "@type": "City", name: "Bengaluru", alternateName: "Bangalore" },
     };
     if (key !== "schools") {
-      service.areaServed = { "@type": "City", name: "Bengaluru" };
       service.audience = { "@type": "PeopleAudience", suggestedMinAge: 5, suggestedMaxAge: 14 };
     }
     graph.push(service);

@@ -111,7 +111,7 @@ export function createSchoolsPage(React, asset) {
     },
     {
       title: "Programme guidance",
-      copy: "Advice for football programmes and events.",
+      copy: "Advice for school football programmes, after-school sports and events.",
       icon: "programme",
       colour: "sage",
       note: "Plan the next step.",
@@ -174,7 +174,7 @@ export function createSchoolsPage(React, asset) {
             h(
               "p",
               { className: "sk-hero-intro" },
-              "LetsAimIt helps school PE teams plan practical fitness sessions and active play.",
+              "LetsAimIt helps school PE teams in Bengaluru (Bangalore) plan practical kids’ fitness sessions, school football programmes and after-school active play.",
             ),
             h(
               Jump,

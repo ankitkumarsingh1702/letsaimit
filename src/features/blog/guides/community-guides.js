@@ -4,13 +4,13 @@ export const communityGuides = [
     id: 'society-sports-coaching-checklist',
     page: 'blog-society-sports-coaching-checklist',
     path: '/blogs/society-sports-coaching-checklist/',
-    title: 'A society checklist for starting children’s sports coaching',
-    description: 'Plan a community football or basketball group in Bengaluru: review the space with the coach, agree access and collection, and explain the programme to parents.',
-    summary: 'The venue, permissions and parent information to settle before the first group arrives.',
+    title: 'Football Coaching in Gated Communities Bangalore: Checklist',
+    description: 'Start football or basketball coaching in a gated community or residential society in Bangalore (Bengaluru): check courts, permissions, entry and parent comms.',
+    summary: 'How Bangalore gated communities and RWAs plan safe kids’ football and basketball coaching close to home.',
     category: 'Community sport', publishedAt: '2026-11-20', author: 'LetsAimIt team',
     queryIds: ['L059', 'L156', 'L166'],
     image: { file: 'image2.jpeg', alt: 'Children taking part in football coaching at Nambiar Ellegenza in Bengaluru', caption: 'Football coaching at Nambiar Ellegenza, Bengaluru.' },
-    intro: 'Starting a coaching group in a Bengaluru society involves more than finding an empty court. The coach needs to understand the usable space, the committee needs to agree how it will be shared, and families need a clear account of what they are joining. Use this checklist for the conversation between the coach, society representatives and parents. It is a planning guide, rather than an assessment of an unseen venue or a promise that any open area is suitable for coaching.',
+    intro: 'Starting football coaching in a gated community in Bangalore (Bengaluru) involves more than finding an empty court. The coach needs to understand the usable space, the society committee needs to agree how it will be shared, and families need a clear account of what they are joining. Use this checklist for the conversation between the coach, RWA or society representatives, and parents. It is a planning guide, rather than an assessment of an unseen venue or a promise that any open area is suitable for coaching.',
     sections: [
       {
         id: 'review-the-space-together', heading: 'Walk through the actual space with the coach',
@@ -60,13 +60,28 @@ export const communityGuides = [
         ],
       },
     ],
+    faq: [
+      {
+        question: 'How do gated communities in Bangalore start kids’ football coaching?',
+        answer: 'Begin with a walkthrough of the available court or open play area with the coach, confirm RWA/committee permissions and shared-use timings, agree resident/visitor entry and collection rules, and invite families to a confirmed free trial session.',
+      },
+      {
+        question: 'Which gated communities in Bangalore currently host LetsAimIt football coaching?',
+        answer: 'LetsAimIt currently runs kids’ football, basketball and fitness coaching for ages 5–14 at Nambiar Bellezea (Narayanaghatta, Chandapura–Dommasandra Road) and Nambiar Ellegenza (Muthanallur / Gopasandra, off Sarjapur Road) in Bengaluru.',
+      },
+      {
+        question: 'Can another Bengaluru apartment or villa community request LetsAimIt coaching?',
+        answer: 'Yes. Society committees can submit a society enquiry through the LetsAimIt Societies page to share their locality, playing space and interest before agreeing on a suitable programme plan.',
+      },
+    ],
     reading: [
       { label: 'Discuss a society coaching programme with LetsAimIt', url: '/societies/' },
+      { label: 'Football coaching near Sarjapur Road and Chandapura', url: '/blogs/football-coaching-sarjapur-road-chandapura-bangalore/' },
       { label: 'The current programme and trial information', url: '/programme/' },
       { label: 'Nambiar Bellezea coaching and location details', url: '/bengaluru/nambiar-bellezea/' },
       { label: 'Nambiar Ellegenza coaching and location details', url: '/bengaluru/nambiar-ellegenza/' },
     ],
-    related: ['choosing-football-coaching-bengaluru', 'choosing-basketball-coaching-bengaluru', 'first-community-match'],
+    related: ['football-coaching-sarjapur-road-chandapura-bangalore', 'choosing-football-coaching-bengaluru', 'first-community-match'],
   },
   {
     id: 'understanding-your-childs-practice-progress',
@@ -140,13 +155,13 @@ export const communityGuides = [
     id: 'balancing-sport-and-school',
     page: 'blog-balancing-sport-and-school',
     path: '/blogs/balancing-sport-and-school/',
-    title: 'Making room for sport alongside school',
-    description: 'Build a practical family routine around confirmed coaching times, school commitments and travel, with space to listen to your child and review the plan.',
-    summary: 'A simple weekly planning conversation, without assuming weekend batches or filling every free hour.',
+    title: 'After-School Sports Programs & School Routine in Bangalore',
+    description: 'Plan after-school sports programs and kids’ football or basketball around school commitments in Bangalore (Bengaluru), with confirmed times and family balance.',
+    summary: 'Choosing sustainable after-school sports routines alongside schoolwork in Bengaluru without overloading your child.',
     category: 'For parents', publishedAt: '2026-11-20', author: 'LetsAimIt team',
     queryIds: ['L184'],
     image: { file: 'ellegenza-team-lineup.jpg', alt: 'Young football players lining up at an Ellegenza community event', caption: 'Players at a Nambiar Ellegenza community football event in Bengaluru.' },
-    intro: 'A coaching session occupies more than the time on the court. There is the journey, the change of clothes, the meal around it and the school work that still needs doing. Start with that whole picture when deciding how sport fits your child’s week. A useful routine gives the family something realistic to follow and room to revise it. It does not need to account for every minute or make a busy week a test of commitment.',
+    intro: 'Choosing an after-school sports program in Bangalore (Bengaluru) involves more than the minutes spent on the pitch or court. There is the commute, the change of clothes, the snack around it and the school work that still needs doing. Start with that whole picture when deciding how football, basketball or fitness coaching fits your child’s week. A useful routine gives the family something realistic to follow and room to revise it. It does not need to account for every minute or make a busy week a test of commitment.',
     sections: [
       {
         id: 'start-with-confirmed-times', heading: 'Start with the timetable that actually exists',
@@ -190,11 +205,27 @@ export const communityGuides = [
         ],
       },
     ],
+    faq: [
+      {
+        question: 'How often should kids attend after-school sports programs in Bangalore?',
+        answer: 'Two structured 45–60 minute coaching sessions each week—paired with ordinary free play and rest days—helps most children aged 5–14 stay active without clashing with homework or family time.',
+      },
+      {
+        question: 'Does LetsAimIt advise schools in Bangalore on football and PE programmes?',
+        answer: 'Yes. Alongside community coaching for ages 5–14, LetsAimIt offers PE curriculum advice, fitness assessment guidance, coach development and school football programme consultancy for schools in Bengaluru (Bangalore).',
+      },
+      {
+        question: 'How can families check confirmed weekday or evening batch times at LetsAimIt?',
+        answer: 'Batch days and start times vary by community (Nambiar Bellezea or Nambiar Ellegenza) and age group. Share your child’s age and sport in a free trial request to confirm current batch options before planning your school-week routine.',
+      },
+    ],
     reading: [
+      { label: 'School football and PE consultancy in Bangalore', url: '/schools/' },
+      { label: 'Kids’ fitness and physical fitness programs in Bangalore', url: '/blogs/kids-fitness-programmes-bangalore/' },
       { label: 'Check the current programme and request a trial', url: '/programme/' },
       { label: 'Choose a Bengaluru coaching community', url: '/bengaluru/' },
       { label: 'NBA and USA Basketball: Youth basketball guidelines', url: 'https://youthguidelines.nba.com/' },
     ],
-    related: ['football-or-basketball-for-beginners', 'first-football-session', 'first-basketball-session'],
+    related: ['kids-fitness-programmes-bangalore', 'football-or-basketball-for-beginners', 'first-football-session'],
   },
 ];

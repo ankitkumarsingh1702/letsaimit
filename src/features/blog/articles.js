@@ -1,11 +1,13 @@
 // Original LetsAimIt editorial guides. These are separate from the attributed
 // LinkedIn previews in blog-posts.js and do not imply Dhiraj's authorship/review.
 import { choosingGuides } from './guides/choosing-guides.js';
+import { queryUniverseGuides } from './guides/query-universe-guides.js';
 import { learningGuides } from './guides/learning-guides.js';
 import { communityGuides } from './guides/community-guides.js';
 
 const sourcedGuides = [
   ...choosingGuides.map(article => ({ ...article, contentSource: 'src/features/blog/guides/choosing-guides.js' })),
+  ...queryUniverseGuides.map(article => ({ ...article, contentSource: 'src/features/blog/guides/query-universe-guides.js' })),
   ...learningGuides.map(article => ({ ...article, contentSource: 'src/features/blog/guides/learning-guides.js' })),
   ...communityGuides.map(article => ({ ...article, contentSource: 'src/features/blog/guides/community-guides.js' })),
 ];

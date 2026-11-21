@@ -35,9 +35,9 @@ function Societies() {
             <span className="so-dot">.</span>
           </h1>
           <p>
-            Football and basketball coaching for children aged 5–14.
+            Football, basketball and fitness coaching for children aged 5–14.
             <br className="so-desktop-break" />
-            {" At residential communities in Bengaluru."}
+            {" In gated communities and residential societies across Bengaluru (Bangalore)."}
           </p>
           <button
             className="btn btn-lime"

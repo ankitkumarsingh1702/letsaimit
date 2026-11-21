@@ -146,7 +146,7 @@ test('the real public route inventory produces complete Markdown and keeps priva
   const vite = await createServer({ server: { middlewareMode: true, hmr: false }, appType: 'custom', logLevel: 'error' });
   try {
     const { PUBLIC_PAGES, render, buildPageGraph, isIndexablePage } = await vite.ssrLoadModule('/src/entry-server.jsx');
-    assert.equal(PUBLIC_PAGES.length, 28);
+    assert.equal(PUBLIC_PAGES.length, 34);
     assert.equal(PUBLIC_PAGES.some(page => /\/(?:admin|parent|coach-dashboard|sign-in|register|404)\//.test(page.path)), false);
     const documents = new Map();
     const pages = PUBLIC_PAGES.map(details => {
@@ -160,9 +160,9 @@ test('the real public route inventory produces complete Markdown and keeps priva
         markdownPath: markdownPath(details.path), indexable: isIndexablePage(details.page, origin) };
     });
     const discovery = buildDiscovery({ pages, documents, origin });
-    assert.equal(discovery.manifest.coverage.publicCount, 28);
-    assert.equal(discovery.manifest.coverage.indexableCount, 28);
-    assert.equal(discovery.markdownFiles.length, 28);
+    assert.equal(discovery.manifest.coverage.publicCount, 34);
+    assert.equal(discovery.manifest.coverage.indexableCount, 34);
+    assert.equal(discovery.markdownFiles.length, 34);
     for (const page of pages) {
       assert.match(page.markdown, /(?:^|\n)# /);
       assert.ok(discovery.full.includes(page.markdown.trim().replace(/^(#{1,5}) /gm, '##$1 ')));
@@ -182,7 +182,7 @@ test('the real public route inventory produces complete Markdown and keeps priva
       assert.equal(page.url, origin + article.path);
       assert.ok(page.markdown.includes(article.intro));
       assert.match(page.markdown, /By LetsAimIt team/);
-      assert.match(page.markdown, /20 November 2026/);
+      assert.match(page.markdown, /(?:20|21) November 2026/);
       for (const section of article.sections) {
         assert.ok(page.markdown.includes(section.heading));
         for (const paragraph of [...section.paragraphs, ...(section.bullets ?? [])]) assert.ok(page.markdown.includes(paragraph));
@@ -217,10 +217,27 @@ test('the real public route inventory produces complete Markdown and keeps priva
       assert.doesNotMatch(page.markdown, /#1|Bengaluru.s best|rated 5|guaranteed results/i);
     }
     assert.doesNotMatch(discovery.full, /Sign in with Google|Keep exploring|Checking your Google account/);
-    assert.equal(discovery.aiCatalog.pages.length, 28);
+    assert.equal(discovery.aiCatalog.pages.length, 34);
     assert.equal(discovery.aiCatalog.pages.some(page => /\/(?:admin|parent|coach-dashboard|sign-in|register|404)\//.test(page.path)), false);
     assert.ok(discovery.llms.includes('Bangalore'));
+    assert.ok(discovery.llms.includes('Sarjapur Road'));
+    assert.ok(discovery.llms.includes('Chandapura'));
+    assert.ok(discovery.llms.includes('girls and boys'));
+    assert.ok(discovery.llms.includes('gated residential communities'));
     assert.ok(discovery.llms.includes('/.well-known/ai-catalog.json'));
+    for (const slug of [
+      '/blogs/football-coaching-by-age-5-to-14-bangalore/',
+      '/blogs/football-coaching-sarjapur-road-chandapura-bangalore/',
+      '/blogs/girls-football-coaching-bangalore/',
+      '/blogs/kids-fitness-programmes-bangalore/',
+      '/blogs/football-dribbling-drills-for-kids/',
+      '/blogs/letsaimit-parent-reviews-and-feedback/',
+    ]) {
+      const target = pages.find(page => page.path === slug);
+      assert.ok(target, slug + ' must exist in public discovery');
+      assert.ok(discovery.manifest.coverage.contextualIncoming[slug] >= 2, slug + ' needs >= 2 contextual links');
+      assert.doesNotMatch(target.markdown, /#1|Bengaluru.s best|rated 5|guaranteed results/i);
+    }
     const footballGuide = pages.find(page => page.page === 'blog-choosing-football-coaching-bengaluru');
     assert.match(footballGuide.markdown, /\| Format \| Typical structure \|/);
     assert.match(footballGuide.markdown, /What should parents check when searching for the best football academy in Bangalore\?/);

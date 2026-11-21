@@ -204,6 +204,36 @@
       "source": "/blogs/balancing-sport-and-school",
       "destination": "/blogs/balancing-sport-and-school/",
       "permanent": true
+    },
+    {
+      "source": "/blogs/football-coaching-by-age-5-to-14-bangalore",
+      "destination": "/blogs/football-coaching-by-age-5-to-14-bangalore/",
+      "permanent": true
+    },
+    {
+      "source": "/blogs/football-coaching-sarjapur-road-chandapura-bangalore",
+      "destination": "/blogs/football-coaching-sarjapur-road-chandapura-bangalore/",
+      "permanent": true
+    },
+    {
+      "source": "/blogs/girls-football-coaching-bangalore",
+      "destination": "/blogs/girls-football-coaching-bangalore/",
+      "permanent": true
+    },
+    {
+      "source": "/blogs/kids-fitness-programmes-bangalore",
+      "destination": "/blogs/kids-fitness-programmes-bangalore/",
+      "permanent": true
+    },
+    {
+      "source": "/blogs/football-dribbling-drills-for-kids",
+      "destination": "/blogs/football-dribbling-drills-for-kids/",
+      "permanent": true
+    },
+    {
+      "source": "/blogs/letsaimit-parent-reviews-and-feedback",
+      "destination": "/blogs/letsaimit-parent-reviews-and-feedback/",
+      "permanent": true
     }
   ],
   "headers": [

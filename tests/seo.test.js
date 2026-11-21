@@ -17,7 +17,14 @@ test("the public inventory is explicit and search permission belongs to producti
     "/", "/programme/", "/coach/", "/societies/", "/schools/",
     "/events/", "/blogs/",
     "/blogs/choosing-football-coaching-bengaluru/", "/blogs/choosing-basketball-coaching-bengaluru/",
-    "/blogs/football-or-basketball-for-beginners/", "/blogs/first-basketball-session/",
+    "/blogs/football-or-basketball-for-beginners/",
+    "/blogs/football-coaching-by-age-5-to-14-bangalore/",
+    "/blogs/football-coaching-sarjapur-road-chandapura-bangalore/",
+    "/blogs/girls-football-coaching-bangalore/",
+    "/blogs/kids-fitness-programmes-bangalore/",
+    "/blogs/football-dribbling-drills-for-kids/",
+    "/blogs/letsaimit-parent-reviews-and-feedback/",
+    "/blogs/first-basketball-session/",
     "/blogs/beginner-basketball-skills/", "/blogs/beginner-football-rules-and-skills/",
     "/blogs/society-sports-coaching-checklist/", "/blogs/understanding-your-childs-practice-progress/",
     "/blogs/balancing-sport-and-school/",
@@ -93,20 +100,21 @@ test("FAQ and external reading references reflect visible content without claimi
 });
 
 test("local articles carry their complete public bodies and real publisher attribution", () => {
-  assert.equal(articles.length, 13);
+  assert.equal(articles.length, 19);
   for (const article of articles) {
     const meta = PAGE_META[article.page];
     assert.equal(meta.path, article.path);
     assert.equal(meta.title, article.title);
     assert.equal(meta.description, article.description);
     assert.ok(meta.sources.includes("src/features/blog/articles.js"));
-    const graph = buildPageGraph(article.page, { origin, dateModified: "2026-11-20T09:30:00+00:00" })["@graph"];
+    const graph = buildPageGraph(article.page, { origin, dateModified: "2026-11-21T09:30:00+00:00" })["@graph"];
     const story = graph.find(node => hasType(node, "Article"));
     const page = graph.find(node => node["@id"] === origin + article.path + "#webpage");
     assert.equal(story.url, origin + article.path);
     assert.equal(story.headline, article.title);
-    assert.equal(story.datePublished, "2026-11-20");
-    assert.equal(story.dateModified, "2026-11-20T09:30:00+00:00");
+    assert.equal(story.datePublished, article.publishedAt);
+    assert.match(article.publishedAt, /^2026-11-(?:20|21)$/);
+    assert.equal(story.dateModified, "2026-11-21T09:30:00+00:00");
     assert.equal(story.author["@id"], origin + "/#organization");
     assert.deepEqual(story.author, story.publisher);
     assert.equal(graph.find(node => node["@id"] === story.author["@id"])["@type"], "Organization");
@@ -141,13 +149,41 @@ test("local articles carry their complete public bodies and real publisher attri
     assert.equal(isIndexablePage(article.page, "https://uat.letsaimit.com"), false);
     const social = pageSocialMeta(article.page, { origin });
     assert.equal(social.type, "article");
-    assert.equal(social.article.publishedTime, "2026-11-20");
+    assert.equal(social.article.publishedTime, article.publishedAt);
     assert.equal(social.article.author, origin + "/");
     assert.equal(social.image.alt, article.image.alt);
     assert.ok(!Object.hasOwn(social.article, "modifiedTime"));
   }
   assert.equal(pageSocialMeta("programme", { origin }).type, "website");
   assert.ok(!Object.hasOwn(pageSocialMeta("programme", { origin }), "article"));
+});
+
+test("all 10 search-query universe categories have truthful schema, FAQs and zero fabricated ratings", () => {
+  const queryGuides = [
+    "blog-football-coaching-by-age-5-to-14-bangalore",
+    "blog-football-coaching-sarjapur-road-chandapura-bangalore",
+    "blog-girls-football-coaching-bangalore",
+    "blog-kids-fitness-programmes-bangalore",
+    "blog-football-dribbling-drills-for-kids",
+    "blog-letsaimit-parent-reviews-and-feedback",
+  ];
+  for (const page of queryGuides) {
+    const graph = buildPageGraph(page, { origin })["@graph"];
+    const story = graph.find(node => hasType(node, "Article"));
+    const faq = graph.find(node => hasType(node, "FAQPage"));
+    assert.ok(story && story.wordCount >= 500, page + " needs substantive >= 500-word Article body");
+    assert.ok(faq && faq.mainEntity.length >= 4, page + " needs visible FAQPage schema");
+    assert.ok(!graph.some(node => ["AggregateRating", "Review", "LocalBusiness"].some(type => hasType(node, type))));
+    assert.doesNotMatch(JSON.stringify(graph), /ratingValue|#1|guaranteed results/i);
+  }
+  const reviewsGuide = buildPageGraph("blog-letsaimit-parent-reviews-and-feedback", { origin })["@graph"].find(node => hasType(node, "Article"));
+  assert.match(reviewsGuide.articleBody, /Frisco, Texas, USA/);
+  assert.match(reviewsGuide.articleBody, /Anand \(Sachiv’s father\)/);
+  assert.match(reviewsGuide.articleBody, /Muhammad \(Arfaraaz’s father\)/);
+  assert.match(PAGE_META["local-ellegenza"].title, /Sarjapur Road/);
+  assert.match(PAGE_META["local-bellezea"].title, /Chandapura/);
+  assert.match(PAGE_META.societies.title, /Gated Communities/);
+  assert.match(PAGE_META.schools.title, /School Football/);
 });
 
 test("all 31 requested content gaps map to substantive public guide sections", () => {
