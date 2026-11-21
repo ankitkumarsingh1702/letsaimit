@@ -286,3 +286,28 @@ const originalArticles = [
 
 // Put the requested coaching-selection guides first in the public journal.
 export const articles = [...sourcedGuides, ...originalArticles];
+
+export function estimateReadMinutes(article) {
+  const parts = [
+    article.intro,
+    ...article.sections.flatMap(section => [
+      section.heading,
+      ...section.paragraphs,
+      ...(section.bullets ?? []),
+      ...(section.table ? [section.table.caption, ...section.table.headers, ...section.table.rows.flat()] : []),
+    ]),
+    ...(article.faq ?? []).flatMap(item => [item.question, item.answer]),
+  ];
+  const words = parts.join(' ').trim().split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.round(words / 220));
+}
+
+export function categoryTone(category) {
+  const key = (category ?? '').toLowerCase();
+  if (key.includes('choosing')) return 'dark';
+  if (key.includes('getting started')) return 'lime';
+  if (key.includes('learning')) return 'mint';
+  if (key.includes('parent')) return 'sage';
+  if (key.includes('community') || key.includes('match')) return 'olive';
+  return 'soft';
+}
