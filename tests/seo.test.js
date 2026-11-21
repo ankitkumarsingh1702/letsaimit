@@ -184,6 +184,18 @@ test("all 10 search-query universe categories have truthful schema, FAQs and zer
   assert.match(PAGE_META["local-bellezea"].title, /Chandapura/);
   assert.match(PAGE_META.societies.title, /Gated Communities/);
   assert.match(PAGE_META.schools.title, /School Football/);
+  for (const videoPage of ["local-football", "blog-football-coaching-sarjapur-road-chandapura-bangalore"]) {
+    const graph = buildPageGraph(videoPage, { origin })["@graph"];
+    const video = graph.find(node => hasType(node, "VideoObject"));
+    const webpage = graph.find(node => hasType(node, "WebPage"));
+    assert.ok(video, videoPage + " must include VideoObject for the live YouTube Short");
+    assert.equal(video.contentUrl, "https://www.youtube.com/shorts/8_t31rp6bQ0");
+    assert.equal(video.embedUrl, "https://www.youtube.com/embed/8_t31rp6bQ0");
+    assert.equal(video.duration, "PT34S");
+    assert.equal(video.uploadDate, "2026-11-21T05:22:19-08:00");
+    assert.equal(video.thumbnailUrl.length, 2);
+    assert.equal(webpage.video["@id"], video["@id"]);
+  }
 });
 
 test("all 31 requested content gaps map to substantive public guide sections", () => {

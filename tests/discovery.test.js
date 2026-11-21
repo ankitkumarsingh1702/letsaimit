@@ -243,6 +243,9 @@ test('the real public route inventory produces complete Markdown and keeps priva
     assert.match(footballGuide.markdown, /What should parents check when searching for the best football academy in Bangalore\?/);
     const footballLocal = pages.find(page => page.page === 'local-football');
     assert.match(footballLocal.markdown, /\| Programme detail \| Verified LetsAimIt information \|/);
+    assert.ok(footballLocal.markdown.includes('https://www.youtube.com/shorts/8_t31rp6bQ0'));
+    const localityGuide = pages.find(page => page.page === 'blog-football-coaching-sarjapur-road-chandapura-bangalore');
+    assert.ok(localityGuide.markdown.includes('https://www.youtube.com/shorts/8_t31rp6bQ0'));
     assert.ok(discovery.manifest.coverage.contextualIncoming['/bengaluru/football-coaching/'] >= 5);
     const robots = buildRobots(origin);
     for (const name of ['Googlebot', 'Bingbot', 'Applebot', 'OAI-SearchBot', 'ChatGPT-User', 'Claude-SearchBot', 'Claude-User', 'PerplexityBot', 'Perplexity-User', 'DuckAssistBot', 'GPTBot', 'ClaudeBot', 'Google-Extended', 'Applebot-Extended']) assert.ok(robots.includes('User-agent: ' + name));

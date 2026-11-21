@@ -23,6 +23,7 @@ export const PAGE_META = {
     kind: "content",
     sources: ["src/features/blog/articles.js", ...(article.contentSource ? [article.contentSource] : []),
       ...(article.id === "letsaimit-parent-reviews-and-feedback" ? ["src/features/stories/testimonials.js"] : []),
+      ...(article.video ? ["src/data/youtubeShort.js", "src/components/YouTubeShortCard.jsx"] : []),
       "src/pages/BlogArticle.jsx", `public/assets/${article.image.file}`,
       ...article.sections.flatMap(section => section.image ? [`public/assets/${section.image.file}`] : [])],
   }])),
@@ -32,7 +33,8 @@ export const PAGE_META = {
     description: content.description,
     indexable: true,
     kind: "content",
-    sources: ["src/features/locations/local-pages.js", "src/features/locations/LocalCoaching.jsx"],
+    sources: ["src/features/locations/local-pages.js", "src/features/locations/LocalCoaching.jsx",
+      ...(content.video ? ["src/data/youtubeShort.js", "src/components/YouTubeShortCard.jsx"] : [])],
   }])),
   privacy: { path: "/privacy/", title: "Privacy Policy for Parents & Guardians", description: "Read how LetsAimIt handles parent and child details, Google sign-in, payment records, photo consent and privacy requests for its community coaching programme.", indexable: true, kind: "policy" },
   terms: { path: "/terms/", title: "Sports Coaching Programme Terms for Parents", description: "Read LetsAimIt coaching terms for enrolment, free trials, monthly payments, safe participation, session changes and parent rights before joining the programme.", indexable: true, kind: "policy" },
@@ -397,6 +399,30 @@ export function buildPageGraph(page, { origin = SITE_ORIGIN, datePublished, date
       };
       graph.push(faq);
       webpage.hasPart = [{ "@id": faq["@id"] }];
+    }
+  }
+  const pageVideo = article?.video || local?.video;
+  if (pageVideo) {
+    const videoNode = {
+      "@type": "VideoObject",
+      "@id": url + "#youtube-short",
+      name: pageVideo.name,
+      description: pageVideo.description,
+      thumbnailUrl: pageVideo.thumbnails,
+      uploadDate: schemaDate(pageVideo.uploadDate),
+      duration: pageVideo.duration,
+      contentUrl: pageVideo.url,
+      embedUrl: pageVideo.embedUrl,
+      inLanguage: "en-IN",
+      isFamilyFriendly: true,
+      publisher: { "@id": organizationId },
+      creditText: pageVideo.credit,
+    };
+    graph.push(videoNode);
+    webpage.video = { "@id": videoNode["@id"] };
+    if (article) {
+      const story = graph.find(node => node["@id"] === url + "#article");
+      if (story) story.video = { "@id": videoNode["@id"] };
     }
   }
   if (key === "home" || key === "programme") {

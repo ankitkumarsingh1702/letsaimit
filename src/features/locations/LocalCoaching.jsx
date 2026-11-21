@@ -1,4 +1,5 @@
 import { Arrow, RegisterLink, TrialButton } from '../../components/ui.jsx';
+import { YouTubeShortCard } from '../../components/YouTubeShortCard.jsx';
 import { mediaProps } from '../../lib/media.js';
 import './locations.css';
 
@@ -70,6 +71,8 @@ export function LocalCoaching({ content }) {
         {section.paragraphs.map((paragraph, index) => <p key={index}>{paragraph}</p>)}
         {section.bullets?.length > 0 && <ul>{section.bullets.map(item => <li key={item}>{item}</li>)}</ul>}
       </section>)}
+
+      {content.video && <YouTubeShortCard video={content.video} />}
 
       <section className="local-faq" aria-labelledby="local-faq-title">
         <h2 id="local-faq-title">Before you join</h2>

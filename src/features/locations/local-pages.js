@@ -1,6 +1,8 @@
 // Current coaching locations and programme facts, not a list of citywide branches.
 // Society addresses describe the communities; session entrance/access is confirmed
 // with the coach. They are not LetsAimIt business-address or walk-in claims.
+import { BANGALORE_FOOTBALL_SHORT } from '../../data/youtubeShort.js';
+
 const paths = {
   city: '/bengaluru/',
   football: '/bengaluru/football-coaching/',
@@ -106,6 +108,7 @@ export const localPages = [
       alt: 'Children playing football at Ellegenza Match Day in Bengaluru',
       caption: 'Community football at Ellegenza Match Day, Bengaluru.',
     },
+    video: BANGALORE_FOOTBALL_SHORT,
     facts: sessionFacts,
     table: {
       heading: 'LetsAimIt kids’ football coaching in Bangalore at a glance',

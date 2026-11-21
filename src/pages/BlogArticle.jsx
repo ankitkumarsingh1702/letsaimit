@@ -1,4 +1,5 @@
 import { Arrow } from '../components/ui.jsx';
+import { YouTubeShortCard } from '../components/YouTubeShortCard.jsx';
 import { asset } from '../lib/assets.js';
 import { mediaProps } from '../lib/media.js';
 import { articles, categoryTone, estimateReadMinutes } from '../features/blog/articles.js';
@@ -98,6 +99,8 @@ export function BlogArticle({ article }) {
               <figcaption>{section.image.caption}</figcaption>
             </figure>}
           </section>)}
+
+          {article.video && <YouTubeShortCard video={article.video} />}
 
           {article.faq?.length > 0 && <section className="blog-article-faq" aria-labelledby="article-faq-title">
             <h2 id="article-faq-title">Common parent questions</h2>

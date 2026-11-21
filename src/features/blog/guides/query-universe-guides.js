@@ -2,6 +2,7 @@
 // coverage across age groups, South-East Bengaluru localities, girls' football,
 // kids' fitness, beginner dribbling drills, and transparent parent feedback.
 import { PARENT_TESTIMONIALS } from '../../stories/testimonials.js';
+import { BANGALORE_FOOTBALL_SHORT } from '../../../data/youtubeShort.js';
 
 export const queryUniverseGuides = [
   {
@@ -122,6 +123,7 @@ export const queryUniverseGuides = [
       alt: 'Coach and children training on the covered football court at Nambiar Ellegenza off Sarjapur Road, Bengaluru',
       caption: 'Kids’ football coaching at Nambiar Ellegenza, off Sarjapur Road, Bengaluru.',
     },
+    video: BANGALORE_FOOTBALL_SHORT,
     intro: 'Parents searching for football coaching near Sarjapur Road, kids’ football classes near Chandapura, or “football classes near me” in South-East Bengaluru (Bangalore) can explore LetsAimIt’s two active community locations: Nambiar Ellegenza (Muthanallur Road, Gopasandra, off Sarjapur Road) and Nambiar Bellezea (Narayanaghatta, Chandapura–Dommasandra Road, near Muthanallur Circle, Bengaluru 560099). Both run twice-weekly football, basketball and fitness sessions for ages 5–14 with a confirmed free first session.',
     sections: [
       {
